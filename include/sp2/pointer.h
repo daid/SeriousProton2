@@ -65,7 +65,7 @@ protected:
                 next->prev = this;
         }
     }
-    
+
     friend class AutoPointerObject;
 };
 
@@ -114,6 +114,12 @@ public:
     explicit operator bool()
     {
         return ptr != nullptr;
+    }
+
+    void destroy()
+    {
+        if (ptr)
+            delete ptr;
     }
 
     template<class T2> operator P<T2>()

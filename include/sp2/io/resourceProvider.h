@@ -39,4 +39,4 @@ private:
 };//!namespace io
 };//!namespace sp
 
-#endif//RESOURCELOADER_H
+#endif//SP2_IO_RESOURCEPROVIDER_H

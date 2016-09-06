@@ -28,11 +28,13 @@ namespace gui {
 **/
 class ThemeData
 {
+public:
     class StateData
     {
     public:
         string background_image;
         sf::Color background_color;
+        string forground_image;
         sf::Color forground_color;
 
         string font;
@@ -47,6 +49,7 @@ public:
     const ThemeData* getData(string element);
 
     static P<Theme> getTheme(string name);
+    static void loadTheme(string name, string resource_name);
 private:
     Theme(string name);
     virtual ~Theme();

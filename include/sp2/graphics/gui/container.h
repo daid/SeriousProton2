@@ -16,8 +16,6 @@ protected:
 public:
     Container();
     virtual ~Container();
-    
-    void updateLayout(const sf::FloatRect& rect);
 
     friend class Widget;
     friend class GraphicsLayer;

@@ -23,7 +23,7 @@ void Logger::logStart(Level level, const char* filename, const char* function, i
         break;
     }
     //*logging_stream << filename << ':' << function << ':' << line_number << ": ";
-    *logging_stream << function << ':' << line_number << ": ";
+    *logging_stream << function << ':' << line_number << ":\n";
 }
 
 void Logger::logEnd()
