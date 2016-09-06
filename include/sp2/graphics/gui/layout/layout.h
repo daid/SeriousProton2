@@ -11,7 +11,7 @@ namespace gui {
 class Layout : sf::NonCopyable
 {
 public:
-    virtual void update(P<Container> container, sf::FloatRect rect);
+    virtual void update(P<Container> container, const sf::FloatRect& rect);
 };
 
 };//!namespace gui

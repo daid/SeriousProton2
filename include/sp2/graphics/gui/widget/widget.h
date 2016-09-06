@@ -39,21 +39,29 @@ public:
     };
     
     virtual void render(sf::RenderTarget& window);
+    State getState();
+    
+    void setPosition(float x, float y, Alignment alignment);
+    void setPosition(sf::Vector2f v, Alignment alignment);
+    void setSize(float x, float y);
+    void setSize(sf::Vector2f v);
 protected:
     class LayoutInfo
     {
     public:
         Vector2f position;
+        Alignment alignment;
         Vector2f size;
         float margin_left, margin_right, margin_top, margin_bottom;
         Vector2f min_size;
         Vector2f max_size;
-        Alignment alignment;
         bool fill_width;
         bool fill_height;
         
         P<Widget> anchor_widget;
         Alignment anchor_point;
+        
+        sf::FloatRect rect;
     } layout;
 
     const ThemeData* theme;
@@ -74,6 +82,7 @@ private:
     void updateLayout();
 
     friend class GraphicsLayer;
+    friend class Layout;
 };
 
 };//!namespace gui

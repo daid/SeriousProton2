@@ -64,6 +64,18 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     root->layout.position = sf::Vector2f(0, 0);
     root->layout.size = virtual_size;
     root->updateLayout();
+    
+    drawWidgets(window, root);
+}
+
+void GraphicsLayer::drawWidgets(sf::RenderTarget& window, P<Widget> w)
+{
+    w->render(window);
+    
+    for(Widget* child : w->children)
+    {
+        drawWidgets(window, child);
+    }
 }
 
 };//!namespace gui

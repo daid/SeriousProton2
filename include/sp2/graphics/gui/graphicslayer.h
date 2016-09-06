@@ -23,6 +23,8 @@ private:
     
     static P<GraphicsLayer> default_gui_layer;
     
+    void drawWidgets(sf::RenderTarget& window, P<Widget> w);
+    
     friend class Widget;
 };
 

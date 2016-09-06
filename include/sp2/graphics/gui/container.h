@@ -19,6 +19,7 @@ public:
 
     friend class Widget;
     friend class GraphicsLayer;
+    friend class Layout;
 };
 
 

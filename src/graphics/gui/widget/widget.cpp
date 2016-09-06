@@ -43,6 +43,45 @@ void Widget::loadThemeData(string name)
     theme = Theme::getTheme(theme_name)->getData(theme_data_name);
 }
 
+void Widget::render(sf::RenderTarget& window)
+{
+}
+
+Widget::State Widget::getState()
+{
+    if (!enabled)
+        return State::Disabled;
+    if (focus)
+        return State::Focused;
+    if (hover)
+        return State::Hovered;
+    return State::Normal;
+}
+
+void Widget::setPosition(float x, float y, Alignment alignment)
+{
+    layout.position.x = x;
+    layout.position.y = y;
+    layout.alignment = alignment;
+}
+
+void Widget::setPosition(sf::Vector2f v, Alignment alignment)
+{
+    layout.position = v;
+    layout.alignment = alignment;
+}
+
+void Widget::setSize(float x, float y)
+{
+    layout.size.x = x;
+    layout.size.y = y;
+}
+
+void Widget::setSize(sf::Vector2f v)
+{
+    layout.size = v;
+}
+
 void Widget::updateLayout()
 {
     if (!layout_manager && !children.size())
@@ -55,10 +94,6 @@ void Widget::updateLayout()
     {
         child->updateLayout();
     }
-}
-
-void Widget::render(sf::RenderTarget& window)
-{
 }
 
 };//!namespace gui
