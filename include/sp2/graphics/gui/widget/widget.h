@@ -5,6 +5,7 @@
 #include <sp2/math/vector.h>
 #include <sp2/pointerVector.h>
 #include <sp2/string.h>
+#include <sp2/io/pointer.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
 namespace sp {
@@ -39,7 +40,10 @@ public:
     };
     
     virtual void render(sf::RenderTarget& window);
-    State getState();
+    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id);
+    virtual void onPointerDrag(sf::Vector2f position, int id);
+    virtual void onPointerUp(sf::Vector2f position, int id);
+    State getState() const;
     
     void setPosition(float x, float y, Alignment alignment);
     void setPosition(sf::Vector2f v, Alignment alignment);
@@ -67,6 +71,11 @@ protected:
     const ThemeData* theme;
     
     void loadThemeData(string name);
+
+protected:
+    void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
+    void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
+    void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
 private:
     Widget();
 

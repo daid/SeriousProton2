@@ -2,7 +2,9 @@
 #include <sp2/graphics/gui/graphicslayer.h>
 #include <sp2/graphics/gui/layout/layout.h>
 #include <sp2/graphics/gui/theme.h>
-
+#include <sp2/graphics/textureManager.h>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 #include <limits>
 
 namespace sp {
@@ -47,7 +49,20 @@ void Widget::render(sf::RenderTarget& window)
 {
 }
 
-Widget::State Widget::getState()
+bool Widget::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+{
+    return false;
+}
+
+void Widget::onPointerDrag(sf::Vector2f position, int id)
+{
+}
+
+void Widget::onPointerUp(sf::Vector2f position, int id)
+{
+}
+
+Widget::State Widget::getState() const
 {
     if (!enabled)
         return State::Disabled;
@@ -94,6 +109,82 @@ void Widget::updateLayout()
     {
         child->updateLayout();
     }
+}
+
+void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+{
+    if (rect.width >= rect.height)
+    {
+        renderStretchedH(window, rect, texture, color);
+    }else{
+        renderStretchedV(window, rect, texture, color);
+    }
+}
+
+void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+{
+    sf::Texture* texture_ptr = TextureManager::get(texture);
+    sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
+    sf::VertexArray a(sf::TrianglesStrip, 8);
+    
+    float w = rect.height / 2.0f;
+    if (w * 2 > rect.width)
+        w = rect.width / 2.0f;
+    a[0].position = sf::Vector2f(rect.left, rect.top);
+    a[1].position = sf::Vector2f(rect.left, rect.top + rect.height);
+    a[2].position = sf::Vector2f(rect.left + w, rect.top);
+    a[3].position = sf::Vector2f(rect.left + w, rect.top + rect.height);
+    a[4].position = sf::Vector2f(rect.left + rect.width - w, rect.top);
+    a[5].position = sf::Vector2f(rect.left + rect.width - w, rect.top + rect.height);
+    a[6].position = sf::Vector2f(rect.left + rect.width, rect.top);
+    a[7].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height);
+    
+    a[0].texCoords = sf::Vector2f(0, 0);
+    a[1].texCoords = sf::Vector2f(0, texture_size.y);
+    a[2].texCoords = sf::Vector2f(texture_size.x / 2, 0);
+    a[3].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
+    a[4].texCoords = sf::Vector2f(texture_size.x / 2, 0);
+    a[5].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
+    a[6].texCoords = sf::Vector2f(texture_size.x, 0);
+    a[7].texCoords = sf::Vector2f(texture_size.x, texture_size.y);
+
+    for(int n=0; n<8; n++)
+        a[n].color = color;
+    
+    window.draw(a, texture_ptr);
+}
+
+void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+{
+    sf::Texture* texture_ptr = TextureManager::get(texture);
+    sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
+    sf::VertexArray a(sf::TrianglesStrip, 8);
+    
+    float h = rect.width / 2.0;
+    if (h * 2 > rect.height)
+        h = rect.height / 2.0f;
+    a[0].position = sf::Vector2f(rect.left, rect.top);
+    a[1].position = sf::Vector2f(rect.left + rect.width, rect.top);
+    a[2].position = sf::Vector2f(rect.left, rect.top + h);
+    a[3].position = sf::Vector2f(rect.left + rect.width, rect.top + h);
+    a[4].position = sf::Vector2f(rect.left, rect.top + rect.height - h);
+    a[5].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height - h);
+    a[6].position = sf::Vector2f(rect.left, rect.top + rect.height);
+    a[7].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height);
+
+    a[0].texCoords = sf::Vector2f(0, 0);
+    a[1].texCoords = sf::Vector2f(0, texture_size.y);
+    a[2].texCoords = sf::Vector2f(texture_size.x / 2, 0);
+    a[3].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
+    a[4].texCoords = sf::Vector2f(texture_size.x / 2, 0);
+    a[5].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
+    a[6].texCoords = sf::Vector2f(texture_size.x, 0);
+    a[7].texCoords = sf::Vector2f(texture_size.x, texture_size.y);
+
+    for(int n=0; n<8; n++)
+        a[n].color = color;
+    
+    window.draw(a, texture_ptr);
 }
 
 };//!namespace gui

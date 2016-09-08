@@ -35,7 +35,7 @@ void Engine::run()
         {
             if (event.type == sf::Event::Closed)
                 Window::window->render_window.close();
-            //IO::System::handleEvent(event);
+            Window::window->handleEvent(event);
         }
 
         float delta = frameTimeClock.restart().asSeconds();
@@ -70,6 +70,11 @@ void Engine::setPause(bool pause)
 bool Engine::getPause()
 {
     return paused;
+}
+
+void Engine::shutdown()
+{
+    Window::window->render_window.close();
 }
 
 };//!namespace sp

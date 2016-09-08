@@ -19,6 +19,9 @@ public:
     float getGameSpeed();
     void setPause(bool pause);
     bool getPause();
+    void shutdown();
+    
+    static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
 

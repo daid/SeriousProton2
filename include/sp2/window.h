@@ -4,10 +4,13 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
+#include <sp2/io/pointer.h>
+#include <map>
 
 namespace sp {
 namespace io { class Clipboard; }
 
+class GraphicsLayer;
 class Window : public AutoPointerObject
 {
 public:
@@ -19,10 +22,17 @@ private:
     
     void createRenderWindow();
     void render();
+    void handleEvent(const sf::Event& event);
+    void pointerDown(io::Pointer::Button button, sf::Vector2f position, int id);
+    void pointerDrag(sf::Vector2f position, int id);
+    void pointerUp(sf::Vector2f position, int id);
     
     string title;
     int antialiasing;
     bool fullscreen;
+    
+    int mouse_button_down_mask;
+    std::map<int, P<GraphicsLayer>> pointer_focus_layer;
 
     static P<Window> window;
     

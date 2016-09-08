@@ -61,11 +61,58 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     }
     window.setView(view);
     
+    virtual_position_transform = sf::Transform::Identity;
+    virtual_position_transform.scale(virtual_size.x, virtual_size.y);
+    virtual_position_transform.scale(1.0f / view.getViewport().width, 1.0f / view.getViewport().height);
+    virtual_position_transform.translate(-view.getViewport().left, -view.getViewport().top);
+    
     root->layout.position = sf::Vector2f(0, 0);
     root->layout.size = virtual_size;
+    root->layout.rect = sf::FloatRect(0, 0, virtual_size.x, virtual_size.y);
     root->updateLayout();
     
+    sf::RectangleShape tmp(virtual_size);
+    tmp.setPosition(0, 0);
+    tmp.setFillColor(sf::Color(0,0,0));
+    window.draw(tmp);
+    
     drawWidgets(window, root);
+}
+
+bool GraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+{
+    position = virtual_position_transform.transformPoint(position);
+    P<Widget> w = widgetAtPosition(root, position);
+    while(w)
+    {
+        if (w->onPointerDown(button, position, id))
+        {
+            focus_widget = w;
+            pointer_widget[id] = w;
+            return true;
+        }
+        w = w->parent;
+    }
+    return false;
+}
+
+void GraphicsLayer::onPointerDrag(sf::Vector2f position, int id)
+{
+    position = virtual_position_transform.transformPoint(position);
+    auto it = pointer_widget.find(id);
+    if (it != pointer_widget.end() && it->second)
+        it->second->onPointerDrag(position, id);
+}
+
+void GraphicsLayer::onPointerUp(sf::Vector2f position, int id)
+{
+    position = virtual_position_transform.transformPoint(position);
+    auto it = pointer_widget.find(id);
+    if (it != pointer_widget.end() && it->second)
+    {
+        it->second->onPointerUp(position, id);
+        pointer_widget.erase(it);
+    }
 }
 
 void GraphicsLayer::drawWidgets(sf::RenderTarget& window, P<Widget> w)
@@ -76,6 +123,21 @@ void GraphicsLayer::drawWidgets(sf::RenderTarget& window, P<Widget> w)
     {
         drawWidgets(window, child);
     }
+}
+
+P<Widget> GraphicsLayer::widgetAtPosition(P<Widget> w, sf::Vector2f position)
+{
+    if (w->layout.rect.contains(position))
+    {
+        for(P<Widget> c : w->children)
+        {
+            P<Widget> result = widgetAtPosition(c, position);
+            if (result)
+                return result;
+        }
+        return w;
+    }
+    return nullptr;
 }
 
 };//!namespace gui

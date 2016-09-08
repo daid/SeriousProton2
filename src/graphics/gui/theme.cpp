@@ -28,7 +28,7 @@ P<Theme> Theme::getTheme(string name)
         LOG(Error, "Default theme not found. Most likely crashing now.");
         return nullptr;
     }
-    LOG(Warning, "Theme", name, "not found. Falling back to [default] theme.");
+    LOG(Warning, "Theme", name, "not found. Falling back to default theme.");
     return getTheme("default");
 }
 
