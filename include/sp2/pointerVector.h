@@ -4,6 +4,7 @@
 #include <sp2/pointer.h>
 
 #include <vector>
+#include <functional>
 #include <algorithm>
 
 namespace sp {

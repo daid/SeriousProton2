@@ -76,6 +76,7 @@ protected:
     void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
     void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
     void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
+    void renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color);
 private:
     Widget();
 

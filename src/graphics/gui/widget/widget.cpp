@@ -3,7 +3,9 @@
 #include <sp2/graphics/gui/layout/layout.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/graphics/fontManager.h>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <limits>
 
@@ -123,7 +125,7 @@ void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect
 
 void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
 {
-    sf::Texture* texture_ptr = TextureManager::get(texture);
+    sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
     
@@ -156,7 +158,7 @@ void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rec
 
 void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
 {
-    sf::Texture* texture_ptr = TextureManager::get(texture);
+    sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
     
@@ -185,6 +187,57 @@ void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rec
         a[n].color = color;
     
     window.draw(a, texture_ptr);
+}
+
+void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color)
+{
+    sf::Text textElement(text, *fontManager.get(font_name), text_size);
+    float y = 0;
+    float x = 0;
+    
+    //The "base line" of the text draw is the "Y position where the text is drawn" + font_size.
+    //The height of normal text is 70% of the font_size.
+    //So use those properties to align the text. Depending on the localbounds does not work.
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::TopRight:
+    case Alignment::Top:
+        y = rect.top - 0.3 * text_size;
+        break;
+    case Alignment::BottomLeft:
+    case Alignment::BottomRight:
+    case Alignment::Bottom:
+        y = rect.top + rect.height - text_size;
+        break;
+    case Alignment::Left:
+    case Alignment::Right:
+    case Alignment::Center:
+        y = rect.top + rect.height / 2.0 - text_size + text_size * 0.35;
+        break;
+    }
+    
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        x = rect.left - textElement.getLocalBounds().left;
+        break;
+    case Alignment::TopRight:
+    case Alignment::BottomRight:
+    case Alignment::Right:
+        x = rect.left + rect.width - textElement.getLocalBounds().width - textElement.getLocalBounds().left;
+        break;
+    case Alignment::Top:
+    case Alignment::Bottom:
+    case Alignment::Center:
+        x = rect.left + rect.width / 2.0 - textElement.getLocalBounds().width / 2.0 - textElement.getLocalBounds().left;
+        break;
+    }
+    textElement.setPosition(x, y);
+    textElement.setFillColor(color);
+    window.draw(textElement);
 }
 
 };//!namespace gui
