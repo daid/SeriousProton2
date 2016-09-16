@@ -50,7 +50,7 @@ void GraphicsLayer::render(sf::RenderTarget& window)
         
     sf::View view(sf::FloatRect(0, 0, virtual_size.x, virtual_size.y));
     //Now we need to setup the viewport so our virtual window is on the screen, and in the center.
-    //Maintaining the same aspect ratio.
+    //Maintaining the same aspect ratio as the virtual size.
     float aspect_x = window_size.x / virtual_size.x;
     float aspect_y = window_size.y / virtual_size.y;
     if (aspect_y < aspect_x)
@@ -71,11 +71,6 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     root->layout.rect = sf::FloatRect(0, 0, virtual_size.x, virtual_size.y);
     root->updateLayout();
     
-    sf::RectangleShape tmp(virtual_size);
-    tmp.setPosition(0, 0);
-    tmp.setFillColor(sf::Color(0,0,0));
-    window.draw(tmp);
-    
     drawWidgets(window, root);
 }
 
@@ -87,11 +82,19 @@ bool GraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f posit
     {
         if (w->onPointerDown(button, position, id))
         {
+            if (focus_widget)
+                focus_widget->focus = false;
             focus_widget = w;
+            focus_widget->focus = true;
             pointer_widget[id] = w;
             return true;
         }
         w = w->parent;
+    }
+    if (focus_widget)
+    {
+        focus_widget->focus = false;
+        focus_widget = nullptr;
     }
     return false;
 }

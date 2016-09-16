@@ -17,7 +17,7 @@ Widget::Widget()
     layout.margin_left = layout.margin_right = layout.margin_top = layout.margin_bottom = 0;
     layout.max_size.x = layout.max_size.y = std::numeric_limits<float>::max();
     layout.alignment = Alignment::TopLeft;
-    layout.fill_width = layout.fill_height = false;
+    layout.fill_width = layout.fill_height = layout.lock_aspect_ratio = false;
 
     layout.anchor_point = Alignment::TopLeft;
     

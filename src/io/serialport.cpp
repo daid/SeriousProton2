@@ -65,7 +65,7 @@ SerialPort::SerialPort(string name)
 #endif
 
     if (!isOpen())
-        LOG(Warning, "Failed to open:", name);
+        LOG(Warning, "Failed to open serial port:", name);
 }
 
 SerialPort::~SerialPort()
@@ -525,18 +525,10 @@ string SerialPort::getPseudoDriverName(string port)
     fclose(f);
     return string(buffer);
 #endif
-#if defined(__APPLE__) && defined(__MACH__)
-    FILE* f = fopen(("/dev/tty." + port).c_str(), "rt");
-    if (!f)
-        return "";
-    char buffer[128];
-    buffer[127] = '\0';
-    if (!fgets(buffer, 127, f))
-	buffer[0] = '\0';
-    fclose(f);
-    return string(buffer);
-#endif
-    return "";
+    for(char& c : port)
+        if (c >= '0' && c <= '9')
+            c = '@';
+    return port;
 }
 
 std::vector<string> SerialPort::portsByPseudoDriverName(string driver_name)

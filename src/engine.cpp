@@ -10,7 +10,7 @@ P<Engine> Engine::engine;
 
 Engine::Engine()
 {
-    sp2assert(!engine);
+    sp2assert(!engine, "SP2 does not support more then 1 engine.");
     engine = engine;
     
     game_speed = 1.0;
@@ -26,6 +26,8 @@ Engine::~Engine()
 
 void Engine::run()
 {
+    sp2assert(Window::window, "Before the engine is run, a Window needs to be created.");
+    
     sf::Clock frameTimeClock;
     LOG(Info, "Engine started");
     while(Window::window->render_window.isOpen())

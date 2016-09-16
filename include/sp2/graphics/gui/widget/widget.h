@@ -5,6 +5,7 @@
 #include <sp2/math/vector.h>
 #include <sp2/pointerVector.h>
 #include <sp2/string.h>
+#include <sp2/variant.h>
 #include <sp2/io/pointer.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -61,6 +62,7 @@ protected:
         Vector2f max_size;
         bool fill_width;
         bool fill_height;
+        bool lock_aspect_ratio;
         
         P<Widget> anchor_widget;
         Alignment anchor_point;

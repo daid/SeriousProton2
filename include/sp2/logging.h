@@ -15,6 +15,12 @@ public:
         Warning,
         Error
     };
+    enum class Format
+    {
+        Basic,
+        Function,
+        Full
+    };
     template<typename... ARGS> static void log(Level level, const char* filename, const char* function, int line_number, const ARGS&... args)
     {
         logStart(level, filename, function, line_number);
@@ -22,11 +28,12 @@ public:
         logEnd();
     }
 private:
-    static std::ostream* logging_stream;
+    static std::ostream* stream;
+    static Format format;
 
     template<typename A1> static inline void logArg(const A1& a)
     {
-        *logging_stream << a;
+        *stream << a;
     }
     template<typename A1, typename... ARGS> static inline void logArg(const A1& a, const ARGS&... args)
     {

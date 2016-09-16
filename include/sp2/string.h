@@ -50,6 +50,14 @@ public:
         *this = stream.str();
     }
 
+    string(const double nr, int decimals = 2) : std::string()
+    {
+        std::ostringstream stream;
+        stream << std::fixed << std::setprecision(decimals);
+        stream << nr;
+        *this = stream.str();
+    }
+
     static string hex(const int nr)
     {
         std::ostringstream stream;

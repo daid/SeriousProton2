@@ -187,8 +187,8 @@ public:
     sf::Vector2<T> operator*(const sf::Vector2<T>& v) const
     {
         return sf::Vector2<T>(
-            this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z + this->data[12],
-            this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z + this->data[13]
+            this->data[0] * v.x + this->data[4] * v.y + this->data[12],
+            this->data[1] * v.x + this->data[5] * v.y + this->data[13]
         );
     }
     

@@ -71,6 +71,10 @@ void Layout::update(P<Container> container, const sf::FloatRect& rect)
             w->layout.rect.top = rect.top + rect.height - w->layout.margin_bottom + w->layout.position.y - w->layout.rect.height;
             break;
         }
+        if (w->layout.lock_aspect_ratio)
+        {
+            
+        }
     }
 }
 

@@ -10,7 +10,7 @@ P<Window> Window::window;
 
 Window::Window()
 {
-    sp2assert(!window);
+    sp2assert(!window, "SP2 does not support more then 1 window.");
     window = this;
     antialiasing = 0;
     fullscreen = false;

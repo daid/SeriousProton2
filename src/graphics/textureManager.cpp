@@ -25,6 +25,8 @@ sf::Texture* TextureManager::finalize(__TextureManagerLoaderData* ptr)
     sf::Texture* result = new sf::Texture();
     result->loadFromImage(ptr->image);
     delete ptr;
+    result->generateMipmap();
+    result->setSmooth(true);
     return result;
 }
 

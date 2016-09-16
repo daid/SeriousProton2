@@ -1,5 +1,6 @@
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
+#include <sp2/collision/shape.h>
 
 namespace sp {
 
@@ -7,6 +8,7 @@ SceneNode::SceneNode(P<SceneNode> parent)
 : scene(parent->scene), parent(parent)
 {
     parent->children.add(this);
+    collision_body2d = nullptr;
 }
 
 SceneNode::SceneNode(P<Scene> scene)
@@ -17,6 +19,11 @@ SceneNode::SceneNode(P<Scene> scene)
 P<SceneNode> SceneNode::getParent()
 {
     return parent;
+}
+
+P<Scene> SceneNode::getScene()
+{
+    return scene;
 }
 
 PVector<SceneNode> SceneNode::getChildren()
@@ -47,6 +54,31 @@ void SceneNode::setRotation(double rotation)
 {
     this->rotation = Quaterniond::fromAngle(rotation);
     updateLocalTransform();
+}
+
+sp::Vector2d SceneNode::getLocalPosition2D()
+{
+    return sp::Vector2d(translation.x, translation.y);
+}
+
+double SceneNode::getLocalRotation2D()
+{
+    
+}
+
+sp::Vector2d SceneNode::getGlobalPosition2D()
+{
+    return global_transform * sp::Vector2d(0, 0);
+}
+
+double SceneNode::getGlobalRotation2D()
+{
+    
+}
+
+void SceneNode::setCollisionShape(const collision::Shape& shape)
+{
+    shape.create(this);
 }
 
 void SceneNode::updateLocalTransform()

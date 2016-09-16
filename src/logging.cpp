@@ -3,32 +3,42 @@
 
 namespace sp {
 
-std::ostream* Logger::logging_stream = &std::cerr;
+std::ostream* Logger::stream = &std::cerr;
+Logger::Format Logger::format = Logger::Format::Basic;
 
 void Logger::logStart(Level level, const char* filename, const char* function, int line_number)
 {
     switch(level)
     {
     case Level::Debug:
-        *logging_stream << "[DEBUG] ";
+        *stream << "[DEBUG] ";
         break;
     case Level::Info:
-        *logging_stream << "[INFO] ";
+        *stream << "[INFO] ";
         break;
     case Level::Warning:
-        *logging_stream << "[WARNING] ";
+        *stream << "[WARNING] ";
         break;
     case Level::Error:
-        *logging_stream << "[ERROR] ";
+        *stream << "[ERROR] ";
         break;
     }
-    //*logging_stream << filename << ':' << function << ':' << line_number << ": ";
-    *logging_stream << function << ':' << line_number << ":\n";
+    switch(format)
+    {
+    case Format::Basic:
+        break;
+    case Format::Function:
+        *stream << function << ':' << line_number << ":\n";
+        break;
+    case Format::Full:
+        *stream << filename << ':' << function << ':' << line_number << ":\n";
+        break;
+    }
 }
 
 void Logger::logEnd()
 {
-    *logging_stream << "\n";
+    *stream << "\n";
 }
 
 };//!namespace sp
