@@ -19,7 +19,7 @@ void Shape2D::create(SceneNode* node) const
     if (!node->collision_body2d)
     {
         b2BodyDef body_def;
-        body_def.position = tob2Vec2(node->getGlobalPosition2D());
+        body_def.position = toVector(node->getGlobalPosition2D());
         body_def.angle = node->getGlobalRotation2D();
         switch(type)
         {

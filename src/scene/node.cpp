@@ -1,6 +1,7 @@
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
 #include <sp2/collision/shape.h>
+#include <cmath>
 
 namespace sp {
 
@@ -9,6 +10,7 @@ SceneNode::SceneNode(P<SceneNode> parent)
 {
     parent->children.add(this);
     collision_body2d = nullptr;
+    render_data = nullptr;
 }
 
 SceneNode::SceneNode(P<Scene> scene)
@@ -63,7 +65,8 @@ sp::Vector2d SceneNode::getLocalPosition2D()
 
 double SceneNode::getLocalRotation2D()
 {
-    
+    sp::Vector2d v = rotation * sp::Vector2d(1, 0);
+    return std::atan2(v.y, v.x) / pi * 180.0f;
 }
 
 sp::Vector2d SceneNode::getGlobalPosition2D()
@@ -73,7 +76,8 @@ sp::Vector2d SceneNode::getGlobalPosition2D()
 
 double SceneNode::getGlobalRotation2D()
 {
-    
+    sp::Vector2d v = global_transform.applyDirection(sp::Vector2d(1, 0));
+    return std::atan2(v.y, v.x) / pi * 180.0f;
 }
 
 void SceneNode::setCollisionShape(const collision::Shape& shape)

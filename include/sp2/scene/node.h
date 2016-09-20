@@ -14,6 +14,7 @@ class Shape;
 class Shape2D;
 }
 class Scene;
+class RenderData;
 class SceneNode : public ScriptBindingObject
 {
 public:
@@ -33,7 +34,11 @@ public:
     sp::Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
     
+    const Matrix4x4d& getGlobalTransform() const { return global_transform; }
+    
     void setCollisionShape(const collision::Shape& shape);
+    
+    RenderData* render_data;
 private:
     SceneNode(P<Scene> scene);
 

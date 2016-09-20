@@ -19,12 +19,15 @@ public:
 
     P<SceneNode> getRoot() { return root; }
     
+    bool isEnabled() { return enabled; }
+    
     friend class collision::Shape2D;
 private:
     P<SceneNode> root;
     b2World* collision_world2d;
     bool enabled;
 
+public:
     static PVector<Scene> scenes;
 };
 

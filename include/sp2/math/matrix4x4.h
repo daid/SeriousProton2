@@ -150,14 +150,14 @@ public:
     }
     
     static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far)
-{
-    return Matrix4x4(
-        (2 * near) / (right - left), 0, (right + left) / (right - left), 0,
-        0, 0, (top + bottom) / (top - bottom), 0,
-        0, 0, (far + near) / (far - near), (2 * far * near) / (far - near),
-        0, 0, -1, 0
-    );
-}
+    {
+        return Matrix4x4(
+            (2 * near) / (right - left), 0, (right + left) / (right - left), 0,
+            0, 0, (top + bottom) / (top - bottom), 0,
+            0, 0, (far + near) / (far - near), (2 * far * near) / (far - near),
+            0, 0, -1, 0
+        );
+    }
 
     static Matrix4x4 ortho(T left, T right, T bottom, T top, T near, T far)
     {
@@ -198,6 +198,167 @@ public:
             this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z + this->data[12],
             this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z + this->data[13],
             this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z + this->data[14]
+        );
+    }
+
+    sf::Vector2<T> applyDirection(const sf::Vector2<T>& v) const
+    {
+        return sf::Vector2<T>(
+            this->data[0] * v.x + this->data[4] * v.y,
+            this->data[1] * v.x + this->data[5] * v.y
+        );
+    }
+    
+    sf::Vector3<T> applyDirection(const sf::Vector3<T>& v) const
+    {
+        return sf::Vector3<T>(
+            this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z,
+            this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z,
+            this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z
+        );
+    }
+    
+    Matrix4x4 inverse() const
+    {
+        T inv[16], det;
+        int i;
+
+        inv[0] = this->data[5]  * this->data[10] * this->data[15] - 
+                 this->data[5]  * this->data[11] * this->data[14] - 
+                 this->data[9]  * this->data[6]  * this->data[15] + 
+                 this->data[9]  * this->data[7]  * this->data[14] +
+                 this->data[13] * this->data[6]  * this->data[11] - 
+                 this->data[13] * this->data[7]  * this->data[10];
+
+        inv[4] = -this->data[4]  * this->data[10] * this->data[15] + 
+                  this->data[4]  * this->data[11] * this->data[14] + 
+                  this->data[8]  * this->data[6]  * this->data[15] - 
+                  this->data[8]  * this->data[7]  * this->data[14] - 
+                  this->data[12] * this->data[6]  * this->data[11] + 
+                  this->data[12] * this->data[7]  * this->data[10];
+
+        inv[8] = this->data[4]  * this->data[9] * this->data[15] - 
+                 this->data[4]  * this->data[11]* this->data[13] - 
+                 this->data[8]  * this->data[5] * this->data[15] + 
+                 this->data[8]  * this->data[7] * this->data[13] + 
+                 this->data[12] * this->data[5] * this->data[11] - 
+                 this->data[12] * this->data[7] * this->data[9];
+
+        inv[12] = -this->data[4]  * this->data[9] * this->data[14] + 
+                   this->data[4]  * this->data[10] * this->data[13] +
+                   this->data[8]  * this->data[5] * this->data[14] - 
+                   this->data[8]  * this->data[6] * this->data[13] - 
+                   this->data[12] * this->data[5] * this->data[10] + 
+                   this->data[12] * this->data[6] * this->data[9];
+
+        inv[1] = -this->data[1]  * this->data[10] * this->data[15] + 
+                  this->data[1]  * this->data[11] * this->data[14] + 
+                  this->data[9]  * this->data[2] * this->data[15] - 
+                  this->data[9]  * this->data[3] * this->data[14] - 
+                  this->data[13] * this->data[2] * this->data[11] + 
+                  this->data[13] * this->data[3] * this->data[10];
+
+        inv[5] = this->data[0]  * this->data[10] * this->data[15] - 
+                 this->data[0]  * this->data[11] * this->data[14] - 
+                 this->data[8]  * this->data[2] * this->data[15] + 
+                 this->data[8]  * this->data[3] * this->data[14] + 
+                 this->data[12] * this->data[2] * this->data[11] - 
+                 this->data[12] * this->data[3] * this->data[10];
+
+        inv[9] = -this->data[0]  * this->data[9] * this->data[15] + 
+                  this->data[0]  * this->data[11] * this->data[13] + 
+                  this->data[8]  * this->data[1] * this->data[15] - 
+                  this->data[8]  * this->data[3] * this->data[13] - 
+                  this->data[12] * this->data[1] * this->data[11] + 
+                  this->data[12] * this->data[3] * this->data[9];
+
+        inv[13] = this->data[0]  * this->data[9] * this->data[14] - 
+                  this->data[0]  * this->data[10] * this->data[13] - 
+                  this->data[8]  * this->data[1] * this->data[14] + 
+                  this->data[8]  * this->data[2] * this->data[13] + 
+                  this->data[12] * this->data[1] * this->data[10] - 
+                  this->data[12] * this->data[2] * this->data[9];
+
+        inv[2] = this->data[1]  * this->data[6] * this->data[15] - 
+                 this->data[1]  * this->data[7] * this->data[14] - 
+                 this->data[5]  * this->data[2] * this->data[15] + 
+                 this->data[5]  * this->data[3] * this->data[14] + 
+                 this->data[13] * this->data[2] * this->data[7] - 
+                 this->data[13] * this->data[3] * this->data[6];
+
+        inv[6] = -this->data[0]  * this->data[6] * this->data[15] + 
+                  this->data[0]  * this->data[7] * this->data[14] + 
+                  this->data[4]  * this->data[2] * this->data[15] - 
+                  this->data[4]  * this->data[3] * this->data[14] - 
+                  this->data[12] * this->data[2] * this->data[7] + 
+                  this->data[12] * this->data[3] * this->data[6];
+
+        inv[10] = this->data[0]  * this->data[5] * this->data[15] - 
+                  this->data[0]  * this->data[7] * this->data[13] - 
+                  this->data[4]  * this->data[1] * this->data[15] + 
+                  this->data[4]  * this->data[3] * this->data[13] + 
+                  this->data[12] * this->data[1] * this->data[7] - 
+                  this->data[12] * this->data[3] * this->data[5];
+
+        inv[14] = -this->data[0]  * this->data[5] * this->data[14] + 
+                   this->data[0]  * this->data[6] * this->data[13] + 
+                   this->data[4]  * this->data[1] * this->data[14] - 
+                   this->data[4]  * this->data[2] * this->data[13] - 
+                   this->data[12] * this->data[1] * this->data[6] + 
+                   this->data[12] * this->data[2] * this->data[5];
+
+        inv[3] = -this->data[1] * this->data[6] * this->data[11] + 
+                  this->data[1] * this->data[7] * this->data[10] + 
+                  this->data[5] * this->data[2] * this->data[11] - 
+                  this->data[5] * this->data[3] * this->data[10] - 
+                  this->data[9] * this->data[2] * this->data[7] + 
+                  this->data[9] * this->data[3] * this->data[6];
+
+        inv[7] = this->data[0] * this->data[6] * this->data[11] - 
+                 this->data[0] * this->data[7] * this->data[10] - 
+                 this->data[4] * this->data[2] * this->data[11] + 
+                 this->data[4] * this->data[3] * this->data[10] + 
+                 this->data[8] * this->data[2] * this->data[7] - 
+                 this->data[8] * this->data[3] * this->data[6];
+
+        inv[11] = -this->data[0] * this->data[5] * this->data[11] + 
+                   this->data[0] * this->data[7] * this->data[9] + 
+                   this->data[4] * this->data[1] * this->data[11] - 
+                   this->data[4] * this->data[3] * this->data[9] - 
+                   this->data[8] * this->data[1] * this->data[7] + 
+                   this->data[8] * this->data[3] * this->data[5];
+
+        inv[15] = this->data[0] * this->data[5] * this->data[10] - 
+                  this->data[0] * this->data[6] * this->data[9] - 
+                  this->data[4] * this->data[1] * this->data[10] + 
+                  this->data[4] * this->data[2] * this->data[9] + 
+                  this->data[8] * this->data[1] * this->data[6] - 
+                  this->data[8] * this->data[2] * this->data[5];
+
+        det = this->data[0] * inv[0] + this->data[1] * inv[4] + this->data[2] * inv[8] + this->data[3] * inv[12];
+
+        if (det == 0)
+            return Matrix4x4();
+
+        det = 1.0 / det;
+
+        return Matrix4x4(
+            inv[0] * det,
+            inv[1] * det,
+            inv[2] * det,
+            inv[3] * det,
+            inv[4] * det,
+            inv[5] * det,
+            inv[6] * det,
+            inv[7] * det,
+            inv[8] * det,
+            inv[9] * det,
+            inv[10] * det,
+            inv[11] * det,
+            inv[12] * det,
+            inv[13] * det,
+            inv[14] * det,
+            inv[15] * det
         );
     }
 };

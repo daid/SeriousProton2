@@ -32,6 +32,29 @@ public:
         );
     }
     
+    template<typename VT> sf::Vector2<VT> operator*(const sf::Vector2<VT>& v) const
+    {
+        T vMult = 2.0 * (x * v.x + y * v.y);
+        T crossMult = 2.0 * w;
+        T pMult = crossMult * w - 1.0;
+
+        return sf::Vector2<VT>(
+            pMult * v.x + vMult * x + crossMult * (- z * v.y),
+            pMult * v.y + vMult * y + crossMult * (z * v.x));
+    }
+
+    template<typename VT> sf::Vector3<VT> operator*(const sf::Vector3<VT>& v) const
+    {
+        T vMult = 2.0 * (x * v.x + y * v.y + z * v.z);
+        T crossMult = 2.0 * w;
+        T pMult = crossMult * w - 1.0;
+
+        return sf::Vector3<VT>(
+            pMult * v.x + vMult * x + crossMult * (y * v.z - z * v.y),
+            pMult * v.y + vMult * y + crossMult * (z * v.x - x * v.z),
+            pMult * v.z + vMult * z + crossMult * (x * v.y - y * v.x));
+    }
+    
     T length()
     {
         return std::sqrt(x * x + y * y + z * z + w * w);
