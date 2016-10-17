@@ -11,8 +11,8 @@ P<Engine> Engine::engine;
 Engine::Engine()
 {
     sp2assert(!engine, "SP2 does not support more then 1 engine.");
-    engine = engine;
-    
+    engine = this;
+
     game_speed = 1.0;
     paused = false;
 
