@@ -84,9 +84,17 @@ bool GraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f posit
         {
             if (focus_widget)
                 focus_widget->focus = false;
-            focus_widget = w;
-            focus_widget->focus = true;
+            if (w->focusable)
+            {
+                focus_widget = w;
+                focus_widget->focus = true;
+            }
+            else
+            {
+                focus_widget = nullptr;
+            }
             pointer_widget[id] = w;
+            w->hover = true;
             return true;
         }
         w = w->parent;
@@ -114,6 +122,12 @@ void GraphicsLayer::onPointerUp(sf::Vector2f position, int id)
     if (it != pointer_widget.end() && it->second)
     {
         it->second->onPointerUp(position, id);
+        bool dehover = true;
+        for(auto i : pointer_widget)
+            if (i.first != id && i.second == it->second)
+                dehover = false;
+        if (dehover)
+            it->second->hover = false;
         pointer_widget.erase(it);
     }
 }
@@ -124,7 +138,8 @@ void GraphicsLayer::drawWidgets(sf::RenderTarget& window, P<Widget> w)
     
     for(Widget* child : w->children)
     {
-        drawWidgets(window, child);
+        if (child->isVisible())
+            drawWidgets(window, child);
     }
 }
 
@@ -132,11 +147,15 @@ P<Widget> GraphicsLayer::widgetAtPosition(P<Widget> w, sf::Vector2f position)
 {
     if (w->layout.rect.contains(position))
     {
-        for(P<Widget> c : w->children)
+        for(PVector<Widget>::ReverseIterator it = w->children.rbegin(); it != w->children.rend(); ++it)
         {
-            P<Widget> result = widgetAtPosition(c, position);
-            if (result)
-                return result;
+            Widget* c = *it;
+            if (c->isVisible())
+            {
+                P<Widget> result = widgetAtPosition(c, position);
+                if (result)
+                    return result;
+            }
         }
         return w;
     }

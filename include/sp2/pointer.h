@@ -121,6 +121,16 @@ public:
         if (ptr)
             delete ptr;
     }
+    
+    bool operator==(const P<T>& other)
+    {
+        return ptr == other.ptr;
+    }
+
+    bool operator!=(const P<T>& other)
+    {
+        return ptr != other.ptr;
+    }
 
     template<class T2> operator P<T2>()
     {

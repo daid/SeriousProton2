@@ -3,7 +3,6 @@
 
 #include <sp2/graphics/gui/widget/widget.h>
 #include <sp2/string.h>
-#include <functional>
 
 namespace sp {
 namespace gui {
@@ -14,6 +13,7 @@ public:
     Button(P<Container> parent);
 
     void setLabel(string label);
+    virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
     virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;

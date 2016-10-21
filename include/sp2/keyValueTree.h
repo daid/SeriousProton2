@@ -21,9 +21,10 @@ class KeyValueTree : public AutoPointerObject
 public:
     std::vector<KeyValueTreeNode> root_nodes;
     
+    KeyValueTreeNode* findId(string id);
     std::map<string, std::map<string, string>> getFlattenNodesByIds();
-
 private:
+    KeyValueTreeNode* findId(KeyValueTreeNode& node, const string& id);
     void buildFlattenNodesByIds(std::map<string, std::map<string, string>>& results, const KeyValueTreeNode& node, std::map<string, string> key_values);
 };
 

@@ -16,25 +16,33 @@ __TextureManagerLoaderData* TextureManager::prepare(string name)
 
 __TextureManagerLoaderData* TextureManager::backgroundLoader(__TextureManagerLoaderData* ptr)
 {
-    ptr->image.loadFromStream(*ptr->stream);
+    if (ptr->stream)
+        ptr->image.loadFromStream(*ptr->stream);
     return ptr;
 }
 
 sf::Texture* TextureManager::finalize(__TextureManagerLoaderData* ptr)
 {
-    sf::Texture* result = new sf::Texture();
-    result->loadFromImage(ptr->image);
-    delete ptr;
-    result->generateMipmap();
-    result->setSmooth(true);
-    return result;
+    if (ptr->stream)
+    {
+        sf::Texture* result = new sf::Texture();
+        result->loadFromImage(ptr->image);
+        delete ptr;
+        result->generateMipmap();
+        result->setSmooth(true);
+        return result;
+    }
+    else
+    {
+        return loadFallback();
+    }
 }
 
 sf::Texture* TextureManager::loadFallback()
 {
     sf::Texture* texture = new sf::Texture();
     texture->create(32, 32);
-    uint8_t pixels[32*32*4];
+    uint8_t pixels[32*32*sizeof(uint32_t)];
     memset(pixels, 0, sizeof(pixels));
     for(int x=0; x<32; x++)
         for(int y=0; y<32; y++)

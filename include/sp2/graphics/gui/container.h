@@ -11,9 +11,9 @@ class Widget;
 class Layout;
 class Container : public AutoPointerObject
 {
-protected:
-    PVector<Widget> children;
 public:
+    PVector<Widget> children;
+
     Container();
     virtual ~Container();
 

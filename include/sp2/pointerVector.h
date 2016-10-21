@@ -20,8 +20,8 @@ public:
         {
             clearOutNullptr();
         }
-        
-        bool operator!=(Iterator& i) const
+
+        bool operator!=(const Iterator& i) const
         {
             return v != i.v || index != i.index;
         }
@@ -52,6 +52,43 @@ public:
                 index = -1;
         }
     };
+    class ReverseIterator
+    {
+    public:
+        ReverseIterator(PVector* v, int index)
+        : v(v), index(index)
+        {
+            clearOutNullptr();
+        }
+        
+        bool operator!=(const ReverseIterator& i) const
+        {
+            return v != i.v || index != i.index;
+        }
+        
+        void operator++()
+        {
+            index--;
+            clearOutNullptr();
+        }
+        
+        T* operator*()
+        {
+            return *v->items[index];
+        }
+    private:
+        PVector* v;
+        int index;
+        
+        void clearOutNullptr()
+        {
+            while(index != -1 && !v->items[index])
+            {
+                v->items.erase(v->items.begin() + index);
+                index -= 1;
+            }
+        }
+    };
 
     void add(P<T> item)
     {
@@ -64,9 +101,19 @@ public:
         return Iterator(this, 0);
     }
 
-    Iterator end()
+    const Iterator end()
     {
         return Iterator(this, -1);
+    }
+    
+    ReverseIterator rbegin()
+    {
+        return ReverseIterator(this, items.size() - 1);
+    }
+    
+    const ReverseIterator rend()
+    {
+        return ReverseIterator(this, -1);
     }
     
     int size()

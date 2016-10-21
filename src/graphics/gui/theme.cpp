@@ -14,7 +14,10 @@ const ThemeData* Theme::getData(string element)
         return &it->second;
     int n = element.rfind(".");
     if (n == -1)
-        return getData("");
+    {
+        LOG(Warning, "Cannot find", element, "in theme", name);
+        return &fallback_data;
+    }
     return getData(element.substr(0, n));
 }
 
@@ -28,7 +31,7 @@ P<Theme> Theme::getTheme(string name)
         LOG(Error, "Default theme not found. Most likely crashing now.");
         return nullptr;
     }
-    LOG(Warning, "Theme", name, "not found. Falling back to default theme.");
+    LOG(Warning, "Theme", name, "not found. Falling back to [default] theme.");
     return getTheme("default");
 }
 
@@ -48,6 +51,11 @@ static sf::Color toColor(string s)
 void Theme::loadTheme(string name, string resource_name)
 {
     P<Theme> theme = new Theme(name);
+    for(unsigned int n=0; n<int(Widget::State::Count); n++)
+    {
+        theme->fallback_data.states[n].forground_color = sf::Color::White;
+        theme->fallback_data.states[n].background_color = sf::Color::White;
+    }
 
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
     for(auto it : tree->getFlattenNodesByIds())

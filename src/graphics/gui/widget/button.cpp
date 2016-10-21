@@ -6,6 +6,8 @@
 namespace sp {
 namespace gui {
 
+SP_REGISTER_WIDGET("button", Button);
+
 Button::Button(P<Container> parent)
 : Widget(parent)
 {
@@ -15,6 +17,18 @@ Button::Button(P<Container> parent)
 void Button::setLabel(string label)
 {
     this->label = label;
+}
+
+void Button::setAttribute(const string& key, const string& value)
+{
+    if (key == "label" || key == "caption")
+    {
+        label = value;
+    }
+    else
+    {
+        Widget::setAttribute(key, value);
+    }
 }
 
 void Button::render(sf::RenderTarget& window)
@@ -31,6 +45,8 @@ bool Button::onPointerDown(io::Pointer::Button button, sf::Vector2f position, in
 
 void Button::onPointerUp(sf::Vector2f position, int id)
 {
+    if (layout.rect.contains(position))
+        runCallback(Variant());
 }
 
 };//!namespace gui
