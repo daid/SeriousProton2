@@ -221,7 +221,6 @@ public:
     Matrix4x4 inverse() const
     {
         T inv[16], det;
-        int i;
 
         inv[0] = this->data[5]  * this->data[10] * this->data[15] - 
                  this->data[5]  * this->data[11] * this->data[14] - 

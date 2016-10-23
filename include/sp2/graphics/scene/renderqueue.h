@@ -13,6 +13,7 @@ class RenderQueue
 public:
     void clear();
     void add(const Matrix4x4d& transform, const RenderData& data);
+    void render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform, sf::RenderTarget& target);
 private:
     class Item
     {
@@ -30,7 +31,6 @@ private:
         Matrix4x4d transform;
         RenderData data;
     };
-    void render(sf::RenderTarget& target);
 
     std::vector<Item> render_list;
 };

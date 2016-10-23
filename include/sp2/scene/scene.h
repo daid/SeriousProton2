@@ -12,18 +12,22 @@ class Shape2D;
 }
 
 class SceneNode;
+class CameraNode;
 class Scene : public AutoPointerObject
 {
 public:
     Scene();
 
     P<SceneNode> getRoot() { return root; }
+    P<CameraNode> getCamera() { return camera; }
+    void setCamera(P<CameraNode> camera) { this->camera = camera; }
     
     bool isEnabled() { return enabled; }
     
     friend class collision::Shape2D;
 private:
     P<SceneNode> root;
+    P<CameraNode> camera;
     b2World* collision_world2d;
     bool enabled;
 

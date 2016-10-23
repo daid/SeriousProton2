@@ -12,13 +12,14 @@ class MeshData;
 class RenderData
 {
 public:
-    enum class RenderType
+    enum class Type
     {
+        None,
         Normal,
         Transparent,
         Additive,
     };
-    RenderType type;
+    Type type;
     std::shared_ptr<MeshData> mesh;
     string texture;
     

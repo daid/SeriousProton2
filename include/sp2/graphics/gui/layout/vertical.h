@@ -9,7 +9,7 @@ namespace gui {
 class VerticalLayout : public Layout
 {
 public:
-    virtual void update(P<Container> container, sf::FloatRect& rect) override;
+    virtual void update(P<Container> container, const sf::FloatRect& rect) override;
 };
 
 };//!namespace gui

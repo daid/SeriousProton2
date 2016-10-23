@@ -5,6 +5,7 @@
 #include <sp2/math/quaternion.h>
 #include <sp2/script/bindingObject.h>
 #include <sp2/pointerVector.h>
+#include <sp2/graphics/scene/renderdata.h>
 
 class b2Body;
 
@@ -38,7 +39,7 @@ public:
     
     void setCollisionShape(const collision::Shape& shape);
     
-    RenderData* render_data;
+    RenderData render_data;
 private:
     SceneNode(P<Scene> scene);
 

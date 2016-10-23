@@ -10,7 +10,6 @@ SceneNode::SceneNode(P<SceneNode> parent)
 {
     parent->children.add(this);
     collision_body2d = nullptr;
-    render_data = nullptr;
 }
 
 SceneNode::SceneNode(P<Scene> scene)

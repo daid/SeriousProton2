@@ -8,7 +8,7 @@ LayoutClassRegistry* LayoutClassRegistry::first;
 
 SP_REGISTER_LAYOUT("default", Layout);
 
-void Layout::update(P<Container> container, sf::FloatRect& rect)
+void Layout::update(P<Container> container, const sf::FloatRect& rect)
 {
     for(Widget* w : container->children)
     {

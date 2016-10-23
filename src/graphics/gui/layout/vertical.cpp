@@ -6,7 +6,7 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("vertical", VerticalLayout);
 
-void VerticalLayout::update(P<Container> container, sf::FloatRect& rect)
+void VerticalLayout::update(P<Container> container, const sf::FloatRect& rect)
 {
     float y = rect.top;
     for(Widget* w : container->children)

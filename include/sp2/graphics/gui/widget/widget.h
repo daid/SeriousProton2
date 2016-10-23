@@ -43,6 +43,7 @@ public:
         bool fill_width;
         bool fill_height;
         bool lock_aspect_ratio;
+        bool match_content_size;
         
         P<Widget> anchor_widget;
         Alignment anchor_point;

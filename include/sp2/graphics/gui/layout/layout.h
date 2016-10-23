@@ -13,7 +13,7 @@ class Layout : sf::NonCopyable
 {
 public:
     virtual ~Layout() {}
-    virtual void update(P<Container> container, sf::FloatRect& rect);
+    virtual void update(P<Container> container, const sf::FloatRect& rect);
 
 protected:
     virtual void basicLayout(const sf::FloatRect& rect, Widget* widget);

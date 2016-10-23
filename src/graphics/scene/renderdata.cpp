@@ -4,7 +4,7 @@ namespace sp {
 
 RenderData::RenderData()
 {
-    type = RenderType::Normal;
+    type = Type::None;
 }
 
 bool RenderData::operator<(const RenderData& other) const

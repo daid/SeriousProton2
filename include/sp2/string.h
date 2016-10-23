@@ -615,8 +615,8 @@ public:
 
 
     /* Convert this string to a number */
-    float toFloat() { return atof(c_str()); }
-    int toInt(int bits_per_digit=10) { return strtol(c_str(), nullptr, bits_per_digit); }
+    float toFloat() const { return atof(c_str()); }
+    int toInt(int bits_per_digit=10) const { return strtol(c_str(), nullptr, bits_per_digit); }
 };
 #undef _WHITESPACE
 

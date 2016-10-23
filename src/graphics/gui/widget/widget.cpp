@@ -21,7 +21,7 @@ Widget::Widget()
     layout.margin_left = layout.margin_right = layout.margin_top = layout.margin_bottom = 0;
     layout.max_size.x = layout.max_size.y = std::numeric_limits<float>::max();
     layout.alignment = Alignment::TopLeft;
-    layout.fill_width = layout.fill_height = layout.lock_aspect_ratio = false;
+    layout.fill_width = layout.fill_height = layout.lock_aspect_ratio = layout.match_content_size = false;
 
     layout.anchor_point = Alignment::TopLeft;
     
@@ -225,6 +225,13 @@ void Widget::setAttribute(const string& key, const string& value)
             LOG(Error, "Failed to find layout type:", value);
         }
     }
+    else if (key == "match_content_size")
+    {
+        if (value == "true")
+            layout.match_content_size = true;
+        else
+            layout.match_content_size = value.toInt();
+    }
     else
     {
         LOG(Warning, "Tried to set unknown attribute:", key, "to", value);
@@ -250,7 +257,26 @@ void Widget::updateLayout()
         return;
     if (!layout_manager)
         layout_manager = new Layout();
-    layout_manager->update(this, layout.rect);
+    if (layout.match_content_size)
+    {
+        layout_manager->update(this, layout.rect);
+        sf::FloatRect content_size(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+        for(Widget* child : children)
+        {
+            if (child->isVisible())
+            {
+                content_size.left = std::min(content_size.left, child->layout.rect.left - child->layout.margin_left);
+                content_size.top = std::min(content_size.top, child->layout.rect.top - child->layout.margin_top);
+                content_size.width = std::max(content_size.width + content_size.left, child->layout.rect.left + child->layout.rect.width + child->layout.margin_right) - content_size.left;
+                content_size.height = std::max(content_size.height + content_size.top, child->layout.rect.top + child->layout.rect.height + child->layout.margin_bottom) - content_size.top;
+            }
+        }
+        layout.rect = content_size;
+        layout.size.x = content_size.width;
+        layout.size.y = content_size.height;
+    }else{
+        layout_manager->update(this, layout.rect);
+    }
     
     for(Widget* child : children)
     {
