@@ -1,8 +1,11 @@
-#include <GL/glew.h>
+#include <sp2/graphics/opengl.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/logging.h>
 #include <limits>
 
 const unsigned int NO_BUFFER = std::numeric_limits<unsigned int>::max();
+
+namespace sp {
 
 MeshData::MeshData()
 {
@@ -28,39 +31,29 @@ MeshData::~MeshData()
 
 void MeshData::render()
 {
-#if FEATURE_3D_RENDERING
     if (!vertex_count)
         return;
-    if (glGenBuffers)
+    if (vbo == NO_BUFFER)
     {
-        if (vbo == NO_BUFFER)
-        {
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(MeshVertex) * vertex_count, &vertices[0], GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
+
+        glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
-        glVertexPointer(3, GL_FLOAT, sizeof(float) * (3 * 2 + 2), (void*)offsetof(MeshVertex, position));
-        glNormalPointer(GL_FLOAT, sizeof(float) * (3 * 2 + 2), (void*)offsetof(MeshVertex, normal));
-        glTexCoordPointer(2, GL_FLOAT, sizeof(float) * (3 * 2 + 2), (void*)offsetof(MeshVertex, uv));
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertex_count, &vertices[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
-    else
-    {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
-        glVertexPointer(3, GL_FLOAT, sizeof(float) * (3 * 2 + 2), &vertices[0].position[0]);
-        glNormalPointer(GL_FLOAT, sizeof(float) * (3 * 2 + 2), &vertices[0].normal[0]);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(float) * (3 * 2 + 2), &vertices[0].uv[0]);
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-    }
-#endif//FEATURE_3D_RENDERING
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glDrawArrays(GL_TRIANGLES, 0, vertex_count);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
 }
+
+}//!namespace sp

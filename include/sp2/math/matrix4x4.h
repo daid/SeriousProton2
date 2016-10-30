@@ -8,6 +8,7 @@
 #include <cstring>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
+#include <SFML/Graphics/Glsl.hpp>
 
 namespace sp {
 
@@ -360,10 +361,27 @@ public:
             inv[15] * det
         );
     }
+    
+    operator sf::Glsl::Mat4() const
+    {
+        float data[16];
+        for(int n=0; n<16; n++)
+            data[n] = this->data[n];
+        return sf::Glsl::Mat4(data);
+    }
 };
 
 typedef Matrix4x4<float> Matrix4x4f;
 typedef Matrix4x4<double> Matrix4x4d;
+
+template<typename T> std::ostream& operator<<(std::ostream& os, const Matrix4x4<T>& mat)
+{
+    os << mat.data[0] << ',' << mat.data[1] << ',' << mat.data[2] << ',' << mat.data[3] << '\n';
+    os << mat.data[4] << ',' << mat.data[5] << ',' << mat.data[6] << ',' << mat.data[7] << '\n';
+    os << mat.data[8] << ',' << mat.data[9] << ',' << mat.data[10] << ',' << mat.data[11] << '\n';
+    os << mat.data[12] << ',' << mat.data[13] << ',' << mat.data[14] << ',' << mat.data[15] << '\n';
+    return os;
+}
 
 };//!namespace sp
 

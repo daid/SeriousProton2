@@ -1,4 +1,7 @@
+#include <sp2/logging.h>
 #include <sp2/graphics/scene/renderqueue.h>
+#include <sp2/graphics/meshdata.h>
+#include <SFML/Graphics/Shader.hpp>
 
 namespace sp {
 
@@ -17,7 +20,11 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
     std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)
     {
-        
+        sf::Shader::bind(item.data.shader);
+        item.data.shader->setUniform("projection_matrix", projection);
+        item.data.shader->setUniform("camera_matrix", camera_transform);
+        item.data.shader->setUniform("object_matrix", item.transform);
+        item.data.mesh->render();
     }
 }
 

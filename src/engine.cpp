@@ -2,6 +2,7 @@
 #include <sp2/window.h>
 #include <sp2/assert.h>
 #include <sp2/logging.h>
+#include <sp2/graphics/opengl.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -28,6 +29,8 @@ void Engine::run()
 {
     sp2assert(Window::window, "Before the engine is run, a Window needs to be created.");
     
+    glewInit();
+    
     sf::Clock frameTimeClock;
     LOG(Info, "Engine started");
     while(Window::window->render_window.isOpen())
@@ -47,9 +50,8 @@ void Engine::run()
         if (paused)
             delta = 0;
 
-        //IOSystem::update();
-        
-        Window::window->render();
+        if (Window::window->render_window.isOpen())
+            Window::window->render();
     }
     LOG(Info, "Engine closing down");
 }

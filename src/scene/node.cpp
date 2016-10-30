@@ -10,11 +10,18 @@ SceneNode::SceneNode(P<SceneNode> parent)
 {
     parent->children.add(this);
     collision_body2d = nullptr;
+    
+    global_transform = Matrix4x4d::identity();
+    local_transform = Matrix4x4d::identity();
 }
 
 SceneNode::SceneNode(P<Scene> scene)
 : scene(scene)
 {
+    collision_body2d = nullptr;
+    
+    global_transform = Matrix4x4d::identity();
+    local_transform = Matrix4x4d::identity();
 }
 
 P<SceneNode> SceneNode::getParent()
