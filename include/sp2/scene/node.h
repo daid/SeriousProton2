@@ -41,7 +41,7 @@ public:
     
     RenderData render_data;
 private:
-    SceneNode(P<Scene> scene);
+    SceneNode(Scene* scene);
 
     P<Scene> scene;
     P<SceneNode> parent;

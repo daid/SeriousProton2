@@ -2,6 +2,7 @@
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/cameraNode.h>
+#include <sp2/logging.h>
 
 namespace sp {
 
@@ -17,6 +18,8 @@ void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> laye
         P<CameraNode> camera = scene->getCamera();
         if (scene->isEnabled() && camera)
         {
+            //TODO: Account for viewport, currently assumes viewport is on the whole target.
+            camera->setAspectRatio(double(target.getSize().x) / double(target.getSize().y));
             queue.clear();
             recursiveNodeRender(*scene->getRoot());
             queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);

@@ -15,7 +15,7 @@ SceneNode::SceneNode(P<SceneNode> parent)
     local_transform = Matrix4x4d::identity();
 }
 
-SceneNode::SceneNode(P<Scene> scene)
+SceneNode::SceneNode(Scene* scene)
 : scene(scene)
 {
     collision_body2d = nullptr;

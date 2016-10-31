@@ -154,8 +154,8 @@ public:
     {
         return Matrix4x4(
             (2 * near) / (right - left), 0, (right + left) / (right - left), 0,
-            0, 0, (top + bottom) / (top - bottom), 0,
-            0, 0, (far + near) / (far - near), (2 * far * near) / (far - near),
+            0, (2 * near) / (top - bottom), (top + bottom) / (top - bottom), 0,
+            0, 0, -(far + near) / (far - near), -(2 * far * near) / (far - near),
             0, 0, -1, 0
         );
     }
@@ -344,20 +344,20 @@ public:
 
         return Matrix4x4(
             inv[0] * det,
-            inv[1] * det,
-            inv[2] * det,
-            inv[3] * det,
             inv[4] * det,
-            inv[5] * det,
-            inv[6] * det,
-            inv[7] * det,
             inv[8] * det,
-            inv[9] * det,
-            inv[10] * det,
-            inv[11] * det,
             inv[12] * det,
+            inv[1] * det,
+            inv[5] * det,
+            inv[9] * det,
             inv[13] * det,
+            inv[2] * det,
+            inv[6] * det,
+            inv[10] * det,
             inv[14] * det,
+            inv[3] * det,
+            inv[7] * det,
+            inv[11] * det,
             inv[15] * det
         );
     }
