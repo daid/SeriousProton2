@@ -54,6 +54,7 @@ void Window::createRenderWindow()
 void Window::render()
 {
     render_window.clear(sf::Color(20, 20, 20));
+    render_window.setActive();
     for(GraphicsLayer* layer : GraphicsLayer::layers)
     {
         layer->render(render_window);

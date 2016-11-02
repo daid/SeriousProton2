@@ -10,7 +10,10 @@ __TextureManagerLoaderData* TextureManager::prepare(string name)
 {
     __TextureManagerLoaderData* ptr = new __TextureManagerLoaderData();
     ptr->stream = io::ResourceProvider::get(name);
-    LOG(Info, "Loading texture:", name);
+    if (ptr->stream)
+        LOG(Info, "Loading texture:", name);
+    else
+        LOG(Error, "Failed to open texture:", name);
     return ptr;
 }
 

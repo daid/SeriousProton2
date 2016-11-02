@@ -19,7 +19,11 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
         glGenVertexArrays(1, &vertex_array_id);
     }
     glViewport(0, 0, window.getSize().x, window.getSize().y);
+    glClear(GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vertex_array_id);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     //TODO: Figure out proper rendering order.
     for(RenderPass* pass : render_passes)
@@ -31,6 +35,8 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
             pass->render(*targets[target], this);
     }
 
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
     glBindVertexArray(0);
     sf::Shader::bind(nullptr);
 }

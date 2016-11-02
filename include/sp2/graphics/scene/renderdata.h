@@ -20,9 +20,11 @@ public:
         Transparent,
         Additive,
     };
+    int order;
     Type type;
     Shader* shader;
     std::shared_ptr<MeshData> mesh;
+    sf::Color color;
     string texture;
     
     RenderData();
