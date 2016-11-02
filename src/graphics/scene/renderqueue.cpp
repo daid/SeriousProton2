@@ -22,12 +22,12 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
     std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)
     {
-        sf::Shader::bind(item.data.shader);
         item.data.shader->setUniform("projection_matrix", projection);
         item.data.shader->setUniform("camera_matrix", camera_transform);
         item.data.shader->setUniform("object_matrix", item.transform);
         item.data.shader->setUniform("color", sf::Glsl::Vec4(item.data.color));
         item.data.shader->setUniform("texture_map", *textureManager.get(item.data.texture));
+        sf::Shader::bind(item.data.shader);
         item.data.mesh->render();
     }
 }
