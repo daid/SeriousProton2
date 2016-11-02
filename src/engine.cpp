@@ -3,6 +3,7 @@
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
+#include <sp2/scene/scene.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -49,6 +50,21 @@ void Engine::run()
         delta *= game_speed;
         if (paused)
             delta = 0;
+        for(Scene* scene : Scene::scenes)
+        {
+            if (scene->isEnabled())
+                scene->update(delta);
+        }
+        fixed_update_accumulator += delta;
+        while(fixed_update_accumulator > 1.0 / fixed_update_frequency)
+        {
+            fixed_update_accumulator -= 1.0 / fixed_update_frequency;
+            for(Scene* scene : Scene::scenes)
+            {
+                if (scene->isEnabled())
+                    scene->fixedUpdate();
+            }
+        }
 
         if (Window::window->render_window.isOpen())
             Window::window->render();

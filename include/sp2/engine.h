@@ -24,12 +24,15 @@ public:
     static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
+    
+    static constexpr float fixed_update_frequency = 30.0f;
 
     float game_speed;
     bool paused;
 
     float maximum_frame_time;
     float minimum_frame_time;
+    float fixed_update_accumulator;
 };
 
 };//!namespace sp

@@ -23,6 +23,8 @@ public:
     void setCamera(P<CameraNode> camera) { this->camera = camera; }
     
     bool isEnabled() { return enabled; }
+    void fixedUpdate();
+    void update(float delta);
     
     friend class collision::Shape2D;
 private:
@@ -31,6 +33,8 @@ private:
     b2World* collision_world2d;
     bool enabled;
 
+    void updateNode(float delta, SceneNode* node);
+    void fixedUpdateNode(SceneNode* node);
 public:
     static PVector<Scene> scenes;
 };

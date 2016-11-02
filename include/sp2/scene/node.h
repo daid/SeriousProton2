@@ -39,6 +39,13 @@ public:
     
     void setCollisionShape(const collision::Shape& shape);
     
+    //Event called every frame.
+    //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.
+    //Called when the game is paused with delta = 0
+    virtual void onUpdate(float delta) {}
+    //Event called 30 times per second. Not called when the game is paused.
+    virtual void onFixedUpdate() {}
+    
     RenderData render_data;
 private:
     SceneNode(Scene* scene);
