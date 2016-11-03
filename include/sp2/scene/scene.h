@@ -5,6 +5,7 @@
 #include <sp2/pointerVector.h>
 
 class b2World;
+class b2Body;
 
 namespace sp {
 namespace collision {
@@ -25,6 +26,8 @@ public:
     bool isEnabled() { return enabled; }
     void fixedUpdate();
     void update(float delta);
+    
+    void destroyCollisionBody2D(b2Body* collision_body2d);
     
     friend class collision::Shape2D;
 private:

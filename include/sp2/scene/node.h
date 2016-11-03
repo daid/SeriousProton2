@@ -20,6 +20,7 @@ class SceneNode : public ScriptBindingObject
 {
 public:
     SceneNode(P<SceneNode> parent);
+    virtual ~SceneNode();
 
     P<SceneNode> getParent();
     P<Scene> getScene();

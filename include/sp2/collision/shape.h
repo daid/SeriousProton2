@@ -8,6 +8,11 @@ namespace collision {
 class Shape
 {
 public:
+    Shape()
+    : type(Type::Dynamic)
+    {
+    }
+
     enum class Type
     {
         Sensor,

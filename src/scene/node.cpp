@@ -1,6 +1,7 @@
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
 #include <sp2/collision/shape.h>
+#include <Box2D/Box2D.h>
 #include <cmath>
 
 namespace sp {
@@ -24,6 +25,14 @@ SceneNode::SceneNode(Scene* scene)
     local_transform = Matrix4x4d::identity();
 }
 
+SceneNode::~SceneNode()
+{
+    if (collision_body2d)
+    {
+        scene->destroyCollisionBody2D(collision_body2d);
+    }
+}
+
 P<SceneNode> SceneNode::getParent()
 {
     return parent;
@@ -41,6 +50,7 @@ PVector<SceneNode> SceneNode::getChildren()
 
 void SceneNode::setPosition(sp::Vector2d position)
 {
+    //TODO: Update collision body position
     translation.x = position.x;
     translation.y = position.y;
     updateLocalTransform();
@@ -48,18 +58,21 @@ void SceneNode::setPosition(sp::Vector2d position)
 
 void SceneNode::setPosition(sp::Vector3d position)
 {
+    //TODO: Update collision body position
     translation = position;
     updateLocalTransform();
 }
 
 void SceneNode::setRotation(Quaterniond rotation)
 {
+    //TODO: Update collision body position
     this->rotation = rotation;
     updateLocalTransform();
 }
 
 void SceneNode::setRotation(double rotation)
 {
+    //TODO: Update collision body position
     this->rotation = Quaterniond::fromAngle(rotation);
     updateLocalTransform();
 }

@@ -46,7 +46,7 @@ void Engine::run()
 
         float delta = frameTimeClock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);
-        delta = std::min(minimum_frame_time, delta);
+        delta = std::max(minimum_frame_time, delta);
         delta *= game_speed;
         if (paused)
             delta = 0;

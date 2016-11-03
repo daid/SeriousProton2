@@ -10,6 +10,8 @@ namespace sp {
 class Engine : public AutoPointerObject
 {
 public:
+    static constexpr float fixed_update_frequency = 30.0f;
+
     Engine();
     virtual ~Engine();
 
@@ -24,8 +26,6 @@ public:
     static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
-    
-    static constexpr float fixed_update_frequency = 30.0f;
 
     float game_speed;
     bool paused;

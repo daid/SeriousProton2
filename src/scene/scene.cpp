@@ -1,5 +1,9 @@
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
+#include <sp2/engine.h>
+#include <sp2/logging.h>
+#include <box2d/box2d.h>
+#include <private/collision/box2dVector.h>
 
 namespace sp {
 
@@ -22,6 +26,21 @@ void Scene::update(float delta)
 
 void Scene::fixedUpdate()
 {
+    if (collision_world2d)
+    {
+        collision_world2d->Step(1.0 / Engine::fixed_update_frequency, 4, 8);
+        for(b2Contact* contact = collision_world2d->GetContactList(); contact; contact = contact->GetNext())
+        {
+            
+        }
+        for(b2Body* body = collision_world2d->GetBodyList(); body; body = body->GetNext())
+        {
+            SceneNode* node = (SceneNode*)body->GetUserData();
+            //TODO: Update the position without updating the b2Body position.
+            node->setPosition(toVector<double>(body->GetPosition()));
+            node->setRotation(body->GetAngle() / pi * 180.0);
+        }
+    }
     if (root)
         fixedUpdateNode(*root);
 }
@@ -38,6 +57,11 @@ void Scene::fixedUpdateNode(SceneNode* node)
     node->onFixedUpdate();
     for(SceneNode* child : node->getChildren())
         fixedUpdateNode(child);
+}
+
+void Scene::destroyCollisionBody2D(b2Body* collision_body2d)
+{
+    collision_world2d->DestroyBody(collision_body2d);
 }
 
 };//!namespace sp

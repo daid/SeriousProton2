@@ -33,6 +33,7 @@ void Shape2D::create(SceneNode* node) const
             body_def.type = b2_dynamicBody;
             break;
         }
+        body_def.userData = node;
         node->collision_body2d = world->CreateBody(&body_def);
     }
     
