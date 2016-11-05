@@ -31,7 +31,10 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
 
     stream = ResourceProvider::get(resource_name);
     if (!stream)
+    {
         LOG(Error, "Failed to open", resource_name, "for tree loading");
+        return;
+    }
     LOG(Info, "Loading tree", resource_name);
     
     while(stream->tell() < stream->getSize())

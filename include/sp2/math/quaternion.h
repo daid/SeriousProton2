@@ -94,6 +94,12 @@ public:
 typedef Quaternion<float> Quaternionf;
 typedef Quaternion<double> Quaterniond;
 
+template <typename T> static inline std::ostream& operator<<(std::ostream& stream, const Quaternion<T> q)
+{
+    stream << q.x << "," << q.y << "," << q.z << "," << q.w;
+    return stream;
+}
+
 };//!namespace sp
 
 #endif//SP2_MATH_QUATERNION_H

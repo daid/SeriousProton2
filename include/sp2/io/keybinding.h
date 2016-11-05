@@ -17,7 +17,12 @@ public:
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
     
+    void setKey(sf::Keyboard::Key key);
+    
     float get() const;
+    
+    static void loadKeybindings(const string& filename);
+    static void saveKeybindings(const string& filename);
 private:
     string name;
     string label;

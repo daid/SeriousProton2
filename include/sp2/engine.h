@@ -11,6 +11,7 @@ class Engine : public AutoPointerObject
 {
 public:
     static constexpr float fixed_update_frequency = 30.0f;
+    static constexpr float fixed_update_delta = 1.0f / fixed_update_frequency;
 
     Engine();
     virtual ~Engine();

@@ -28,13 +28,16 @@ public:
     
     void setPosition(sp::Vector2d position);
     void setPosition(sp::Vector3d position);
-    void setRotation(Quaterniond rotation);
     void setRotation(double rotation);
+    void setRotation(Quaterniond rotation);
+    void setVelocity(sp::Vector2d velocity);
+    void setVelocity(sp::Vector3d velocity);
     
     sp::Vector2d getLocalPosition2D();
     double getLocalRotation2D();
     sp::Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
+    sp::Vector2d getGlobalVelocity2D();
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     
@@ -64,6 +67,9 @@ private:
     
     void updateLocalTransform();
     void updateGlobalTransform();
+    
+    void modifyPositionByPhysics(sp::Vector2d position, double rotation);
+    void modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation);
     
     friend class Scene;
     friend class collision::Shape2D;

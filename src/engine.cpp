@@ -20,6 +20,7 @@ Engine::Engine()
 
     maximum_frame_time = 0.5f;
     minimum_frame_time = 0.001f;
+    fixed_update_accumulator = 0.0;
 }
 
 Engine::~Engine()
@@ -56,9 +57,9 @@ void Engine::run()
                 scene->update(delta);
         }
         fixed_update_accumulator += delta;
-        while(fixed_update_accumulator > 1.0 / fixed_update_frequency)
+        while(fixed_update_accumulator > fixed_update_delta)
         {
-            fixed_update_accumulator -= 1.0 / fixed_update_frequency;
+            fixed_update_accumulator -= fixed_update_delta;
             for(Scene* scene : Scene::scenes)
             {
                 if (scene->isEnabled())

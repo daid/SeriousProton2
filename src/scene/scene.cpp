@@ -28,7 +28,7 @@ void Scene::fixedUpdate()
 {
     if (collision_world2d)
     {
-        collision_world2d->Step(1.0 / Engine::fixed_update_frequency, 4, 8);
+        collision_world2d->Step(Engine::fixed_update_delta, 4, 8);
         for(b2Contact* contact = collision_world2d->GetContactList(); contact; contact = contact->GetNext())
         {
             
@@ -36,9 +36,7 @@ void Scene::fixedUpdate()
         for(b2Body* body = collision_world2d->GetBodyList(); body; body = body->GetNext())
         {
             SceneNode* node = (SceneNode*)body->GetUserData();
-            //TODO: Update the position without updating the b2Body position.
-            node->setPosition(toVector<double>(body->GetPosition()));
-            node->setRotation(body->GetAngle() / pi * 180.0);
+            node->modifyPositionByPhysics(toVector<double>(body->GetPosition()), body->GetAngle() / pi * 180.0);
         }
     }
     if (root)
