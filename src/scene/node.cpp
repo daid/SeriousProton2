@@ -2,6 +2,7 @@
 #include <sp2/scene/scene.h>
 #include <sp2/collision/shape.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 #include <Box2D/Box2D.h>
 #include <private/collision/box2dVector.h>
 #include <cmath>
@@ -50,6 +51,18 @@ PVector<SceneNode> SceneNode::getChildren()
     return children;
 }
 
+void SceneNode::setParent(P<SceneNode> new_parent)
+{
+    sp2assert(new_parent->scene == scene, "Tried to switch node from one scene to a different one. This is not supported.");
+    sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
+    
+    parent->children.remove(this);
+    parent = new_parent;
+    parent->children.add(this);
+    
+    updateGlobalTransform();
+}
+
 void SceneNode::setPosition(sp::Vector2d position)
 {
     translation.x = position.x;
@@ -92,7 +105,7 @@ void SceneNode::setRotation(Quaterniond rotation)
     updateLocalTransform();
 }
 
-void SceneNode::setVelocity(sp::Vector2d velocity)
+void SceneNode::setLinearVelocity(sp::Vector2d velocity)
 {
     if (collision_body2d)
     {
@@ -100,9 +113,10 @@ void SceneNode::setVelocity(sp::Vector2d velocity)
     }
 }
 
-void SceneNode::setVelocity(sp::Vector3d velocity)
+void SceneNode::setAngularVelocity(double velocity)
 {
-    //TODO
+    if (collision_body2d)
+        collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
 }
 
 sp::Vector2d SceneNode::getLocalPosition2D()
@@ -127,13 +141,22 @@ double SceneNode::getGlobalRotation2D()
     return std::atan2(v.y, v.x) / pi * 180.0f;
 }
 
-sp::Vector2d SceneNode::getGlobalVelocity2D()
+sp::Vector2d SceneNode::getLinearVelocity2D()
 {
     if (collision_body2d)
     {
         return toVector<double>(collision_body2d->GetLinearVelocity());
     }
     return sp::Vector2d(0.0, 0.0);
+}
+
+double SceneNode::getAngularVelocity2D()
+{
+    if (collision_body2d)
+    {
+        return collision_body2d->GetAngularVelocity() / pi * 180.0f;
+    }
+    return 0.0;
 }
 
 void SceneNode::setCollisionShape(const collision::Shape& shape)

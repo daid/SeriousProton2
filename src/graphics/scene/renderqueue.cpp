@@ -26,7 +26,8 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
         item.data.shader->setUniform("camera_matrix", camera_transform);
         item.data.shader->setUniform("object_matrix", item.transform);
         item.data.shader->setUniform("color", sf::Glsl::Vec4(item.data.color));
-        item.data.shader->setUniform("texture_map", *textureManager.get(item.data.texture));
+        if (item.data.texture != "")
+            item.data.shader->setUniform("texture_map", *textureManager.get(item.data.texture));
         sf::Shader::bind(item.data.shader);
         item.data.mesh->render();
     }

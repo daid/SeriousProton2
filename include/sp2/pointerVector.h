@@ -95,6 +95,20 @@ public:
         if (item)
             items.push_back(item);
     }
+    
+    void remove(P<T> item)
+    {
+        if (item)
+        {
+            for(auto it = items.begin(); it != items.end();)
+            {
+                if (*it == item)
+                    it = items.erase(it);
+                else
+                    ++it;
+            }
+        }
+    }
 
     Iterator begin()
     {

@@ -18,18 +18,21 @@ class Scene : public AutoPointerObject
 {
 public:
     Scene();
+    virtual ~Scene();
 
     P<SceneNode> getRoot() { return root; }
     P<CameraNode> getCamera() { return camera; }
-    void setCamera(P<CameraNode> camera) { this->camera = camera; }
+    void setDefaultCamera(P<CameraNode> camera) { this->camera = camera; }
     
     bool isEnabled() { return enabled; }
     void fixedUpdate();
+    void postFixedUpdate(float delta);
     void update(float delta);
     
     void destroyCollisionBody2D(b2Body* collision_body2d);
     
     friend class collision::Shape2D;
+    friend class CollisionRenderPass;
 private:
     P<SceneNode> root;
     P<CameraNode> camera;

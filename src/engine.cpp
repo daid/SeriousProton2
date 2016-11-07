@@ -66,6 +66,11 @@ void Engine::run()
                     scene->fixedUpdate();
             }
         }
+        for(Scene* scene : Scene::scenes)
+        {
+            if (scene->isEnabled())
+                scene->postFixedUpdate(fixed_update_accumulator);
+        }
 
         if (Window::window->render_window.isOpen())
             Window::window->render();

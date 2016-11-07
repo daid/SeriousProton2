@@ -23,6 +23,8 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     glBindVertexArray(vertex_array_id);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LEQUAL);
 
     //TODO: Figure out proper rendering order.

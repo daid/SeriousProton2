@@ -18,6 +18,12 @@ Scene::Scene()
     scenes.add(this);
 }
 
+Scene::~Scene()
+{
+    if (collision_world2d)
+        delete collision_world2d;
+}
+
 void Scene::update(float delta)
 {
     if (root)
@@ -33,14 +39,21 @@ void Scene::fixedUpdate()
         {
             
         }
-        for(b2Body* body = collision_world2d->GetBodyList(); body; body = body->GetNext())
-        {
-            SceneNode* node = (SceneNode*)body->GetUserData();
-            node->modifyPositionByPhysics(toVector<double>(body->GetPosition()), body->GetAngle() / pi * 180.0);
-        }
     }
     if (root)
         fixedUpdateNode(*root);
+}
+
+void Scene::postFixedUpdate(float delta)
+{
+    if (collision_world2d)
+    {
+        for(b2Body* body = collision_world2d->GetBodyList(); body; body = body->GetNext())
+        {
+            SceneNode* node = (SceneNode*)body->GetUserData();
+            node->modifyPositionByPhysics(toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
+        }
+    }
 }
 
 void Scene::updateNode(float delta, SceneNode* node)

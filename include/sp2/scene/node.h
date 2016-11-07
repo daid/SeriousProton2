@@ -25,19 +25,24 @@ public:
     P<SceneNode> getParent();
     P<Scene> getScene();
     PVector<SceneNode> getChildren();
+    void setParent(P<SceneNode> new_parent);
     
     void setPosition(sp::Vector2d position);
     void setPosition(sp::Vector3d position);
     void setRotation(double rotation);
     void setRotation(Quaterniond rotation);
-    void setVelocity(sp::Vector2d velocity);
-    void setVelocity(sp::Vector3d velocity);
+    void setLinearVelocity(sp::Vector2d velocity);
+    void setLinearVelocity(sp::Vector3d velocity);
+    void setAngularVelocity(double velocity);
+    void setAngularVelocity(Quaterniond velocity);
     
     sp::Vector2d getLocalPosition2D();
     double getLocalRotation2D();
     sp::Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
-    sp::Vector2d getGlobalVelocity2D();
+    
+    sp::Vector2d getLinearVelocity2D();
+    double getAngularVelocity2D();
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     
