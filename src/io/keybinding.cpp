@@ -1,5 +1,6 @@
 #include <sp2/io/keybinding.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 #include <json11/json11.hpp>
 #include <fstream>
 
@@ -18,6 +19,8 @@ Keybinding::Keybinding(string name)
     joystick_axis = sf::Joystick::X;
     joystick_axis_positive = true;
     
+    for(Keybinding* other : keybindings)
+        sp2assert(other->name != name, "Duplicate keybinding name");
     keybindings.add(this);
 }
 
