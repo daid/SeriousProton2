@@ -54,6 +54,8 @@ public:
     virtual void onUpdate(float delta) {}
     //Event called 30 times per second. Not called when the game is paused.
     virtual void onFixedUpdate() {}
+    //Event called when 2 nodes collide. Not called when the game is paused.
+    virtual void onCollision(P<SceneNode> other, float force) {}
     
     RenderData render_data;
 private:

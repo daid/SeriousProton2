@@ -30,14 +30,45 @@ void Scene::update(float delta)
         updateNode(delta, *root);
 }
 
+class Collision
+{
+public:
+    P<SceneNode> node_a;
+    P<SceneNode> node_b;
+    float force;
+
+    Collision(P<SceneNode> node_a, P<SceneNode> node_b, float force)
+    : node_a(node_a), node_b(node_b), force(force)
+    {}
+};
+
 void Scene::fixedUpdate()
 {
     if (collision_world2d)
     {
         collision_world2d->Step(Engine::fixed_update_delta, 4, 8);
+        std::vector<Collision> collisions;
         for(b2Contact* contact = collision_world2d->GetContactList(); contact; contact = contact->GetNext())
         {
-            
+            if (contact->IsTouching() && contact->IsEnabled())
+            {
+                SceneNode* node_a = (SceneNode*)contact->GetFixtureA()->GetBody()->GetUserData();
+                SceneNode* node_b = (SceneNode*)contact->GetFixtureB()->GetBody()->GetUserData();
+
+                float collision_force = 0.0f;
+                for (int n = 0; n < contact->GetManifold()->pointCount; n++)
+                {
+                    collision_force += contact->GetManifold()->points[n].normalImpulse;
+                }
+                collisions.push_back(Collision(node_a, node_b, collision_force));
+            }
+        }
+        for(Collision& collision : collisions)
+        {
+            if (collision.node_a && collision.node_b)
+                collision.node_a->onCollision(collision.node_b, collision.force);
+            if (collision.node_a && collision.node_b)
+                collision.node_b->onCollision(collision.node_a, collision.force);
         }
     }
     if (root)
