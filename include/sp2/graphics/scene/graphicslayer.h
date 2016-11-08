@@ -12,6 +12,7 @@ class SceneGraphicsLayer : public GraphicsLayer
 {
 public:
     SceneGraphicsLayer(int priority);
+    virtual ~SceneGraphicsLayer();
     
     virtual void render(sf::RenderTarget& window) override;
     virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;

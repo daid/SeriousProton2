@@ -11,6 +11,12 @@ SceneGraphicsLayer::SceneGraphicsLayer(int priority)
 {
 }
 
+SceneGraphicsLayer::~SceneGraphicsLayer()
+{
+    for(RenderPass* pass : render_passes)
+        delete pass;
+}
+
 void SceneGraphicsLayer::render(sf::RenderTarget& window)
 {
     static GLuint vertex_array_id = 0;
@@ -18,7 +24,9 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     {
         glGenVertexArrays(1, &vertex_array_id);
     }
-    glViewport(0, 0, window.getSize().x, window.getSize().y);
+    int pixel_width = viewport.width * window.getSize().x;
+    int pixel_height = viewport.height * window.getSize().y;
+    glViewport(viewport.left * window.getSize().x, viewport.top * window.getSize().y, pixel_width, pixel_height);
     glClear(GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vertex_array_id);
     glEnable(GL_CULL_FACE);
@@ -26,15 +34,17 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LEQUAL);
+    
+    float aspect_ratio = double(pixel_width) / double(pixel_height);
 
     //TODO: Figure out proper rendering order.
     for(RenderPass* pass : render_passes)
     {
         string target = pass->getTargetLayer();
         if (target == "window")
-            pass->render(window, this);
+            pass->render(window, this, aspect_ratio);
         else
-            pass->render(*targets[target], this);
+            pass->render(*targets[target], this, aspect_ratio);
     }
 
     glDisable(GL_DEPTH_TEST);

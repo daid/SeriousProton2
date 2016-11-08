@@ -12,7 +12,7 @@ class BasicNodeRenderPass : public RenderPass
 public:
     BasicNodeRenderPass(string target_layer);
     
-    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer) override;
+    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) override;
 private:
     RenderQueue queue;
     void recursiveNodeRender(SceneNode* node);

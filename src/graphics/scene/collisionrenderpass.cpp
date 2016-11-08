@@ -90,7 +90,7 @@ CollisionRenderPass::CollisionRenderPass(string target_layer)
 {
 }
     
-void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer)
+void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
     for(Scene* scene : Scene::scenes)
     {
@@ -99,8 +99,7 @@ void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> laye
         {
             Collision2DDebugRender debug_renderer(queue);
             
-            //TODO: Account for viewport, currently assumes viewport is on the whole target.
-            camera->setAspectRatio(double(target.getSize().x) / double(target.getSize().y));
+            camera->setAspectRatio(aspect_ratio);
             queue.clear();
             
             if (scene->collision_world2d)

@@ -11,15 +11,14 @@ BasicNodeRenderPass::BasicNodeRenderPass(string target_layer)
 {
 }
     
-void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer)
+void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
     for(Scene* scene : Scene::scenes)
     {
         P<CameraNode> camera = scene->getCamera();
         if (scene->isEnabled() && camera)
         {
-            //TODO: Account for viewport, currently assumes viewport is on the whole target.
-            camera->setAspectRatio(double(target.getSize().x) / double(target.getSize().y));
+            camera->setAspectRatio(aspect_ratio);
             queue.clear();
             recursiveNodeRender(*scene->getRoot());
             queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);

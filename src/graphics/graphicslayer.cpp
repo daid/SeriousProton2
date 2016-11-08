@@ -9,6 +9,7 @@ GraphicsLayer::GraphicsLayer(int priority)
     enabled = true;
     layers.add(this);
     setPriority(priority);
+    viewport = sf::FloatRect(0, 0, 1, 1);
 }
 
 void GraphicsLayer::enable()

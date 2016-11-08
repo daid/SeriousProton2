@@ -12,7 +12,7 @@ class CollisionRenderPass : public RenderPass
 public:
     CollisionRenderPass(string target_layer);
     
-    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer) override;
+    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) override;
 private:
     RenderQueue queue;
 };

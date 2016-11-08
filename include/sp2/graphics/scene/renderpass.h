@@ -11,7 +11,7 @@ class RenderPass : public AutoPointerObject
 public:
     RenderPass(string target_layer);
     
-    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer) = 0;
+    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) = 0;
     
     string getTargetLayer() const;
     virtual std::vector<string> getSourceLayers() const;

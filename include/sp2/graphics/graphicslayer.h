@@ -21,6 +21,10 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) = 0;
     virtual void onPointerDrag(sf::Vector2f position, int id) = 0;
     virtual void onPointerUp(sf::Vector2f position, int id) = 0;
+
+    void setViewport(sf::FloatRect rect) { viewport = rect; }
+protected:
+    sf::FloatRect viewport;
 private:
     bool enabled;
     int priority;
