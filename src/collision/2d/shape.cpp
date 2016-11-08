@@ -24,7 +24,7 @@ void Shape2D::create(SceneNode* node) const
         switch(type)
         {
         case Type::Sensor:
-            body_def.type = b2_staticBody;
+            body_def.type = b2_dynamicBody;
             break;
         case Type::Static:
             body_def.type = b2_staticBody;

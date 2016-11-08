@@ -9,7 +9,7 @@ class Shape
 {
 public:
     Shape()
-    : type(Type::Dynamic)
+    : type(Type::Dynamic), density(1.0)
     {
     }
 
@@ -21,6 +21,7 @@ public:
     };
     
     Type type;
+    float density;
 private:
     virtual void create(SceneNode* node) const = 0;
     
