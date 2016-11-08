@@ -52,8 +52,8 @@ void Scene::fixedUpdate()
         {
             if (contact->IsTouching() && contact->IsEnabled())
             {
-                SceneNode* node_a = (SceneNode*)contact->GetFixtureA()->GetBody()->GetUserData();
-                SceneNode* node_b = (SceneNode*)contact->GetFixtureB()->GetBody()->GetUserData();
+                SceneNode* node_a = (SceneNode*)contact->GetFixtureA()->GetUserData();
+                SceneNode* node_b = (SceneNode*)contact->GetFixtureB()->GetUserData();
 
                 float collision_force = 0.0f;
                 for (int n = 0; n < contact->GetManifold()->pointCount; n++)

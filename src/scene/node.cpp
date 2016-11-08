@@ -31,9 +31,9 @@ SceneNode::SceneNode(Scene* scene)
 SceneNode::~SceneNode()
 {
     if (collision_body2d)
-    {
         scene->destroyCollisionBody2D(collision_body2d);
-    }
+    for(SceneNode* child : children)
+        delete child;
 }
 
 P<SceneNode> SceneNode::getParent()

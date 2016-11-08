@@ -21,6 +21,7 @@ void Circle2D::createFixture(b2Body* body) const
     shapeDef.density = density;
     shapeDef.friction = 0.0;
     shapeDef.isSensor = (type == Type::Sensor);
+    shapeDef.userData = body->GetUserData();
     body->CreateFixture(&shapeDef);
 }
 
