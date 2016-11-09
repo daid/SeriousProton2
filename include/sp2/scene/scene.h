@@ -22,14 +22,20 @@ public:
 
     P<SceneNode> getRoot() { return root; }
     P<CameraNode> getCamera() { return camera; }
-    void setDefaultCamera(P<CameraNode> camera) { this->camera = camera; }
+    void setDefaultCamera(P<CameraNode> camera);
     
+    void enable() { enabled = true; }
+    void disable() { enabled = false; }
+    void setEnabled(bool enabled) { this->enabled = enabled; }
     bool isEnabled() { return enabled; }
     void fixedUpdate();
     void postFixedUpdate(float delta);
     void update(float delta);
     
     void destroyCollisionBody2D(b2Body* collision_body2d);
+    
+    virtual void onUpdate(float delta) {}
+    virtual void onFixedUpdate() {}
     
     friend class collision::Shape2D;
     friend class CollisionRenderPass;

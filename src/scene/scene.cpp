@@ -1,7 +1,9 @@
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
+#include <sp2/scene/cameraNode.h>
 #include <sp2/engine.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 #include <box2d/box2d.h>
 #include <private/collision/box2dVector.h>
 
@@ -20,14 +22,22 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+    delete *root;
     if (collision_world2d)
         delete collision_world2d;
+}
+
+void Scene::setDefaultCamera(P<CameraNode> camera)
+{
+    sp2assert(camera->getScene() == this, "Trying to set camera from different scene as default for scene.");
+    this->camera = camera;
 }
 
 void Scene::update(float delta)
 {
     if (root)
         updateNode(delta, *root);
+    onUpdate(delta);
 }
 
 class Collision
@@ -73,6 +83,7 @@ void Scene::fixedUpdate()
     }
     if (root)
         fixedUpdateNode(*root);
+    onFixedUpdate();
 }
 
 void Scene::postFixedUpdate(float delta)

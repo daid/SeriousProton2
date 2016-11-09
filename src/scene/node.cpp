@@ -10,13 +10,16 @@
 namespace sp {
 
 SceneNode::SceneNode(P<SceneNode> parent)
-: scene(parent->scene), parent(parent)
+: parent(parent)
 {
+    sp2assert(parent != nullptr, "Tried to create SceneNode without a parent.");
+    
+    scene = parent->scene;
     parent->children.add(this);
     collision_body2d = nullptr;
     
-    global_transform = Matrix4x4d::identity();
     local_transform = Matrix4x4d::identity();
+    updateGlobalTransform();
 }
 
 SceneNode::SceneNode(Scene* scene)

@@ -62,6 +62,10 @@ public:
         return fallback;
     }
 
+    void insert(string name, T* item)
+    {
+        cached_items[name] = item;
+    }
 protected:
     virtual BackgroundLoaderDataType* prepare(string name) = 0;
     virtual BackgroundLoaderDataType* backgroundLoader(BackgroundLoaderDataType* ptr) = 0;
