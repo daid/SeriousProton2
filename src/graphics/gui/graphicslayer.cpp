@@ -43,6 +43,25 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     sf::Vector2f window_size = sf::Vector2f(window.getSize());
     sf::Vector2f render_size(window_size.x * viewport.width, window_size.y * viewport.height);
     sf::Vector2f virtual_size = render_size;
+    
+    double render_aspect = render_size.x / render_size.y;
+    double min_aspect = min_size.x / min_size.y;
+    double max_aspect = max_size.x / max_size.y;
+    if (max_aspect < min_aspect)
+    {
+        //Allow vertical stretching.
+        double virtual_aspect = std::min(min_aspect, render_aspect);
+        virtual_size.x = max_size.x;
+        virtual_size.y = virtual_size.x / virtual_aspect;
+    }
+    else
+    {
+        //Allow horizontal stretching.
+        double virtual_aspect = std::max(min_aspect, render_aspect);
+        virtual_size.y = max_size.y;
+        virtual_size.x = virtual_size.y * virtual_aspect;
+    }
+
     //Setup a virtual size which matches the min/max specs that we have. Getting as close to the actual window size a possible.
     virtual_size.x = std::max(min_size.x, virtual_size.x);
     virtual_size.y = std::max(min_size.y, virtual_size.y);
