@@ -179,21 +179,21 @@ void Widget::setAttribute(const string& key, const string& value)
         }
         else if (values.size() == 2)
         {
-            layout.margin_top = layout.margin_bottom = values[0].strip().toFloat();
-            layout.margin_left = layout.margin_right = values[1].strip().toFloat();
+            layout.margin_left = layout.margin_right = values[0].strip().toFloat();
+            layout.margin_top = layout.margin_bottom = values[1].strip().toFloat();
         }
         else if (values.size() == 3)
         {
-            layout.margin_top = values[0].strip().toFloat();
-            layout.margin_bottom = values[1].strip().toFloat();
-            layout.margin_left = layout.margin_right = values[2].strip().toFloat();
+            layout.margin_left = layout.margin_right = values[0].strip().toFloat();
+            layout.margin_top = values[1].strip().toFloat();
+            layout.margin_bottom = values[2].strip().toFloat();
         }
         else if (values.size() == 4)
         {
-            layout.margin_top = values[0].strip().toFloat();
-            layout.margin_bottom = values[1].strip().toFloat();
-            layout.margin_left = values[2].strip().toFloat();
-            layout.margin_right = values[3].strip().toFloat();
+            layout.margin_left = values[0].strip().toFloat();
+            layout.margin_right = values[1].strip().toFloat();
+            layout.margin_top = values[2].strip().toFloat();
+            layout.margin_bottom = values[3].strip().toFloat();
         }
     }
     else if (key == "alignment")
@@ -252,6 +252,16 @@ void Widget::setAttribute(const string& key, const string& value)
             layout.fill_width = true;
         else
             layout.fill_width = value.toInt();
+    }
+    else if (key == "theme")
+    {
+        theme_name = value;
+        theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+    }
+    else if (key == "theme_data")
+    {
+        theme_data_name = value;
+        theme = Theme::getTheme(theme_name)->getData(theme_data_name);
     }
     else
     {

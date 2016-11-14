@@ -25,5 +25,5 @@ private:
 };//!namespace gui
 };//!namespace sp
 
-#endif//SP2_GRAPHICS_GUI_WIDGET_H
+#endif//SP2_GRAPHICS_GUI_BUTTON_H
 
