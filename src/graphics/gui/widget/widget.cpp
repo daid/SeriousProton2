@@ -232,6 +232,27 @@ void Widget::setAttribute(const string& key, const string& value)
         else
             layout.match_content_size = value.toInt();
     }
+    else if (key == "stretch")
+    {
+        if (value == "true")
+            layout.fill_height = layout.fill_width = true;
+        else
+            layout.fill_height = layout.fill_width = value.toInt();
+    }
+    else if (key == "fill_height")
+    {
+        if (value == "true")
+            layout.fill_height = true;
+        else
+            layout.fill_height = value.toInt();
+    }
+    else if (key == "fill_width")
+    {
+        if (value == "true")
+            layout.fill_width = true;
+        else
+            layout.fill_width = value.toInt();
+    }
     else
     {
         LOG(Warning, "Tried to set unknown attribute:", key, "to", value);
