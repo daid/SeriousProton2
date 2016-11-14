@@ -469,7 +469,7 @@ void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Ali
     case Alignment::Left:
     case Alignment::Right:
     case Alignment::Center:
-        y = rect.top + rect.height / 2.0 - text_size + text_size * 0.35;
+        y = rect.top + rect.height / 2.0 - text_size + text_size * 0.3;
         break;
     }
     
@@ -489,6 +489,58 @@ void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Ali
     case Alignment::Bottom:
     case Alignment::Center:
         x = rect.left + rect.width / 2.0 - textElement.getLocalBounds().width / 2.0 - textElement.getLocalBounds().left;
+        break;
+    }
+    textElement.setPosition(x, y);
+    textElement.setFillColor(color);
+    window.draw(textElement);
+}
+
+void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color)
+{
+    sf::Text textElement(text, *fontManager.get(font_name), text_size);
+    textElement.setRotation(-90);
+    float y = 0;
+    float x = 0;
+    
+    //The "base line" of the text draw is the "Y position where the text is drawn" + font_size.
+    //The height of normal text is 70% of the font_size.
+    //So use those properties to align the text. Depending on the localbounds does not work.
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::TopRight:
+    case Alignment::Top:
+        y = rect.top + textElement.getLocalBounds().width + textElement.getLocalBounds().left;
+        break;
+    case Alignment::BottomLeft:
+    case Alignment::BottomRight:
+    case Alignment::Bottom:
+        y = rect.top + rect.height + textElement.getLocalBounds().left;
+        break;
+    case Alignment::Left:
+    case Alignment::Right:
+    case Alignment::Center:
+        y = rect.top + rect.height / 2.0 + textElement.getLocalBounds().width / 2.0 + textElement.getLocalBounds().left;
+        break;
+    }
+    
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        x = rect.left + text_size * 0.3;
+        break;
+    case Alignment::TopRight:
+    case Alignment::BottomRight:
+    case Alignment::Right:
+        x = rect.left + rect.width - text_size;
+        break;
+    case Alignment::Top:
+    case Alignment::Bottom:
+    case Alignment::Center:
+        x = rect.left + rect.width / 2.0 - text_size * 0.7;
         break;
     }
     textElement.setPosition(x, y);

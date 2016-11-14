@@ -25,7 +25,7 @@ void Layout::basicLayout(const sf::FloatRect& rect, Widget* widget)
     case Widget::Alignment::Left:
         widget->layout.rect.left = rect.left + widget->layout.position.x + widget->layout.margin_left;
         if (widget->layout.fill_width)
-            widget->layout.rect.width = rect.width - widget->layout.rect.left - widget->layout.margin_right;
+            widget->layout.rect.width = rect.width - widget->layout.margin_left - widget->layout.margin_right + widget->layout.position.x;
         else
             widget->layout.rect.width = widget->layout.size.x;
         break;
@@ -57,7 +57,7 @@ void Layout::basicLayout(const sf::FloatRect& rect, Widget* widget)
     case Widget::Alignment::TopRight:
         widget->layout.rect.top = rect.top + widget->layout.position.y + widget->layout.margin_top;
         if (widget->layout.fill_height)
-            widget->layout.rect.height = rect.height - widget->layout.rect.top - widget->layout.margin_bottom;
+            widget->layout.rect.height = rect.height - widget->layout.margin_top - widget->layout.margin_bottom + widget->layout.position.y;
         else
             widget->layout.rect.height = widget->layout.size.y;
         break;
