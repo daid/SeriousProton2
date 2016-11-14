@@ -65,9 +65,15 @@ void Theme::loadTheme(string name, string resource_name)
         ThemeData data;
 
         global_data.background_image = input["background.image"];
-        global_data.background_color = toColor(input["background.color"]);
+        if (input.find("background.color") != input.end())
+            global_data.background_color = toColor(input["background.color"]);
+        else
+            global_data.background_color = sf::Color::White;
         global_data.forground_image = input["forground.image"];
-        global_data.forground_color = toColor(input["forground.color"]);
+        if (input.find("forground.color") != input.end())
+            global_data.forground_color = toColor(input["forground.color"]);
+        else
+            global_data.forground_color = sf::Color::White;
         global_data.font = input["font"];
         global_data.text_size = input["text.size"].toFloat();
         for(unsigned int n=0; n<int(Widget::State::Count); n++)

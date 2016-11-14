@@ -33,6 +33,7 @@ sf::Texture* TextureManager::finalize(__TextureManagerLoaderData* ptr)
         delete ptr;
         result->generateMipmap();
         result->setSmooth(true);
+        result->setRepeated(true);
         return result;
     }
     else

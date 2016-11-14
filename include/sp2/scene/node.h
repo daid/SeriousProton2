@@ -14,6 +14,13 @@ namespace collision {
 class Shape;
 class Shape2D;
 }
+class SceneNode;
+class CollisionInfo
+{
+public:
+    P<SceneNode> other;
+    float force;
+};
 class Scene;
 class RenderData;
 class SceneNode : public ScriptBindingObject
@@ -55,7 +62,7 @@ public:
     //Event called 30 times per second. Not called when the game is paused.
     virtual void onFixedUpdate() {}
     //Event called when 2 nodes collide. Not called when the game is paused.
-    virtual void onCollision(P<SceneNode> other, float force) {}
+    virtual void onCollision(CollisionInfo& info) {}
     
     RenderData render_data;
 private:

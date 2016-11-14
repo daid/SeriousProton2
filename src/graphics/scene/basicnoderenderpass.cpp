@@ -10,19 +10,53 @@ BasicNodeRenderPass::BasicNodeRenderPass(string target_layer)
 : RenderPass(target_layer)
 {
 }
+
+BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene)
+: RenderPass(target_layer), single_scene(scene)
+{
+}
+
+BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene, P<CameraNode> camera)
+: RenderPass(target_layer), single_scene(scene), specific_camera(camera)
+{
+}
+
+
+void BasicNodeRenderPass::setScene(P<Scene> scene)
+{
+    single_scene = scene;
+}
+
+void BasicNodeRenderPass::setCamera(P<CameraNode> camera)
+{
+    specific_camera = camera;
+}
     
 void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
-    for(Scene* scene : Scene::scenes)
+    if (single_scene)
     {
-        P<CameraNode> camera = scene->getCamera();
-        if (scene->isEnabled() && camera)
+        renderScene(*single_scene, target, layer, aspect_ratio);
+    }else{
+        for(Scene* scene : Scene::scenes)
         {
-            camera->setAspectRatio(aspect_ratio);
-            queue.clear();
-            recursiveNodeRender(*scene->getRoot());
-            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
+            renderScene(scene, target, layer, aspect_ratio);
         }
+    }
+}
+
+void BasicNodeRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+{
+    P<CameraNode> camera = scene->getCamera();
+    if (specific_camera && specific_camera->getScene() == scene)
+        camera = specific_camera;
+    
+    if (scene->isEnabled() && camera)
+    {
+        camera->setAspectRatio(aspect_ratio);
+        queue.clear();
+        recursiveNodeRender(*scene->getRoot());
+        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
     }
 }
 

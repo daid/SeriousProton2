@@ -76,9 +76,19 @@ void Scene::fixedUpdate()
         for(Collision& collision : collisions)
         {
             if (collision.node_a && collision.node_b)
-                collision.node_a->onCollision(collision.node_b, collision.force);
+            {
+                CollisionInfo info;
+                info.other = collision.node_b;
+                info.force = collision.force;
+                collision.node_a->onCollision(info);
+            }
             if (collision.node_a && collision.node_b)
-                collision.node_b->onCollision(collision.node_a, collision.force);
+            {
+                CollisionInfo info;
+                info.other = collision.node_a;
+                info.force = collision.force;
+                collision.node_b->onCollision(info);
+            }
         }
     }
     if (root)
