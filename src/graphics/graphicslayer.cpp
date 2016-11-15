@@ -22,6 +22,11 @@ void GraphicsLayer::disable()
     enabled = false;
 }
 
+bool GraphicsLayer::isEnabled()
+{
+    return enabled;
+}
+
 void GraphicsLayer::setPriority(int priority)
 {
     this->priority = priority;

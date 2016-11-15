@@ -89,28 +89,60 @@ CollisionRenderPass::CollisionRenderPass(string target_layer)
 : RenderPass(target_layer)
 {
 }
-    
+
+CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene)
+: RenderPass(target_layer), single_scene(scene)
+{
+}
+
+CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene, P<CameraNode> camera)
+: RenderPass(target_layer), single_scene(scene), specific_camera(camera)
+{
+}
+
+
+void CollisionRenderPass::setScene(P<Scene> scene)
+{
+    single_scene = scene;
+}
+
+void CollisionRenderPass::setCamera(P<CameraNode> camera)
+{
+    specific_camera = camera;
+}
+
 void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
-    for(Scene* scene : Scene::scenes)
+    if (single_scene)
     {
-        P<CameraNode> camera = scene->getCamera();
-        if (scene->isEnabled() && camera)
+        renderScene(*single_scene, target, layer, aspect_ratio);
+    }else{
+        for(Scene* scene : Scene::scenes)
         {
-            Collision2DDebugRender debug_renderer(queue);
-            
-            camera->setAspectRatio(aspect_ratio);
-            queue.clear();
-            
-            if (scene->collision_world2d)
-            {
-                scene->collision_world2d->SetDebugDraw(&debug_renderer);
-                scene->collision_world2d->DrawDebugData();
-                scene->collision_world2d->SetDebugDraw(nullptr);
-            }
-            
-            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
+            renderScene(scene, target, layer, aspect_ratio);
         }
+    }
+}
+
+void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+{    
+    P<CameraNode> camera = scene->getCamera();
+    if (specific_camera && specific_camera->getScene() == scene)
+        camera = specific_camera;
+    
+    if (scene->isEnabled() && camera)
+    {
+        Collision2DDebugRender debug_renderer(queue);
+        
+        camera->setAspectRatio(aspect_ratio);
+        queue.clear();
+        if (scene->collision_world2d)
+        {
+            scene->collision_world2d->SetDebugDraw(&debug_renderer);
+            scene->collision_world2d->DrawDebugData();
+            scene->collision_world2d->SetDebugDraw(nullptr);
+        }
+        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
     }
 }
 

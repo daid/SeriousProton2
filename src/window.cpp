@@ -57,7 +57,8 @@ void Window::render()
     render_window.setActive();
     for(GraphicsLayer* layer : GraphicsLayer::layers)
     {
-        layer->render(render_window);
+        if (layer->isEnabled())
+            layer->render(render_window);
     }
     render_window.display();
 }

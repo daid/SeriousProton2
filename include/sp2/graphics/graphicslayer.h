@@ -14,6 +14,7 @@ public:
 
     void enable();
     void disable();
+    bool isEnabled();
     
     void setPriority(int priority);
     
