@@ -28,8 +28,13 @@ void Keybinding::setKey(sf::Keyboard::Key key)
 {
     this->key = key;
 }
-    
-float Keybinding::get() const
+
+bool Keybinding::get() const
+{
+    return getValue() > 0.5;
+}
+
+float Keybinding::getValue() const
 {
     if (key != sf::Keyboard::Unknown)
     {

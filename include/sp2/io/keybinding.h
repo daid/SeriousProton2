@@ -19,7 +19,8 @@ public:
     
     void setKey(sf::Keyboard::Key key);
     
-    float get() const;
+    bool get() const;
+    float getValue() const;
     
     static void loadKeybindings(const string& filename);
     static void saveKeybindings(const string& filename);

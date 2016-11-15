@@ -18,6 +18,17 @@ Progressbar::Progressbar(P<Container> parent)
     max_value = 1.0;
 }
 
+void Progressbar::setValue(float value)
+{
+    this->value = value;
+}
+
+void Progressbar::setRange(float min_value, float max_value)
+{
+    this->min_value = min_value;
+    this->max_value = max_value;
+}
+
 void Progressbar::setAttribute(const string& key, const string& value)
 {
     if (key == "progress_alignment")

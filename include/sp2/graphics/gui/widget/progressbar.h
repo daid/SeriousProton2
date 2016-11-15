@@ -11,6 +11,9 @@ class Progressbar : public Widget
 {
 public:
     Progressbar(P<Container> parent);
+    
+    void setValue(float value);
+    void setRange(float min_value, float max_value);
 
     virtual void setAttribute(const string& key, const string& value) override;
     
