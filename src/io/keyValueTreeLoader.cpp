@@ -40,6 +40,9 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
     while(stream->tell() < stream->getSize())
     {
         string line = stream->readLine().strip();
+        int comment_start = line.find("//");
+        if (comment_start >= 0)
+            line = line.substr(0, comment_start);
         if (line == "{")
         {
             //New anomounous node.
@@ -57,6 +60,10 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
         {
             throw ParsingException("Node close while no node open.");
         }
+        else if (line.startswith("#"))
+        {
+            //Comment line.
+        }
         else if (line.length() > 0)
         {
             LOG(Error, "Failed to parse line:", line);
@@ -71,6 +78,9 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
     while(stream->tell() < stream->getSize())
     {
         string line = stream->readLine().strip();
+        int comment_start = line.find("//");
+        if (comment_start >= 0)
+            line = line.substr(0, comment_start);
         if (line == "{")
         {
             //New anomounous node.
@@ -88,7 +98,7 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
         {
             return;
         }
-        else if (line.startswith("//") || line.startswith("#"))
+        else if (line.startswith("#"))
         {
             //Comment line.
         }
