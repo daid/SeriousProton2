@@ -111,14 +111,14 @@ void Scene::postFixedUpdate(float delta)
 void Scene::updateNode(float delta, SceneNode* node)
 {
     node->onUpdate(delta);
-    for(SceneNode* child : node->getChildren())
+    for(SceneNode* child : node->children)
         updateNode(delta, child);
 }
 
 void Scene::fixedUpdateNode(SceneNode* node)
 {
     node->onFixedUpdate();
-    for(SceneNode* child : node->getChildren())
+    for(SceneNode* child : node->children)
         fixedUpdateNode(child);
 }
 
