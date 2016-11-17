@@ -88,6 +88,10 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
         {
             return;
         }
+        else if (line.startswith("//") || line.startswith("#"))
+        {
+            //Comment line.
+        }
         else if (line.find(":") > 0)
         {
             string key = line.substr(0, line.find(":")).strip();
