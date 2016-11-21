@@ -51,11 +51,6 @@ void Engine::run()
         delta *= game_speed;
         if (paused)
             delta = 0;
-        for(Scene* scene : Scene::scenes)
-        {
-            if (scene->isEnabled())
-                scene->update(delta);
-        }
         fixed_update_accumulator += delta;
         while(fixed_update_accumulator > fixed_update_delta)
         {
@@ -70,6 +65,11 @@ void Engine::run()
         {
             if (scene->isEnabled())
                 scene->postFixedUpdate(fixed_update_accumulator);
+        }
+        for(Scene* scene : Scene::scenes)
+        {
+            if (scene->isEnabled())
+                scene->update(delta);
         }
 
         if (Window::window->render_window.isOpen())

@@ -144,6 +144,16 @@ double SceneNode::getGlobalRotation2D()
     return std::atan2(v.y, v.x) / pi * 180.0f;
 }
 
+sp::Vector2d SceneNode::getLocalPoint2D(sp::Vector2d v)
+{
+    return local_transform * v;
+}
+
+sp::Vector2d SceneNode::getGlobalPoint2D(sp::Vector2d v)
+{
+    return global_transform * v;
+}
+
 sp::Vector2d SceneNode::getLinearVelocity2D()
 {
     if (collision_body2d)

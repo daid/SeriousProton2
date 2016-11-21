@@ -47,6 +47,8 @@ public:
     double getLocalRotation2D();
     sp::Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
+    sp::Vector2d getLocalPoint2D(sp::Vector2d v);
+    sp::Vector2d getGlobalPoint2D(sp::Vector2d v);
     
     sp::Vector2d getLinearVelocity2D();
     double getAngularVelocity2D();
