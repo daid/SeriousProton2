@@ -3,6 +3,7 @@
 
 #include <sp2/pointer.h>
 #include <sp2/pointerVector.h>
+#include <sp2/math/vector.h>
 
 class b2World;
 class b2Body;
@@ -31,6 +32,8 @@ public:
     void fixedUpdate();
     void postFixedUpdate(float delta);
     void update(float delta);
+    
+    void queryCollision2D(Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function);
     
     void destroyCollisionBody2D(b2Body* collision_body2d);
     

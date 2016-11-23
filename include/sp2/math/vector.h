@@ -20,6 +20,11 @@ template <typename T> sf::Vector2<T> normalize(const sf::Vector2<T>& v)
     return v / length(v);
 }
 
+template <typename T> T toRotationAngle(const sf::Vector2<T>& v)
+{
+    return std::atan2(v.y, v.x) / pi * 180.0f;
+}
+
 typedef sf::Vector2<float> Vector2f;
 typedef sf::Vector2<double> Vector2d;
 

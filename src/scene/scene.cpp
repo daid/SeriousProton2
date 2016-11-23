@@ -127,4 +127,34 @@ void Scene::destroyCollisionBody2D(b2Body* collision_body2d)
     collision_world2d->DestroyBody(collision_body2d);
 }
 
+class Box2DQueryCallback : public b2QueryCallback
+{
+public:
+    std::function<bool(SceneNode* node)> callback;
+    
+	/// Called for each fixture found in the query AABB.
+	/// @return false to terminate the query.
+	virtual bool ReportFixture(b2Fixture* fixture)
+	{
+        SceneNode* node = (SceneNode*)fixture->GetUserData();
+        return callback(node);
+	}
+};
+
+void Scene::queryCollision2D(sp::Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function)
+{
+    if (!collision_world2d)
+        return;
+    Box2DQueryCallback callback;
+    callback.callback = [callback_function, position, range](SceneNode* node) {
+        if (length(node->getGlobalPosition2D() - position) <= range)
+            return callback_function(node);
+        return true;
+    };
+    b2AABB aabb;
+    aabb.lowerBound = b2Vec2(position.x - range, position.y - range);
+    aabb.upperBound = b2Vec2(position.x + range, position.y + range);
+    collision_world2d->QueryAABB(&callback, aabb);
+}
+
 };//!namespace sp
