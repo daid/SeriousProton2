@@ -48,8 +48,8 @@ private:
     b2World* collision_world2d;
     bool enabled;
 
-    void updateNode(float delta, SceneNode* node);
-    void fixedUpdateNode(SceneNode* node);
+    void updateNode(float delta, P<SceneNode> node);
+    void fixedUpdateNode(P<SceneNode> node);
 public:
     static PVector<Scene> scenes;
 };

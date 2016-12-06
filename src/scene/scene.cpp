@@ -108,18 +108,24 @@ void Scene::postFixedUpdate(float delta)
     }
 }
 
-void Scene::updateNode(float delta, SceneNode* node)
+void Scene::updateNode(float delta, P<SceneNode> node)
 {
     node->onUpdate(delta);
-    for(SceneNode* child : node->children)
-        updateNode(delta, child);
+    if (node)
+    {
+        for(SceneNode* child : node->children)
+            updateNode(delta, child);
+    }
 }
 
-void Scene::fixedUpdateNode(SceneNode* node)
+void Scene::fixedUpdateNode(P<SceneNode> node)
 {
     node->onFixedUpdate();
-    for(SceneNode* child : node->children)
-        fixedUpdateNode(child);
+    if (node)
+    {
+        for(SceneNode* child : node->children)
+            fixedUpdateNode(child);
+    }
 }
 
 void Scene::destroyCollisionBody2D(b2Body* collision_body2d)
