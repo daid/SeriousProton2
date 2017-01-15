@@ -2,7 +2,7 @@
 #define SP2_SCENE_SCENE_H
 
 #include <sp2/pointer.h>
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <sp2/math/vector.h>
 
 class b2World;
@@ -51,7 +51,7 @@ private:
     void updateNode(float delta, P<SceneNode> node);
     void fixedUpdateNode(P<SceneNode> node);
 public:
-    static PVector<Scene> scenes;
+    static PList<Scene> scenes;
 };
 
 };//!namespace sp

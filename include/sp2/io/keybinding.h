@@ -2,7 +2,7 @@
 #define SP2_IO_KEYBINDING_H
 
 #include <sp2/string.h>
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Joystick.hpp>
 
@@ -35,7 +35,7 @@ private:
     sf::Joystick::Axis joystick_axis;
     bool joystick_axis_positive;
 
-    static PVector<Keybinding> keybindings;
+    static PList<Keybinding> keybindings;
 };
 
 };//!namespace io

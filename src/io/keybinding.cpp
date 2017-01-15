@@ -7,7 +7,7 @@
 namespace sp {
 namespace io {
 
-PVector<Keybinding> Keybinding::keybindings;
+PList<Keybinding> Keybinding::keybindings;
 
 Keybinding::Keybinding(string name)
 : name(name), label(name)

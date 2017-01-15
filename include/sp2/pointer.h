@@ -2,71 +2,26 @@
 #define SP2_POINTER_H
 
 #include <SFML/System/NonCopyable.hpp>
+#include <sp2/pointerBase.h>
 
 namespace sp {
-
-class _PBase;
 
 class AutoPointerObject : sf::NonCopyable
 {
 private:
     _PBase* pointer_list_start;
-
+    _PListEntry* pointer_list_entry_list_start;
 public:
     AutoPointerObject()
     {
         pointer_list_start = nullptr;
+        pointer_list_entry_list_start = nullptr;
     }
     
     virtual ~AutoPointerObject();
     
     friend class _PBase;
-};
-
-class _PBase
-{
-protected:
-    AutoPointerObject* ptr;
-    _PBase* next;
-    _PBase* prev;
-    
-    _PBase()
-    {
-        ptr = nullptr;
-    }
-
-    void release()
-    {
-        if (ptr)
-        {
-            if (prev)
-            {
-                prev->next = next;
-                if (next)
-                    next->prev = prev;
-            }else{
-                ptr->pointer_list_start = next;
-                if (next)
-                    next->prev = nullptr;
-            }
-        }
-    }
-    
-    void set(AutoPointerObject* p)
-    {
-        release();
-        ptr = p;
-        if (ptr != nullptr)
-        {
-            next = ptr->pointer_list_start;
-            ptr->pointer_list_start = this;
-            prev = nullptr;
-            if (next)
-                next->prev = this;
-        }
-    }
-
-    friend class AutoPointerObject;
+    friend class _PListBase;
 };
 
 template<class T> class P : _PBase

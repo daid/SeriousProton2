@@ -9,7 +9,7 @@
 
 namespace sp {
 
-PVector<Scene> Scene::scenes;
+PList<Scene> Scene::scenes;
 
 Scene::Scene()
 {

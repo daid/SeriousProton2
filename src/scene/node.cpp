@@ -49,7 +49,7 @@ P<Scene> SceneNode::getScene()
     return scene;
 }
 
-PVector<SceneNode> SceneNode::getChildren()
+PList<SceneNode>& SceneNode::getChildren()
 {
     return children;
 }
@@ -59,7 +59,7 @@ void SceneNode::setParent(P<SceneNode> new_parent)
     sp2assert(new_parent->scene == scene, "Tried to switch node from one scene to a different one. This is not supported.");
     sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
     
-    parent->children.remove(this);
+    parent->children.remove(P<SceneNode>(this));
     parent = new_parent;
     parent->children.add(this);
     

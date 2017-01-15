@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_SCENE_GRAPHICSLAYER_H
 
 #include <sp2/graphics/graphicslayer.h>
+#include <sp2/pointerList.h>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <map>
 
@@ -22,7 +23,7 @@ public:
     void addRenderPass(P<RenderPass> render_pass);
     void createRenderTarget(string name);
 private:
-    PVector<RenderPass> render_passes;
+    PList<RenderPass> render_passes;
     std::map<string, sf::RenderTexture*> targets;
 };
 

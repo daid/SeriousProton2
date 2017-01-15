@@ -2,7 +2,7 @@
 
 namespace sp {
 
-PVector<GraphicsLayer> GraphicsLayer::layers;
+PList<GraphicsLayer> GraphicsLayer::layers;
 
 GraphicsLayer::GraphicsLayer(int priority)
 {

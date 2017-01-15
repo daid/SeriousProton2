@@ -3,7 +3,7 @@
 
 #include <sp2/string.h>
 #include <sp2/pointer.h>
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <SFML/System/InputStream.hpp>
 #include <memory>
 
@@ -33,7 +33,7 @@ protected:
     bool searchMatch(const string name, const string search_pattern);
 
 private:
-    static PVector<ResourceProvider> providers;
+    static PList<ResourceProvider> providers;
 };
 
 };//!namespace io

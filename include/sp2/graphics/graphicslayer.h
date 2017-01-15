@@ -1,7 +1,7 @@
 #ifndef SP2_GRAPHICS_GRAPHICSLAYER_H
 #define SP2_GRAPHICS_GRAPHICSLAYER_H
 
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <sp2/io/pointer.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -31,7 +31,7 @@ private:
     int priority;
     
     static void sortLayers();
-    static PVector<GraphicsLayer> layers;
+    static PList<GraphicsLayer> layers;
 
     friend class Window;
     friend class Engine;

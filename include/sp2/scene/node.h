@@ -4,7 +4,7 @@
 #include <sp2/math/matrix4x4.h>
 #include <sp2/math/quaternion.h>
 #include <sp2/script/bindingObject.h>
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <sp2/graphics/scene/renderdata.h>
 
 class b2Body;
@@ -31,7 +31,7 @@ public:
 
     P<SceneNode> getParent();
     P<Scene> getScene();
-    PVector<SceneNode> getChildren();
+    PList<SceneNode>& getChildren();
     void setParent(P<SceneNode> new_parent);
     
     void setPosition(sp::Vector2d position);
@@ -72,7 +72,7 @@ private:
 
     P<Scene> scene;
     P<SceneNode> parent;
-    PVector<SceneNode> children;
+    PList<SceneNode> children;
     b2Body* collision_body2d;
     
     Vector3d translation;

@@ -3,7 +3,7 @@
 namespace sp {
 namespace io {
 
-PVector<ResourceProvider> ResourceProvider::providers;
+PList<ResourceProvider> ResourceProvider::providers;
 
 ResourceProvider::ResourceProvider()
 {

@@ -1,7 +1,7 @@
 #ifndef SP2_GRAPHICS_GUI_CONTAINER_H
 #define SP2_GRAPHICS_GUI_CONTAINER_H
 
-#include <sp2/pointerVector.h>
+#include <sp2/pointerList.h>
 #include <SFML/Graphics/Rect.hpp>
 
 namespace sp {
@@ -12,7 +12,7 @@ class Layout;
 class Container : public AutoPointerObject
 {
 public:
-    PVector<Widget> children;
+    PList<Widget> children;
 
     Container();
     virtual ~Container();

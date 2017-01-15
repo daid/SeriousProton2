@@ -169,7 +169,7 @@ P<Widget> GraphicsLayer::widgetAtPosition(P<Widget> w, sf::Vector2f position)
 {
     if (w->layout.rect.contains(position))
     {
-        for(PVector<Widget>::ReverseIterator it = w->children.rbegin(); it != w->children.rend(); ++it)
+        for(PList<Widget>::ReverseIterator it = w->children.rbegin(); it != w->children.rend(); ++it)
         {
             Widget* c = *it;
             if (c->isVisible())

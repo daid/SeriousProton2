@@ -41,7 +41,7 @@ UsbHID::UsbHID(int vendor_id, int product_id)
         device_details->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
         SetupDiGetDeviceInterfaceDetail(device_info_list, &device_info, device_details, size, &size, NULL);
         
-        HANDLE handle = CreateFile(device_details->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+        HANDLE handle = CreateFile(device_details->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, nullptr);
         
         if (handle != INVALID_HANDLE_VALUE)
         {
@@ -49,6 +49,7 @@ UsbHID::UsbHID(int vendor_id, int product_id)
             device_attributes.Size = sizeof(HIDD_ATTRIBUTES);
             HidD_GetAttributes(handle, &device_attributes);
             
+            LOG(Debug, "USB VID:", sp::string::hex(device_attributes.VendorID), "PID:", sp::string::hex(device_attributes.ProductID));
             //Filter on Vendor and Product ID. Note that filtering on string names has no use.
             //As windows caches these values from the first product that it encounters.
             //Making those values pretty much useless.
@@ -61,6 +62,7 @@ UsbHID::UsbHID(int vendor_id, int product_id)
         }
         
         free(device_details);
+        i++;
     }
 
     SetupDiDestroyDeviceInfoList(device_info_list);
@@ -84,7 +86,7 @@ UsbHID::UsbHID(int vendor_id, int product_id)
                 if (handle)
                     return;
             }
-        }
+         }
     }
 #endif
 }
@@ -115,6 +117,7 @@ bool UsbHID::setReport(std::vector<uint8_t> buffer)
 #ifdef __WIN32__
     if (HidD_SetFeature((HANDLE)device_handle, buffer.data(), buffer.size()))
         return true;
+    LOG(Debug, "HidD_SetFeature failed:", GetLastError());
     return false;
 #else
     if (usb_control_msg(device_handle, USB_TYPE_CLASS | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, USBRQ_HID_SET_REPORT, USB_HID_REPORT_TYPE_FEATURE << 8 | (buffer[0] & 0xff), 0, buffer.data(), buffer.size(), 5000) != buffer.size())
@@ -138,6 +141,8 @@ std::vector<uint8_t> UsbHID::getReport(int report_number, int report_size)
     {
         for(int n=0; n<report_size + 1; n++)
             result.push_back(buffer[n]);
+    }else{
+        LOG(Debug, "HidD_GetFeature failed:", GetLastError());
     }
 #else
     int receive_size = usb_control_msg(device_handle, USB_TYPE_CLASS | USB_RECIP_DEVICE | USB_ENDPOINT_IN, USBRQ_HID_GET_REPORT, USB_HID_REPORT_TYPE_FEATURE << 8 | report_number, 0, buffer, report_size + 1, 5000);
