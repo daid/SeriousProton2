@@ -27,17 +27,9 @@ RenderData& SpriteManager::create(string name, string texture, sp::Vector2f scal
 {
     RenderData& data = sprites[name];
 
-    std::vector<sp::MeshData::Vertex> vertices;
-    vertices.emplace_back(sf::Vector3f(-scale.x, -scale.y, 0.0f), sp::Vector2f(0, 1));
-    vertices.emplace_back(sf::Vector3f( scale.x, -scale.y, 0.0f), sp::Vector2f(1, 1));
-    vertices.emplace_back(sf::Vector3f(-scale.x,  scale.y, 0.0f), sp::Vector2f(0, 0));
-    vertices.emplace_back(sf::Vector3f(-scale.x,  scale.y, 0.0f), sp::Vector2f(0, 0));
-    vertices.emplace_back(sf::Vector3f( scale.x, -scale.y, 0.0f), sp::Vector2f(1, 1));
-    vertices.emplace_back(sf::Vector3f( scale.x,  scale.y, 0.0f), sp::Vector2f(1, 0));
-
     data.shader = sp::Shader::get("shader/basic.shader");
     data.type = sp::RenderData::Type::Normal;
-    data.mesh = std::make_shared<sp::MeshData>(vertices);
+    data.mesh = sp::MeshData::createQuad(scale);
     data.texture = texture;
 
     return data;

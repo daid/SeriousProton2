@@ -14,6 +14,8 @@ void RenderQueue::clear()
 
 void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
 {
+    if (!data.shader)
+        return;
     render_list.emplace_back(transform, data);
 }
 

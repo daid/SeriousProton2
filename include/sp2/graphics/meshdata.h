@@ -4,6 +4,7 @@
 #include <SFML/System/NonCopyable.hpp>
 #include "sp2/math/vector.h"
 #include "sp2/string.h"
+#include <memory>
 
 namespace sp {
 
@@ -43,6 +44,8 @@ public:
     ~MeshData();
     
     void render();
+    
+    static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
 private:
     int vertex_count;
     Vertex* vertices;

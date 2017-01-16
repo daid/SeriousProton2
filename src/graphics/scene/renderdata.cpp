@@ -7,6 +7,7 @@ RenderData::RenderData()
     color = sf::Color::White;
     type = Type::None;
     order = 0;
+    shader = nullptr;
 }
 
 bool RenderData::operator<(const RenderData& other) const
