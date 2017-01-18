@@ -9,7 +9,7 @@ class Shape
 {
 public:
     Shape()
-    : type(Type::Dynamic), density(1.0)
+    : type(Type::Dynamic), density(1.0), linear_damping(0.0), angular_damping(0.0)
     {
     }
 
@@ -22,6 +22,8 @@ public:
     
     Type type;
     float density;
+    float linear_damping;
+    float angular_damping;
 private:
     virtual void create(SceneNode* node) const = 0;
     

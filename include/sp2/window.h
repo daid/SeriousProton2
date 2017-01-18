@@ -17,6 +17,7 @@ public:
     sf::RenderWindow render_window;
 
     Window();
+    Window(float aspect_ratio);
 private:
     virtual ~Window();
     
@@ -30,6 +31,7 @@ private:
     string title;
     int antialiasing;
     bool fullscreen;
+    float aspect_ratio; //Aspect ratio in window mode (ignored in full screen)
     
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer;

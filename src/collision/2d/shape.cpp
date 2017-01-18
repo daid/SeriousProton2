@@ -21,6 +21,8 @@ void Shape2D::create(SceneNode* node) const
         b2BodyDef body_def;
         body_def.position = toVector(node->getGlobalPosition2D());
         body_def.angle = node->getGlobalRotation2D();
+        body_def.linearDamping = linear_damping;
+        body_def.angularDamping = angular_damping;
         switch(type)
         {
         case Type::Sensor:

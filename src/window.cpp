@@ -9,11 +9,17 @@ namespace sp {
 P<Window> Window::window;
 
 Window::Window()
+: Window(0.0)
+{
+}
+
+Window::Window(float aspect_ratio)
 {
     sp2assert(!window, "SP2 does not support more then 1 window.");
     window = this;
     antialiasing = 0;
     fullscreen = false;
+    this->aspect_ratio = aspect_ratio;
     mouse_button_down_mask = 0;
     
     createRenderWindow();
@@ -36,6 +42,10 @@ void Window::createRenderWindow()
         {
             window_width *= 0.9;
             window_height *= 0.9;
+        }
+        if (aspect_ratio != 0.0)
+        {
+            window_width = window_height * aspect_ratio;
         }
     }
 

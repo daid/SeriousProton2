@@ -21,9 +21,20 @@ void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
 
 void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform, sf::RenderTarget& target)
 {
-    std::sort(render_list.begin(), render_list.end());
+    //std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)
     {
+        switch(item.data.type)
+        {
+        case RenderData::Type::None:
+        case RenderData::Type::Normal:
+        case RenderData::Type::Transparent:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case RenderData::Type::Additive:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        }
         item.data.shader->setUniform("projection_matrix", projection);
         item.data.shader->setUniform("camera_matrix", camera_transform);
         item.data.shader->setUniform("object_matrix", item.transform);
