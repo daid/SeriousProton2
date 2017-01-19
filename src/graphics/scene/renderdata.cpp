@@ -4,7 +4,7 @@ namespace sp {
 
 RenderData::RenderData()
 {
-    color = sf::Color::White;
+    color = Color::White;
     type = Type::None;
     order = 0;
     shader = nullptr;

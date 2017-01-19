@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_GUI_WIDGET_H
 
 #include <sp2/graphics/gui/container.h>
+#include <sp2/graphics/color.h>
 #include <sp2/math/vector.h>
 #include <sp2/pointerVector.h>
 #include <sp2/string.h>
@@ -91,12 +92,12 @@ protected:
 protected:
     void runCallback(Variant v);
 
-    void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
-    void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
-    void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color);
-    void renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, sf::Color color);
-    void renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color);
-    void renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color);
+    void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    void renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, sp::Color color);
+    void renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
+    void renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
 private:
     Widget();
 

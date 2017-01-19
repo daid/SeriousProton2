@@ -322,7 +322,7 @@ void Widget::runCallback(Variant v)
         callback(v);
 }
 
-void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
     if (rect.width >= rect.height)
     {
@@ -332,7 +332,7 @@ void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect
     }
 }
 
-void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
@@ -365,7 +365,7 @@ void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rec
     window.draw(a, texture_ptr);
 }
 
-void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sf::Color color)
+void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
@@ -398,7 +398,7 @@ void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rec
     window.draw(a, texture_ptr);
 }
 
-void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, sf::Color color)
+void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, Color color)
 {
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
@@ -455,7 +455,7 @@ void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& re
     window.draw(a, texture_ptr);
 }
 
-void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color)
+void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
 {
     sf::Text textElement(text, *fontManager.get(font_name), text_size);
     float y = 0;
@@ -506,7 +506,7 @@ void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Ali
     window.draw(textElement);
 }
 
-void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sf::Color color)
+void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
 {
     sf::Text textElement(text, *fontManager.get(font_name), text_size);
     textElement.setRotation(-90);

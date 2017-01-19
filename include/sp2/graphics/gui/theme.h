@@ -33,9 +33,9 @@ public:
     {
     public:
         string background_image;
-        sf::Color background_color;
+        sp::Color background_color;
         string forground_image;
-        sf::Color forground_color;
+        sp::Color forground_color;
 
         string font;
         float text_size;

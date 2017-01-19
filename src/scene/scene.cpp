@@ -149,7 +149,7 @@ public:
 	}
 };
 
-void Scene::queryCollision2D(sp::Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function)
+void Scene::queryCollision(sp::Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function)
 {
     if (!collision_world2d)
         return;
@@ -163,6 +163,78 @@ void Scene::queryCollision2D(sp::Vector2d position, double range, std::function<
     aabb.lowerBound = b2Vec2(position.x - range, position.y - range);
     aabb.upperBound = b2Vec2(position.x + range, position.y + range);
     collision_world2d->QueryAABB(&callback, aabb);
+}
+
+class Box2DRayCastCallbackAny : public b2RayCastCallback
+{
+public:
+    std::function<bool(SceneNode* node, Vector2d hit_location, Vector2d hit_normal)> callback;
+    
+	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
+	{
+        SceneNode* node = (SceneNode*)fixture->GetUserData();
+        if (callback(node, toVector<double>(point), toVector<double>(normal)))
+            return -1.0;
+        return 0.0;
+	}
+};
+
+void Scene::queryCollisionAny(Vector2d start, Vector2d end, std::function<bool(P<SceneNode> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+{
+    if (!collision_world2d)
+        return;
+    
+    Box2DRayCastCallbackAny callback;
+    callback.callback = callback_function;
+    collision_world2d->RayCast(&callback, toVector(start), toVector(end));
+}
+
+class Box2DRayCastCallbackAll : public b2RayCastCallback
+{
+public:
+    class Hit
+    {
+    public:
+        P<SceneNode> node;
+        Vector2d location;
+        Vector2d normal;
+        float fraction;
+        
+        Hit(SceneNode* node, Vector2d location, Vector2d normal, float fraction)
+        : node(node), location(location), normal(normal), fraction(fraction)
+        {
+        }
+        
+        bool operator<(const Hit& other) const
+        {
+            return fraction < other.fraction;
+        }
+    };
+    
+    std::vector<Hit> hits;
+
+	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
+	{
+        hits.emplace_back((SceneNode*)fixture->GetUserData(), toVector<double>(point), toVector<double>(normal), fraction);
+        return -1.0;
+	}
+};
+
+void Scene::queryCollisionAll(Vector2d start, Vector2d end, std::function<bool(P<SceneNode> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+{
+    if (!collision_world2d)
+        return;
+    
+    Box2DRayCastCallbackAll callback;
+    collision_world2d->RayCast(&callback, toVector(start), toVector(end));
+    
+    std::sort(callback.hits.begin(), callback.hits.end());
+    
+    for(Box2DRayCastCallbackAll::Hit& hit : callback.hits)
+    {
+        if (!callback_function(hit.node, hit.location, hit.normal))
+            return;
+    }
 }
 
 };//!namespace sp

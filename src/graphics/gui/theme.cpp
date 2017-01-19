@@ -35,26 +35,13 @@ P<Theme> Theme::getTheme(string name)
     return getTheme("default");
 }
 
-static sf::Color toColor(string s)
-{
-    if (s.startswith("#"))
-    {
-        if (s.length() == 7)
-            return sf::Color((s.substr(1).toInt(16) << 8) | 0xFF);
-        if (s.length() == 9)
-            return sf::Color(s.substr(0, 4).toInt(16) << 16 | s.substr(4).toInt(16));  //toInt(16) fails with 8 bytes, so split the convertion in 2 sections.
-    }
-    LOG(Error, "Failed to parse color string", s);
-    return sf::Color::White;
-}
-
 void Theme::loadTheme(string name, string resource_name)
 {
     P<Theme> theme = new Theme(name);
     for(unsigned int n=0; n<int(Widget::State::Count); n++)
     {
-        theme->fallback_data.states[n].forground_color = sf::Color::White;
-        theme->fallback_data.states[n].background_color = sf::Color::White;
+        theme->fallback_data.states[n].forground_color = sp::Color::White;
+        theme->fallback_data.states[n].background_color = sp::Color::White;
     }
 
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
@@ -66,14 +53,14 @@ void Theme::loadTheme(string name, string resource_name)
 
         global_data.background_image = input["background.image"];
         if (input.find("background.color") != input.end())
-            global_data.background_color = toColor(input["background.color"]);
+            global_data.background_color = Color::fromString(input["background.color"]);
         else
-            global_data.background_color = sf::Color::White;
+            global_data.background_color = Color::White;
         global_data.forground_image = input["forground.image"];
         if (input.find("forground.color") != input.end())
-            global_data.forground_color = toColor(input["forground.color"]);
+            global_data.forground_color = Color::fromString(input["forground.color"]);
         else
-            global_data.forground_color = sf::Color::White;
+            global_data.forground_color = Color::White;
         global_data.font = input["font"];
         global_data.text_size = input["text.size"].toFloat();
         for(unsigned int n=0; n<int(Widget::State::Count); n++)
@@ -101,11 +88,11 @@ void Theme::loadTheme(string name, string resource_name)
             if (input.find("background.image." + postfix) != input.end())
                 data.states[n].background_image = input["background.image." + postfix];
             if (input.find("background.color." + postfix) != input.end())
-                data.states[n].background_color = toColor(input["background.color." + postfix]);
+                data.states[n].background_color = Color::fromString(input["background.color." + postfix]);
             if (input.find("forground.image." + postfix) != input.end())
                 data.states[n].forground_image = input["forground.image." + postfix];
             if (input.find("forground.color." + postfix) != input.end())
-                data.states[n].forground_color = toColor(input["forground.color." + postfix]);
+                data.states[n].forground_color = Color::fromString(input["forground.color." + postfix]);
             if (input.find("font." + postfix) != input.end())
                 data.states[n].font = input["font." + postfix];
             if (input.find("text.size." + postfix) != input.end())
