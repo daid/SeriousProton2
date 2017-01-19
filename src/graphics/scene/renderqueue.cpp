@@ -21,7 +21,7 @@ void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
 
 void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform, sf::RenderTarget& target)
 {
-    //std::sort(render_list.begin(), render_list.end());
+    std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)
     {
         switch(item.data.type)

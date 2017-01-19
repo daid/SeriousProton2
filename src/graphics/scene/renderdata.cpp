@@ -14,8 +14,11 @@ bool RenderData::operator<(const RenderData& other) const
 {
     if (order < other.order)
         return true;
-    if (type < other.type)
-        return true;
+    if (order == other.order)
+    {
+        if (type < other.type)
+            return true;
+    }
     return false;
 }
 

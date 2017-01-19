@@ -54,9 +54,14 @@ public:
 
 void Scene::fixedUpdate()
 {
+    if (root)
+        fixedUpdateNode(*root);
+    onFixedUpdate();
+
     if (collision_world2d)
     {
         collision_world2d->Step(Engine::fixed_update_delta, 4, 8);
+        
         std::vector<Collision> collisions;
         for(b2Contact* contact = collision_world2d->GetContactList(); contact; contact = contact->GetNext())
         {
@@ -91,9 +96,6 @@ void Scene::fixedUpdate()
             }
         }
     }
-    if (root)
-        fixedUpdateNode(*root);
-    onFixedUpdate();
 }
 
 void Scene::postFixedUpdate(float delta)
