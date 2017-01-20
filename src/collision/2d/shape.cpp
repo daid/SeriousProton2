@@ -20,7 +20,7 @@ void Shape2D::create(SceneNode* node) const
     {
         b2BodyDef body_def;
         body_def.position = toVector(node->getGlobalPosition2D());
-        body_def.angle = node->getGlobalRotation2D();
+        body_def.angle = node->getGlobalRotation2D() / 180.0 * pi;
         body_def.linearDamping = linear_damping;
         body_def.angularDamping = angular_damping;
         switch(type)
@@ -30,6 +30,9 @@ void Shape2D::create(SceneNode* node) const
             break;
         case Type::Static:
             body_def.type = b2_staticBody;
+            break;
+        case Type::Kinematic:
+            body_def.type = b2_kinematicBody;
             break;
         case Type::Dynamic:
             body_def.type = b2_dynamicBody;

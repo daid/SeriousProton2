@@ -15,9 +15,10 @@ public:
 
     enum class Type
     {
-        Sensor,
-        Static,
-        Dynamic
+        Sensor,    //No collision
+        Static,    //Collision, no movement
+        Kinematic, //Collision, may be moved
+        Dynamic    //Full physics simulation
     };
     
     Type type;
