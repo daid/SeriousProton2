@@ -4,6 +4,7 @@
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/scene/scene.h>
+#include <sp2/io/keybinding.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -44,6 +45,7 @@ void Engine::run()
                 Window::window->render_window.close();
             Window::window->handleEvent(event);
         }
+        io::Keybinding::updateAll();
 
         float delta = frameTimeClock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);

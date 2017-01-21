@@ -19,6 +19,9 @@ Keybinding::Keybinding(string name)
     joystick_axis = sf::Joystick::X;
     joystick_axis_positive = true;
     
+    value = 0.0;
+    previous_value = 0.0;
+    
     for(Keybinding* other : keybindings)
         sp2assert(other->name != name, "Duplicate keybinding name");
     keybindings.add(this);
@@ -31,30 +34,22 @@ void Keybinding::setKey(sf::Keyboard::Key key)
 
 bool Keybinding::get() const
 {
-    return getValue() > 0.5;
+    return value > 0.5;
+}
+
+bool Keybinding::getDown() const
+{
+    return value > 0.5 && previous_value <= 0.5;
+}
+
+bool Keybinding::getUp() const
+{
+    return value <= 0.5 && previous_value > 0.5;
 }
 
 float Keybinding::getValue() const
 {
-    if (key != sf::Keyboard::Unknown)
-    {
-        if (sf::Keyboard::isKeyPressed(key))
-            return 1.0;
-    }
-    if (joystick_index != -1)
-    {
-        if (joystick_button_index != -1 && sf::Joystick::isButtonPressed(joystick_index, joystick_button_index))
-            return 1.0;
-        if (joystick_axis_enabled)
-        {
-            float f = sf::Joystick::getAxisPosition(joystick_index, joystick_axis);
-            if (!joystick_axis_positive)
-                f = -f;
-            if (f > 0.0)
-                return f / 100.0f;
-        }
-    }
-    return 0.0;
+    return value;
 }
 
 void Keybinding::loadKeybindings(const string& filename)
@@ -110,6 +105,39 @@ void Keybinding::saveKeybindings(const string& filename)
     
     std::ofstream file(filename);
     file << json.dump();
+}
+
+void Keybinding::update()
+{
+    previous_value = value;
+    value = 0.0;
+    
+    if (key != sf::Keyboard::Unknown)
+    {
+        if (sf::Keyboard::isKeyPressed(key))
+            value = 1.0;
+    }
+    if (joystick_index != -1)
+    {
+        if (joystick_button_index != -1 && sf::Joystick::isButtonPressed(joystick_index, joystick_button_index))
+            value = 1.0;
+        if (joystick_axis_enabled)
+        {
+            float f = sf::Joystick::getAxisPosition(joystick_index, joystick_axis);
+            if (!joystick_axis_positive)
+                f = -f;
+            if (f > 0.0)
+                value = f / 100.0f;
+        }
+    }
+}
+
+void Keybinding::updateAll()
+{
+    for(Keybinding* key : keybindings)
+    {
+        key->update();
+    }
 }
 
 };//!namespace io

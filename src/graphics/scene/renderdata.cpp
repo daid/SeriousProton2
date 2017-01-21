@@ -7,6 +7,7 @@ RenderData::RenderData()
     color = Color::White;
     type = Type::None;
     order = 0;
+    scale = 1.0;
     shader = nullptr;
 }
 

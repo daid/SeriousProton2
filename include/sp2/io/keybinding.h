@@ -7,6 +7,8 @@
 #include <SFML/Window/Joystick.hpp>
 
 namespace sp {
+class Engine;
+
 namespace io {
 
 class Keybinding : public AutoPointerObject
@@ -20,6 +22,8 @@ public:
     void setKey(sf::Keyboard::Key key);
     
     bool get() const;
+    bool getDown() const; //True for 1 update cycle when the key is pressed.
+    bool getUp() const; //True for 1 update cycle when the key is released.
     float getValue() const;
     
     static void loadKeybindings(const string& filename);
@@ -34,8 +38,15 @@ private:
     bool joystick_axis_enabled;
     sf::Joystick::Axis joystick_axis;
     bool joystick_axis_positive;
+    
+    float value;
+    float previous_value;
 
+    void update();
+    static void updateAll();
     static PList<Keybinding> keybindings;
+    
+    friend class sp::Engine;
 };
 
 };//!namespace io
