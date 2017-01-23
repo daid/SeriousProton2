@@ -165,6 +165,22 @@ void Scene::queryCollision(sp::Vector2d position, double range, std::function<bo
     collision_world2d->QueryAABB(&callback, aabb);
 }
 
+void Scene::queryCollision(sp::Vector2d position, std::function<bool(P<SceneNode> object)> callback_function)
+{
+    if (!collision_world2d)
+        return;
+    Box2DQueryCallback callback;
+    callback.callback = [callback_function, position](SceneNode* node) {
+        if (node->testCollision(position))
+            return callback_function(node);
+        return true;
+    };
+    b2AABB aabb;
+    aabb.lowerBound = b2Vec2(position.x, position.y);
+    aabb.upperBound = b2Vec2(position.x, position.y);
+    collision_world2d->QueryAABB(&callback, aabb);
+}
+
 class Box2DRayCastCallbackAny : public b2RayCastCallback
 {
 public:

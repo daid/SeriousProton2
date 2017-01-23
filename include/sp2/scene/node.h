@@ -56,6 +56,7 @@ public:
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     
     void setCollisionShape(const collision::Shape& shape);
+    bool testCollision(sp::Vector2d position);
     
     //Event called every frame.
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.

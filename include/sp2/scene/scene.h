@@ -33,6 +33,7 @@ public:
     void postFixedUpdate(float delta);
     void update(float delta);
     
+    void queryCollision(sp::Vector2d position, std::function<bool(P<SceneNode> object)> callback_function);
     void queryCollision(Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function);
     //Gives a callback for any object being hit by the ray from start to end. In any order.
     //Best used to see if start to end is blocked by anything (line of sight)

@@ -177,6 +177,16 @@ void SceneNode::setCollisionShape(const collision::Shape& shape)
     shape.create(this);
 }
 
+bool SceneNode::testCollision(sp::Vector2d position)
+{
+    for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
+    {
+        if (f->TestPoint(toVector(position)))
+            return true;
+    }
+    return false;
+}
+
 void SceneNode::updateLocalTransform()
 {
     local_transform = Matrix4x4d::translate(translation) * Matrix4x4d::fromQuaternion(rotation);
