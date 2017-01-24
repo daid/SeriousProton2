@@ -3,6 +3,8 @@
 
 #include <SFML/System/NonCopyable.hpp>
 #include <sp2/pointerBase.h>
+#include <ostream>
+#include <typeinfo>
 
 namespace sp {
 
@@ -92,6 +94,12 @@ public:
         return dynamic_cast<T2*>(**this);
     }
 };
+
+template<typename T> static inline std::ostream& operator<<(std::ostream& os, const P<T>& p)
+{
+    os << typeid(**p).name() << ':' << *p;
+    return os;
+}
 
 };//!namespace sp
 

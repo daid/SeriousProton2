@@ -374,7 +374,7 @@ public:
 typedef Matrix4x4<float> Matrix4x4f;
 typedef Matrix4x4<double> Matrix4x4d;
 
-template<typename T> std::ostream& operator<<(std::ostream& os, const Matrix4x4<T>& mat)
+template<typename T> static inline std::ostream& operator<<(std::ostream& os, const Matrix4x4<T>& mat)
 {
     os << mat.data[0] << ',' << mat.data[1] << ',' << mat.data[2] << ',' << mat.data[3] << '\n';
     os << mat.data[4] << ',' << mat.data[5] << ',' << mat.data[6] << ',' << mat.data[7] << '\n';

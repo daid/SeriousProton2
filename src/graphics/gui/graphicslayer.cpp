@@ -154,6 +154,11 @@ void GraphicsLayer::onPointerUp(sf::Vector2f position, int id)
     }
 }
 
+sp::Vector2f GraphicsLayer::virtualPositionToScreen(sp::Vector2f position)
+{
+    return virtual_position_transform.getInverse().transformPoint(position);
+}
+
 void GraphicsLayer::drawWidgets(sf::RenderTarget& window, P<Widget> w)
 {
     w->render(window);

@@ -21,6 +21,8 @@ public:
     virtual void onPointerDrag(sf::Vector2f position, int id) override;
     virtual void onPointerUp(sf::Vector2f position, int id) override;
     P<Widget> getRoot() { return root; }
+    
+    sf::Vector2f virtualPositionToScreen(sf::Vector2f position);
 private:
     sf::Vector2f min_size;
     sf::Vector2f max_size;
