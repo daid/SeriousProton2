@@ -97,7 +97,10 @@ public:
 
 template<typename T> static inline std::ostream& operator<<(std::ostream& os, const P<T>& p)
 {
-    os << typeid(**p).name() << ':' << *p;
+    if (p)
+        os << typeid(**p).name() << ':' << *p;
+    else
+        os << "nullptr";
     return os;
 }
 
