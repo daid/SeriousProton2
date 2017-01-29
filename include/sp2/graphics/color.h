@@ -2,11 +2,37 @@
 #define SP2_GRAPHICS_COLOR_H
 
 #include <SFML/Graphics/Color.hpp>
+#include <sp2/math/vector.h>
 #include <sp2/string.h>
 #include <sp2/logging.h>
 #include <cmath>
 
 namespace sp {
+
+class Color;
+
+class HsvColor
+{
+public:
+    HsvColor()
+    : hue(0), saturation(0), value(0)
+    {
+    }
+
+    HsvColor(const double hue, const double saturation, const double value)
+    : hue(hue), saturation(saturation), value(value)
+    {
+    }
+    
+    HsvColor(const sp::Color& color);
+
+    // hue: 0-360
+    // saturation: 0-100
+    // value: 0-100
+    double hue;
+    double saturation;
+    double value;
+};
 
 class Color : public sf::Color
 {
@@ -30,6 +56,50 @@ public:
     : sf::Color(red, green, blue, alpha)
     {
     }
+    
+    Color(const HsvColor& hsv)
+    {
+        double c = hsv.value / 100.0 * hsv.saturation / 100.0;
+        double x = c * (1.0 - std::abs(std::fmod((hsv.hue / 60.0), 2.0) - 1.0));
+        double m = hsv.value / 100.0 - c;
+
+        if (hsv.hue < 60)
+        {
+            r = (c + m) * 255;
+            g = (x + m) * 255;
+            b = (m) * 255;
+        }
+        else if (hsv.hue < 120)
+        {
+            r = (x + m) * 255;
+            g = (c + m) * 255;
+            b = (m) * 255;
+        }
+        else if (hsv.hue < 180)
+        {
+            r = (m) * 255;
+            g = (c + m) * 255;
+            b = (x + m) * 255;
+        }
+        else if (hsv.hue < 240)
+        {
+            r = (m) * 255;
+            g = (x + m) * 255;
+            b = (c + m) * 255;
+        }
+        else if (hsv.hue < 300)
+        {
+            r = (x + m) * 255;
+            g = (m) * 255;
+            b = (c + m) * 255;
+        }
+        else
+        {
+            r = (c + m) * 255;
+            g = (m) * 255;
+            b = (x + m) * 255;
+        }
+    }
 
     static Color fromString(string s)
     {
@@ -43,30 +113,17 @@ public:
         LOG(Error, "Failed to parse color string", s);
         return Color::White;
     }
-
-    //Convert a HSV value into an RGB value.
-    // hue: 0-360
-    // saturation: 0-100
-    // value: 0-100
-    static Color fromHSV(double hue, double saturation, double value)
+    
+    string toString()
     {
-        double c = value / 100.0 * saturation / 100.0;
-        double x = c * (1.0 - std::abs(std::fmod((hue / 60.0), 2.0) - 1.0));
-        double m = value / 100.0 - c;
-
-        if (hue < 60)
-            return Color((c + m) * 255, (x + m) * 255, (m) * 255);
-        else if (hue < 120)
-            return Color((x + m) * 255, (c + m) * 255, (m) * 255);
-        else if (hue < 180)
-            return Color((m) * 255, (c + m) * 255, (x + m) * 255);
-        else if (hue < 240)
-            return Color((m) * 255, (x + m) * 255, (c + m) * 255);
-        else if (hue < 300)
-            return Color((x + m) * 255, (m) * 255, (c + m) * 255);
+        if (a == 0xFF)
+        {
+            return "#" + string::hex(toInteger() >> 8, 6);
+        }
         else
-            return Color((c + m) * 255, (m) * 255, (x + m) * 255);
-        return Color::Black;
+        {
+            return "#" + string::hex(toInteger(), 8);
+        }
     }
 private:
 };

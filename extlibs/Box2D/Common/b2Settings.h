@@ -20,7 +20,7 @@
 #define B2_SETTINGS_H
 
 #include <stddef.h>
-#include <assert.h>
+#include <sp2/assert.h>
 #include <float.h>
 
 #if !defined(NDEBUG)
@@ -28,7 +28,7 @@
 #endif
 
 #define B2_NOT_USED(x) ((void)(x))
-#define b2Assert(A) assert(A)
+#define b2Assert(A) sp2assert(A, "Box2D")
 
 typedef signed char	int8;
 typedef signed short int16;

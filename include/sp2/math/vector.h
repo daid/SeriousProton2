@@ -10,6 +10,11 @@ namespace sp {
 
 constexpr double pi = 3.14159265358979323846;
 
+template <typename T> sf::Vector2<T> abs(const sf::Vector2<T>& v)
+{
+    return sf::Vector2<T>(std::abs(v.x), std::abs(v.y));
+}
+
 template <typename T> T length(const sf::Vector2<T>& v)
 {
     return sqrtf(v.x*v.x+v.y*v.y);
@@ -36,6 +41,11 @@ template <typename T> static inline std::ostream& operator<<(std::ostream& strea
 };//!namespace sp
 
 namespace sp {
+
+template <typename T> sf::Vector3<T> abs(const sf::Vector3<T>& v)
+{
+    return sf::Vector3<T>(std::abs(v.x), std::abs(v.y), std::abs(v.z));
+}
 
 template <typename T> T length(const sf::Vector3<T>& v)
 {

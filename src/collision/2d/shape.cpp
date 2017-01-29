@@ -1,6 +1,7 @@
 #include <sp2/collision/2d/shape.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
+#include <sp2/assert.h>
 
 #include <private/collision/box2dVector.h>
 #include <Box2D/Box2D.h>
@@ -15,7 +16,9 @@ void Shape2D::create(SceneNode* node) const
         node->getScene()->collision_world2d = new b2World(b2Vec2_zero);
     }
     b2World* world = node->getScene()->collision_world2d;
-    
+
+    sp2assert(node->parent == node->getScene()->getRoot(), "2D collision shapes can only be added to top level nodes.");
+
     if (!node->collision_body2d)
     {
         b2BodyDef body_def;
@@ -42,6 +45,8 @@ void Shape2D::create(SceneNode* node) const
         node->collision_body2d = world->CreateBody(&body_def);
     }
     
+    while(node->collision_body2d->GetFixtureList())
+        node->collision_body2d->DestroyFixture(node->collision_body2d->GetFixtureList());
     createFixture(node->collision_body2d);
 }
 

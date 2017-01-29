@@ -58,10 +58,10 @@ public:
         *this = stream.str();
     }
 
-    static string hex(const int nr)
+    static string hex(const int nr, const int minimal_digits = 0)
     {
         std::ostringstream stream;
-        stream << std::hex << nr;
+        stream << std::hex << std::setfill('0') << std::setw(minimal_digits) << nr;
         return stream.str();
     }
 
