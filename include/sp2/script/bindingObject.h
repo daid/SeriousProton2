@@ -9,7 +9,8 @@ namespace sp {
 class ScriptBindingObject : public AutoPointerObject
 {
 public:
-    void setScriptClass(string name);
+    ScriptBindingObject();
+    virtual ~ScriptBindingObject();
 };
 
 };//!namespace sp

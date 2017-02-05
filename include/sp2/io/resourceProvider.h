@@ -16,6 +16,7 @@ public:
     virtual ~ResourceStream() {}
     
     string readLine();
+    string readAll();
 };
 typedef std::shared_ptr<ResourceStream> ResourceStreamPtr;
 

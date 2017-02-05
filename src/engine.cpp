@@ -34,7 +34,9 @@ void Engine::run()
     
     glewInit();
     
-    sf::Clock frameTimeClock;
+    sf::Clock frame_time_clock;
+    int fps_count = 0;
+    sf::Clock fps_counter_clock;
     LOG(Info, "Engine started");
     while(Window::window->render_window.isOpen())
     {
@@ -46,8 +48,7 @@ void Engine::run()
             Window::window->handleEvent(event);
         }
         io::Keybinding::updateAll();
-
-        float delta = frameTimeClock.restart().asSeconds();
+        float delta = frame_time_clock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);
         delta = std::max(minimum_frame_time, delta);
         delta *= game_speed;
@@ -76,6 +77,14 @@ void Engine::run()
 
         if (Window::window->render_window.isOpen())
             Window::window->render();
+        
+        fps_count++;
+        if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
+        {
+            double fps = double(fps_count) / fps_counter_clock.restart().asSeconds();
+            fps_count = 0;
+            LOG(Debug, "FPS:", fps);
+        }
     }
     LOG(Info, "Engine closing down");
 }

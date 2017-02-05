@@ -43,6 +43,15 @@ string ResourceStream::readLine()
     }
 }
 
+string ResourceStream::readAll()
+{
+    unsigned int size = getSize();
+    string result;
+    result.resize(size);
+    read(&result[0], size);
+    return result;
+}
+
 ResourceStreamPtr ResourceProvider::get(const string filename)
 {
     for(ResourceProvider* rp : providers)

@@ -46,9 +46,11 @@ public:
     P<SceneNode> node_a;
     P<SceneNode> node_b;
     float force;
+    sp::Vector2d position;
+    sp::Vector2d normal;
 
-    Collision(P<SceneNode> node_a, P<SceneNode> node_b, float force)
-    : node_a(node_a), node_b(node_b), force(force)
+    Collision(P<SceneNode> node_a, P<SceneNode> node_b, float force, sp::Vector2d position, sp::Vector2d normal)
+    : node_a(node_a), node_b(node_b), force(force), position(position), normal(normal)
     {}
 };
 
@@ -69,13 +71,16 @@ void Scene::fixedUpdate()
             {
                 SceneNode* node_a = (SceneNode*)contact->GetFixtureA()->GetUserData();
                 SceneNode* node_b = (SceneNode*)contact->GetFixtureB()->GetUserData();
+                b2WorldManifold world_manifold;
+                contact->GetWorldManifold(&world_manifold);
 
                 float collision_force = 0.0f;
                 for (int n = 0; n < contact->GetManifold()->pointCount; n++)
                 {
                     collision_force += contact->GetManifold()->points[n].normalImpulse;
                 }
-                collisions.push_back(Collision(node_a, node_b, collision_force));
+                
+                collisions.emplace_back(node_a, node_b, collision_force, toVector<double>(world_manifold.points[0]), toVector<double>(world_manifold.normal));
             }
         }
         for(Collision& collision : collisions)
@@ -85,6 +90,8 @@ void Scene::fixedUpdate()
                 CollisionInfo info;
                 info.other = collision.node_b;
                 info.force = collision.force;
+                info.position = collision.position;
+                info.normal = collision.normal;
                 collision.node_a->onCollision(info);
             }
             if (collision.node_a && collision.node_b)
@@ -92,6 +99,8 @@ void Scene::fixedUpdate()
                 CollisionInfo info;
                 info.other = collision.node_a;
                 info.force = collision.force;
+                info.position = collision.position;
+                info.normal = -collision.normal;
                 collision.node_b->onCollision(info);
             }
         }

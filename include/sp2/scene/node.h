@@ -20,6 +20,8 @@ class CollisionInfo
 public:
     P<SceneNode> other;
     float force;
+    sp::Vector2d position;
+    sp::Vector2d normal;
 };
 class Scene;
 class RenderData;

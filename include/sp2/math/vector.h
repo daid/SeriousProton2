@@ -25,6 +25,16 @@ template <typename T> sf::Vector2<T> normalize(const sf::Vector2<T>& v)
     return v / length(v);
 }
 
+template <typename T> T cross(const sf::Vector2<T>& v1, const sf::Vector2<T>& v2)
+{
+    return v1.x * v2.y - v1.y * v2.x;
+}
+
+template <typename T> T dot(const sf::Vector2<T>& v1, const sf::Vector2<T>& v2)
+{
+    return v1.x * v2.x + v1.y * v2.y;
+}
+
 template <typename T> T toRotationAngle(const sf::Vector2<T>& v)
 {
     return std::atan2(v.y, v.x) / pi * 180.0f;
