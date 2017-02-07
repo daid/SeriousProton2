@@ -8,12 +8,13 @@
 #include <sp2/logging.h>
 
 namespace sp {
-
+namespace script { class Callback; };
 class ScriptBindingObject;
+
 class ScriptBindingClass
 {
 public:
-    template<class TYPE, typename RET, typename... ARGS> void addFunction(sp::string name, RET(TYPE::*func)(ARGS...))
+    template<class TYPE, typename RET, typename... ARGS> void bind(sp::string name, RET(TYPE::*func)(ARGS...))
     {
         typedef RET(TYPE::*FT)(ARGS...);
         
@@ -26,6 +27,7 @@ public:
         lua_settable(sp::script::global_lua_state, -3);
     }
 
+    void bind(sp::string name, sp::script::Callback& callback);
 private:
     ScriptBindingClass() {}
     
@@ -35,4 +37,3 @@ private:
 };//!namespace sp
 
 #endif//SP2_SCRIPT_BINDING_OBJECT_H
-

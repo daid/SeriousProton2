@@ -42,7 +42,7 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     
     //Set our variable in this environment table
     lua_pushstring(global_lua_state, name.c_str());
-    pushResult(ptr);
+    pushToLua(ptr);
     lua_settable(global_lua_state, -3);
     
     //Pop the table
