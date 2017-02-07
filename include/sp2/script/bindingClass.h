@@ -36,4 +36,6 @@ private:
 
 };//!namespace sp
 
+#include <sp2/script/callback.h>
+
 #endif//SP2_SCRIPT_BINDING_OBJECT_H

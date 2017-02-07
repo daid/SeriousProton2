@@ -21,6 +21,8 @@ bool ResourceProvider::searchMatch(const string name, const string search_patter
     }
     for(unsigned int n=1; n<parts.size(); n++)
     {
+        if (parts[n] == "" && n == parts.size() - 1)
+            return true;
         int offset = name.find(parts[n], pos);
         if (offset < 0)
             return false;
