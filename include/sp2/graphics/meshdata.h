@@ -46,6 +46,7 @@ public:
     void render();
     
     static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
+    static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
 private:
     int vertex_count;
     Vertex* vertices;

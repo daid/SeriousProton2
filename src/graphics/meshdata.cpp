@@ -71,4 +71,26 @@ std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
     return std::make_shared<MeshData>(vertices);
 }
 
+std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size)
+{
+    size *= 0.5f;
+    
+    std::vector<Vertex> vertices;
+    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
+    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
+
+    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
+    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
+    
+    return std::make_shared<MeshData>(vertices);
+}
+
 }//!namespace sp
