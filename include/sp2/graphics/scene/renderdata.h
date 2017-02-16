@@ -27,7 +27,7 @@ public:
     std::shared_ptr<MeshData> mesh;
     sp::Color color;
     string texture;
-    float scale;
+    sp::Vector3f scale;
     
     RenderData();
     

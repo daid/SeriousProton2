@@ -2,6 +2,7 @@
 #include <sp2/graphics/meshdata.h>
 #include <sp2/logging.h>
 #include <limits>
+#include <string.h>
 
 const unsigned int NO_BUFFER = std::numeric_limits<unsigned int>::max();
 

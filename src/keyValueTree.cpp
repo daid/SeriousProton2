@@ -27,9 +27,9 @@ KeyValueTreeNode* KeyValueTree::findId(KeyValueTreeNode& node, const string& id)
 {
     if (node.id == id)
         return &node;
-    for(KeyValueTreeNode& node : node.child_nodes)
+    for(KeyValueTreeNode& child_node : node.child_nodes)
     {
-        KeyValueTreeNode* result = findId(node, id);
+        KeyValueTreeNode* result = findId(child_node, id);
         if (result)
             return result;
     }

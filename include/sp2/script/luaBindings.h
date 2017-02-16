@@ -4,6 +4,7 @@
 #include <lua/lua.hpp>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
+#include <tuple>
 
 namespace sp {
 class ScriptBindingObject;
