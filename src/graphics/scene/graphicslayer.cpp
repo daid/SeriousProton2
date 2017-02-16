@@ -19,16 +19,10 @@ SceneGraphicsLayer::~SceneGraphicsLayer()
 
 void SceneGraphicsLayer::render(sf::RenderTarget& window)
 {
-    static GLuint vertex_array_id = 0;
-    if (!vertex_array_id)
-    {
-        glGenVertexArrays(1, &vertex_array_id);
-    }
     int pixel_width = viewport.width * window.getSize().x;
     int pixel_height = viewport.height * window.getSize().y;
     glViewport(viewport.left * window.getSize().x, viewport.top * window.getSize().y, pixel_width, pixel_height);
     glClear(GL_DEPTH_BUFFER_BIT);
-    glBindVertexArray(vertex_array_id);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -50,7 +44,6 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    glBindVertexArray(0);
     sf::Shader::bind(nullptr);
 }
 
