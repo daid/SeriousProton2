@@ -35,7 +35,6 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             break;
         }
-        sf::Shader::bind(item.data.shader);
         item.data.shader->setUniform("projection_matrix", projection);
         item.data.shader->setUniform("camera_matrix", camera_transform);
         item.data.shader->setUniform("object_matrix", item.transform);
@@ -43,6 +42,7 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
         item.data.shader->setUniform("color", sf::Glsl::Vec4(item.data.color));
         if (item.data.texture != "")
             item.data.shader->setUniform("texture_map", *textureManager.get(item.data.texture));
+        sf::Shader::bind(item.data.shader);
         item.data.mesh->render();
     }
 }
