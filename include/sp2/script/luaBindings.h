@@ -80,7 +80,7 @@ template<class TYPE, typename RET, typename... ARGS> int call(lua_State*)
     TYPE* obj = convertFromLua(typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
     if (!obj)
         return 0;
-    std::tuple<ARGS...> args = getArgs();
+    std::tuple<ARGS...> args = getArgs<ARGS...>();
     return callClass<TYPE, RET>::doCall(obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
@@ -93,6 +93,26 @@ template<typename T> T* convertFromLua(typeIdentifier<T*>, int index)
     T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(global_lua_state, -1)));
     lua_pop(global_lua_state, 1);
     return obj;
+}
+
+static inline int convertFromLua(typeIdentifier<int>, int index)
+{
+    return luaL_checkinteger(global_lua_state, index);
+}
+
+static inline float convertFromLua(typeIdentifier<float>, int index)
+{
+    return luaL_checknumber(global_lua_state, index);
+}
+
+static inline double convertFromLua(typeIdentifier<double>, int index)
+{
+    return luaL_checknumber(global_lua_state, index);
+}
+
+static inline string convertFromLua(typeIdentifier<string>, int index)
+{
+    return luaL_checkstring(global_lua_state, index);
 }
 
 };//!namespace script
