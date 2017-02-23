@@ -18,6 +18,8 @@ public:
 
     Window();
     Window(float aspect_ratio);
+    
+    void setFullScreen(bool fullscreen);
 private:
     virtual ~Window();
     

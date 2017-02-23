@@ -60,11 +60,11 @@ Subprocess::Subprocess(std::vector<sp::string> command)
     pid_t pid = fork();
     if (pid == 0)   //Child process.
     {
-        closefrom(3);
+        //closefrom(3);
         
         char* parameters[command.size() + 1];
         for(unsigned int n=0; n<command.size(); n++)
-            parameters[n] = command[n].c_str();
+            parameters[n] = (char*)command[n].c_str();
         parameters[command.size()] = nullptr;
         execvp(command[0].c_str(), parameters);
         exit(-1);
@@ -99,6 +99,7 @@ int Subprocess::wait()
     return exit_status;
 #endif//__WIN32__
 #ifdef __linux__
+    int exit_status;
     waitpid(data->pid, &exit_status, 0);
     delete data;
     data = nullptr;
@@ -130,7 +131,8 @@ bool Subprocess::isRunning()
     return exit_status == STILL_ACTIVE;
 #endif//__WIN32__
 #ifdef __linux__
-    return ::kill(data->pid, 0) == 0;
+    int exit_status;
+    return ::waitpid(data->pid, &exit_status, WNOHANG) == 0;
 #endif//__linux__
 }
 

@@ -4,7 +4,7 @@
 #include <sp2/engine.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
-#include <box2d/box2d.h>
+#include <Box2D/Box2D.h>
 #include <private/collision/box2dVector.h>
 
 namespace sp {

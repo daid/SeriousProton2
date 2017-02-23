@@ -29,6 +29,12 @@ Window::~Window()
 {
 }
 
+void Window::setFullScreen(bool fullscreen)
+{
+    this->fullscreen = fullscreen;
+    createRenderWindow();
+}
+
 void Window::createRenderWindow()
 {
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
