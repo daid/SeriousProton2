@@ -12,7 +12,7 @@ class Subprocess : sf::NonCopyable
 public:
     class Data;
 
-    Subprocess(std::vector<sp::string> command);
+    Subprocess(std::vector<sp::string> command, sp::string working_directory="");
 
     ~Subprocess();
 

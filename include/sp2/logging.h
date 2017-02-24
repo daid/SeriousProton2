@@ -2,6 +2,7 @@
 #define SP2_LOGGING_H
 
 #include <ostream>
+#include <vector>
 
 namespace sp {
 
@@ -34,6 +35,15 @@ private:
     template<typename A1> static inline void logArg(const A1& a)
     {
         *stream << a;
+    }
+    template<typename A1> static inline void logArg(const std::vector<A1>& a)
+    {
+        for(auto e : a)
+        {
+            if (e != a.front())
+                *stream << ", ";
+            logArg(e);
+        }
     }
     template<typename A1, typename... ARGS> static inline void logArg(const A1& a, const ARGS&... args)
     {

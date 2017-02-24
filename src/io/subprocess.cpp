@@ -25,7 +25,7 @@ public:
 #endif
 };
 
-Subprocess::Subprocess(std::vector<sp::string> command)
+Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_directory)
 {
     data = nullptr;
 
@@ -49,7 +49,10 @@ Subprocess::Subprocess(std::vector<sp::string> command)
     
     char command_string_buffer[command_string.length() + 1];
     strcpy(command_string_buffer, command_string.c_str());
-    bool success = CreateProcess(nullptr, command_string_buffer, nullptr, nullptr, false, 0, nullptr, nullptr, &startup_info, &process_information);
+    const char* working_directory_ptr = nullptr;
+    if (working_directory.length() > 0)
+        working_directory_ptr = working_directory.c_str();
+    bool success = CreateProcess(nullptr, command_string_buffer, nullptr, nullptr, false, 0, nullptr, working_directory_ptr, &startup_info, &process_information);
     if (success)
     {
         data = new Data();
@@ -61,6 +64,8 @@ Subprocess::Subprocess(std::vector<sp::string> command)
     if (pid == 0)   //Child process.
     {
         //closefrom(3);
+        if (working_directory.length() > 0)
+            chdir(working_directory.c_str());
         
         char* parameters[command.size() + 1];
         for(unsigned int n=0; n<command.size(); n++)
