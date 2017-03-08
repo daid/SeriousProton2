@@ -56,6 +56,7 @@ public:
     double getAngularVelocity2D();
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
+    const Matrix4x4d& getLocalTransform() const { return local_transform; }
     
     void setCollisionShape(const collision::Shape& shape);
     bool testCollision(sp::Vector2d position);

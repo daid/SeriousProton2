@@ -18,6 +18,8 @@ public:
     void setAspectRatio(double ratio);
     const sp::Matrix4x4d& getProjectionMatrix() { return projection_matrix; }
 
+    sp::Vector2f worldToScreen(sp::Vector2d position);
+    sp::Vector2d screenToWorld(sp::Vector2f position);
 protected:
     void setProjectionMatrix(const sp::Matrix4x4d& matrix) { projection_matrix = matrix; }
 
