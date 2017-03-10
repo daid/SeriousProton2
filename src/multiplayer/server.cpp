@@ -55,21 +55,9 @@ void Server::update()
     //And then we send out variable value updates. This because else we could update a pointer variable to an object that does not exist yet.
     for(SceneNode* node : new_nodes)
     {
-        auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*node));
-        sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*node).name()).c_str());
-        
-        P<SceneNode> parent = node->getParent();
-
         sf::Packet packet;
-        if (parent)
-        {
-            packet << PacketIDs::create_object << node->multiplayer.getId() << e->second << parent->multiplayer.getId();
-        }
-        else
-        {
-            P<Scene> scene = node->getScene();
-            packet << PacketIDs::create_scene << node->multiplayer.getId() << scene->getSceneName();
-        }
+        buildCreatePacket(packet, node);
+        
         sendToAllConnectedClients(packet);
         
         node_by_id[node->multiplayer.getId()] = node;
@@ -159,6 +147,28 @@ void Server::update()
                 switch(packet_id)
                 {
                 case PacketIDs::request_authentication:
+                    for(auto it : node_by_id)
+                    {
+                        sf::Packet packet;
+                        buildCreatePacket(packet, *it.second);
+                        client->send(packet);
+                    }
+                    for(auto it : node_by_id)
+                    {
+                        if (it.second->multiplayer.replication_links.size() > 0)
+                        {
+                            sf::Packet packet;
+                            packet << PacketIDs::update_object << it.second->multiplayer.getId();
+                            for(unsigned int n=0; n<it.second->multiplayer.replication_links.size(); n++)
+                            {
+                                ReplicationLinkBase* replication_link = it.second->multiplayer.replication_links[n];
+                                packet << uint16_t(n);
+                                replication_link->handleSend(packet);
+                            }
+                            client->send(packet);
+                        }
+                    }
+                    client->state = ClientInfo::State::Connected;
                     break;
                 default:
                     LOG(Warning, "Unknown packet during authentication, id:", packet_id);
@@ -191,6 +201,24 @@ void Server::update()
     }
 }
 
+void Server::buildCreatePacket(sf::Packet& packet, SceneNode* node)
+{
+    auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*node));
+    sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*node).name()).c_str());
+    
+    P<SceneNode> parent = node->getParent();
+
+    if (parent)
+    {
+        packet << PacketIDs::create_object << node->multiplayer.getId() << e->second << parent->multiplayer.getId();
+    }
+    else
+    {
+        P<Scene> scene = node->getScene();
+        packet << PacketIDs::create_scene << node->multiplayer.getId() << scene->getSceneName();
+    }
+}
+
 void Server::addNewObject(SceneNode* node)
 {
     node->multiplayer.id = next_object_id;
@@ -204,15 +232,7 @@ void Server::sendToAllConnectedClients(sf::Packet& packet)
     {
         if (client.state != ClientInfo::State::Connected)
             continue;
-        if (client.send_queue.begin() == client.send_queue.end())
-        {
-            if (client.socket->send(packet) == sf::Socket::Partial)
-                client.send_queue.push_back(packet);
-        }
-        else
-        {
-            client.send_queue.push_back(packet);
-        }
+        client.send(packet);
     }
 }
 

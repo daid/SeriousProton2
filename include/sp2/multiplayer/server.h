@@ -4,6 +4,7 @@
 #include <sp2/scene/node.h>
 
 #include <SFML/Network/Packet.hpp>
+#include <SFML/Network/TcpSocket.hpp>
 #include <SFML/Network/TcpListener.hpp>
 
 #include <list>
@@ -31,6 +32,19 @@ private:
             Connected
         } state;
         std::list<sf::Packet> send_queue;
+        
+        void send(sf::Packet& packet)
+        {
+            if (send_queue.begin() == send_queue.end())
+            {
+                if (socket->send(packet) == sf::Socket::Partial)
+                    send_queue.push_back(packet);
+            }
+            else
+            {
+                send_queue.push_back(packet);
+            }
+        }
     };
 
     uint32_t next_client_id;
@@ -51,6 +65,7 @@ private:
     
     void update();
     
+    void buildCreatePacket(sf::Packet& packet, SceneNode* node);
     void sendToAllConnectedClients(sf::Packet& packet);
 
     friend class SceneNode::Multiplayer;
