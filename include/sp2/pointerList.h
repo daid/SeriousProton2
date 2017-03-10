@@ -295,6 +295,13 @@ public:
             }
         }
     }
+    
+    void clear()
+    {
+        _PListEntry* e = list_start;
+        while(e)
+            e = removeEntry(e);
+    }
 
     Iterator begin()
     {

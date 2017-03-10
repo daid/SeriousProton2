@@ -27,6 +27,16 @@ public:
         queue.pop();
         return result;
     }
+
+    T getNoBlock()
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        if (queue.empty())
+            return nullptr;
+        T result = queue.front();
+        queue.pop();
+        return result;
+    }
 private:
     std::queue<T> queue;
     std::mutex mutex;

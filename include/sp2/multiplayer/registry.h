@@ -1,0 +1,50 @@
+#ifndef SP2_MULTIPLAYER_REGISTRY_H
+#define SP2_MULTIPLAYER_REGISTRY_H
+
+#include <sp2/string.h>
+
+#include <typeindex>
+#include <unordered_map>
+
+namespace sp {
+class Engine;
+class SceneNode;
+namespace multiplayer {
+
+//Register a class name to a string for multiplayer relication.
+#define REGISTER_MULTIPLAYER_CLASS(class_name) \
+    ::sp::multiplayer::ClassEntry class_entry_ ## class_name ( # class_name , typeid(class_name), ::sp::multiplayer::__objectCreateFunction<class_name> );
+
+class ClassEntry
+{
+public:
+    typedef SceneNode* (*create_object_function_t)(SceneNode* parent);
+    
+    ClassEntry(string class_name, std::type_index type_index, create_object_function_t create_function);
+private:
+    string class_name;
+    std::type_index type_index;
+    create_object_function_t create_function;
+
+    ClassEntry* next;
+    static ClassEntry* list_start;
+    
+    static void fillMappings();
+    
+    static std::unordered_map<std::type_index, string> type_to_name_mapping;
+    static std::unordered_map<string, create_object_function_t> name_to_create_mapping;
+    
+    friend class ::sp::Engine;
+    friend class Server;
+    friend class Client;
+};
+
+template<class T> SceneNode* __objectCreateFunction(SceneNode* parent)
+{
+    return new T(parent);
+}
+
+};//!namespace multiplayer
+};//!namespace sp
+
+#endif//SP2_MULTIPLAYER_CLIENT_H

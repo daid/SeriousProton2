@@ -3,7 +3,10 @@
 
 #include <sp2/pointer.h>
 #include <sp2/pointerList.h>
+#include <sp2/string.h>
 #include <sp2/math/vector.h>
+
+#include <unordered_map>
 
 class b2World;
 class b2Body;
@@ -15,10 +18,10 @@ class Shape2D;
 
 class SceneNode;
 class CameraNode;
-class Scene : public AutoPointerObject
+class Scene final : public AutoPointerObject
 {
 public:
-    Scene();
+    Scene(string scene_name);
     virtual ~Scene();
 
     P<SceneNode> getRoot() { return root; }
@@ -49,9 +52,13 @@ public:
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}
     
+    string getSceneName() const { return scene_name; }
+    
     friend class collision::Shape2D;
     friend class CollisionRenderPass;
 private:
+    string scene_name;
+    
     P<SceneNode> root;
     P<CameraNode> camera;
     b2World* collision_world2d;
@@ -59,7 +66,11 @@ private:
 
     void updateNode(float delta, P<SceneNode> node);
     void fixedUpdateNode(P<SceneNode> node);
+
+    static std::unordered_map<string, P<Scene>> scene_mapping;
+
 public:
+    static P<Scene> get(string name) { return scene_mapping[name]; }
     static PList<Scene> scenes;
 };
 

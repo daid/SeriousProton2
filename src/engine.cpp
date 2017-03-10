@@ -4,6 +4,9 @@
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/scene/scene.h>
+#include <sp2/multiplayer/server.h>
+#include <sp2/multiplayer/client.h>
+#include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
 #include <SFML/Window/Event.hpp>
 
@@ -22,6 +25,8 @@ Engine::Engine()
     maximum_frame_time = 0.5f;
     minimum_frame_time = 0.001f;
     fixed_update_accumulator = 0.0;
+    
+    sp::multiplayer::ClassEntry::fillMappings();
 }
 
 Engine::~Engine()
@@ -74,6 +79,11 @@ void Engine::run()
             if (scene->isEnabled())
                 scene->update(delta);
         }
+        
+        if (multiplayer::Server::getInstance())
+            multiplayer::Server::getInstance()->update();
+        if (multiplayer::Client::getInstance())
+            multiplayer::Client::getInstance()->update();
 
         if (Window::window->render_window.isOpen())
             Window::window->render();

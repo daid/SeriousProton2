@@ -6,10 +6,15 @@
 #include <sp2/script/bindingObject.h>
 #include <sp2/pointerList.h>
 #include <sp2/graphics/scene/renderdata.h>
+#include <sp2/multiplayer/replication.h>
 
 class b2Body;
 
 namespace sp {
+namespace multiplayer {
+class Server;
+class Client;
+}
 namespace collision {
 class Shape;
 class Shape2D;
@@ -71,6 +76,30 @@ public:
     virtual void onCollision(CollisionInfo& info) {}
     
     RenderData render_data;
+
+    class Multiplayer
+    {
+    public:
+        Multiplayer(SceneNode* node);
+        ~Multiplayer();
+        
+        void enable();
+
+        template<typename T> void replicate(T& var)
+        {
+            replication_links.push_back(new multiplayer::ReplicationLink<T>(&var));
+        }
+        
+        uint64_t getId() const { return id; }
+    private:
+        SceneNode* node;
+        bool enable_replication;
+        uint64_t id;
+        std::vector<multiplayer::ReplicationLinkBase*> replication_links;
+        
+        friend class ::sp::multiplayer::Server;
+        friend class ::sp::multiplayer::Client;
+    } multiplayer;
 private:
     SceneNode(Scene* scene);
 
@@ -90,7 +119,7 @@ private:
     
     void modifyPositionByPhysics(sp::Vector2d position, double rotation);
     void modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation);
-    
+
     friend class Scene;
     friend class collision::Shape2D;
 };

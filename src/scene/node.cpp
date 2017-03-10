@@ -3,14 +3,16 @@
 #include <sp2/collision/shape.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
+#include <sp2/multiplayer/server.h>
 #include <Box2D/Box2D.h>
 #include <private/collision/box2dVector.h>
 #include <cmath>
+#include <typeindex>
 
 namespace sp {
 
 SceneNode::SceneNode(P<SceneNode> parent)
-: parent(parent)
+: multiplayer(this), parent(parent)
 {
     sp2assert(parent != nullptr, "Tried to create SceneNode without a parent.");
     
@@ -23,7 +25,7 @@ SceneNode::SceneNode(P<SceneNode> parent)
 }
 
 SceneNode::SceneNode(Scene* scene)
-: scene(scene)
+: multiplayer(this), scene(scene)
 {
     collision_body2d = nullptr;
     parent = nullptr;
@@ -218,6 +220,32 @@ void SceneNode::modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotat
     translation = position;
     this->rotation = rotation;
     updateLocalTransform();
+}
+
+SceneNode::Multiplayer::Multiplayer(SceneNode* node)
+: node(node)
+{
+    enable_replication = false;
+    id = 0;
+}
+
+SceneNode::Multiplayer::~Multiplayer()
+{
+    for(auto link : replication_links)
+        delete link;
+}
+
+void SceneNode::Multiplayer::enable()
+{
+    if (enable_replication)
+        return;
+    if (node->parent)
+        sp2assert(node->parent->multiplayer.enable_replication, "Parent of a multiplayer enabled object should also be multiplayer enabled.");
+    //If a server is already running, let it know there is a new object for it to process.
+    multiplayer::Server* server = multiplayer::Server::getInstance();
+    if (!server)
+        return;
+    server->addNewObject(node);
 }
 
 };//!namespace sp

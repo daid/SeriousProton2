@@ -9,13 +9,18 @@
 
 namespace sp {
 
+std::unordered_map<string, P<Scene>> Scene::scene_mapping;
 PList<Scene> Scene::scenes;
 
-Scene::Scene()
+Scene::Scene(string scene_name)
+: scene_name(scene_name)
 {
     root = new SceneNode(this);
     collision_world2d = nullptr;
     enabled = true;
+
+    sp2assert(scene_mapping.find(scene_name) == scene_mapping.end(), "Cannot create two scenes with the same name.");
+    scene_mapping[scene_name] = this;
     
     scenes.add(this);
 }
@@ -25,6 +30,8 @@ Scene::~Scene()
     delete *root;
     if (collision_world2d)
         delete collision_world2d;
+
+    scene_mapping.erase(scene_name);
 }
 
 void Scene::setDefaultCamera(P<CameraNode> camera)
