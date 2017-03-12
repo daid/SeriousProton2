@@ -21,7 +21,8 @@ public:
         lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
         if (lua_isfunction(global_lua_state, -1))
         {
-            if (lua_pcall(global_lua_state, 0, 0, 0))
+            int arg_count = pushArgs(args...);
+            if (lua_pcall(global_lua_state, arg_count, 0, 0))
             {
                 LOG(Error, "Callback function error:", lua_tostring(global_lua_state, -1));
                 lua_pop(global_lua_state, 1);
@@ -31,6 +32,17 @@ public:
         }
         lua_pop(global_lua_state, 1);
         return false;
+    }
+private:
+    int pushArgs()
+    {
+        return 0;
+    }
+
+    template<typename ARG, typename... ARGS> int pushArgs(ARG arg, ARGS... args)
+    {
+        pushToLua(arg);
+        return 1 + pushArgs(args...);
     }
 };
 

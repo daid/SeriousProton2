@@ -66,6 +66,75 @@ ScriptBindingObject::~ScriptBindingObject()
     lua_settable(script::global_lua_state, LUA_REGISTRYINDEX);
 }
 
+void ScriptBindingObject::setScriptMember(string name, int value)
+{
+    //REGISTY[this][name] = value
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_pushinteger(script::global_lua_state, value);
+    lua_rawset(script::global_lua_state, -3);
+    lua_pop(script::global_lua_state, 1);
+}
+
+void ScriptBindingObject::setScriptMember(string name, double value)
+{
+    //REGISTY[this][name] = value
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_pushnumber(script::global_lua_state, value);
+    lua_rawset(script::global_lua_state, -3);
+    lua_pop(script::global_lua_state, 1);
+}
+
+void ScriptBindingObject::setScriptMember(string name, string value)
+{
+    //REGISTY[this][name] = value
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_pushstring(script::global_lua_state, value.c_str());
+    lua_rawset(script::global_lua_state, -3);
+    lua_pop(script::global_lua_state, 1);
+}
+
+int ScriptBindingObject::getScriptMemberInteger(string name)
+{
+    //return REGISTY[this][name]
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_rawget(script::global_lua_state, -2);
+    int result = lua_tointeger(script::global_lua_state, -1);
+    lua_pop(script::global_lua_state, 1);
+    return result;
+}
+
+double ScriptBindingObject::getScriptMemberDouble(string name)
+{
+    //return REGISTY[this][name]
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_rawget(script::global_lua_state, -2);
+    double result = lua_tonumber(script::global_lua_state, -1);
+    lua_pop(script::global_lua_state, 1);
+    return result;
+}
+
+string ScriptBindingObject::getScriptMemberString(string name)
+{
+    //return REGISTY[this][name]
+    lua_pushlightuserdata(script::global_lua_state, this);
+    lua_gettable(script::global_lua_state, LUA_REGISTRYINDEX);
+    lua_pushstring(script::global_lua_state, name.c_str());
+    lua_rawget(script::global_lua_state, -2);
+    string result = lua_tostring(script::global_lua_state, -1);
+    lua_pop(script::global_lua_state, 1);
+    return result;
+}
+
 void ScriptBindingObject::onRegisterScriptBindings(ScriptBindingClass& script_binding_class)
 {
     LOG(Debug, "onRegisterScriptBindings:", typeid(*this).name());

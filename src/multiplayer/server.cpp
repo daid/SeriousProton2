@@ -2,6 +2,7 @@
 #include <sp2/multiplayer/registry.h>
 #include <private/multiplayer/packetIDs.h>
 #include <sp2/scene/scene.h>
+#include <sp2/engine.h>
 #include <sp2/assert.h>
 
 #include <SFML/Network/TcpSocket.hpp>
@@ -167,6 +168,16 @@ void Server::update()
                             }
                             client->send(packet);
                         }
+                    }
+                    {
+                        sf::Packet packet;
+                        packet << PacketIDs::set_client_id << client->client_id;
+                        client->send(packet);
+                    }
+                    {
+                        sf::Packet packet;
+                        packet << PacketIDs::change_game_speed << Engine::getInstance()->getGameSpeed();
+                        client->send(packet);
                     }
                     client->state = ClientInfo::State::Connected;
                     break;

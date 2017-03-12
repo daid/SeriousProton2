@@ -6,6 +6,16 @@ namespace script {
 
 Environment::Environment()
 {
+    if (!script::global_lua_state)
+    {
+        script::global_lua_state = luaL_newstate();
+        luaL_newmetatable(script::global_lua_state, "lazyLoading");
+        lua_pushstring(script::global_lua_state, "__index");
+        lua_pushcfunction(script::global_lua_state, script::lazyLoading);
+        lua_settable(script::global_lua_state, -3);
+        lua_pop(script::global_lua_state, 1);
+    }
+
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G}, "__ptr": this}    
     lua_pushlightuserdata(global_lua_state, this);
@@ -32,6 +42,22 @@ Environment::~Environment()
     lua_pushlightuserdata(global_lua_state, this);
     lua_pushnil(global_lua_state);
     lua_settable(global_lua_state, LUA_REGISTRYINDEX);
+}
+
+void Environment::setGlobal(string name, lua_CFunction function)
+{
+    //Get the environment table from the registry.
+    lua_pushlightuserdata(global_lua_state, this);
+    lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+    
+    //Set our variable in this environment table
+    lua_pushstring(global_lua_state, name.c_str());
+    lua_pushvalue(global_lua_state, -2);
+    lua_pushcclosure(global_lua_state, function, 1);
+    lua_settable(global_lua_state, -3);
+    
+    //Pop the table
+    lua_pop(global_lua_state, 1);
 }
 
 void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)

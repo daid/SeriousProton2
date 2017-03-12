@@ -4,6 +4,10 @@
 #include <sp2/string.h>
 #include <sp2/pointer.h>
 
+#include <SFML/Network/TcpSocket.hpp>
+
+#include <list>
+
 namespace sp {
 class Engine;
 namespace multiplayer {
@@ -19,16 +23,19 @@ public:
         Disconnected    //Disconnected, server gone missing or never managed to connect at all.
     };
 
-    Client(string hostname);
+    Client(string hostname, int port_nr);
     ~Client();
     
     State getState() const { return state; }
     
 private:
+    sf::TcpSocket socket;
+    std::list<sf::Packet> send_queue;
     State state;
     uint32_t client_id;
     
     void update();
+    void send(sf::Packet& packet);
     
     friend class ::sp::Engine;
 public:

@@ -15,6 +15,7 @@ public:
     Environment();
     virtual ~Environment();
     
+    void setGlobal(string name, lua_CFunction function);
     void setGlobal(string name, P<ScriptBindingObject> ptr);
     
     bool load(sp::io::ResourceStreamPtr resource);
