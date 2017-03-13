@@ -18,6 +18,7 @@ SP_REGISTER_WIDGET("", Widget);
 
 Widget::Widget()
 {
+    layout.span = sf::Vector2i(1, 1);
     layout.margin_left = layout.margin_right = layout.margin_top = layout.margin_bottom = 0;
     layout.max_size.x = layout.max_size.y = std::numeric_limits<float>::max();
     layout.alignment = Alignment::TopLeft;
@@ -195,6 +196,13 @@ void Widget::setAttribute(const string& key, const string& value)
             layout.margin_top = values[2].strip().toFloat();
             layout.margin_bottom = values[3].strip().toFloat();
         }
+    }
+    else if (key == "span")
+    {
+        auto values = value.split(",", 1);
+        layout.span.x = std::max(1, values[0].strip().toInt());
+        if (values.size() == 2)
+            layout.span.y = std::max(1, values[1].strip().toInt());
     }
     else if (key == "alignment")
     {

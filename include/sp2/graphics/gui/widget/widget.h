@@ -38,6 +38,7 @@ public:
         Vector2f position;
         Alignment alignment;
         Vector2f size;
+        sf::Vector2i span;
         float margin_left, margin_right, margin_top, margin_bottom;
         Vector2f min_size;
         Vector2f max_size;
