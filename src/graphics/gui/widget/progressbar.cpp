@@ -43,6 +43,16 @@ void Progressbar::setAttribute(const string& key, const string& value)
         else if (value == "bottom") alignment = Alignment::Bottom;
         else if (value == "bottomright") alignment = Alignment::BottomRight;
     }
+    else if (key == "range")
+    {
+        auto values = value.split(",", 1);
+        max_value = values[0].strip().toFloat();
+        if (values.size() > 1)
+        {
+            min_value = values[0].strip().toFloat();
+            max_value = values[1].strip().toFloat();
+        }
+    }
     else
     {
         Widget::setAttribute(key, value);

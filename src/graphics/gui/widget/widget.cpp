@@ -265,13 +265,19 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else if (key == "theme")
     {
-        theme_name = value;
-        theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+        if (theme_name != value)
+        {
+            theme_name = value;
+            theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+        }
     }
     else if (key == "theme_data")
     {
-        theme_data_name = value;
-        theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+        if (theme_data_name != value)
+        {
+            theme_data_name = value;
+            theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+        }
     }
     else
     {

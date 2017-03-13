@@ -83,7 +83,10 @@ void Layout::basicLayout(const sf::FloatRect& rect, Widget* widget)
     }
     if (widget->layout.lock_aspect_ratio)
     {
-        
+        if (widget->layout.fill_height)
+            widget->layout.rect.width = widget->layout.rect.height / widget->layout.size.y * widget->layout.size.x;
+        if (widget->layout.fill_width)
+            widget->layout.rect.height = widget->layout.rect.width / widget->layout.size.x * widget->layout.size.y;
     }
 }
 
