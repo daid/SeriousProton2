@@ -65,6 +65,17 @@ ResourceStreamPtr ResourceProvider::get(const string filename)
     return nullptr;
 }
 
+sf::Time ResourceProvider::getModifyTime(const string filename)
+{
+    for(ResourceProvider* rp : providers)
+    {
+        sf::Time time = rp->getFileModifyTime(filename);
+        if (time != sf::Time::Zero)
+            return time;
+    }
+    return sf::Time::Zero;
+}
+
 std::vector<string> ResourceProvider::find(string search_pattern)
 {
     std::vector<string> found_files;

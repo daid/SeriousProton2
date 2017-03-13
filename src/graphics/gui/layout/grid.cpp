@@ -62,7 +62,7 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
 
-        sf::FloatRect r(col_x[position.x], row_y[position.y], col_width[position.x], row_height[position.y]);
+        sf::FloatRect r(rect.left + col_x[position.x], rect.top + row_y[position.y], col_width[position.x], row_height[position.y]);
         for(int n=1; n<span.x; n++)
             r.width += col_width[position.x + n];
         for(int n=1; n<span.y; n++)

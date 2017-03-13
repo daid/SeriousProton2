@@ -9,6 +9,7 @@
 #include <sp2/variant.h>
 #include <sp2/io/pointer.h>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/System/Time.hpp>
 
 namespace sp {
 namespace gui {
@@ -85,6 +86,10 @@ public:
     P<Widget> getWidgetWithID(const string& id);
     
     LayoutInfo layout;
+
+#ifdef DEBUG
+    void setupAutoReload(P<Widget> widget, const string& resource_name, const string& root_id);
+#endif
 protected:
     const ThemeData* theme;
     
@@ -117,6 +122,18 @@ private:
     Callback callback;
     
     void updateLayout();
+
+#ifdef DEBUG
+    class AutoReloadData
+    {
+    public:
+        sf::Time last_modify_time;
+        string resource_name;
+        string root_id;
+        P<Widget> widget;
+    };
+    std::vector<AutoReloadData> auto_reload;
+#endif
 
     friend class GraphicsLayer;
 };

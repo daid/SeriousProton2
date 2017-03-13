@@ -12,6 +12,7 @@ public:
     DirectoryResourceProvider(string base_path);
     
     virtual ResourceStreamPtr getStream(const string filename) override;
+    virtual sf::Time getFileModifyTime(const string filename) override;
     virtual std::vector<string> findFilenames(const string search_pattern) override;
 
 private:

@@ -5,6 +5,7 @@
 #include <sp2/pointer.h>
 #include <sp2/pointerList.h>
 #include <SFML/System/InputStream.hpp>
+#include <SFML/System/Time.hpp>
 #include <memory>
 
 namespace sp {
@@ -26,9 +27,11 @@ public:
     ResourceProvider();
     
     virtual ResourceStreamPtr getStream(const string filename) = 0;
+    virtual sf::Time getFileModifyTime(const string filename) { return sf::Time::Zero; }
     virtual std::vector<string> findFilenames(const string search_pattern) = 0;
 
     static ResourceStreamPtr get(const string filename);
+    static sf::Time getModifyTime(const string filename);
     static std::vector<string> find(const string search_pattern);
 protected:
     bool searchMatch(const string name, const string search_pattern);

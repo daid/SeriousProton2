@@ -2,11 +2,13 @@
 #include <sp2/graphics/gui/graphicslayer.h>
 #include <sp2/graphics/gui/layout/layout.h>
 #include <sp2/graphics/gui/theme.h>
+#include <sp2/graphics/gui/guiLoader.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/System/Sleep.hpp>
 #include <limits>
 
 namespace sp {
@@ -290,8 +292,35 @@ P<Widget> Widget::getWidgetWithID(const string& id)
     return nullptr;
 }
 
+#ifdef DEBUG
+void Widget::setupAutoReload(P<Widget> widget, const string& resource_name, const string& root_id)
+{
+    AutoReloadData data;
+    data.last_modify_time = io::ResourceProvider::getModifyTime(resource_name);
+    data.resource_name = resource_name;
+    data.root_id = root_id;
+    data.widget = widget;
+    auto_reload.push_back(data);
+}
+#endif
+
 void Widget::updateLayout()
 {
+#ifdef DEBUG
+    for(auto& data : auto_reload)
+    {
+        sf::Time modify_time = io::ResourceProvider::getModifyTime(data.resource_name);
+        if (modify_time == data.last_modify_time)
+            continue;
+        LOG(Info, "Reloading:", data.resource_name, data.root_id);
+        sf::sleep(sf::seconds(0.1));
+        delete *data.widget;
+        data.widget = sp::gui::Loader::load(data.resource_name, data.root_id, this);
+        if (data.widget)
+            data.last_modify_time = modify_time;
+    }
+#endif
+
     if (!layout_manager && !children.size())
         return;
     if (!layout_manager)

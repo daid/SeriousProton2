@@ -1,6 +1,7 @@
 #include <sp2/io/directoryResourceProvider.h>
 #include <SFML/System/FileInputStream.hpp>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <stdio.h>
 
 namespace sp {
@@ -54,6 +55,14 @@ ResourceStreamPtr DirectoryResourceProvider::getStream(const string filename)
     if (stream->isOpen())
         return stream;
     return nullptr;
+}
+
+sf::Time DirectoryResourceProvider::getFileModifyTime(const string filename)
+{
+    struct stat stat_info;
+    if (stat((base_path + "/" + filename).c_str(), &stat_info) != 0)
+        return sf::Time::Zero;
+    return sf::microseconds(int64_t(stat_info.st_mtime) * 1000000LL);
 }
 
 std::vector<string> DirectoryResourceProvider::findFilenames(string search_pattern)

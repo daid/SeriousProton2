@@ -35,7 +35,7 @@ void Progressbar::setAttribute(const string& key, const string& value)
     {
         if (value == "topleft") alignment = Alignment::TopLeft;
         else if (value == "top") alignment = Alignment::Top;
-        else if (value == "right") alignment = Alignment::TopRight;
+        else if (value == "topright") alignment = Alignment::TopRight;
         else if (value == "left") alignment = Alignment::Left;
         else if (value == "center") alignment = Alignment::Center;
         else if (value == "right") alignment = Alignment::Right;

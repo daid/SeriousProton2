@@ -6,7 +6,7 @@
 namespace sp {
 namespace gui {
 
-P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widget)
+P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widget, bool auto_reload)
 {
     Loader loader;
     loader.tree = io::KeyValueTreeLoader::load(resource_name);
@@ -14,7 +14,16 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
 
     if (root)
     {
-        return loader.createWidget(root_widget, *root);
+        P<Widget> result = loader.createWidget(root_widget, *root);
+        if (auto_reload)
+        {
+#ifdef DEBUG
+            root_widget->setupAutoReload(result, resource_name, root_id);
+#else
+            LOG(Warning, "Cannot use 'auto reload' on sp::gui::Loader in release builds");
+#endif
+        }
+        return result;
     }
     return nullptr;
 }
@@ -53,7 +62,9 @@ void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node)
     for(auto it : node.items)
     {
         if (it.first != "@ref" && it.first != "type")
+        {
             widget->setAttribute(it.first, it.second);
+        }
     }
     
     for(KeyValueTreeNode& child_node : node.child_nodes)
