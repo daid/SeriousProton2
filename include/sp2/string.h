@@ -7,6 +7,7 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <map>
 
 namespace sp {
 /*
@@ -201,7 +202,50 @@ public:
     /*
         Return a formatted version of S
     */
-    string format(...) const;
+    string format(const std::map<string, string>& mapping) const
+    {
+        string ret;
+
+        //Reserve the target UnicodeString to the current length plus the length of all the parameters.
+        //Which should be a good rough estimate for the final UnicodeString length.
+        int itemslength = 0;
+        for(auto it : mapping)
+        {
+            itemslength += it.second.length();
+        }
+        ret.reserve(length() + itemslength);
+
+        //Run through the source UnicodeString, find matching brackets.
+        for(unsigned int n=0; n<length(); n++)
+        {
+            char c = at(n);
+            if (c == '{')
+            {
+                unsigned int end = n;
+                while(end < length() && at(end) != '}')
+                {
+                    end++;
+                }
+                string key = substr(n + 1, end);
+                if (mapping.find(key) != mapping.end())
+                {
+                    ret += mapping.find(key)->second;
+                }
+
+                n = end;
+            }
+            else if (c == '\\')
+            {
+                n++;
+                ret.push_back(at(n));
+            }
+            else
+            {
+                ret.push_back(c);
+            }
+        }
+        return ret;
+    }
 
     /*
         Return True if all characters in S are alphanumeric

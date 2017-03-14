@@ -20,9 +20,9 @@ public:
 
 private:
     P<KeyValueTree> tree;
-    P<Widget> createWidget(P<Widget> parent, KeyValueTreeNode& node);
-    void loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node);
-    string getType(KeyValueTreeNode& node);
+    P<Widget> createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters);
+    void loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters);
+    string getType(KeyValueTreeNode& node, std::map<string, string>& parameters);
 };
 
 };//!namespace gui

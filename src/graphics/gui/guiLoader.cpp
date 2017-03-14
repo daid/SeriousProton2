@@ -14,7 +14,8 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
 
     if (root)
     {
-        P<Widget> result = loader.createWidget(root_widget, *root);
+        std::map<string, string> parameters;
+        P<Widget> result = loader.createWidget(root_widget, *root, parameters);
         if (auto_reload)
         {
 #ifdef DEBUG
@@ -28,9 +29,9 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
     return nullptr;
 }
 
-P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node)
+P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
-    string type = getType(node);
+    string type = getType(node, parameters);
     WidgetClassRegistry* reg;
     for(reg = WidgetClassRegistry::first; reg != nullptr; reg = reg->next)
     {
@@ -41,7 +42,7 @@ P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node)
     {
         P<Widget> widget = reg->creation_function(parent);
         widget->setID(node.id);
-        loadWidgetFromTree(widget, node);
+        loadWidgetFromTree(widget, node, parameters);
         return widget;
     }else{
         LOG(Error, "Failed to find widget type:", type);
@@ -49,41 +50,55 @@ P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node)
     return nullptr;
 }
 
-void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node)
+void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
     if (node.items.find("@ref") != node.items.end())
     {
-        KeyValueTreeNode* ref = tree->findId("@" + node.items["@ref"]);
+        auto values = node.items["@ref"].format(parameters).split();
+        string reference_name = values.front();
+        values.erase(values.begin());
+        
+        std::map<string, string> new_parameters = parameters;
+        for(auto parameter : values)
+        {
+            auto key_value = parameter.split("=", 1);
+            if (key_value.size() > 1)
+                new_parameters[key_value[0]] = key_value[1];
+        }
+        
+        KeyValueTreeNode* ref = tree->findId("@" + reference_name);
         if (ref)
-            loadWidgetFromTree(widget, *ref);
+            loadWidgetFromTree(widget, *ref, new_parameters);
         else
-            LOG(Warning, "Could not find @ref", node.items["@ref"]);
+            LOG(Warning, "Could not find @ref", reference_name);
     }
     for(auto it : node.items)
     {
         if (it.first != "@ref" && it.first != "type")
         {
-            widget->setAttribute(it.first, it.second);
+            widget->setAttribute(it.first, it.second.format(parameters));
         }
     }
     
     for(KeyValueTreeNode& child_node : node.child_nodes)
     {
-        createWidget(widget, child_node);
+        createWidget(widget, child_node, parameters);
     }
 }
 
-string Loader::getType(KeyValueTreeNode& node)
+string Loader::getType(KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
     if (node.items.find("type") != node.items.end())
         return node.items["type"];
     if (node.items.find("@ref") != node.items.end())
     {
-        KeyValueTreeNode* ref = tree->findId("@" + node.items["@ref"]);
+        auto values = node.items["@ref"].format(parameters).split();
+        string reference_name = values.front();
+        KeyValueTreeNode* ref = tree->findId("@" + reference_name);
         if (ref)
-            return getType(*ref);
+            return getType(*ref, parameters);
         else
-            LOG(Warning, "Could not find @ref", node.items["@ref"]);
+            LOG(Warning, "Could not find @ref", reference_name);
     }
     return "";
 }
