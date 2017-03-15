@@ -10,6 +10,8 @@ namespace sp {
 class ScriptBindingObject;
 namespace script {
 
+void createGlobalLuaState();
+
 int lazyLoading(lua_State* L);
 extern lua_State* global_lua_state;
 
@@ -27,6 +29,11 @@ template<typename... ARGS> std::tuple<ARGS...> getArgs()
 {
     return getArgs<ARGS...>(typename sequenceGenerator<sizeof... (ARGS)>::type());
 }
+
+int pushToLua(bool b);
+int pushToLua(int i);
+int pushToLua(float f);
+int pushToLua(double f);
 
 template<class T> int pushToLua(sp::P<T> obj)
 {

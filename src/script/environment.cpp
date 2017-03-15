@@ -7,14 +7,7 @@ namespace script {
 Environment::Environment()
 {
     if (!script::global_lua_state)
-    {
-        script::global_lua_state = luaL_newstate();
-        luaL_newmetatable(script::global_lua_state, "lazyLoading");
-        lua_pushstring(script::global_lua_state, "__index");
-        lua_pushcfunction(script::global_lua_state, script::lazyLoading);
-        lua_settable(script::global_lua_state, -3);
-        lua_pop(script::global_lua_state, 1);
-    }
+        script::createGlobalLuaState();
 
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G}, "__ptr": this}    
