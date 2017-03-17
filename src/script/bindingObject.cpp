@@ -100,7 +100,7 @@ int ScriptBindingObject::getScriptMemberInteger(string name)
     lua_pushstring(script::global_lua_state, name.c_str());
     lua_rawget(script::global_lua_state, -2);
     int result = lua_tointeger(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 1);
+    lua_pop(script::global_lua_state, 2);
     return result;
 }
 
@@ -112,7 +112,7 @@ double ScriptBindingObject::getScriptMemberDouble(string name)
     lua_pushstring(script::global_lua_state, name.c_str());
     lua_rawget(script::global_lua_state, -2);
     double result = lua_tonumber(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 1);
+    lua_pop(script::global_lua_state, 2);
     return result;
 }
 
@@ -124,7 +124,7 @@ string ScriptBindingObject::getScriptMemberString(string name)
     lua_pushstring(script::global_lua_state, name.c_str());
     lua_rawget(script::global_lua_state, -2);
     string result = lua_tostring(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 1);
+    lua_pop(script::global_lua_state, 2);
     return result;
 }
 
