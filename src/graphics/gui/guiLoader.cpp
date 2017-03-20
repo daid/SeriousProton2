@@ -10,6 +10,8 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
 {
     Loader loader;
     loader.tree = io::KeyValueTreeLoader::load(resource_name);
+    if (!loader.tree)
+        return nullptr;
     KeyValueTreeNode* root = loader.tree->findId(root_id);
 
     if (root)

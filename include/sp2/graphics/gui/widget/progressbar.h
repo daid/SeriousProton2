@@ -18,7 +18,7 @@ public:
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
-private:
+protected:
     Alignment alignment;
     float value;
     float min_value;
