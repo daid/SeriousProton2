@@ -74,7 +74,7 @@ void Progressbar::render(sf::RenderTarget& window)
     case Alignment::TopRight:
         renderStretchedV(window, rect, t.background_image, t.background_color);
         rect.height *= f;
-        renderStretchedV(window, rect, t.forground_image, t.forground_color);
+        renderStretchedV(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
@@ -82,26 +82,32 @@ void Progressbar::render(sf::RenderTarget& window)
         renderStretchedV(window, rect, t.background_image, t.background_color);
         rect.top += rect.height * (1.0 - f);
         rect.height *= f;
-        renderStretchedV(window, rect, t.forground_image, t.forground_color);
+        renderStretchedV(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Left:
         renderStretchedH(window, rect, t.background_image, t.background_color);
         rect.width *= f;
-        renderStretchedH(window, rect, t.forground_image, t.forground_color);
+        renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Right:
         renderStretchedH(window, rect, t.background_image, t.background_color);
         rect.left += rect.width * (1.0 - f);
         rect.width *= f;
-        renderStretchedH(window, rect, t.forground_image, t.forground_color);
+        renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Center:
         renderStretchedH(window, rect, t.background_image, t.background_color);
         rect.left += rect.width * (1.0 - f) * 0.5;
         rect.width *= f;
-        renderStretchedH(window, rect, t.forground_image, t.forground_color);
+        renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     }
+}
+
+sp::Color Progressbar::getProgressColor()
+{
+    const ThemeData::StateData& t = theme->states[int(getState())];
+    return t.forground_color;
 }
 
 };//!namespace gui

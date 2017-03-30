@@ -23,6 +23,8 @@ protected:
     float value;
     float min_value;
     float max_value;
+    
+    virtual sp::Color getProgressColor();
 };
 
 };//!namespace gui
