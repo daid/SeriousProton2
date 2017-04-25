@@ -50,5 +50,18 @@ void Shape2D::create(SceneNode* node) const
     createFixture(node->collision_body2d);
 }
 
+void Shape2D::createFixtureOnBody(b2Body* body, b2Shape* shape) const
+{
+    b2FixtureDef shapeDef;
+    shapeDef.shape = shape;
+    shapeDef.density = density;
+    shapeDef.friction = 0.0;
+    shapeDef.isSensor = (type == Type::Sensor);
+    shapeDef.userData = body->GetUserData();
+    shapeDef.filter.categoryBits = filter_category;
+    shapeDef.filter.maskBits = filter_mask;
+    body->CreateFixture(&shapeDef);
+}
+
 };//!namespace collision
 };//!namespace sp

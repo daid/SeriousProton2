@@ -16,13 +16,7 @@ void Box2D::createFixture(b2Body* body) const
     b2PolygonShape shape;
     shape.SetAsBox(width / 2.0, height / 2.0);
 
-    b2FixtureDef shapeDef;
-    shapeDef.shape = &shape;
-    shapeDef.density = density;
-    shapeDef.friction = 0.0;
-    shapeDef.isSensor = (type == Type::Sensor);
-    shapeDef.userData = body->GetUserData();
-    body->CreateFixture(&shapeDef);
+    createFixtureOnBody(body, &shape);
 }
 
 };//!namespace collision
