@@ -11,6 +11,8 @@ void VerticalLayout::update(P<Container> container, const sf::FloatRect& rect)
     float y = rect.top;
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         float h = w->layout.size.y + w->layout.margin_top + w->layout.margin_bottom;
         sf::FloatRect r(rect.left, y, rect.width, h);
         basicLayout(r, w);

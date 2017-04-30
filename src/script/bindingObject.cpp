@@ -130,7 +130,6 @@ string ScriptBindingObject::getScriptMemberString(string name)
 
 void ScriptBindingObject::onRegisterScriptBindings(ScriptBindingClass& script_binding_class)
 {
-    LOG(Debug, "onRegisterScriptBindings:", typeid(*this).name());
 }
 
 };//!namespace sp

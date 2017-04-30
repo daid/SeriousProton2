@@ -43,7 +43,7 @@ void Environment::setGlobal(string name, lua_CFunction function)
     lua_pushlightuserdata(global_lua_state, this);
     lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
     
-    //Set our variable in this environment table
+    //Set our variable in this environment table, with our environment as first upvalue.
     lua_pushstring(global_lua_state, name.c_str());
     lua_pushvalue(global_lua_state, -2);
     lua_pushcclosure(global_lua_state, function, 1);

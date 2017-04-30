@@ -23,7 +23,7 @@ public:
         *f = func;
         lua_pushvalue(sp::script::global_lua_state, 1); //push the table of this object
         
-        lua_pushcclosure(sp::script::global_lua_state, &script::call<TYPE, RET, ARGS...>, 2);
+        lua_pushcclosure(sp::script::global_lua_state, &script::callMember<TYPE, RET, ARGS...>, 2);
         lua_settable(sp::script::global_lua_state, -3);
     }
 

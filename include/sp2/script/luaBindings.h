@@ -61,7 +61,7 @@ template<class T> int pushToLua(T* obj)
     return 1;
 }
 
-template<class TYPE, typename RET> class callClass
+template<class TYPE, typename RET> class callClassHelper
 {
 public:
     template<typename... ARGS, std::size_t... N> static int doCall(TYPE* obj, RET(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
@@ -70,7 +70,7 @@ public:
     }
 };
 
-template<class TYPE> class callClass<TYPE, void>
+template<class TYPE> class callClassHelper<TYPE, void>
 {
 public:
     template<typename... ARGS, std::size_t... N> static int doCall(TYPE* obj, void(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
@@ -80,7 +80,26 @@ public:
     }
 };
 
-template<class TYPE, typename RET, typename... ARGS> int call(lua_State*)
+template<typename RET> class callFunctionHelper
+{
+public:
+    template<typename... ARGS, std::size_t... N> static int doCall(RET(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    {
+        return pushToLua((*f)(std::get<N>(args)...));
+    }
+};
+
+template<> class callFunctionHelper<void>
+{
+public:
+    template<typename... ARGS, std::size_t... N> static int doCall(void(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    {
+        (*f)(std::get<N>(args)...);
+        return 0;
+    }
+};
+
+template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State*)
 {
     typedef RET(TYPE::*FT)(ARGS...);
     FT* f = reinterpret_cast<FT*>(lua_touserdata(global_lua_state, lua_upvalueindex(1)));
@@ -88,7 +107,15 @@ template<class TYPE, typename RET, typename... ARGS> int call(lua_State*)
     if (!obj)
         return 0;
     std::tuple<ARGS...> args = getArgs<ARGS...>();
-    return callClass<TYPE, RET>::doCall(obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    return callClassHelper<TYPE, RET>::doCall(obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+}
+
+template<typename RET, typename... ARGS> int callFunction(lua_State*)
+{
+    typedef RET(*FT)(ARGS...);
+    FT* f = reinterpret_cast<FT*>(lua_touserdata(global_lua_state, lua_upvalueindex(1)));
+    std::tuple<ARGS...> args = getArgs<ARGS...>();
+    return callFunctionHelper<RET>::doCall(*f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
 template<typename T> T* convertFromLua(typeIdentifier<T*>, int index)

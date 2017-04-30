@@ -11,6 +11,8 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
     sf::Vector2i grid_size;
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
         grid_size.x = std::max(grid_size.x, position.x + span.x);
@@ -26,6 +28,8 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
 
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
         
@@ -59,6 +63,8 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
     
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
 

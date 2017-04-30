@@ -13,6 +13,8 @@ void VerticalFlowLayout::update(P<Container> container, const sf::FloatRect& rec
     float x1 = rect.left;
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         float height = w->layout.size.y + w->layout.margin_top + w->layout.margin_bottom;
         if (y + height > rect.top + rect.height)
         {

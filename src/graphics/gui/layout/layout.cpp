@@ -12,6 +12,8 @@ void Layout::update(P<Container> container, const sf::FloatRect& rect)
 {
     for(Widget* w : container->children)
     {
+        if (!w->isVisible())
+            continue;
         basicLayout(rect, w);
     }
 }

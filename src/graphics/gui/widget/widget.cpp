@@ -143,6 +143,26 @@ bool Widget::isVisible()
     return visible;
 }
 
+void Widget::setEnable(bool enable)
+{
+    enabled = enable;
+}
+
+void Widget::enable()
+{
+    enabled = true;
+}
+
+void Widget::disable()
+{
+    enabled = false;
+}
+
+bool Widget::isEnabled()
+{
+    return enabled;
+}
+
 void Widget::setID(string id)
 {
     this->id = id;
@@ -367,6 +387,8 @@ void Widget::runCallback(Variant v)
 
 void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
+    if (texture == "")
+        return;
     if (rect.width >= rect.height)
     {
         renderStretchedH(window, rect, texture, color);
@@ -377,6 +399,8 @@ void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect
 
 void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
+    if (texture == "")
+        return;
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
@@ -410,6 +434,8 @@ void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rec
 
 void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
+    if (texture == "")
+        return;
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
@@ -443,6 +469,8 @@ void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rec
 
 void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, Color color)
 {
+    if (texture == "")
+        return;
     sf::Texture* texture_ptr = textureManager.get(texture);
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);

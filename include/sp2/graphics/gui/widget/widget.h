@@ -78,6 +78,10 @@ public:
     void show();
     void hide();
     bool isVisible();
+    void setEnable(bool enable);
+    void enable();
+    void disable();
+    bool isEnabled();
     void setID(string id);
     
     void setEventCallback(Callback callback);
