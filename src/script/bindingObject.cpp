@@ -8,17 +8,31 @@ namespace script {
 
 int lazyLoading(lua_State* L)
 {
+    //Het the object reference for this object.
     lua_pushstring(L, "__ptr");
     lua_rawget(L, 1);
     sp::ScriptBindingObject* sbc = static_cast<sp::ScriptBindingObject*>(lua_touserdata(L, -1));
     lua_pop(L, 1);
+    
+    //Create a new table as meta table.
     lua_newtable(L);
     lua_pushstring(L, "__index");
+    //Create a new table as __index table for this object.
     lua_newtable(L);
+    //Put a field "valid" in this metatable that is always true. (We clear the metatable on object destruction, causing valid to become "nil" and thus false)
+    lua_pushstring(L, "valid");
+    lua_pushboolean(L, true);
+    lua_settable(L, -3);
+    
+    //Call the onRegisterScriptBindings which will register functions in the current __index table.
     ScriptBindingClass script_binding_class;
     sbc->onRegisterScriptBindings(script_binding_class);
+    
+    //Set the __index table as actual field in the metatable.
     lua_settable(L, -3);
+    //Register the metatable on our object table
     lua_setmetatable(L, 1);
+    //Return the actual field that was requested by lazyloading.
     lua_gettable(L, 1);
     return 1;
 }
@@ -30,7 +44,7 @@ ScriptBindingObject::ScriptBindingObject()
     if (!script::global_lua_state)
         script::createGlobalLuaState();
 
-    //Add object to Lua registry
+    //Add object to Lua registry, and register the lazy loader. This loads the bindings on first use, so we do not bind objects that we never use from the scripts.
     //REGISTY[this] = {"__ptr": this}
     lua_pushlightuserdata(script::global_lua_state, this);
     lua_newtable(script::global_lua_state);
@@ -50,6 +64,9 @@ ScriptBindingObject::~ScriptBindingObject()
     lua_pushstring(script::global_lua_state, "__ptr");
     lua_pushlightuserdata(script::global_lua_state, nullptr);
     lua_rawset(script::global_lua_state, -3);
+    //Clear the metatable of this object.
+    lua_pushnil(script::global_lua_state);
+    lua_setmetatable(script::global_lua_state, -2);
     lua_pop(script::global_lua_state, 1);
     
     //Remove object from Lua registry

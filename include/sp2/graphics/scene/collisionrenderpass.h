@@ -21,6 +21,7 @@ public:
     void setScene(P<Scene> scene);
     void setCamera(P<CameraNode> camera);
 private:
+    bool enabled;
     P<Scene> single_scene;
     P<CameraNode> specific_camera;
     

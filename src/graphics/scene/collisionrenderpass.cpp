@@ -5,6 +5,7 @@
 #include <sp2/scene/cameraNode.h>
 #include <sp2/logging.h>
 #include <Box2D/Box2D.h>
+#include <SFML/Window/Keyboard.hpp>
 
 namespace sp {
 
@@ -88,16 +89,19 @@ public:
 CollisionRenderPass::CollisionRenderPass(string target_layer)
 : RenderPass(target_layer)
 {
+    enabled = true;
 }
 
 CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene)
 : RenderPass(target_layer), single_scene(scene)
 {
+    enabled = true;
 }
 
 CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene, P<CameraNode> camera)
 : RenderPass(target_layer), single_scene(scene), specific_camera(camera)
 {
+    enabled = true;
 }
 
 
@@ -113,6 +117,10 @@ void CollisionRenderPass::setCamera(P<CameraNode> camera)
 
 void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
+        enabled = !enabled;
+    if (!enabled)
+        return;
     if (single_scene)
     {
         renderScene(*single_scene, target, layer, aspect_ratio);
