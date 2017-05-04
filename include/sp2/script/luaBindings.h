@@ -4,6 +4,7 @@
 #include <lua/lua.hpp>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
+#include <sp2/math/vector.h>
 #include <tuple>
 
 namespace sp {
@@ -59,6 +60,13 @@ template<class T> int pushToLua(T* obj)
     }
     lua_pushnil(global_lua_state);
     return 1;
+}
+
+template<typename T> int pushToLua(sf::Vector2<T> f)
+{
+    int x = pushToLua(f.x);
+    int y = pushToLua(f.y);
+    return x + y;
 }
 
 template<class TYPE, typename RET> class callClassHelper

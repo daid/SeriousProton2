@@ -3,8 +3,6 @@
 
 #include <sp2/scene/node.h>
 
-class b2Body;
-
 namespace sp {
 
 class CameraNode : public SceneNode

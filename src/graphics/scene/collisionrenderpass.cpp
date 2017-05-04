@@ -32,7 +32,7 @@ public:
         
         data.shader = sp::Shader::get("shader/color.shader");
         data.type = sp::RenderData::Type::Normal;
-        data.mesh = std::make_shared<sp::MeshData>(vertices);
+        data.mesh = sp::MeshData::create(vertices);
         data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 64);
 
         queue.add(Matrix4x4d::identity(), data);
@@ -57,7 +57,7 @@ public:
         
         data.shader = sp::Shader::get("shader/color.shader");
         data.type = sp::RenderData::Type::Normal;
-        data.mesh = std::make_shared<sp::MeshData>(vertices);
+        data.mesh = sp::MeshData::create(vertices);
         data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
 
         queue.add(Matrix4x4d::translate(center.x, center.y, 0), data);

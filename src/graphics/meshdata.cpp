@@ -50,6 +50,11 @@ void MeshData::render()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+std::shared_ptr<MeshData> MeshData::create(std::vector<Vertex>& vertices)
+{
+    return std::make_shared<MeshData>(vertices);
+}
+
 std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
 {
     size *= 0.5f;

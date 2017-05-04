@@ -33,6 +33,7 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
             break;
         case RenderData::Type::Additive:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glDepthMask(false);
             break;
         }
         item.data.shader->setUniform("projection_matrix", projection);
@@ -44,6 +45,8 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
             item.data.shader->setUniform("texture_map", *textureManager.get(item.data.texture));
         sf::Shader::bind(item.data.shader);
         item.data.mesh->render();
+        if (item.data.type == RenderData::Type::Additive)
+            glDepthMask(true);
     }
 }
 
