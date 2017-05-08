@@ -51,24 +51,24 @@ private:
     //Next id for a new object.
     uint64_t next_object_id;
     //List of newly created objects.
-    PList<SceneNode> new_nodes;
+    PList<Node> new_nodes;
     
-    std::unordered_map<uint64_t, P<SceneNode>> node_by_id;
+    std::unordered_map<uint64_t, P<Node>> node_by_id;
     std::list<ClientInfo> clients;
     
     sf::TcpListener new_connection_listener;
     sf::TcpSocket* new_connection_socket;
     
-    void recursiveAddInitial(SceneNode* node);
+    void recursiveAddInitial(Node* node);
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
-    void addNewObject(SceneNode* node);
+    void addNewObject(Node* node);
     
     void update();
     
-    void buildCreatePacket(sf::Packet& packet, SceneNode* node);
+    void buildCreatePacket(sf::Packet& packet, Node* node);
     void sendToAllConnectedClients(sf::Packet& packet);
 
-    friend class SceneNode::Multiplayer;
+    friend class Node::Multiplayer;
     friend class ::sp::Engine;
 public:
     static Server* getInstance() { return instance; }

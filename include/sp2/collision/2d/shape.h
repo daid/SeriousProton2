@@ -12,7 +12,7 @@ namespace collision {
 class Shape2D : public Shape
 {
 private:
-    virtual void create(SceneNode* node) const override;
+    virtual void create(Node* node) const override;
     virtual void createFixture(b2Body* body) const = 0;
 protected:
     void createFixtureOnBody(b2Body* body, b2Shape* shape) const;

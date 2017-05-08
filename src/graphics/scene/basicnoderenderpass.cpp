@@ -60,12 +60,12 @@ void BasicNodeRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
     }
 }
 
-void BasicNodeRenderPass::recursiveNodeRender(SceneNode* node)
+void BasicNodeRenderPass::recursiveNodeRender(Node* node)
 {
     if (node->render_data.type != sp::RenderData::Type::None)
         queue.add(node->getGlobalTransform(), node->render_data);
 
-    for(SceneNode* child : node->getChildren())
+    for(Node* child : node->getChildren())
     {
         recursiveNodeRender(child);
     }

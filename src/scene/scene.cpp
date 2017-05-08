@@ -15,7 +15,7 @@ PList<Scene> Scene::scenes;
 Scene::Scene(string scene_name)
 : scene_name(scene_name)
 {
-    root = new SceneNode(this);
+    root = new Node(this);
     collision_world2d = nullptr;
     enabled = true;
 
@@ -50,13 +50,13 @@ void Scene::update(float delta)
 class Collision
 {
 public:
-    P<SceneNode> node_a;
-    P<SceneNode> node_b;
+    P<Node> node_a;
+    P<Node> node_b;
     float force;
     sp::Vector2d position;
     sp::Vector2d normal;
 
-    Collision(P<SceneNode> node_a, P<SceneNode> node_b, float force, sp::Vector2d position, sp::Vector2d normal)
+    Collision(P<Node> node_a, P<Node> node_b, float force, sp::Vector2d position, sp::Vector2d normal)
     : node_a(node_a), node_b(node_b), force(force), position(position), normal(normal)
     {}
 };
@@ -76,8 +76,8 @@ void Scene::fixedUpdate()
         {
             if (contact->IsTouching() && contact->IsEnabled())
             {
-                SceneNode* node_a = (SceneNode*)contact->GetFixtureA()->GetUserData();
-                SceneNode* node_b = (SceneNode*)contact->GetFixtureB()->GetUserData();
+                Node* node_a = (Node*)contact->GetFixtureA()->GetUserData();
+                Node* node_b = (Node*)contact->GetFixtureB()->GetUserData();
                 b2WorldManifold world_manifold;
                 contact->GetWorldManifold(&world_manifold);
 
@@ -86,8 +86,23 @@ void Scene::fixedUpdate()
                 {
                     collision_force += contact->GetManifold()->points[n].normalImpulse;
                 }
-                
-                collisions.emplace_back(node_a, node_b, collision_force, toVector<double>(world_manifold.points[0]), toVector<double>(world_manifold.normal));
+
+                if (contact->GetManifold()->pointCount == 0)
+                {
+                    b2Manifold manifold;
+                    const b2Transform& transform_a = contact->GetFixtureA()->GetBody()->GetTransform();
+                    const b2Transform& transform_b = contact->GetFixtureB()->GetBody()->GetTransform();
+                    contact->Evaluate(&manifold, transform_a, transform_b);
+                    
+                    //No actual contact? This seems to happen quite often on sensor to sensor contacts...
+                    if (manifold.pointCount < 1)
+                        continue;
+                    
+                    world_manifold.Initialize(&manifold, transform_a, contact->GetFixtureA()->GetShape()->m_radius, transform_b, contact->GetFixtureB()->GetShape()->m_radius);
+                }
+
+                sp::Vector2d position = toVector<double>(world_manifold.points[0]);
+                collisions.emplace_back(node_a, node_b, collision_force, position, toVector<double>(world_manifold.normal));
             }
         }
         for(Collision& collision : collisions)
@@ -120,28 +135,28 @@ void Scene::postFixedUpdate(float delta)
     {
         for(b2Body* body = collision_world2d->GetBodyList(); body; body = body->GetNext())
         {
-            SceneNode* node = (SceneNode*)body->GetUserData();
+            Node* node = (Node*)body->GetUserData();
             node->modifyPositionByPhysics(toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
         }
     }
 }
 
-void Scene::updateNode(float delta, P<SceneNode> node)
+void Scene::updateNode(float delta, P<Node> node)
 {
     node->onUpdate(delta);
     if (node)
     {
-        for(SceneNode* child : node->children)
+        for(Node* child : node->children)
             updateNode(delta, child);
     }
 }
 
-void Scene::fixedUpdateNode(P<SceneNode> node)
+void Scene::fixedUpdateNode(P<Node> node)
 {
     node->onFixedUpdate();
     if (node)
     {
-        for(SceneNode* child : node->children)
+        for(Node* child : node->children)
             fixedUpdateNode(child);
     }
 }
@@ -154,23 +169,23 @@ void Scene::destroyCollisionBody2D(b2Body* collision_body2d)
 class Box2DQueryCallback : public b2QueryCallback
 {
 public:
-    std::function<bool(SceneNode* node)> callback;
+    std::function<bool(Node* node)> callback;
     
 	/// Called for each fixture found in the query AABB.
 	/// @return false to terminate the query.
 	virtual bool ReportFixture(b2Fixture* fixture)
 	{
-        SceneNode* node = (SceneNode*)fixture->GetUserData();
+        Node* node = (Node*)fixture->GetUserData();
         return callback(node);
 	}
 };
 
-void Scene::queryCollision(sp::Vector2d position, double range, std::function<bool(P<SceneNode> object)> callback_function)
+void Scene::queryCollision(sp::Vector2d position, double range, std::function<bool(P<Node> object)> callback_function)
 {
     if (!collision_world2d)
         return;
     Box2DQueryCallback callback;
-    callback.callback = [callback_function, position, range](SceneNode* node) {
+    callback.callback = [callback_function, position, range](Node* node) {
         if (length(node->getGlobalPosition2D() - position) <= range)
             return callback_function(node);
         return true;
@@ -181,12 +196,12 @@ void Scene::queryCollision(sp::Vector2d position, double range, std::function<bo
     collision_world2d->QueryAABB(&callback, aabb);
 }
 
-void Scene::queryCollision(sp::Vector2d position, std::function<bool(P<SceneNode> object)> callback_function)
+void Scene::queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function)
 {
     if (!collision_world2d)
         return;
     Box2DQueryCallback callback;
-    callback.callback = [callback_function, position](SceneNode* node) {
+    callback.callback = [callback_function, position](Node* node) {
         if (node->testCollision(position))
             return callback_function(node);
         return true;
@@ -200,18 +215,18 @@ void Scene::queryCollision(sp::Vector2d position, std::function<bool(P<SceneNode
 class Box2DRayCastCallbackAny : public b2RayCastCallback
 {
 public:
-    std::function<bool(SceneNode* node, Vector2d hit_location, Vector2d hit_normal)> callback;
+    std::function<bool(Node* node, Vector2d hit_location, Vector2d hit_normal)> callback;
     
 	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
 	{
-        SceneNode* node = (SceneNode*)fixture->GetUserData();
+        Node* node = (Node*)fixture->GetUserData();
         if (callback(node, toVector<double>(point), toVector<double>(normal)))
             return -1.0;
         return 0.0;
 	}
 };
 
-void Scene::queryCollisionAny(Vector2d start, Vector2d end, std::function<bool(P<SceneNode> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Scene::queryCollisionAny(Vector2d start, Vector2d end, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
     if (!collision_world2d)
         return;
@@ -227,12 +242,12 @@ public:
     class Hit
     {
     public:
-        P<SceneNode> node;
+        P<Node> node;
         Vector2d location;
         Vector2d normal;
         float fraction;
         
-        Hit(SceneNode* node, Vector2d location, Vector2d normal, float fraction)
+        Hit(Node* node, Vector2d location, Vector2d normal, float fraction)
         : node(node), location(location), normal(normal), fraction(fraction)
         {
         }
@@ -247,12 +262,12 @@ public:
 
 	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
 	{
-        hits.emplace_back((SceneNode*)fixture->GetUserData(), toVector<double>(point), toVector<double>(normal), fraction);
+        hits.emplace_back((Node*)fixture->GetUserData(), toVector<double>(point), toVector<double>(normal), fraction);
         return -1.0;
 	}
 };
 
-void Scene::queryCollisionAll(Vector2d start, Vector2d end, std::function<bool(P<SceneNode> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Scene::queryCollisionAll(Vector2d start, Vector2d end, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
     if (!collision_world2d)
         return;

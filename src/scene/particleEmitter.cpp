@@ -4,13 +4,15 @@
 
 namespace sp {
 
-ParticleEmitter::ParticleEmitter(P<SceneNode> parent, int initial_buffer_size, Origin origin)
-: sp::SceneNode(parent)
+ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin origin)
+: sp::Node(parent)
 {
     particles.reserve(initial_buffer_size);
     render_data.shader = Shader::get("shader/particle.shader");
     render_data.texture = "particle.png";
-    render_data.type = RenderData::Type::Additive;
+    render_data.type = RenderData::Type::Transparent;
+    
+    auto_destroy = false;
 }
 
 void ParticleEmitter::emit(const Parameters& parameters)
@@ -21,10 +23,25 @@ void ParticleEmitter::emit(const Parameters& parameters)
 void ParticleEmitter::onUpdate(float delta)
 {
     std::vector<MeshData::Vertex> vertices;
+    vertices.reserve(particles.size() * 6);
 
     for(auto it = particles.begin(); it != particles.end(); )
     {
         Parameters& particle = *it;
+        
+        
+        particle.velocity += particle.acceleration * delta;
+        particle.position += particle.velocity * delta;
+        
+        float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
+        sp::Vector3f color = Tween<sp::Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size,-size));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
+
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size, size));
         
         particle.time += delta;
         if (particle.time >= particle.lifetime)
@@ -37,25 +54,19 @@ void ParticleEmitter::onUpdate(float delta)
                 *it = particles.back();
                 particles.erase(particles.end() - 1);
             }
-        }else{
-            particle.velocity += particle.acceleration * delta;
-            particle.position += particle.velocity * delta;
-            
-            float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
-            sp::Vector3f color = Tween<sp::Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size,-size));
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
-
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
-            vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size, size));
-            
+        }
+        else
+        {
             it++;
         }
     }
     
     render_data.mesh = MeshData::create(vertices);
+    
+    if (auto_destroy && vertices.size() == 0)
+    {
+        delete this;
+    }
 }
 
 };//!namespace sp

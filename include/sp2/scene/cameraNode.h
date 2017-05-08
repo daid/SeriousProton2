@@ -5,10 +5,10 @@
 
 namespace sp {
 
-class CameraNode : public SceneNode
+class CameraNode : public Node
 {
 public:
-    CameraNode(P<SceneNode> parent);
+    CameraNode(P<Node> parent);
     
     void setOrtographic(double view_distance = 1.0f);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);

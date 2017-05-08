@@ -9,7 +9,7 @@
 namespace sp {
 namespace collision {
 
-void Shape2D::create(SceneNode* node) const
+void Shape2D::create(Node* node) const
 {
     if (!node->getScene()->collision_world2d)
     {

@@ -3,8 +3,8 @@
 
 namespace sp {
 
-CameraNode::CameraNode(P<SceneNode> parent)
-: SceneNode(parent), type(Type::Ortographic)
+CameraNode::CameraNode(P<Node> parent)
+: Node(parent), type(Type::Ortographic)
 {
     field_of_view = 60.0;
     view_distance = 1.0;

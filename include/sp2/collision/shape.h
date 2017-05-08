@@ -2,7 +2,7 @@
 #define SP2_COLLISION_SHAPE_H
 
 namespace sp {
-class SceneNode;
+class Node;
 namespace collision {
 
 class Shape
@@ -43,9 +43,9 @@ public:
     int filter_category;
 	int filter_mask;
 private:
-    virtual void create(SceneNode* node) const = 0;
+    virtual void create(Node* node) const = 0;
     
-    friend class sp::SceneNode;
+    friend class sp::Node;
 };
 
 };//!namespace collision

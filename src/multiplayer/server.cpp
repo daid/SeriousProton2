@@ -38,12 +38,12 @@ Server::~Server()
     instance = nullptr;
 }
 
-void Server::recursiveAddInitial(SceneNode* node)
+void Server::recursiveAddInitial(Node* node)
 {
     if (node->multiplayer.enable_replication)
     {
         addNewObject(node);
-        for(SceneNode* child : node->getChildren())
+        for(Node* child : node->getChildren())
         {
             recursiveAddInitial(child);
         }
@@ -54,7 +54,7 @@ void Server::update()
 {
     //When creating new objects, we first send out packets for all objects to be created.
     //And then we send out variable value updates. This because else we could update a pointer variable to an object that does not exist yet.
-    for(SceneNode* node : new_nodes)
+    for(Node* node : new_nodes)
     {
         sf::Packet packet;
         buildCreatePacket(packet, node);
@@ -63,7 +63,7 @@ void Server::update()
         
         node_by_id[node->multiplayer.getId()] = node;
     }
-    for(SceneNode* node : new_nodes)
+    for(Node* node : new_nodes)
     {
         if (node->multiplayer.replication_links.size() > 0)
         {
@@ -212,12 +212,12 @@ void Server::update()
     }
 }
 
-void Server::buildCreatePacket(sf::Packet& packet, SceneNode* node)
+void Server::buildCreatePacket(sf::Packet& packet, Node* node)
 {
     auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*node));
     sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*node).name()).c_str());
     
-    P<SceneNode> parent = node->getParent();
+    P<Node> parent = node->getParent();
 
     if (parent)
     {
@@ -230,7 +230,7 @@ void Server::buildCreatePacket(sf::Packet& packet, SceneNode* node)
     }
 }
 
-void Server::addNewObject(SceneNode* node)
+void Server::addNewObject(Node* node)
 {
     node->multiplayer.id = next_object_id;
     next_object_id++;

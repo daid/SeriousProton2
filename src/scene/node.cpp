@@ -11,10 +11,10 @@
 
 namespace sp {
 
-SceneNode::SceneNode(P<SceneNode> parent)
+Node::Node(P<Node> parent)
 : multiplayer(this), parent(parent)
 {
-    sp2assert(parent != nullptr, "Tried to create SceneNode without a parent.");
+    sp2assert(parent != nullptr, "Tried to create Node without a parent.");
     
     scene = parent->scene;
     parent->children.add(this);
@@ -24,7 +24,7 @@ SceneNode::SceneNode(P<SceneNode> parent)
     updateGlobalTransform();
 }
 
-SceneNode::SceneNode(Scene* scene)
+Node::Node(Scene* scene)
 : multiplayer(this), scene(scene)
 {
     collision_body2d = nullptr;
@@ -34,42 +34,42 @@ SceneNode::SceneNode(Scene* scene)
     local_transform = Matrix4x4d::identity();
 }
 
-SceneNode::~SceneNode()
+Node::~Node()
 {
     if (collision_body2d)
         scene->destroyCollisionBody2D(collision_body2d);
-    for(SceneNode* child : children)
+    for(Node* child : children)
         delete child;
 }
 
-P<SceneNode> SceneNode::getParent()
+P<Node> Node::getParent()
 {
     return parent;
 }
 
-P<Scene> SceneNode::getScene()
+P<Scene> Node::getScene()
 {
     return scene;
 }
 
-PList<SceneNode>& SceneNode::getChildren()
+PList<Node>& Node::getChildren()
 {
     return children;
 }
 
-void SceneNode::setParent(P<SceneNode> new_parent)
+void Node::setParent(P<Node> new_parent)
 {
     sp2assert(new_parent->scene == scene, "Tried to switch node from one scene to a different one. This is not supported.");
     sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
     
-    parent->children.remove(P<SceneNode>(this));
+    parent->children.remove(P<Node>(this));
     parent = new_parent;
     parent->children.add(this);
     
     updateGlobalTransform();
 }
 
-void SceneNode::setPosition(sp::Vector2d position)
+void Node::setPosition(sp::Vector2d position)
 {
     translation.x = position.x;
     translation.y = position.y;
@@ -80,7 +80,7 @@ void SceneNode::setPosition(sp::Vector2d position)
     updateLocalTransform();
 }
 
-void SceneNode::setPosition(sp::Vector3d position)
+void Node::setPosition(sp::Vector3d position)
 {
     translation = position;
     if (collision_body2d)
@@ -90,7 +90,7 @@ void SceneNode::setPosition(sp::Vector3d position)
     updateLocalTransform();
 }
 
-void SceneNode::setRotation(double rotation)
+void Node::setRotation(double rotation)
 {
     this->rotation = Quaterniond::fromAngle(rotation);
     if (collision_body2d)
@@ -100,7 +100,7 @@ void SceneNode::setRotation(double rotation)
     updateLocalTransform();
 }
 
-void SceneNode::setRotation(Quaterniond rotation)
+void Node::setRotation(Quaterniond rotation)
 {
     this->rotation = rotation;
     if (collision_body2d)
@@ -111,7 +111,7 @@ void SceneNode::setRotation(Quaterniond rotation)
     updateLocalTransform();
 }
 
-void SceneNode::setLinearVelocity(sp::Vector2d velocity)
+void Node::setLinearVelocity(sp::Vector2d velocity)
 {
     if (collision_body2d)
     {
@@ -119,45 +119,45 @@ void SceneNode::setLinearVelocity(sp::Vector2d velocity)
     }
 }
 
-void SceneNode::setAngularVelocity(double velocity)
+void Node::setAngularVelocity(double velocity)
 {
     if (collision_body2d)
         collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
 }
 
-sp::Vector2d SceneNode::getLocalPosition2D()
+sp::Vector2d Node::getLocalPosition2D()
 {
     return sp::Vector2d(translation.x, translation.y);
 }
 
-double SceneNode::getLocalRotation2D()
+double Node::getLocalRotation2D()
 {
     sp::Vector2d v = rotation * sp::Vector2d(1, 0);
     return toRotationAngle(v);
 }
 
-sp::Vector2d SceneNode::getGlobalPosition2D()
+sp::Vector2d Node::getGlobalPosition2D()
 {
     return global_transform * sp::Vector2d(0, 0);
 }
 
-double SceneNode::getGlobalRotation2D()
+double Node::getGlobalRotation2D()
 {
     sp::Vector2d v = global_transform.applyDirection(sp::Vector2d(1, 0));
     return toRotationAngle(v);
 }
 
-sp::Vector2d SceneNode::getLocalPoint2D(sp::Vector2d v)
+sp::Vector2d Node::getLocalPoint2D(sp::Vector2d v)
 {
     return local_transform * v;
 }
 
-sp::Vector2d SceneNode::getGlobalPoint2D(sp::Vector2d v)
+sp::Vector2d Node::getGlobalPoint2D(sp::Vector2d v)
 {
     return global_transform * v;
 }
 
-sp::Vector2d SceneNode::getLinearVelocity2D()
+sp::Vector2d Node::getLinearVelocity2D()
 {
     if (collision_body2d)
     {
@@ -166,7 +166,7 @@ sp::Vector2d SceneNode::getLinearVelocity2D()
     return sp::Vector2d(0.0, 0.0);
 }
 
-double SceneNode::getAngularVelocity2D()
+double Node::getAngularVelocity2D()
 {
     if (collision_body2d)
     {
@@ -175,12 +175,12 @@ double SceneNode::getAngularVelocity2D()
     return 0.0;
 }
 
-void SceneNode::setCollisionShape(const collision::Shape& shape)
+void Node::setCollisionShape(const collision::Shape& shape)
 {
     shape.create(this);
 }
 
-bool SceneNode::testCollision(sp::Vector2d position)
+bool Node::testCollision(sp::Vector2d position)
 {
     for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
     {
@@ -190,24 +190,24 @@ bool SceneNode::testCollision(sp::Vector2d position)
     return false;
 }
 
-void SceneNode::updateLocalTransform()
+void Node::updateLocalTransform()
 {
     local_transform = Matrix4x4d::translate(translation) * Matrix4x4d::fromQuaternion(rotation);
     updateGlobalTransform();
 }
 
-void SceneNode::updateGlobalTransform()
+void Node::updateGlobalTransform()
 {
     if (parent)
         global_transform = parent->global_transform * local_transform;
     else
         global_transform = local_transform;
 
-    for(P<SceneNode> n : children)
+    for(P<Node> n : children)
         n->updateGlobalTransform();
 }
 
-void SceneNode::modifyPositionByPhysics(sp::Vector2d position, double rotation)
+void Node::modifyPositionByPhysics(sp::Vector2d position, double rotation)
 {
     translation.x = position.x;
     translation.y = position.y;
@@ -215,27 +215,27 @@ void SceneNode::modifyPositionByPhysics(sp::Vector2d position, double rotation)
     updateLocalTransform();
 }
 
-void SceneNode::modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation)
+void Node::modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation)
 {
     translation = position;
     this->rotation = rotation;
     updateLocalTransform();
 }
 
-SceneNode::Multiplayer::Multiplayer(SceneNode* node)
+Node::Multiplayer::Multiplayer(Node* node)
 : node(node)
 {
     enable_replication = false;
     id = 0;
 }
 
-SceneNode::Multiplayer::~Multiplayer()
+Node::Multiplayer::~Multiplayer()
 {
     for(auto link : replication_links)
         delete link;
 }
 
-void SceneNode::Multiplayer::enable()
+void Node::Multiplayer::enable()
 {
     if (enable_replication)
         return;

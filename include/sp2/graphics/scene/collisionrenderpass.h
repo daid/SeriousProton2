@@ -7,7 +7,7 @@
 
 namespace sp {
 class Scene;
-class SceneNode;
+class Node;
 class CameraNode;
 class CollisionRenderPass : public RenderPass
 {
@@ -22,6 +22,7 @@ public:
     void setCamera(P<CameraNode> camera);
 private:
     bool enabled;
+    bool enabled_toggled;
     P<Scene> single_scene;
     P<CameraNode> specific_camera;
     

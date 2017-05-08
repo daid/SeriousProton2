@@ -19,27 +19,27 @@ namespace collision {
 class Shape;
 class Shape2D;
 }
-class SceneNode;
+class Node;
 class CollisionInfo
 {
 public:
-    P<SceneNode> other;
+    P<Node> other;
     float force;
     sp::Vector2d position;
     sp::Vector2d normal;
 };
 class Scene;
 class RenderData;
-class SceneNode : public ScriptBindingObject
+class Node : public ScriptBindingObject
 {
 public:
-    SceneNode(P<SceneNode> parent);
-    virtual ~SceneNode();
+    Node(P<Node> parent);
+    virtual ~Node();
 
-    P<SceneNode> getParent();
+    P<Node> getParent();
     P<Scene> getScene();
-    PList<SceneNode>& getChildren();
-    void setParent(P<SceneNode> new_parent);
+    PList<Node>& getChildren();
+    void setParent(P<Node> new_parent);
     
     void setPosition(sp::Vector2d position);
     void setPosition(sp::Vector3d position);
@@ -80,7 +80,7 @@ public:
     class Multiplayer
     {
     public:
-        Multiplayer(SceneNode* node);
+        Multiplayer(Node* node);
         ~Multiplayer();
         
         void enable();
@@ -92,7 +92,7 @@ public:
         
         uint64_t getId() const { return id; }
     private:
-        SceneNode* node;
+        Node* node;
         bool enable_replication;
         uint64_t id;
         std::vector<multiplayer::ReplicationLinkBase*> replication_links;
@@ -101,11 +101,11 @@ public:
         friend class ::sp::multiplayer::Client;
     } multiplayer;
 private:
-    SceneNode(Scene* scene);
+    Node(Scene* scene);
 
     P<Scene> scene;
-    P<SceneNode> parent;
-    PList<SceneNode> children;
+    P<Node> parent;
+    PList<Node> children;
     b2Body* collision_body2d;
     
     Vector3d translation;

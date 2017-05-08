@@ -8,7 +8,7 @@
 
 namespace sp {
 class Engine;
-class SceneNode;
+class Node;
 namespace multiplayer {
 
 //Register a class name to a string for multiplayer relication.
@@ -18,7 +18,7 @@ namespace multiplayer {
 class ClassEntry
 {
 public:
-    typedef SceneNode* (*create_object_function_t)(SceneNode* parent);
+    typedef Node* (*create_object_function_t)(Node* parent);
     
     ClassEntry(string class_name, std::type_index type_index, create_object_function_t create_function);
 private:
@@ -39,7 +39,7 @@ private:
     friend class Client;
 };
 
-template<class T> SceneNode* __objectCreateFunction(SceneNode* parent)
+template<class T> Node* __objectCreateFunction(Node* parent)
 {
     return new T(parent);
 }

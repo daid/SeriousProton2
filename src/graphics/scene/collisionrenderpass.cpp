@@ -90,6 +90,7 @@ CollisionRenderPass::CollisionRenderPass(string target_layer)
 : RenderPass(target_layer)
 {
     enabled = true;
+    enabled_toggled = false;
 }
 
 CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene)
@@ -118,7 +119,17 @@ void CollisionRenderPass::setCamera(P<CameraNode> camera)
 void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
-        enabled = !enabled;
+    {
+        if (!enabled_toggled)
+        {
+            enabled_toggled = true;
+            enabled = !enabled;
+        }
+    }
+    else
+    {
+        enabled_toggled = false;
+    }
     if (!enabled)
         return;
     if (single_scene)

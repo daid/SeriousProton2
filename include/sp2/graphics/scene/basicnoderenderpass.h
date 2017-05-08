@@ -7,7 +7,7 @@
 
 namespace sp {
 class Scene;
-class SceneNode;
+class Node;
 class CameraNode;
 class BasicNodeRenderPass : public RenderPass
 {
@@ -27,7 +27,7 @@ private:
     void renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
     
     RenderQueue queue;
-    void recursiveNodeRender(SceneNode* node);
+    void recursiveNodeRender(Node* node);
 };
 
 };//!namespace sp

@@ -5,7 +5,7 @@
 
 namespace sp {
 
-class ParticleEmitter : public SceneNode
+class ParticleEmitter : public Node
 {
 public:
     class Parameters
@@ -50,12 +50,14 @@ public:
         * Laser beam: local
         * Smoke: global
     */
-    ParticleEmitter(P<SceneNode> parent, int initial_buffer_size=16, Origin origin=Origin::Local);
+    ParticleEmitter(P<Node> parent, int initial_buffer_size=16, Origin origin=Origin::Local);
     
     void emit(const Parameters& parameters);
     
     virtual void onUpdate(float delta) override;
-private:
+protected:
+    bool auto_destroy;
+public:
     std::vector<Parameters> particles;
 };
 
