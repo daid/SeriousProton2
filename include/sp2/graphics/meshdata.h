@@ -40,12 +40,12 @@ public:
         float uv[2];
     };
 
-    MeshData(std::vector<Vertex>& vertices);
+    MeshData(const std::vector<Vertex>& vertices);
     ~MeshData();
     
     void render();
     
-    static std::shared_ptr<MeshData> create(std::vector<Vertex>& vertices);
+    static std::shared_ptr<MeshData> create(const std::vector<Vertex>& vertices);
     static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
     static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
 private:

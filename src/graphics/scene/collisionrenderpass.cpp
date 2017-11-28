@@ -6,6 +6,7 @@
 #include <sp2/logging.h>
 #include <Box2D/Box2D.h>
 #include <SFML/Window/Keyboard.hpp>
+#include <private/collision/box2dVector.h>
 
 namespace sp {
 
@@ -70,7 +71,25 @@ public:
 	
 	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override
 	{
-        LOG(Debug, "Called unimplemented function", __FUNCTION__);
+        RenderData data;
+        sp::Vector2f v0 = toVector<float>(p1);
+        sp::Vector2f v1 = toVector<float>(p2);
+        sp::Vector2f diff = sp::normalize(v1 - v0) * 0.2f;
+        
+        std::vector<sp::MeshData::Vertex> vertices;
+        vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
+        vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
+        vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f));
+        vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
+        vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
+        vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f));
+
+        data.shader = sp::Shader::get("shader/color.shader");
+        data.type = sp::RenderData::Type::Normal;
+        data.mesh = sp::MeshData::create(vertices);
+        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
+
+        queue.add(Matrix4x4d::identity(), data);
 	}
 
 	virtual void DrawTransform(const b2Transform& xf) override
@@ -80,7 +99,14 @@ public:
 
 	virtual void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override
 	{
-        LOG(Debug, "Called unimplemented function", __FUNCTION__);
+        RenderData data;
+        
+        data.shader = sp::Shader::get("shader/color.shader");
+        data.type = sp::RenderData::Type::Normal;
+        data.mesh = sp::MeshData::createQuad(sp::Vector2f(size * 0.1, size * 0.1));
+        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
+
+        queue.add(Matrix4x4d::translate(p.x, p.y, 0), data);
 	}
 
     RenderQueue& queue;

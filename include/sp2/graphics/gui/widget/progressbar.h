@@ -14,6 +14,9 @@ public:
     
     void setValue(float value);
     void setRange(float min_value, float max_value);
+    float getValue() { return value; }
+    float getMinRange() { return min_value; }
+    float getMaxRange() { return max_value; }
 
     virtual void setAttribute(const string& key, const string& value) override;
     

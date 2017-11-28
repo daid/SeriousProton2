@@ -5,7 +5,8 @@ namespace sp {
 
 static int updateCallback(lua_State* L)
 {
-    luaL_checktype(L, 1, LUA_TFUNCTION);
+    if (!lua_isnil(L, 1))
+        luaL_checktype(L, 1, LUA_TFUNCTION);
     
     lua_pushstring(L, "__ptr");
     lua_gettable(L, lua_upvalueindex(2));

@@ -15,7 +15,7 @@ MeshData::MeshData()
     vbo = NO_BUFFER;
 }
 
-MeshData::MeshData(std::vector<Vertex>& vertices)
+MeshData::MeshData(const std::vector<Vertex>& vertices)
 {
     this->vertices = new Vertex[vertices.size()];
     memcpy(this->vertices, vertices.data(), sizeof(Vertex) * vertices.size());
@@ -50,7 +50,7 @@ void MeshData::render()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-std::shared_ptr<MeshData> MeshData::create(std::vector<Vertex>& vertices)
+std::shared_ptr<MeshData> MeshData::create(const std::vector<Vertex>& vertices)
 {
     return std::make_shared<MeshData>(vertices);
 }

@@ -137,6 +137,11 @@ template<typename T> T* convertFromLua(typeIdentifier<T*>, int index)
     return obj;
 }
 
+static inline bool convertFromLua(typeIdentifier<bool>, int index)
+{
+    return lua_toboolean(global_lua_state, index);
+}
+
 static inline int convertFromLua(typeIdentifier<int>, int index)
 {
     return luaL_checkinteger(global_lua_state, index);
