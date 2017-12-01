@@ -94,6 +94,27 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     root->updateLayout();
     
     drawWidgets(window, root);
+
+#ifdef DEBUG
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::G))
+    {
+        debugDump(root, 0);
+    }
+#endif
+}
+
+void GraphicsLayer::debugDump(P<Widget> widget, int indent)
+{
+    sp::string istr = sp::string(" ") * indent;
+    if (!widget->isVisible())
+        return;
+    
+    LOG(Debug, istr, "{", "[" + widget->id + "]");
+    for(Widget* child : widget->children)
+    {
+        debugDump(child, indent + 1);
+    }
+    LOG(Debug, istr, "}");
 }
 
 bool GraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)

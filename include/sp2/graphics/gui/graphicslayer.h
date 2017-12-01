@@ -38,6 +38,8 @@ private:
     void drawWidgets(sf::RenderTarget& window, P<Widget> w);
     P<Widget> widgetAtPosition(P<Widget> w, sf::Vector2f position);
     
+    void debugDump(P<Widget> widget, int indent);
+    
     friend class Widget;
 };
 

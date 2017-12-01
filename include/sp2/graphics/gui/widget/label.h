@@ -13,6 +13,10 @@ public:
     Label(P<Container> parent);
 
     void setLabel(string label);
+    
+    Alignment getTextAlignment() { return text_alignment; }
+    void setTextAlignment(Alignment alignment) { text_alignment = alignment; }
+    
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
