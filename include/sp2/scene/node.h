@@ -50,11 +50,12 @@ public:
     void setAngularVelocity(double velocity);
     void setAngularVelocity(Quaterniond velocity);
     
-    sp::Vector2d getLocalPosition2D();
-    double getLocalRotation2D();
+    sp::Vector2d getPosition2D();
+    double getRotation2D();
+    sp::Vector2d getLocalPoint2D(sp::Vector2d v);
+    
     sp::Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
-    sp::Vector2d getLocalPoint2D(sp::Vector2d v);
     sp::Vector2d getGlobalPoint2D(sp::Vector2d v);
     
     sp::Vector2d getLinearVelocity2D();
@@ -62,7 +63,7 @@ public:
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     const Matrix4x4d& getLocalTransform() const { return local_transform; }
-    
+
     void setCollisionShape(const collision::Shape& shape);
     bool testCollision(sp::Vector2d position);
     

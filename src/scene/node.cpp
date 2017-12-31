@@ -125,12 +125,12 @@ void Node::setAngularVelocity(double velocity)
         collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
 }
 
-sp::Vector2d Node::getLocalPosition2D()
+sp::Vector2d Node::getPosition2D()
 {
     return sp::Vector2d(translation.x, translation.y);
 }
 
-double Node::getLocalRotation2D()
+double Node::getRotation2D()
 {
     sp::Vector2d v = rotation * sp::Vector2d(1, 0);
     return toRotationAngle(v);

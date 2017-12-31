@@ -61,7 +61,10 @@ void ParticleEmitter::onUpdate(float delta)
         }
     }
     
-    render_data.mesh = MeshData::create(vertices);
+    if (!render_data.mesh)
+        render_data.mesh = MeshData::create(vertices);
+    else
+        render_data.mesh->update(vertices);
     
     if (auto_destroy && vertices.size() == 0)
     {

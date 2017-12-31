@@ -10,44 +10,49 @@ namespace sp {
 
 MeshData::MeshData()
 {
-    vertices = nullptr;
-    vertex_count = 0;
     vbo = NO_BUFFER;
+    dirty = true;
 }
 
 MeshData::MeshData(const std::vector<Vertex>& vertices)
 {
-    this->vertices = new Vertex[vertices.size()];
-    memcpy(this->vertices, vertices.data(), sizeof(Vertex) * vertices.size());
-    vertex_count = vertices.size();
+    this->vertices = vertices;
     vbo = NO_BUFFER;
+    dirty = true;
 }
 
 MeshData::~MeshData()
 {
-    if (vertices) delete vertices;
     if (vbo != NO_BUFFER)
         glDeleteBuffers(1, &vbo);
 }
 
 void MeshData::render()
 {
-    if (!vertex_count)
+    if (vertices.size() < 1)
         return;
     if (vbo == NO_BUFFER)
     {
         glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertex_count, &vertices[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    if (dirty)
+    {
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+        dirty = false;
+    }
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glNormalPointer(GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-    glDrawArrays(GL_TRIANGLES, 0, vertex_count);
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void MeshData::update(const std::vector<Vertex>& vertices)
+{
+    this->vertices = vertices;
+    dirty = true;
 }
 
 std::shared_ptr<MeshData> MeshData::create(const std::vector<Vertex>& vertices)
