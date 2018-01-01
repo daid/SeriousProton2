@@ -10,6 +10,13 @@ TextureManager::TextureManager()
 {
     fallback_primary_color = sp::Color(255, 255, 0);
     fallback_secondary_color = sp::Color(0, 0, 0, 0);
+    
+    default_smooth = true;
+}
+
+void TextureManager::setDefaultSmoothFiltering(bool enabled)
+{
+    default_smooth = enabled;
 }
 
 __TextureManagerLoaderData* TextureManager::prepare(string name)
@@ -38,7 +45,7 @@ sf::Texture* TextureManager::finalize(__TextureManagerLoaderData* ptr)
         result->loadFromImage(ptr->image);
         delete ptr;
         result->generateMipmap();
-        result->setSmooth(true);
+        result->setSmooth(default_smooth);
         result->setRepeated(true);
         return result;
     }

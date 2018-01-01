@@ -20,6 +20,7 @@ public:
     TextureManager();
 
     void setFallbackColors(sp::Color primary_color, sp::Color secondary_color);
+    void setDefaultSmoothFiltering(bool enabled);
 protected:
     virtual __TextureManagerLoaderData* prepare(string name);
     virtual __TextureManagerLoaderData* backgroundLoader(__TextureManagerLoaderData* ptr) ;
@@ -29,6 +30,8 @@ protected:
 private:
     sp::Color fallback_primary_color;
     sp::Color fallback_secondary_color;
+    
+    bool default_smooth;
 };
 extern TextureManager textureManager;
 

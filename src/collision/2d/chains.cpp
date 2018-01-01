@@ -17,7 +17,7 @@ void Chains2D::createFixture(b2Body* body) const
     for(auto chain : chains)
     {
         b2ChainShape shape;
-        b2Vec2* verts = new b2Vec2[chain.size()];
+        b2Vec2 verts[chain.size()];
         for(unsigned int n=0; n<chain.size(); n++)
             verts[n] = toVector(chain[n]);
         shape.CreateChain(verts, chain.size());
@@ -28,7 +28,7 @@ void Chains2D::createFixture(b2Body* body) const
     for(auto loop : loops)
     {
         b2ChainShape shape;
-        b2Vec2* verts = new b2Vec2[loop.size()];
+        b2Vec2 verts[loop.size()];
         for(unsigned int n=0; n<loop.size(); n++)
             verts[n] = toVector(loop[n]);
         shape.CreateLoop(verts, loop.size());

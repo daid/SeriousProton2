@@ -14,9 +14,9 @@ MeshData::MeshData()
     dirty = true;
 }
 
-MeshData::MeshData(const std::vector<Vertex>& vertices)
+MeshData::MeshData(std::vector<Vertex>&& vertices)
 {
-    this->vertices = vertices;
+    this->vertices = std::move(vertices);
     vbo = NO_BUFFER;
     dirty = true;
 }
@@ -49,15 +49,15 @@ void MeshData::render()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void MeshData::update(const std::vector<Vertex>& vertices)
+void MeshData::update(std::vector<Vertex>&& vertices)
 {
-    this->vertices = vertices;
+    this->vertices = std::move(vertices);
     dirty = true;
 }
 
-std::shared_ptr<MeshData> MeshData::create(const std::vector<Vertex>& vertices)
+std::shared_ptr<MeshData> MeshData::create(std::vector<Vertex>&& vertices)
 {
-    return std::make_shared<MeshData>(vertices);
+    return std::make_shared<MeshData>(std::forward<std::vector<Vertex>>(vertices));
 }
 
 std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
@@ -72,7 +72,7 @@ std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
     vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
     vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
     
-    return std::make_shared<MeshData>(vertices);
+    return std::make_shared<MeshData>(std::move(vertices));
 }
 
 std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size)
@@ -94,7 +94,7 @@ std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size)
     vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
     vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
     
-    return std::make_shared<MeshData>(vertices);
+    return std::make_shared<MeshData>(std::move(vertices));
 }
 
 }//!namespace sp

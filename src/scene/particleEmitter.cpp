@@ -60,16 +60,17 @@ void ParticleEmitter::onUpdate(float delta)
             it++;
         }
     }
-    
-    if (!render_data.mesh)
-        render_data.mesh = MeshData::create(vertices);
-    else
-        render_data.mesh->update(vertices);
-    
+
     if (auto_destroy && vertices.size() == 0)
     {
         delete this;
+        return;
     }
+    
+    if (!render_data.mesh)
+        render_data.mesh = MeshData::create(std::move(vertices));
+    else
+        render_data.mesh->update(std::move(vertices));
 }
 
 };//!namespace sp
