@@ -41,6 +41,7 @@ void Shape2D::create(Node* node) const
             body_def.type = b2_dynamicBody;
             break;
         }
+        body_def.fixedRotation = fixed_rotation;
         body_def.userData = node;
         node->collision_body2d = world->CreateBody(&body_def);
     }
