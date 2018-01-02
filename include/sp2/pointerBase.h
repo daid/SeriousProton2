@@ -22,8 +22,9 @@ protected:
     }
 
     void release();
-        
+    
     void set(AutoPointerObject* p);
+    void take(_PBase& p);
 
     friend class AutoPointerObject;
 };

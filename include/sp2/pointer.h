@@ -37,6 +37,10 @@ public:
     {
         set(p.ptr);
     }
+    P(P&& p)
+    {
+        take(p);
+    }
     P(T* p)
     {
         set(p);

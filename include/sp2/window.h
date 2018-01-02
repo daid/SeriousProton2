@@ -20,6 +20,7 @@ public:
     Window(float aspect_ratio);
     
     void setFullScreen(bool fullscreen);
+    void setClearColor(sf::Color color);
 private:
     virtual ~Window();
     
@@ -34,6 +35,7 @@ private:
     int antialiasing;
     bool fullscreen;
     float aspect_ratio; //Aspect ratio in window mode (ignored in full screen)
+    sf::Color clear_color;
     
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer;

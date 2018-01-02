@@ -35,6 +35,11 @@ void Window::setFullScreen(bool fullscreen)
     createRenderWindow();
 }
 
+void Window::setClearColor(sf::Color color)
+{
+    clear_color = color;
+}
+
 void Window::createRenderWindow()
 {
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
@@ -65,11 +70,13 @@ void Window::createRenderWindow()
     render_window.setVerticalSyncEnabled(false);
     render_window.setFramerateLimit(60);
     render_window.setMouseCursorVisible(true);
+    
+    clear_color = sf::Color(20, 20, 20);
 }
 
 void Window::render()
 {
-    render_window.clear(sf::Color(20, 20, 20));
+    render_window.clear(clear_color);
     render_window.setActive();
     for(GraphicsLayer* layer : GraphicsLayer::layers)
     {

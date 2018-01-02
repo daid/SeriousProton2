@@ -9,6 +9,7 @@
 
 namespace sp {
 
+/** Depricated, use PList, which is safer and more efficient */
 template<class T> class PVector
 {
 public:
