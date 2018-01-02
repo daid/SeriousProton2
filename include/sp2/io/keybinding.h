@@ -14,7 +14,7 @@ namespace io {
 class Keybinding : public AutoPointerObject
 {
 public:
-    Keybinding(string name);
+    Keybinding(string name, sf::Keyboard::Key default_key = sf::Keyboard::Unknown);
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }

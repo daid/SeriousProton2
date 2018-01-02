@@ -108,6 +108,8 @@ public:
     TileMapCollisionBuilder(Tilemap& tilemap)
     : tilemap(tilemap)
     {
+        result.type = collision::Shape::Type::Static;
+    
         w = tilemap.tiles[0].size();
         h = tilemap.tiles.size();
         collision.resize(w);

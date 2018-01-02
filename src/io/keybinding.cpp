@@ -1,18 +1,19 @@
 #include <sp2/io/keybinding.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
+#include <sp2/attributes.h>
 #include <json11/json11.hpp>
 #include <fstream>
 
 namespace sp {
 namespace io {
 
-PList<Keybinding> Keybinding::keybindings;
+PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 
-Keybinding::Keybinding(string name)
+Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
 : name(name), label(name)
 {
-    key = sf::Keyboard::Unknown;
+    key = default_key;
     joystick_index = -1;
     joystick_button_index = -1;
     joystick_axis_enabled = false;

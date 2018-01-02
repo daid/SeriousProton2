@@ -1,9 +1,10 @@
 #include <sp2/io/resourceProvider.h>
+#include <sp2/attributes.h>
 
 namespace sp {
 namespace io {
 
-PList<ResourceProvider> ResourceProvider::providers;
+PList<ResourceProvider> ResourceProvider::providers SP2_INIT_EARLY;
 
 ResourceProvider::ResourceProvider()
 {
