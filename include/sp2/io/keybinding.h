@@ -41,9 +41,13 @@ private:
     
     float value;
     float previous_value;
+    float fixed_value;
+    float fixed_previous_value;
 
     void update();
+    void updateFixed();
     static void updateAll();
+    static void updateAllFixed();
     static PList<Keybinding> keybindings;
     
     friend class sp::Engine;

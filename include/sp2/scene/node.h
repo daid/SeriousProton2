@@ -65,7 +65,11 @@ public:
     const Matrix4x4d& getLocalTransform() const { return local_transform; }
 
     void setCollisionShape(const collision::Shape& shape);
+    
+    //Test if the given point will collide with the shape of this Node.
     bool testCollision(sp::Vector2d position);
+    //Test if this is a solid object, so it has a collision shape, which isn't generated as Sensor.
+    bool isSolid();
     
     //Event called every frame.
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.

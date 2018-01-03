@@ -182,9 +182,23 @@ void Node::setCollisionShape(const collision::Shape& shape)
 
 bool Node::testCollision(sp::Vector2d position)
 {
+    if (!collision_body2d)
+        return false;
     for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
     {
         if (f->TestPoint(toVector(position)))
+            return true;
+    }
+    return false;
+}
+
+bool Node::isSolid()
+{
+    if (!collision_body2d)
+        return false;
+    for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
+    {
+        if (!f->IsSensor())
             return true;
     }
     return false;

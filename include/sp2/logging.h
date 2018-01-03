@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <vector>
+#include <unordered_map>
 
 namespace sp {
 
@@ -38,12 +39,30 @@ private:
     }
     template<typename A1> static inline void logArg(const std::vector<A1>& a)
     {
-        for(auto e : a)
+        *stream << "[";
+        for(const auto& e : a)
         {
-            if (e != a.front())
+            if (e != a.begin())
                 *stream << ", ";
             logArg(e);
         }
+        *stream << "]";
+    }
+    template<typename A1, typename A2> static inline void logArg(const std::unordered_map<A1, A2>& a)
+    {
+        *stream << "{";
+        bool first = true;
+        for(auto e : a)
+        {
+            if (first)
+                first = false;
+            else
+                *stream << ", ";
+            logArg(e.first);
+            *stream << "=";
+            logArg(e.second);
+        }
+        *stream << "}";
     }
     template<typename A1, typename... ARGS> static inline void logArg(const A1& a, const ARGS&... args)
     {

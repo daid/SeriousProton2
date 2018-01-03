@@ -141,7 +141,7 @@ void Server::update()
         while((status = client->socket->receive(packet)) == sf::Socket::Done)
         {
             uint8_t packet_id;
-            packet << packet_id;
+            packet >> packet_id;
             switch(client->state)
             {
             case ClientInfo::State::WaitingForAuthentication:

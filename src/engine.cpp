@@ -26,6 +26,8 @@ Engine::Engine()
     minimum_frame_time = 0.001f;
     fixed_update_accumulator = 0.0;
     
+    in_fixed_update = false;
+    
     sp::multiplayer::ClassEntry::fillMappings();
 }
 
@@ -60,8 +62,10 @@ void Engine::run()
         if (paused)
             delta = 0;
         fixed_update_accumulator += delta;
+        in_fixed_update = true;
         while(fixed_update_accumulator > fixed_update_delta)
         {
+            io::Keybinding::updateAllFixed();
             fixed_update_accumulator -= fixed_update_delta;
             for(Scene* scene : Scene::scenes)
             {
@@ -69,6 +73,7 @@ void Engine::run()
                     scene->fixedUpdate();
             }
         }
+        in_fixed_update = false;
         for(Scene* scene : Scene::scenes)
         {
             if (scene->isEnabled())

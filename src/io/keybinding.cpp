@@ -2,6 +2,7 @@
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <sp2/attributes.h>
+#include <sp2/engine.h>
 #include <json11/json11.hpp>
 #include <fstream>
 
@@ -22,6 +23,8 @@ Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
     
     value = 0.0;
     previous_value = 0.0;
+    fixed_value = 0.0;
+    fixed_previous_value = 0.0;
     
     for(Keybinding* other : keybindings)
         sp2assert(other->name != name, "Duplicate keybinding name");
@@ -35,21 +38,29 @@ void Keybinding::setKey(sf::Keyboard::Key key)
 
 bool Keybinding::get() const
 {
+    if (Engine::getInstance()->isInFixedUpdate())
+        return fixed_value > 0.5;
     return value > 0.5;
 }
 
 bool Keybinding::getDown() const
 {
+    if (Engine::getInstance()->isInFixedUpdate())
+        return fixed_value > 0.5 && fixed_previous_value <= 0.5;
     return value > 0.5 && previous_value <= 0.5;
 }
 
 bool Keybinding::getUp() const
 {
+    if (Engine::getInstance()->isInFixedUpdate())
+        return fixed_value <= 0.5 && fixed_previous_value > 0.5;
     return value <= 0.5 && previous_value > 0.5;
 }
 
 float Keybinding::getValue() const
 {
+    if (Engine::getInstance()->isInFixedUpdate())
+        return fixed_value;
     return value;
 }
 
@@ -133,11 +144,25 @@ void Keybinding::update()
     }
 }
 
+void Keybinding::updateFixed()
+{
+    fixed_previous_value = fixed_value;
+    fixed_value = value;
+}
+
 void Keybinding::updateAll()
 {
     for(Keybinding* key : keybindings)
     {
         key->update();
+    }
+}
+
+void Keybinding::updateAllFixed()
+{
+    for(Keybinding* key : keybindings)
+    {
+        key->updateFixed();
     }
 }
 

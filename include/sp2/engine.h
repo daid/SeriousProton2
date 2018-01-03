@@ -24,12 +24,17 @@ public:
     bool getPause();
     void shutdown();
     
+    // Check if we are currently calling onUpdateFixed.
+    bool isInFixedUpdate() { return in_fixed_update; }
+    
     static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
 
     float game_speed;
     bool paused;
+
+    bool in_fixed_update;
 
     float maximum_frame_time;
     float minimum_frame_time;
