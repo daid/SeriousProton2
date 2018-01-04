@@ -28,6 +28,7 @@ private:
     
     void renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
 
+    std::shared_ptr<MeshData> mesh;
     RenderQueue queue;
 };
 

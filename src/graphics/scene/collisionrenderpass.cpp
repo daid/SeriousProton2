@@ -13,30 +13,19 @@ namespace sp {
 class Collision2DDebugRender : public b2Draw
 {
 public:
-    Collision2DDebugRender(RenderQueue& queue)
-    : queue(queue)
+    Collision2DDebugRender()
     {
         SetFlags(e_shapeBit);
     }
 
 	virtual void DrawPolygon(const b2Vec2* bvertices, int32 vertexCount, const b2Color& color) override
 	{
-        RenderData data;
-
-        std::vector<sp::MeshData::Vertex> vertices;
         for(int n=0; n<vertexCount - 1; n+=2)
         {
             vertices.emplace_back(sf::Vector3f(bvertices[n].x, bvertices[n].y, 0.0f));
             vertices.emplace_back(sf::Vector3f(bvertices[(n + 1) % vertexCount].x, bvertices[(n + 1) % vertexCount].y, 0.0f));
             vertices.emplace_back(sf::Vector3f(bvertices[(n + 2) % vertexCount].x, bvertices[(n + 2) % vertexCount].y, 0.0f));
         }
-        
-        data.shader = sp::Shader::get("shader/color.shader");
-        data.type = sp::RenderData::Type::Normal;
-        data.mesh = sp::MeshData::create(std::move(vertices));
-        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 64);
-
-        queue.add(Matrix4x4d::identity(), data);
 	}
 
 	virtual void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) override
@@ -46,22 +35,12 @@ public:
 
 	virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) override
 	{
-        RenderData data;
-
-        std::vector<sp::MeshData::Vertex> vertices;
         for(int n=0; n<16; n++)
         {
-            vertices.emplace_back(sf::Vector3f(std::sin(float(n + 1) / 8 * pi) * radius, std::cos(float(n + 1) / 8 * pi) * radius, 0.0f));
-            vertices.emplace_back(sf::Vector3f(std::sin(float(n) / 8 * pi) * radius, std::cos(float(n) / 8 * pi) * radius, 0.0f));
-            vertices.emplace_back(sf::Vector3f(0.0f, 0.0f, 0.0f));
+            vertices.emplace_back(sf::Vector3f(center.x + std::sin(float(n + 1) / 8 * pi) * radius, center.y + std::cos(float(n + 1) / 8 * pi) * radius, 0.0f));
+            vertices.emplace_back(sf::Vector3f(center.x + std::sin(float(n) / 8 * pi) * radius, center.y + std::cos(float(n) / 8 * pi) * radius, 0.0f));
+            vertices.emplace_back(sf::Vector3f(center.x, center.y, 0.0f));
         }
-        
-        data.shader = sp::Shader::get("shader/color.shader");
-        data.type = sp::RenderData::Type::Normal;
-        data.mesh = sp::MeshData::create(std::move(vertices));
-        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
-
-        queue.add(Matrix4x4d::translate(center.x, center.y, 0), data);
 	}
 	
 	virtual void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) override
@@ -71,25 +50,16 @@ public:
 	
 	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override
 	{
-        RenderData data;
         sp::Vector2f v0 = toVector<float>(p1);
         sp::Vector2f v1 = toVector<float>(p2);
         sp::Vector2f diff = sp::normalize(v1 - v0) * 0.2f;
         
-        std::vector<sp::MeshData::Vertex> vertices;
         vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
         vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
         vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f));
         vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
         vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
         vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f));
-
-        data.shader = sp::Shader::get("shader/color.shader");
-        data.type = sp::RenderData::Type::Normal;
-        data.mesh = sp::MeshData::create(std::move(vertices));
-        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
-
-        queue.add(Matrix4x4d::identity(), data);
 	}
 
 	virtual void DrawTransform(const b2Transform& xf) override
@@ -99,17 +69,16 @@ public:
 
 	virtual void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override
 	{
-        RenderData data;
-        
-        data.shader = sp::Shader::get("shader/color.shader");
-        data.type = sp::RenderData::Type::Normal;
-        data.mesh = sp::MeshData::createQuad(sp::Vector2f(size * 0.1, size * 0.1));
-        data.color = Color(color.r * 255, color.g * 255, color.b * 255, color.a * 128);
-
-        queue.add(Matrix4x4d::translate(p.x, p.y, 0), data);
+        size *= 0.05;
+        vertices.emplace_back(sf::Vector3f(p.x - size, p.y - size, 0.0f));
+        vertices.emplace_back(sf::Vector3f(p.x + size, p.y - size, 0.0f));
+        vertices.emplace_back(sf::Vector3f(p.x - size, p.y + size, 0.0f));
+        vertices.emplace_back(sf::Vector3f(p.x - size, p.y + size, 0.0f));
+        vertices.emplace_back(sf::Vector3f(p.x + size, p.y - size, 0.0f));
+        vertices.emplace_back(sf::Vector3f(p.x + size, p.y + size, 0.0f));
 	}
 
-    RenderQueue& queue;
+    std::vector<sp::MeshData::Vertex> vertices;
 };
 
 CollisionRenderPass::CollisionRenderPass(string target_layer)
@@ -177,17 +146,30 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
     
     if (scene->isEnabled() && camera)
     {
-        Collision2DDebugRender debug_renderer(queue);
-        
         camera->setAspectRatio(aspect_ratio);
-        queue.clear();
         if (scene->collision_world2d)
         {
+            Collision2DDebugRender debug_renderer;
+            
             scene->collision_world2d->SetDebugDraw(&debug_renderer);
             scene->collision_world2d->DrawDebugData();
             scene->collision_world2d->SetDebugDraw(nullptr);
+            
+            if (!mesh)
+                mesh = sp::MeshData::create(std::move(debug_renderer.vertices));
+            else
+                mesh->update(std::move(debug_renderer.vertices));
+
+            queue.clear();
+            RenderData render_data;
+            render_data.shader = sp::Shader::get("shader/color.shader");
+            render_data.type = sp::RenderData::Type::Normal;
+            render_data.mesh = mesh;
+            render_data.color = Color(255, 255, 255, 64);
+            queue.add(Matrix4x4d::identity(), render_data);
+
+            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
         }
-        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
     }
 }
 
