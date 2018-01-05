@@ -22,15 +22,15 @@ void Slider::setAttribute(const string& key, const string& value)
 {
     if (key == "min" || key == "min_value")
     {
-        min_value = value.toFloat();
+        min_value = stringutil::convert::toFloat(value);
     }
     else if (key == "max" || key == "max_value")
     {
-        max_value = value.toFloat();
+        max_value = stringutil::convert::toFloat(value);
     }
     else if (key == "value")
     {
-        this->value = value.toFloat();
+        this->value = stringutil::convert::toFloat(value);
     }
     else
     {

@@ -655,11 +655,6 @@ public:
             return substr(0, 1) + string("0") * (width - length()) + substr(1);
         return string("0") * (width - length()) + *this;
     }
-
-
-    /* Convert this string to a number */
-    float toFloat() const { return atof(c_str()); }
-    int toInt(int bits_per_digit=10) const { return strtol(c_str(), nullptr, bits_per_digit); }
 };
 #undef _WHITESPACE
 

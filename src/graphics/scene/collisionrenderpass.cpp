@@ -78,7 +78,7 @@ public:
         vertices.emplace_back(sf::Vector3f(p.x + size, p.y + size, 0.0f));
 	}
 
-    std::vector<sp::MeshData::Vertex> vertices;
+    sp::MeshData::Vertices vertices;
 };
 
 CollisionRenderPass::CollisionRenderPass(string target_layer)
@@ -162,7 +162,7 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
 
             queue.clear();
             RenderData render_data;
-            render_data.shader = sp::Shader::get("shader/color.shader");
+            render_data.shader = sp::Shader::get("internal:color.shader");
             render_data.type = sp::RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(255, 255, 255, 64);

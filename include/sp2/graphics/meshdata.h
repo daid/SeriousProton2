@@ -2,8 +2,8 @@
 #define SP2_GRAPHICS_MESHDATA_H
 
 #include <SFML/System/NonCopyable.hpp>
-#include "sp2/math/vector.h"
-#include "sp2/string.h"
+#include <sp2/math/vector.h>
+#include <sp2/string.h>
 #include <memory>
 
 namespace sp {
@@ -39,18 +39,19 @@ public:
         float normal[3];
         float uv[2];
     };
+    typedef std::vector<Vertex> Vertices;
 
-    MeshData(std::vector<Vertex>&& vertices);
+    MeshData(Vertices&& vertices);
     ~MeshData();
     
     void render();
-    void update(std::vector<Vertex>&& vertices);
+    void update(Vertices&& vertices);
     
-    static std::shared_ptr<MeshData> create(std::vector<Vertex>&& vertices);
+    static std::shared_ptr<MeshData> create(Vertices&& vertices);
     static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
     static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
 private:
-    std::vector<Vertex> vertices;
+    Vertices vertices;
     unsigned int vbo;
     bool dirty;
 

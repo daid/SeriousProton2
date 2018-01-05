@@ -8,7 +8,7 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin
 : sp::Node(parent)
 {
     particles.reserve(initial_buffer_size);
-    render_data.shader = Shader::get("shader/particle.shader");
+    render_data.shader = Shader::get("internal:particle.shader");
     render_data.texture = "particle.png";
     render_data.type = RenderData::Type::Transparent;
     
@@ -22,7 +22,7 @@ void ParticleEmitter::emit(const Parameters& parameters)
 
 void ParticleEmitter::onUpdate(float delta)
 {
-    std::vector<MeshData::Vertex> vertices;
+    MeshData::Vertices vertices;
     vertices.reserve(particles.size() * 6);
 
     for(auto it = particles.begin(); it != particles.end(); )

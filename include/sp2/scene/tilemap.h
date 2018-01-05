@@ -18,6 +18,7 @@ public:
     Tilemap(P<Node> parent, string texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y);
     
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
+    int getTileIndex(int x, int y);
     
     virtual void onUpdate(float delta);
 private:
@@ -40,7 +41,7 @@ private:
     void updateMesh();
     void updateCollision();
     
-    friend class TileMapCollisionBuilder;
+    friend class TilemapCollisionBuilder;
 };
 
 };//!namespace sp

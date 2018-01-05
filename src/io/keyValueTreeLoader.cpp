@@ -83,7 +83,7 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
             line = line.substr(0, comment_start);
         if (line == "{")
         {
-            //New anomounous node.
+            //New anonymous node.
             node->child_nodes.emplace_back();
             parseNode(&node->child_nodes.back());
         }

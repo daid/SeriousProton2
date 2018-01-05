@@ -41,10 +41,7 @@ void Label::setAttribute(const string& key, const string& value)
     }
     else if (key == "vertical")
     {
-        if (value == "true")
-            vertical = true;
-        else
-            vertical = value.toInt();
+        vertical = stringutil::convert::toBool(value);
     }
     else
     {

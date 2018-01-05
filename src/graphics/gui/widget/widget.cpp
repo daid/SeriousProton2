@@ -177,54 +177,41 @@ void Widget::setAttribute(const string& key, const string& value)
 {
     if (key == "size")
     {
-        auto values = value.split(",", 1);
-        layout.size.x = values[0].strip().toFloat();
-        if (values.size() == 2)
-            layout.size.y = values[1].strip().toFloat();
-        else
-            layout.size.y = layout.size.x;
+        layout.size = stringutil::convert::toVector2f(value);
     }
     else if (key == "position")
     {
-        auto values = value.split(",", 1);
-        layout.position.x = values[0].strip().toFloat();
-        if (values.size() == 2)
-            layout.position.y = values[1].strip().toFloat();
-        else
-            layout.position.y = layout.position.x;
+        layout.position = stringutil::convert::toVector2f(value);
     }
     else if (key == "margin")
     {
         auto values = value.split(",", 3);
         if (values.size() == 1)
         {
-            layout.margin_top = layout.margin_bottom = layout.margin_left = layout.margin_right = values[0].strip().toFloat();
+            layout.margin_top = layout.margin_bottom = layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
         }
         else if (values.size() == 2)
         {
-            layout.margin_left = layout.margin_right = values[0].strip().toFloat();
-            layout.margin_top = layout.margin_bottom = values[1].strip().toFloat();
+            layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
+            layout.margin_top = layout.margin_bottom = stringutil::convert::toFloat(values[1].strip());
         }
         else if (values.size() == 3)
         {
-            layout.margin_left = layout.margin_right = values[0].strip().toFloat();
-            layout.margin_top = values[1].strip().toFloat();
-            layout.margin_bottom = values[2].strip().toFloat();
+            layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
+            layout.margin_top = stringutil::convert::toFloat(values[1].strip());
+            layout.margin_bottom = stringutil::convert::toFloat(values[2].strip());
         }
         else if (values.size() == 4)
         {
-            layout.margin_left = values[0].strip().toFloat();
-            layout.margin_right = values[1].strip().toFloat();
-            layout.margin_top = values[2].strip().toFloat();
-            layout.margin_bottom = values[3].strip().toFloat();
+            layout.margin_left = stringutil::convert::toFloat(values[0].strip());
+            layout.margin_right = stringutil::convert::toFloat(values[1].strip());
+            layout.margin_top = stringutil::convert::toFloat(values[2].strip());
+            layout.margin_bottom = stringutil::convert::toFloat(values[3].strip());
         }
     }
     else if (key == "span")
     {
-        auto values = value.split(",", 1);
-        layout.span.x = std::max(1, values[0].strip().toInt());
-        if (values.size() == 2)
-            layout.span.y = std::max(1, values[1].strip().toInt());
+        layout.span = stringutil::convert::toVector2i(value);
     }
     else if (key == "alignment")
     {
@@ -257,31 +244,19 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else if (key == "match_content_size")
     {
-        if (value == "true")
-            layout.match_content_size = true;
-        else
-            layout.match_content_size = value.toInt();
+        layout.match_content_size = stringutil::convert::toBool(value);
     }
     else if (key == "stretch")
     {
-        if (value == "true")
-            layout.fill_height = layout.fill_width = true;
-        else
-            layout.fill_height = layout.fill_width = value.toInt();
+        layout.fill_height = layout.fill_width = stringutil::convert::toBool(value);
     }
     else if (key == "fill_height")
     {
-        if (value == "true")
-            layout.fill_height = true;
-        else
-            layout.fill_height = value.toInt();
+        layout.fill_height = stringutil::convert::toBool(value);
     }
     else if (key == "fill_width")
     {
-        if (value == "true")
-            layout.fill_width = true;
-        else
-            layout.fill_width = value.toInt();
+        layout.fill_width = stringutil::convert::toBool(value);
     }
     else if (key == "theme")
     {

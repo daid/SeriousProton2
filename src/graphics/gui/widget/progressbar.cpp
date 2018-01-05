@@ -45,13 +45,10 @@ void Progressbar::setAttribute(const string& key, const string& value)
     }
     else if (key == "range")
     {
-        auto values = value.split(",", 1);
-        max_value = values[0].strip().toFloat();
-        if (values.size() > 1)
-        {
-            min_value = values[0].strip().toFloat();
-            max_value = values[1].strip().toFloat();
-        }
+        sp::Vector2f v = stringutil::convert::toVector2f(value);
+        max_value = v.y;
+        if (v.x != v.y)
+            min_value = v.x;
     }
     else
     {

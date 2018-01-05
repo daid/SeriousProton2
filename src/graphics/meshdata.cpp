@@ -55,16 +55,16 @@ void MeshData::update(std::vector<Vertex>&& vertices)
     dirty = true;
 }
 
-std::shared_ptr<MeshData> MeshData::create(std::vector<Vertex>&& vertices)
+std::shared_ptr<MeshData> MeshData::create(Vertices&& vertices)
 {
-    return std::make_shared<MeshData>(std::forward<std::vector<Vertex>>(vertices));
+    return std::make_shared<MeshData>(std::forward<Vertices>(vertices));
 }
 
 std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
 {
     size *= 0.5f;
     
-    std::vector<Vertex> vertices;
+    Vertices vertices;
     vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
     vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
     vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
@@ -79,7 +79,7 @@ std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size)
 {
     size *= 0.5f;
     
-    std::vector<Vertex> vertices;
+    Vertices vertices;
     vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
     vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
     vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));

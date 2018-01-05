@@ -25,7 +25,7 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     this->texture_tile_count_x = texture_tile_count_x;
     this->texture_tile_count_y = texture_tile_count_y;
 
-    render_data.shader = Shader::get("shader/basic.shader");
+    render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = texture;
     render_data.type = RenderData::Type::Normal;
     
@@ -58,6 +58,15 @@ void Tilemap::setTile(int x, int y, int index, Collision collision)
     dirty = true;
 }
 
+int Tilemap::getTileIndex(int x, int y)
+{
+    if (y < 0 || y >= tiles.size())
+        return -1;
+    if (x < 0 || x >= tiles[0].size())
+        return -1;
+    return tiles[y][x].index;
+}
+
 void Tilemap::onUpdate(float delta)
 {
     if (!dirty)
@@ -72,7 +81,7 @@ void Tilemap::updateMesh()
     float fu = 1.0 / float(texture_tile_count_x);
     float fv = 1.0 / float(texture_tile_count_y);
     
-    std::vector<MeshData::Vertex> vertices;
+    MeshData::Vertices vertices;
     for(unsigned int y=0; y<tiles.size(); y++)
     {
         for(unsigned int x=0; x<tiles[y].size(); x++)
@@ -100,12 +109,12 @@ void Tilemap::updateMesh()
         render_data.mesh->update(std::move(vertices));
 }
 
-class TileMapCollisionBuilder
+class TilemapCollisionBuilder
 {
 public:
     sp::collision::Chains2D result;
     
-    TileMapCollisionBuilder(Tilemap& tilemap)
+    TilemapCollisionBuilder(Tilemap& tilemap)
     : tilemap(tilemap)
     {
         result.type = collision::Shape::Type::Static;
@@ -247,7 +256,7 @@ private:
 
 void Tilemap::updateCollision()
 {
-    TileMapCollisionBuilder builder(*this);
+    TilemapCollisionBuilder builder(*this);
     setCollisionShape(builder.result);
 }
 
