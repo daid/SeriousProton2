@@ -6,6 +6,7 @@
 #include <sp2/script/bindingObject.h>
 #include <sp2/pointerList.h>
 #include <sp2/graphics/scene/renderdata.h>
+#include <sp2/graphics/animation.h>
 #include <sp2/multiplayer/replication.h>
 
 class b2Body;
@@ -80,6 +81,7 @@ public:
     //Event called when 2 nodes collide. Not called when the game is paused.
     virtual void onCollision(CollisionInfo& info) {}
     
+    std::unique_ptr<Animation> animation;
     RenderData render_data;
 
     class Multiplayer
