@@ -60,9 +60,9 @@ void Tilemap::setTile(int x, int y, int index, Collision collision)
 
 int Tilemap::getTileIndex(int x, int y)
 {
-    if (y < 0 || y >= tiles.size())
+    if (y < 0 || y >= int(tiles.size()))
         return -1;
-    if (x < 0 || x >= tiles[0].size())
+    if (x < 0 || x >= int(tiles[0].size()))
         return -1;
     return tiles[y][x].index;
 }
