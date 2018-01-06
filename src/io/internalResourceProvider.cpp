@@ -13,6 +13,7 @@ public:
     InternalResourceStream(const string& resource)
     : resource(resource)
     {
+        offset = 0;
     }
     virtual ~InternalResourceStream()
     {

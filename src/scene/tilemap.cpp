@@ -180,12 +180,13 @@ private:
 
     void buildPathUp(collision::Chains2D::Path& path, int x, int y)
     {
+        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
         for(; x<w && collision[x][y].up; x++)
         {
             collision[x][y].up = false;
         }
         path.emplace_back(x * tilemap.tile_width, (y + 1) * tilemap.tile_height);
-        if (collision[x - 1][y].right)
+        if (x > 0 && collision[x - 1][y].right)
         {
             buildPathRight(path, x - 1, y);
             return;
@@ -199,6 +200,7 @@ private:
 
     void buildPathLeft(collision::Chains2D::Path& path, int x, int y)
     {
+        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
         for(; y<h && collision[x][y].left; y++)
         {
             collision[x][y].left = false;
@@ -209,7 +211,7 @@ private:
             buildPathUp(path, x, y - 1);
             return;
         }
-        if (x > 0 && y < w && collision[x - 1][y].down)
+        if (x > 0 && y < h && collision[x - 1][y].down)
         {
             buildPathDown(path, x - 1, y);
             return;
@@ -218,6 +220,7 @@ private:
 
     void buildPathRight(collision::Chains2D::Path& path, int x, int y)
     {
+        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
         for(; y>=0 && collision[x][y].right; y--)
         {
             collision[x][y].right = false;
@@ -237,6 +240,7 @@ private:
 
     void buildPathDown(collision::Chains2D::Path& path, int x, int y)
     {
+        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
         for(; x>=0 && collision[x][y].down; x--)
         {
             collision[x][y].down = false;

@@ -40,9 +40,12 @@ private:
     template<typename A1> static inline void logArg(const std::vector<A1>& a)
     {
         *stream << "[";
+        bool first = true;
         for(const auto& e : a)
         {
-            if (e != a.begin())
+            if (first)
+                first = false;
+            else
                 *stream << ", ";
             logArg(e);
         }
