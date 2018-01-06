@@ -19,6 +19,12 @@ static inline int toInt(const string& s, int bits_per_digit=10) { return strtol(
 static inline bool toBool(const string& s) { if (s.lower() == "true" || s.lower() == "yes" || s.lower() == "ok") return true; return toInt(s) != 0; }
 
 /*
+    Convert a string in the format "x[, y]*" into an std::vector of ints.
+    The result has minimal 1 value, even if the string cannot be converted to a int, the value 0 will be in the resulting vector.
+ */
+std::vector<int> toIntArray(const string& s);
+
+/*
     Convert a string in the format "x[, y]*" into an std::vector of floats.
     The result has minimal 1 value, even if the string cannot be converted to a float, the value 0 will be in the resulting vector.
  */

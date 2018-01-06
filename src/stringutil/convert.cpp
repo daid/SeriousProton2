@@ -4,6 +4,17 @@ namespace sp {
 namespace stringutil {
 namespace convert {
 
+std::vector<int> toIntArray(const string& s)
+{
+    std::vector<string> parts = s.split(",");
+    std::vector<int> result;
+    for(const string& part : parts)
+    {
+        result.push_back(toInt(part.strip()));
+    }
+    return result;
+}
+
 std::vector<float> toFloatArray(const string& s)
 {
     std::vector<string> parts = s.split(",");

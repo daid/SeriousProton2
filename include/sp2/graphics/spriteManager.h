@@ -11,7 +11,7 @@ namespace sp {
 class SpriteAnimation : public Animation
 {
 public:
-    virtual void play(string key);
+    virtual void play(string key, float speed=1.0);
     virtual void setFlags(int flags);
 protected:
     virtual void update(float delta, RenderData& render_data);
@@ -44,10 +44,13 @@ private:
     const Data& data;
     const Data::Animation* animation;
     float time_delta;
+    float speed;
+    bool playing;
     unsigned int keyframe;
     bool flip;
 public:
     static std::unique_ptr<Animation> load(string resource_name);
+    static constexpr int FlipFlag = 0x0001;
 private:
     static std::map<string, Data> cache;
 };

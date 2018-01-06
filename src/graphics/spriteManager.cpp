@@ -11,7 +11,7 @@ SpriteAnimation::SpriteAnimation(const Data& data)
     flip = false;
 }
 
-void SpriteAnimation::play(string key)
+void SpriteAnimation::play(string key, float speed)
 {
     auto it = data.animations.find(key);
     if (it == data.animations.end())
@@ -19,6 +19,8 @@ void SpriteAnimation::play(string key)
         animation = nullptr;
         return;
     }
+    this->speed = speed;
+    playing = true;
     if (animation == &it->second)
         return;
     
@@ -29,7 +31,7 @@ void SpriteAnimation::play(string key)
 
 void SpriteAnimation::setFlags(int flags)
 {
-    flip = flags & 0x01;
+    flip = flags & FlipFlag;
 }
 
 void SpriteAnimation::update(float delta, RenderData& render_data)
@@ -39,17 +41,25 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
         render_data.type = RenderData::Type::None;
         return;
     }
-    time_delta += delta;
-    if (time_delta >= animation->frames[keyframe].delay)
+    if (playing)
     {
-        time_delta -= animation->frames[keyframe].delay;
-        keyframe = keyframe + 1;
-        if (keyframe == animation->frames.size())
+        time_delta += delta * speed;
+        if (time_delta >= animation->frames[keyframe].delay)
         {
-            if (animation->loop)
-                keyframe = 0;
-            else
-                keyframe--;
+            time_delta -= animation->frames[keyframe].delay;
+            keyframe = keyframe + 1;
+            if (keyframe == animation->frames.size())
+            {
+                if (animation->loop)
+                {
+                    keyframe = 0;
+                }
+                else
+                {
+                    keyframe--;
+                    playing = false;
+                }
+            }
         }
     }
 
@@ -84,12 +94,19 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
         animation.texture = data["texture"];
         animation.loop = stringutil::convert::toBool(data["loop"]);
         
-        int frame_count = stringutil::convert::toInt(data["frame_count"]);
-        if (frame_count < 1)
-            frame_count = 1;
+        std::vector<int> frames = stringutil::convert::toIntArray(data["frames"]);
+        if (frames.size() == 1)
+        {
+            int frame_count = stringutil::convert::toInt(data["frame_count"]);
+            if (frame_count < 1)
+                frame_count = 1;
+            frames.clear();
+            for(int n=0; n<frame_count; n++)
+                frames.push_back(n);
+        }
         int line_length = stringutil::convert::toInt(data["line_length"]);
         if (line_length <= 0)
-            line_length = frame_count;
+            line_length = frames.size();
         std::vector<float> delays = stringutil::convert::toFloatArray(data["delay"]);
         sf::Vector2f texture_size = stringutil::convert::toVector2f(data["texture_size"]);
         sf::Vector2f position = stringutil::convert::toVector2f(data["position"]);
@@ -103,11 +120,11 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
         sf::Vector3f p2 = sf::Vector3f(-size.x + offset.x / frame_size.y,  size.y + offset.y / frame_size.y, 0.0f);
         sf::Vector3f p3 = sf::Vector3f( size.x + offset.x / frame_size.y,  size.y + offset.y / frame_size.y, 0.0f);
         
-        total_frames += frame_count;
-        for(int n=0; n<frame_count; n++)
+        total_frames += frames.size();
+        for(unsigned int n=0; n<frames.size(); n++)
         {
-            int x = n % line_length;
-            int y = n / line_length;
+            int x = frames[n] % line_length;
+            int y = frames[n] / line_length;
             
             float u0 = position.x + (frame_size.x + margin.x) * x;
             float u1 = u0 + frame_size.x;

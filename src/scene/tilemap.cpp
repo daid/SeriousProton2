@@ -28,6 +28,7 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = texture;
     render_data.type = RenderData::Type::Normal;
+    render_data.order = -1;
     
     dirty = false;
 }
