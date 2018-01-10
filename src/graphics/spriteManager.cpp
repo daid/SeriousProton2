@@ -115,10 +115,13 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
         sf::Vector2f size = stringutil::convert::toVector2f(data["size"]) / 2.0f;
         sf::Vector2f margin = stringutil::convert::toVector2f(data["margin"]);
         
-        sf::Vector3f p0 = sf::Vector3f(-size.x + offset.x / frame_size.y, -size.y + offset.y / frame_size.y, 0.0f);
-        sf::Vector3f p1 = sf::Vector3f( size.x + offset.x / frame_size.y, -size.y + offset.y / frame_size.y, 0.0f);
-        sf::Vector3f p2 = sf::Vector3f(-size.x + offset.x / frame_size.y,  size.y + offset.y / frame_size.y, 0.0f);
-        sf::Vector3f p3 = sf::Vector3f( size.x + offset.x / frame_size.y,  size.y + offset.y / frame_size.y, 0.0f);
+        offset.x = offset.x / frame_size.x * size.x * 2.0;
+        offset.y = offset.y / frame_size.y * size.y * 2.0;
+        
+        sf::Vector3f p0 = sf::Vector3f(-size.x + offset.x, -size.y + offset.y, 0.0f);
+        sf::Vector3f p1 = sf::Vector3f( size.x + offset.x, -size.y + offset.y, 0.0f);
+        sf::Vector3f p2 = sf::Vector3f(-size.x + offset.x,  size.y + offset.y, 0.0f);
+        sf::Vector3f p3 = sf::Vector3f( size.x + offset.x,  size.y + offset.y, 0.0f);
         
         total_frames += frames.size();
         for(unsigned int n=0; n<frames.size(); n++)
