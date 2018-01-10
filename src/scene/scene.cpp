@@ -144,7 +144,7 @@ void Scene::postFixedUpdate(float delta)
 void Scene::updateNode(float delta, P<Node> node)
 {
     node->onUpdate(delta);
-    if (node->animation)
+    if (node && node->animation)
         node->animation->update(delta, node->render_data);
     if (node)
     {

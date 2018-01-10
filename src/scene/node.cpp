@@ -180,6 +180,13 @@ void Node::setCollisionShape(const collision::Shape& shape)
     shape.create(this);
 }
 
+void Node::removeCollisionShape()
+{
+    if (collision_body2d)
+        scene->destroyCollisionBody2D(collision_body2d);
+    collision_body2d = nullptr;
+}
+
 bool Node::testCollision(sp::Vector2d position)
 {
     if (!collision_body2d)

@@ -65,7 +65,11 @@ public:
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     const Matrix4x4d& getLocalTransform() const { return local_transform; }
 
+    //Set or replace the current collision shape on this body.
+    //If you want to shape change, you do not need to call removeCollisionShape() before calling setCollisionShape (doing so will reset the velocity)
     void setCollisionShape(const collision::Shape& shape);
+    //Remove the collision shape.
+    void removeCollisionShape();
     
     //Test if the given point will collide with the shape of this Node.
     bool testCollision(sp::Vector2d position);

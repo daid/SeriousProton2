@@ -10,7 +10,7 @@ class CameraNode : public Node
 public:
     CameraNode(P<Node> parent);
     
-    void setOrtographic(double view_distance = 1.0f);
+    void setOrtographic(double view_distance = 1.0f, bool fixed_width=false);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
     
     void setAspectRatio(double ratio);
@@ -23,7 +23,8 @@ protected:
 
     enum class Type
     {
-        Ortographic,
+        OrtographicFixedHeight,
+        OrtographicFixedWidth,
         Perspective
     };
 private:

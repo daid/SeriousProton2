@@ -72,7 +72,7 @@ public:
         return static_cast<T*>(ptr);
     }
 
-    explicit operator bool()
+    explicit operator bool() const
     {
         return ptr != nullptr;
     }
@@ -101,7 +101,7 @@ public:
 
 template<typename T> static inline std::ostream& operator<<(std::ostream& os, const P<T>& p)
 {
-    if (p)
+    if (bool(p))
         os << typeid(**p).name() << ':' << *p;
     else
         os << "nullptr";
