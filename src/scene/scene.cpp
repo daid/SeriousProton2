@@ -1,6 +1,6 @@
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
-#include <sp2/scene/cameraNode.h>
+#include <sp2/scene/camera.h>
 #include <sp2/engine.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
@@ -34,7 +34,7 @@ Scene::~Scene()
     scene_mapping.erase(scene_name);
 }
 
-void Scene::setDefaultCamera(P<CameraNode> camera)
+void Scene::setDefaultCamera(P<Camera> camera)
 {
     sp2assert(camera->getScene() == this, "Trying to set camera from different scene as default for scene.");
     this->camera = camera;

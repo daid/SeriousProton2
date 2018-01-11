@@ -1,14 +1,14 @@
-#ifndef SP2_SCENE_CAMERA_NODE_H
-#define SP2_SCENE_CAMERA_NODE_H
+#ifndef SP2_SCENE_CAMERA_H
+#define SP2_SCENE_CAMERA_H
 
 #include <sp2/scene/node.h>
 
 namespace sp {
 
-class CameraNode : public Node
+class Camera : public Node
 {
 public:
-    CameraNode(P<Node> parent);
+    Camera(P<Node> parent);
     
     void setOrtographic(double view_distance = 1.0f, bool fixed_width=false);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
@@ -36,4 +36,4 @@ private:
 
 };//!namespace sp
 
-#endif//SP2_SCENE_NODE_H
+#endif//SP2_SCENE_CAMERA_H

@@ -1,7 +1,7 @@
 #include <sp2/graphics/scene/basicnoderenderpass.h>
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
-#include <sp2/scene/cameraNode.h>
+#include <sp2/scene/camera.h>
 #include <sp2/logging.h>
 
 namespace sp {
@@ -16,7 +16,7 @@ BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene)
 {
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene, P<CameraNode> camera)
+BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene, P<Camera> camera)
 : RenderPass(target_layer), single_scene(scene), specific_camera(camera)
 {
 }
@@ -27,7 +27,7 @@ void BasicNodeRenderPass::setScene(P<Scene> scene)
     single_scene = scene;
 }
 
-void BasicNodeRenderPass::setCamera(P<CameraNode> camera)
+void BasicNodeRenderPass::setCamera(P<Camera> camera)
 {
     specific_camera = camera;
 }
@@ -47,7 +47,7 @@ void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> laye
 
 void BasicNodeRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
-    P<CameraNode> camera = scene->getCamera();
+    P<Camera> camera = scene->getCamera();
     if (specific_camera && specific_camera->getScene() == scene)
         camera = specific_camera;
     

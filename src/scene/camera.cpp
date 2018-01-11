@@ -1,16 +1,16 @@
-#include <sp2/scene/cameraNode.h>
+#include <sp2/scene/camera.h>
 #include <sp2/logging.h>
 
 namespace sp {
 
-CameraNode::CameraNode(P<Node> parent)
+Camera::Camera(P<Node> parent)
 : Node(parent), type(Type::OrtographicFixedHeight)
 {
     field_of_view = 60.0;
     view_distance = 1.0;
 }
 
-void CameraNode::setOrtographic(double view_distance, bool fixed_width)
+void Camera::setOrtographic(double view_distance, bool fixed_width)
 {
     if (fixed_width)
         this->type = Type::OrtographicFixedWidth;
@@ -19,14 +19,14 @@ void CameraNode::setOrtographic(double view_distance, bool fixed_width)
     this->view_distance = view_distance;
 }
 
-void CameraNode::setPerspective(double field_of_view, double view_distance)
+void Camera::setPerspective(double field_of_view, double view_distance)
 {
     this->type = Type::Perspective;
     this->field_of_view = field_of_view;
     this->view_distance = view_distance;
 }
 
-void CameraNode::setAspectRatio(double ratio)
+void Camera::setAspectRatio(double ratio)
 {
     switch(type)
     {
@@ -42,7 +42,7 @@ void CameraNode::setAspectRatio(double ratio)
     }
 }
 
-sp::Vector2d CameraNode::screenToWorld(sp::Vector2f position)
+sp::Vector2d Camera::screenToWorld(sp::Vector2f position)
 {
     //First transform the screen pixel coordinates into -1 to 1 coordinates to match OpenGL screen space.
     sp::Vector2d screen_position_normalized = sp::Vector2d(position) * 2.0 - sp::Vector2d(1, 1);
@@ -53,7 +53,7 @@ sp::Vector2d CameraNode::screenToWorld(sp::Vector2f position)
     return getLocalPoint2D(world_position);
 }
 
-sp::Vector2f CameraNode::worldToScreen(sp::Vector2d position)
+sp::Vector2f Camera::worldToScreen(sp::Vector2d position)
 {
     sp::Vector2d world_position = getLocalTransform().inverse() * position;
     sp::Vector2d screen_position_normalized = projection_matrix * world_position;

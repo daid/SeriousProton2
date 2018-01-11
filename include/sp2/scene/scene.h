@@ -17,7 +17,7 @@ class Shape2D;
 }
 
 class Node;
-class CameraNode;
+class Camera;
 class Scene final : public AutoPointerObject
 {
 public:
@@ -25,8 +25,8 @@ public:
     virtual ~Scene();
 
     P<Node> getRoot() { return root; }
-    P<CameraNode> getCamera() { return camera; }
-    void setDefaultCamera(P<CameraNode> camera);
+    P<Camera> getCamera() { return camera; }
+    void setDefaultCamera(P<Camera> camera);
     
     void enable() { enabled = true; }
     void disable() { enabled = false; }
@@ -60,7 +60,7 @@ private:
     string scene_name;
     
     P<Node> root;
-    P<CameraNode> camera;
+    P<Camera> camera;
     b2World* collision_world2d;
     bool enabled;
 

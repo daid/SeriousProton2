@@ -2,7 +2,7 @@
 #include <sp2/graphics/meshdata.h>
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
-#include <sp2/scene/cameraNode.h>
+#include <sp2/scene/camera.h>
 #include <sp2/logging.h>
 #include <Box2D/Box2D.h>
 #include <SFML/Window/Keyboard.hpp>
@@ -94,7 +94,7 @@ CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene)
     enabled = true;
 }
 
-CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene, P<CameraNode> camera)
+CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene, P<Camera> camera)
 : RenderPass(target_layer), single_scene(scene), specific_camera(camera)
 {
     enabled = true;
@@ -106,7 +106,7 @@ void CollisionRenderPass::setScene(P<Scene> scene)
     single_scene = scene;
 }
 
-void CollisionRenderPass::setCamera(P<CameraNode> camera)
+void CollisionRenderPass::setCamera(P<Camera> camera)
 {
     specific_camera = camera;
 }
@@ -140,7 +140,7 @@ void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> laye
 
 void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {    
-    P<CameraNode> camera = scene->getCamera();
+    P<Camera> camera = scene->getCamera();
     if (specific_camera && specific_camera->getScene() == scene)
         camera = specific_camera;
     
