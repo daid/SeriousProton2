@@ -38,6 +38,7 @@ public:
     
     void queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function);
     void queryCollision(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function);
+    void queryCollision(Vector2d position_a, Vector2d position_b, std::function<bool(P<Node> object)> callback_function);
     //Gives a callback for any object being hit by the ray from start to end. In any order.
     //Best used to see if start to end is blocked by anything (line of sight)
     //Return false to stop searching for colliding objects.
