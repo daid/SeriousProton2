@@ -2,8 +2,8 @@
 #define SP2_STRINGUTIL_CONVERT_H
 
 #include <sp2/string.h>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
+#include <sp2/math/vector.h>
+
 
 namespace sp {
 namespace stringutil {
@@ -33,6 +33,7 @@ std::vector<float> toFloatArray(const string& s);
     Convert a string to a 2d vector value.
     Will try to convert "x, y" into a vector. If the y value is missing (only a single number) then the x value is copied into the y value as well.
 */
+sp::Vector2d toVector2d(const string& s);
 sf::Vector2f toVector2f(const string& s);
 sf::Vector2i toVector2i(const string& s);
 

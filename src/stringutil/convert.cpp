@@ -26,6 +26,16 @@ std::vector<float> toFloatArray(const string& s)
     return result;
 }
 
+sp::Vector2d toVector2d(const string& s)
+{
+    double f = toFloat(s);
+    if (s.find(",") > -1)
+    {
+        return sp::Vector2d(f, toFloat(s.substr(s. find(",") + 1).strip()));
+    }
+    return sp::Vector2d(f, f);
+}
+
 sf::Vector2f toVector2f(const string& s)
 {
     float f = toFloat(s);
