@@ -14,6 +14,7 @@ Label::Label(P<Container> parent)
     loadThemeData("label");
     text_alignment = Alignment::Center;
     vertical = false;
+    text_size = -1;
 }
 
 void Label::setLabel(string label)
@@ -26,6 +27,10 @@ void Label::setAttribute(const string& key, const string& value)
     if (key == "label" || key == "caption")
     {
         label = value;
+    }
+    else if (key == "text_size" || key == "text.size")
+    {
+        text_size = stringutil::convert::toFloat(value);
     }
     else if (key == "text_alignment")
     {
@@ -54,9 +59,9 @@ void Label::render(sf::RenderTarget& window)
     const ThemeData::StateData& t = theme->states[int(getState())];
     //renderStretched(window, layout.rect, t.background_image, t.background_color);
     if (vertical)
-        renderTextVertical(window, layout.rect, text_alignment, label, t.font, t.text_size, t.forground_color);
+        renderTextVertical(window, layout.rect, text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
     else
-        renderText(window, layout.rect, text_alignment, label, t.font, t.text_size, t.forground_color);
+        renderText(window, layout.rect, text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
 }
 
 };//!namespace gui

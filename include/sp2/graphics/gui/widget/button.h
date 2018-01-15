@@ -20,6 +20,7 @@ public:
     virtual void onPointerUp(sf::Vector2f position, int id) override;
 private:
     string label;
+    float text_size;
 };
 
 };//!namespace gui

@@ -23,6 +23,7 @@ public:
 private:
     Alignment text_alignment;
     string label;
+    float text_size;
     bool vertical;
 };
 

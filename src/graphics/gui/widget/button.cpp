@@ -12,6 +12,7 @@ Button::Button(P<Container> parent)
 : Widget(parent)
 {
     loadThemeData("button");
+    text_size = -1;
 }
 
 void Button::setLabel(string label)
@@ -25,6 +26,10 @@ void Button::setAttribute(const string& key, const string& value)
     {
         label = value;
     }
+    else if (key == "text_size" || key == "text.size")
+    {
+        text_size = stringutil::convert::toFloat(value);
+    }
     else
     {
         Widget::setAttribute(key, value);
@@ -35,7 +40,7 @@ void Button::render(sf::RenderTarget& window)
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
     renderStretched(window, layout.rect, t.background_image, t.background_color);
-    renderText(window, layout.rect, Alignment::Center, label, t.font, t.text_size, t.forground_color);
+    renderText(window, layout.rect, Alignment::Center, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
 }
 
 bool Button::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)

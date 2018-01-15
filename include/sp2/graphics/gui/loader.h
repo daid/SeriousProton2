@@ -16,7 +16,7 @@ class Widget;
 class Loader : sf::NonCopyable
 {
 public:
-    static P<Widget> load(string resource_name, string root_id, P<Widget> root, bool auto_reload=false);
+    static P<Widget> load(string resource_name, string root_id, P<Widget> root=nullptr, bool auto_reload=false);
 
 private:
     P<KeyValueTree> tree;

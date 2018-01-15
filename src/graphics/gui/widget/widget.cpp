@@ -5,6 +5,7 @@
 #include <sp2/graphics/gui/loader.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
+#include <sp2/assert.h>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
@@ -43,6 +44,7 @@ Widget::Widget(P<Widget> parent)
 {
     if (!parent)
     {
+        sp2assert(GraphicsLayer::default_gui_layer, "Need to create a <sp::gui::GraphicsLayer> before Widgets can be created");
         parent = GraphicsLayer::default_gui_layer->root;
     }
 
