@@ -2,7 +2,7 @@
 #include <sp2/graphics/gui/graphicslayer.h>
 #include <sp2/graphics/gui/layout/layout.h>
 #include <sp2/graphics/gui/theme.h>
-#include <sp2/graphics/gui/guiLoader.h>
+#include <sp2/graphics/gui/loader.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
 #include <SFML/Graphics/Texture.hpp>
