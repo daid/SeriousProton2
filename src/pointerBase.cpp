@@ -40,13 +40,15 @@ void _PBase::take(_PBase& p)
     next = p.next;
     prev = p.prev;
     
-    if (prev)
-        prev->next = this;
-    else
-        ptr->pointer_list_start = this;
-    if (next)
-        next->prev = this;
-    
+    if (ptr)
+    {
+        if (prev)
+            prev->next = this;
+        else
+            ptr->pointer_list_start = this;
+        if (next)
+            next->prev = this;
+    }
     p.ptr = nullptr;
 }
 
