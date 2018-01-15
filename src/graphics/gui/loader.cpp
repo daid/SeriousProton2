@@ -1,4 +1,4 @@
-#include <sp2/graphics/gui/guiLoader.h>
+#include <sp2/graphics/gui/loader.h>
 #include <sp2/graphics/gui/widget/widget.h>
 #include <sp2/io/keyValueTreeLoader.h>
 #include <sp2/logging.h>
