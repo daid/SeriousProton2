@@ -16,6 +16,7 @@ namespace sp {
 namespace gui {
 
 WidgetClassRegistry* WidgetClassRegistry::first;
+float Widget::text_scale_factor = 0.5;
 
 SP_REGISTER_WIDGET("", Widget);
 
@@ -505,7 +506,7 @@ void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& re
 
 void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
 {
-    sf::Text textElement(text, *fontManager.get(font_name), text_size);
+    sf::Text text_element(text, *fontManager.get(font_name), text_size / text_scale_factor);
     float y = 0;
     float x = 0;
     
@@ -536,28 +537,29 @@ void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Ali
     case Alignment::TopLeft:
     case Alignment::BottomLeft:
     case Alignment::Left:
-        x = rect.left - textElement.getLocalBounds().left;
+        x = rect.left - text_element.getLocalBounds().left * text_scale_factor;
         break;
     case Alignment::TopRight:
     case Alignment::BottomRight:
     case Alignment::Right:
-        x = rect.left + rect.width - textElement.getLocalBounds().width - textElement.getLocalBounds().left;
+        x = rect.left + rect.width - text_element.getLocalBounds().width * text_scale_factor - text_element.getLocalBounds().left * text_scale_factor;
         break;
     case Alignment::Top:
     case Alignment::Bottom:
     case Alignment::Center:
-        x = rect.left + rect.width / 2.0 - textElement.getLocalBounds().width / 2.0 - textElement.getLocalBounds().left;
+        x = rect.left + rect.width / 2.0 - text_element.getLocalBounds().width * text_scale_factor / 2.0 - text_element.getLocalBounds().left * text_scale_factor;
         break;
     }
-    textElement.setPosition(x, y);
-    textElement.setFillColor(color);
-    window.draw(textElement);
+    text_element.setScale(text_scale_factor, text_scale_factor);
+    text_element.setPosition(x, y);
+    text_element.setFillColor(color);
+    window.draw(text_element);
 }
 
 void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
 {
-    sf::Text textElement(text, *fontManager.get(font_name), text_size);
-    textElement.setRotation(-90);
+    sf::Text text_element(text, *fontManager.get(font_name), text_size / text_scale_factor);
+    text_element.setRotation(-90);
     float y = 0;
     float x = 0;
     
@@ -569,17 +571,17 @@ void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& r
     case Alignment::TopLeft:
     case Alignment::TopRight:
     case Alignment::Top:
-        y = rect.top + textElement.getLocalBounds().width + textElement.getLocalBounds().left;
+        y = rect.top + text_element.getLocalBounds().width * text_scale_factor + text_element.getLocalBounds().left * text_scale_factor;
         break;
     case Alignment::BottomLeft:
     case Alignment::BottomRight:
     case Alignment::Bottom:
-        y = rect.top + rect.height + textElement.getLocalBounds().left;
+        y = rect.top + rect.height + text_element.getLocalBounds().left * text_scale_factor;
         break;
     case Alignment::Left:
     case Alignment::Right:
     case Alignment::Center:
-        y = rect.top + rect.height / 2.0 + textElement.getLocalBounds().width / 2.0 + textElement.getLocalBounds().left;
+        y = rect.top + rect.height / 2.0 + text_element.getLocalBounds().width * text_scale_factor / 2.0 + text_element.getLocalBounds().left * text_scale_factor;
         break;
     }
     
@@ -601,9 +603,10 @@ void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& r
         x = rect.left + rect.width / 2.0 - text_size * 0.7;
         break;
     }
-    textElement.setPosition(x, y);
-    textElement.setFillColor(color);
-    window.draw(textElement);
+    text_element.setScale(text_scale_factor, text_scale_factor);
+    text_element.setPosition(x, y);
+    text_element.setFillColor(color);
+    window.draw(text_element);
 }
 
 };//!namespace gui

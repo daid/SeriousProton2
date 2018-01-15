@@ -87,6 +87,7 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     virtual_position_transform.scale(virtual_size.x, virtual_size.y);
     virtual_position_transform.scale(1.0f / view.getViewport().width, 1.0f / view.getViewport().height);
     virtual_position_transform.translate(-view.getViewport().left, -view.getViewport().top);
+    Widget::text_scale_factor = std::min(virtual_size.x / render_size.x, virtual_size.y / render_size.y);
     
     root->layout.position = sf::Vector2f(0, 0);
     root->layout.size = virtual_size;

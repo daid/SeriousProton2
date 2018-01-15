@@ -139,6 +139,8 @@ private:
     std::vector<AutoReloadData> auto_reload;
 #endif
 
+    static float text_scale_factor;
+
     friend class GraphicsLayer;
 };
 

@@ -62,7 +62,7 @@ void BasicNodeRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
 
 void BasicNodeRenderPass::recursiveNodeRender(Node* node)
 {
-    if (node->render_data.type != sp::RenderData::Type::None)
+    if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
         queue.add(node->getGlobalTransform(), node->render_data);
 
     for(Node* child : node->getChildren())
