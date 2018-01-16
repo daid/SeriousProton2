@@ -18,6 +18,8 @@ GraphicsLayer::GraphicsLayer(int priority)
     min_size.x = min_size.y = 0.0;
     max_size.x = max_size.y = std::numeric_limits<float>::max();
     
+    draw_debug = false;
+    
     if (!default_gui_layer)
         default_gui_layer = this;
 }
@@ -100,6 +102,11 @@ void GraphicsLayer::render(sf::RenderTarget& window)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::G))
     {
         debugDump(root, 0);
+        draw_debug = !draw_debug;
+    }
+    if (draw_debug)
+    {
+        debugDraw(window, root);
     }
 #endif
 }
@@ -110,12 +117,30 @@ void GraphicsLayer::debugDump(P<Widget> widget, int indent)
     if (!widget->isVisible())
         return;
     
-    LOG(Debug, istr, "{", "[" + widget->id + "]");
+    LOG(Debug, istr, "{", "[" + widget->id + "]", widget->layout.rect.left, widget->layout.rect.top, widget->layout.rect.width, widget->layout.rect.height);
     for(Widget* child : widget->children)
     {
         debugDump(child, indent + 1);
     }
     LOG(Debug, istr, "}");
+}
+
+void GraphicsLayer::debugDraw(sf::RenderTarget& window, P<Widget> widget)
+{
+    {
+        sf::RectangleShape rect(sf::Vector2f(widget->layout.rect.width - 2, widget->layout.rect.height - 2));
+        rect.setPosition(widget->layout.rect.left + 1, widget->layout.rect.top + 1);
+        rect.setFillColor(sf::Color(255,255,255, 8));
+        rect.setOutlineColor(sf::Color(255,255,255, 64));
+        rect.setOutlineThickness(1);
+        window.draw(rect);
+    }
+    
+    for(Widget* child : widget->children)
+    {
+        if (child->isVisible())
+            debugDraw(window, child);
+    }
 }
 
 bool GraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)

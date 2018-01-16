@@ -18,7 +18,7 @@ class Shape2D;
 
 class Node;
 class Camera;
-class Scene final : public AutoPointerObject
+class Scene : public AutoPointerObject
 {
 public:
     Scene(string scene_name);
@@ -28,9 +28,9 @@ public:
     P<Camera> getCamera() { return camera; }
     void setDefaultCamera(P<Camera> camera);
     
-    void enable() { enabled = true; }
-    void disable() { enabled = false; }
-    void setEnabled(bool enabled) { this->enabled = enabled; }
+    void enable() { setEnabled(true); }
+    void disable() { setEnabled(false); }
+    void setEnabled(bool enabled);
     bool isEnabled() { return enabled; }
     void fixedUpdate();
     void postFixedUpdate(float delta);
@@ -52,6 +52,8 @@ public:
     
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}
+    virtual void onEnable() {}
+    virtual void onDisable() {}
     
     string getSceneName() const { return scene_name; }
     

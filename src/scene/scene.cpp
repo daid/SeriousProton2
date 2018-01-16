@@ -34,6 +34,18 @@ Scene::~Scene()
     scene_mapping.erase(scene_name);
 }
 
+void Scene::setEnabled(bool enabled)
+{
+    if (this->enabled != enabled)
+    {
+        this->enabled = enabled;
+        if (enabled)
+            onEnable();
+        else
+            onDisable();
+    }
+}
+
 void Scene::setDefaultCamera(P<Camera> camera)
 {
     sp2assert(camera->getScene() == this, "Trying to set camera from different scene as default for scene.");

@@ -45,7 +45,7 @@ P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::ma
     if (reg)
     {
         P<Widget> widget = reg->creation_function(parent);
-        widget->setID(node.id);
+        widget->setID(node.id.format(parameters));
         loadWidgetFromTree(widget, node, parameters);
         return widget;
     }else{

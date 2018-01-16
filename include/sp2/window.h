@@ -21,6 +21,8 @@ public:
     
     void setFullScreen(bool fullscreen);
     void setClearColor(sf::Color color);
+
+    static P<Window> getInstance();
 private:
     virtual ~Window();
     

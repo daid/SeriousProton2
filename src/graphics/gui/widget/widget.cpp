@@ -277,6 +277,10 @@ void Widget::setAttribute(const string& key, const string& value)
             theme = Theme::getTheme(theme_name)->getData(theme_data_name);
         }
     }
+    else if (key == "visible")
+    {
+        visible = stringutil::convert::toBool(value);
+    }
     else
     {
         LOG(Warning, "Tried to set unknown attribute:", key, "to", value);
@@ -528,7 +532,7 @@ void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Ali
     case Alignment::Left:
     case Alignment::Right:
     case Alignment::Center:
-        y = rect.top + rect.height / 2.0 - text_size + text_size * 0.3;
+        y = rect.top + rect.height / 2.0 - text_size * 0.7;
         break;
     }
     

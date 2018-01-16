@@ -88,6 +88,24 @@ public:
     virtual void setAttribute(const string& key, const string& value);
     
     P<Widget> getWidgetWithID(const string& id);
+    template<class T> P<T> getWidgetAt(sp::Vector2f position)
+    {
+        if (layout.rect.contains(position))
+        {
+            for(PList<Widget>::ReverseIterator it = children.rbegin(); it != children.rend(); ++it)
+            {
+                Widget* w = *it;
+                if (w->isVisible())
+                {
+                    P<T> result = w->getWidgetAt<T>(position);
+                    if (result)
+                        return result;
+                }
+            }
+            return P<Widget>(this);
+        }
+        return nullptr;
+    }
     
     LayoutInfo layout;
 

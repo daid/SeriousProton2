@@ -29,6 +29,11 @@ Window::~Window()
 {
 }
 
+P<Window> Window::getInstance()
+{
+    return window;
+}
+
 void Window::setFullScreen(bool fullscreen)
 {
     this->fullscreen = fullscreen;

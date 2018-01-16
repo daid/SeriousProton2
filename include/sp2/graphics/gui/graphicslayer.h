@@ -33,12 +33,15 @@ private:
     //transform to translate 0.0-1.0 screen coordinates to virtual window coordinates of the GUI
     sf::Transform virtual_position_transform;
     
+    bool draw_debug;
+    
     static P<GraphicsLayer> default_gui_layer;
     
     void drawWidgets(sf::RenderTarget& window, P<Widget> w);
     P<Widget> widgetAtPosition(P<Widget> w, sf::Vector2f position);
     
     void debugDump(P<Widget> widget, int indent);
+    void debugDraw(sf::RenderTarget& window, P<Widget> widget);
     
     friend class Widget;
 };
