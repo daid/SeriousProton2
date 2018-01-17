@@ -20,7 +20,7 @@ public:
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
     int getTileIndex(int x, int y);
     
-    virtual void onUpdate(float delta);
+    virtual void onFixedUpdate();
 private:
     class Tile
     {

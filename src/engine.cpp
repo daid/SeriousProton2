@@ -70,7 +70,10 @@ void Engine::run()
             for(Scene* scene : Scene::scenes)
             {
                 if (scene->isEnabled())
+                {
                     scene->fixedUpdate();
+                    scene->postFixedUpdate(fixed_update_accumulator);
+                }
             }
         }
         in_fixed_update = false;

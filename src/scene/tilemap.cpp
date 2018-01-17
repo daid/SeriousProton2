@@ -68,7 +68,7 @@ int Tilemap::getTileIndex(int x, int y)
     return tiles[y][x].index;
 }
 
-void Tilemap::onUpdate(float delta)
+void Tilemap::onFixedUpdate()
 {
     if (!dirty)
         return;
