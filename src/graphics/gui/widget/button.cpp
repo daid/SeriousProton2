@@ -50,7 +50,7 @@ bool Button::onPointerDown(io::Pointer::Button button, sf::Vector2f position, in
 
 void Button::onPointerUp(sf::Vector2f position, int id)
 {
-    if (layout.rect.contains(position))
+    if (layout.rect.contains(position) && isEnabled())
         runCallback(Variant());
 }
 

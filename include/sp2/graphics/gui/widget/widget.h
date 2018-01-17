@@ -108,6 +108,7 @@ public:
     }
     
     LayoutInfo layout;
+    string tag; //User set tag, can be used for anything.
 
 #ifdef DEBUG
     void setupAutoReload(P<Widget> widget, const string& resource_name, const string& root_id);

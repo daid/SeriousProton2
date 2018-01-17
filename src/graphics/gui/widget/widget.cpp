@@ -281,6 +281,10 @@ void Widget::setAttribute(const string& key, const string& value)
     {
         visible = stringutil::convert::toBool(value);
     }
+    else if (key == "tag")
+    {
+        tag = value;
+    }
     else
     {
         LOG(Warning, "Tried to set unknown attribute:", key, "to", value);
