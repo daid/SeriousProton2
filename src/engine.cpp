@@ -8,7 +8,9 @@
 #include <sp2/multiplayer/client.h>
 #include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
+
 #include <SFML/Window/Event.hpp>
+#include <SFML/Audio.hpp>
 
 namespace sp {
 
@@ -27,6 +29,10 @@ Engine::Engine()
     fixed_update_accumulator = 0.0;
     
     in_fixed_update = false;
+    
+    // By creating a SoundBuffer we force SFML to load the sound subsystem.
+    // Else this is done when the first sound is loaded, causing a delay at that point, which causes a hickup on windows.
+    sf::SoundBuffer forceLoadBuffer;
     
     sp::multiplayer::ClassEntry::fillMappings();
 }
