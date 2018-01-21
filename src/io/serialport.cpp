@@ -222,7 +222,7 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
     case OneStopBit:
         break;
     case OneAndAHalfStopBit:
-        LOG(WARNING) << "OneAndAHalfStopBit not supported on linux!";
+        LOG(Warning, "OneAndAHalfStopBit not supported on linux!");
         break;
     case TwoStopbits:
         tio.c_cflag |= CSTOPB;
@@ -283,7 +283,7 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
     case OneStopBit:
         break;
     case OneAndAHalfStopBit:
-        LOG(WARNING) << "OneAndAHalfStopBit not supported on posix!";
+        LOG(Warning, "OneAndAHalfStopBit not supported on posix!");
         break;
     case TwoStopbits:
         tio.c_cflag |= CSTOPB;
@@ -295,7 +295,7 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
     // setting nonstandard baud rate
     speed_t speed = baudrate;
     if (ioctl (handle, IOSSIOSPEED, &speed, 1) < 0) {
-        LOG(ERROR) << "setting baud rate failed. errno:" << errno;
+        LOG(Error, "setting baud rate failed. errno:", errno);
     }
 
 #endif

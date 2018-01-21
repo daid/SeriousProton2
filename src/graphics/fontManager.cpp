@@ -12,7 +12,8 @@ sf::Font* FontManager::load(string name)
     {
         resource_streams[name] = stream;
         LOG(Info, "Loading font:", name);
-        font->loadFromStream(*stream);
+        if (!font->loadFromStream(*stream))
+            LOG(Warning, "Failed to load font:", name);
     }
     return font;
 }

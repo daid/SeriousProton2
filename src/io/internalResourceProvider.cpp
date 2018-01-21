@@ -1,4 +1,5 @@
 #include <sp2/io/internalResourceProvider.h>
+#include <string.h>
 
 namespace sp {
 namespace io {
