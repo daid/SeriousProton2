@@ -3,18 +3,11 @@
 
 #include <sp2/io/lazyLoader.h>
 #include <sp2/graphics/color.h>
-#include <SFML/Graphics/Texture.hpp>
+#include <sp2/graphics/texture.h>
 
 namespace sp {
 
-class __TextureManagerLoaderData
-{
-public:
-    io::ResourceStreamPtr stream;
-    sf::Image image;
-};
-
-class TextureManager : public io::LazyLoader<sf::Texture, __TextureManagerLoaderData>
+class TextureManager : public io::LazyLoader<Texture>
 {
 public:
     TextureManager();
@@ -22,11 +15,8 @@ public:
     void setFallbackColors(sp::Color primary_color, sp::Color secondary_color);
     void setDefaultSmoothFiltering(bool enabled);
 protected:
-    virtual __TextureManagerLoaderData* prepare(string name);
-    virtual __TextureManagerLoaderData* backgroundLoader(__TextureManagerLoaderData* ptr) ;
-    virtual sf::Texture* finalize(__TextureManagerLoaderData* ptr);
-    virtual sf::Texture* loadFallback();
-
+    virtual Texture* prepare(string name);
+    virtual void backgroundLoader(Texture* texture, io::ResourceStreamPtr stream);
 private:
     sp::Color fallback_primary_color;
     sp::Color fallback_secondary_color;

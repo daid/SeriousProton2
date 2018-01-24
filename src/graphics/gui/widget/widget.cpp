@@ -387,7 +387,7 @@ void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rec
 {
     if (texture == "")
         return;
-    sf::Texture* texture_ptr = textureManager.get(texture);
+    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
     
@@ -422,7 +422,7 @@ void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rec
 {
     if (texture == "")
         return;
-    sf::Texture* texture_ptr = textureManager.get(texture);
+    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
     
@@ -457,7 +457,7 @@ void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& re
 {
     if (texture == "")
         return;
-    sf::Texture* texture_ptr = textureManager.get(texture);
+    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 8);
 

@@ -1,5 +1,6 @@
 #include <sp2/scene/particleEmitter.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/graphics/textureManager.h>
 #include <sp2/tween.h>
 
 namespace sp {
@@ -9,7 +10,7 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin
 {
     particles.reserve(initial_buffer_size);
     render_data.shader = Shader::get("internal:particle.shader");
-    render_data.texture = "particle.png";
+    render_data.texture = textureManager.get("particle.png");
     render_data.type = RenderData::Type::Transparent;
     
     auto_destroy = false;

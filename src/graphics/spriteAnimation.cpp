@@ -1,5 +1,6 @@
 #include <sp2/graphics/spriteAnimation.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/graphics/textureManager.h>
 #include <sp2/io/keyValueTreeLoader.h>
 #include <sp2/logging.h>
 
@@ -91,7 +92,7 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
         Data::Animation& animation = result.animations[it.first];
         std::map<string, string>& data = it.second;
         
-        animation.texture = data["texture"];
+        animation.texture = textureManager.get(data["texture"]);
         animation.loop = stringutil::convert::toBool(data["loop"]);
         
         std::vector<int> frames = stringutil::convert::toIntArray(data["frames"]);

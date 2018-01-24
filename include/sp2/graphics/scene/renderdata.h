@@ -4,6 +4,7 @@
 #include <sp2/string.h>
 #include <sp2/graphics/shader.h>
 #include <sp2/graphics/color.h>
+#include <sp2/graphics/texture.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <vector>
 #include <memory>
@@ -26,7 +27,7 @@ public:
     Shader* shader;
     std::shared_ptr<MeshData> mesh;
     sp::Color color;
-    string texture;
+    Texture* texture;
     sp::Vector3f scale;
     
     RenderData();

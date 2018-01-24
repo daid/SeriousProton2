@@ -29,7 +29,7 @@ void Image::setAttribute(const string& key, const string& value)
 
 void Image::render(sf::RenderTarget& window)
 {
-    sf::Texture* texture_ptr = textureManager.get(texture);
+    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
     sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
     sf::VertexArray a(sf::TrianglesStrip, 4);
 

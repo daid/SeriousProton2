@@ -31,7 +31,7 @@ private:
                 float delay;
             };
             
-            string texture;
+            Texture* texture;
             std::vector<Frame> frames;
             bool loop;
         };

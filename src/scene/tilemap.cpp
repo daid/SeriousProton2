@@ -1,6 +1,7 @@
 #include <sp2/collision/2d/chains.h>
 #include <sp2/scene/tilemap.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/graphics/textureManager.h>
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 
@@ -26,7 +27,7 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     this->texture_tile_count_y = texture_tile_count_y;
 
     render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = texture;
+    render_data.texture = textureManager.get(texture);
     render_data.type = RenderData::Type::Normal;
     render_data.order = -1;
     

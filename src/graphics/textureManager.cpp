@@ -4,6 +4,26 @@
 
 namespace sp {
 
+class TextureManagerTexture : public Texture
+{
+public:
+    TextureManagerTexture(string resource_name)
+    : Texture(Type::Static, resource_name)
+    {
+        LOG(Info, "Loading texture:", resource_name);
+        //TODO: Fallback texture
+        //TODO: Default smoothness
+        texture.setRepeated(true);
+        texture.setSmooth(false);
+    }
+
+    void transferImageFromThread(std::shared_ptr<sf::Image> image)
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        this->image = image;
+    }
+};
+
 TextureManager textureManager;
 
 TextureManager::TextureManager()
@@ -19,39 +39,18 @@ void TextureManager::setDefaultSmoothFiltering(bool enabled)
     default_smooth = enabled;
 }
 
-__TextureManagerLoaderData* TextureManager::prepare(string name)
+Texture* TextureManager::prepare(string name)
 {
-    __TextureManagerLoaderData* ptr = new __TextureManagerLoaderData();
-    ptr->stream = io::ResourceProvider::get(name);
-    if (ptr->stream)
-        LOG(Info, "Loading texture:", name);
-    else
-        LOG(Error, "Failed to open texture:", name);
-    return ptr;
+    return new TextureManagerTexture(name);
 }
 
-__TextureManagerLoaderData* TextureManager::backgroundLoader(__TextureManagerLoaderData* ptr)
+void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr stream)
 {
-    if (ptr->stream)
-        ptr->image.loadFromStream(*ptr->stream);
-    return ptr;
-}
-
-sf::Texture* TextureManager::finalize(__TextureManagerLoaderData* ptr)
-{
-    if (ptr->stream)
+    if (stream)
     {
-        sf::Texture* result = new sf::Texture();
-        result->loadFromImage(ptr->image);
-        delete ptr;
-        result->generateMipmap();
-        result->setSmooth(default_smooth);
-        result->setRepeated(true);
-        return result;
-    }
-    else
-    {
-        return loadFallback();
+        std::shared_ptr<sf::Image> image = std::make_shared<sf::Image>();
+        image->loadFromStream(*stream);
+        (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(image);
     }
 }
 
@@ -61,6 +60,7 @@ void TextureManager::setFallbackColors(sp::Color primary_color, sp::Color second
     fallback_secondary_color = secondary_color;
 }
 
+/*
 sf::Texture* TextureManager::loadFallback()
 {
     uint32_t a = fallback_primary_color.toInteger();
@@ -76,5 +76,6 @@ sf::Texture* TextureManager::loadFallback()
     texture->update(pixels);
     return texture;
 }
+*/
 
 };//!namespace sp

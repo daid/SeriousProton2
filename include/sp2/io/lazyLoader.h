@@ -17,65 +17,43 @@ private:
     static sp::threading::Queue<std::function<void()>> queue;
     static void addWork(std::function<void()> f);
     
-    template<class T, class BackgroundLoaderDataType> friend class LazyLoader;
+    template<class T> friend class LazyLoader;
 };
 
-template<class T, class BackgroundLoaderDataType> class LazyLoader : sf::NonCopyable
+template<class T> class LazyLoader : sf::NonCopyable
 {
 public:
     T* get(string name)
     {
+        auto it = cached_items.find(name);
+        if (it != cached_items.end())
         {
-            std::lock_guard<std::mutex> lock(mutex);
-            auto it = cached_items.find(name);
-            if (it != cached_items.end())
-            {
-                T* result = it->second;
-                return result;
-            }
-            auto result_it = load_result_items.find(name);
-            if (result_it != load_result_items.end())
-            {
-                BackgroundLoaderDataType* ptr = result_it->second;
-                if (ptr)
-                {
-                    T* result = finalize(ptr);
-                    cached_items[name] = result;
-                    load_result_items.erase(result_it);
-                    return result;
-                }
-                return fallback;
-            }
-            load_result_items[name] = nullptr;
+            T* result = it->second;
+            return result;
         }
         
-        BackgroundLoaderDataType* ptr = prepare(name);
-        LazyLoaderManager::addWork([this, name, ptr]()
+        T* ptr = prepare(name);
+        cached_items[name] = ptr;
+        io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
+        if (stream)
         {
-            BackgroundLoaderDataType* p = this->backgroundLoader(ptr);
-            std::lock_guard<std::mutex> lock(mutex);
-            load_result_items[name] = p;
-        });
-        
-        if (!fallback)
-            fallback = loadFallback();
-        return fallback;
+            LazyLoaderManager::addWork([this, ptr, stream]()
+            {
+                this->backgroundLoader(ptr, stream);
+            });
+        }
+        else
+        {
+            LOG(Warning, "Failed to load", name);
+        }
+        return ptr;
     }
 
-    void insert(string name, T* item)
-    {
-        cached_items[name] = item;
-    }
 protected:
-    virtual BackgroundLoaderDataType* prepare(string name) = 0;
-    virtual BackgroundLoaderDataType* backgroundLoader(BackgroundLoaderDataType* ptr) = 0;
-    virtual T* finalize(BackgroundLoaderDataType* ptr) = 0;
-    virtual T* loadFallback() = 0;
+    virtual T* prepare(string name) = 0;
+    virtual void backgroundLoader(T* ptr, io::ResourceStreamPtr stream) = 0;
 private:
     std::map<string, T*> cached_items;
-    std::map<string, BackgroundLoaderDataType*> load_result_items;
-    T* fallback;
-    std::mutex mutex;
 };
 
 };//!namespace io

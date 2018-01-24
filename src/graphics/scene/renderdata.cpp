@@ -9,6 +9,7 @@ RenderData::RenderData()
     order = 0;
     scale = sp::Vector3f(1.0, 1.0, 1.0);
     shader = nullptr;
+    texture = nullptr;
 }
 
 bool RenderData::operator<(const RenderData& other) const
