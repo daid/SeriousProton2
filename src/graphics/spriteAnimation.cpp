@@ -1,4 +1,4 @@
-#include <sp2/graphics/spriteManager.h>
+#include <sp2/graphics/spriteAnimation.h>
 #include <sp2/graphics/meshdata.h>
 #include <sp2/io/keyValueTreeLoader.h>
 #include <sp2/logging.h>

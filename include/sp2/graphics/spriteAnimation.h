@@ -1,5 +1,5 @@
-#ifndef SP2_GRAPHICS_SPRITE_MANAGER_H
-#define SP2_GRAPHICS_SPRITE_MANAGER_H
+#ifndef SP2_GRAPHICS_SPRITE_ANIMATION_H
+#define SP2_GRAPHICS_SPRITE_ANIMATION_H
 
 #include <sp2/graphics/scene/renderdata.h>
 #include <sp2/graphics/animation.h>
@@ -57,4 +57,4 @@ private:
 
 };//!namespace sp
 
-#endif//SP2_GRAPHICS_SPRITE_MANAGER_H
+#endif//SP2_GRAPHICS_SPRITE_ANIMATION_H
