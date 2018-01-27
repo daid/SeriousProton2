@@ -14,7 +14,6 @@ const sf::Texture* Texture::get()
         {
             LOG(Warning, "loadFromImage failed for", name);
         }
-        texture.generateMipmap();
         image = nullptr;
         revision++;
     }

@@ -11,6 +11,11 @@ namespace sp {
 class MeshData : public sf::NonCopyable
 {
 public:
+    enum class Type
+    {
+        Static,
+        Dynamic
+    };
     class Vertex
     {
     public:
@@ -41,21 +46,23 @@ public:
     };
     typedef std::vector<Vertex> Vertices;
 
-    MeshData(Vertices&& vertices);
+    MeshData(Vertices&& vertices, Type type=Type::Static);
     ~MeshData();
     
     void render();
     void update(Vertices&& vertices);
     
-    static std::shared_ptr<MeshData> create(Vertices&& vertices);
+    static std::shared_ptr<MeshData> create(Vertices&& vertices, Type type=Type::Static);
     static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
     static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
 private:
     Vertices vertices;
     unsigned int vbo;
     bool dirty;
+    int revision;
+    Type type;
 
-    MeshData();
+    MeshData(Type type);
 };
 
 }//!namespace sp

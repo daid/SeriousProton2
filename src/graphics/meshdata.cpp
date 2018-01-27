@@ -8,17 +8,18 @@ const unsigned int NO_BUFFER = std::numeric_limits<unsigned int>::max();
 
 namespace sp {
 
-MeshData::MeshData()
+MeshData::MeshData(Type type)
+: type(type)
 {
     vbo = NO_BUFFER;
     dirty = true;
+    revision = 0;
 }
 
-MeshData::MeshData(std::vector<Vertex>&& vertices)
+MeshData::MeshData(std::vector<Vertex>&& vertices, Type type)
+: MeshData(type)
 {
     this->vertices = std::move(vertices);
-    vbo = NO_BUFFER;
-    dirty = true;
 }
 
 MeshData::~MeshData()
@@ -39,7 +40,11 @@ void MeshData::render()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     if (dirty)
     {
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+        switch(type)
+        {
+        case Type::Static: glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW); break;
+        case Type::Dynamic: glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW); break;
+        }
         dirty = false;
     }
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, position));
@@ -53,11 +58,12 @@ void MeshData::update(std::vector<Vertex>&& vertices)
 {
     this->vertices = std::move(vertices);
     dirty = true;
+    revision++;
 }
 
-std::shared_ptr<MeshData> MeshData::create(Vertices&& vertices)
+std::shared_ptr<MeshData> MeshData::create(Vertices&& vertices, Type type)
 {
-    return std::make_shared<MeshData>(std::forward<Vertices>(vertices));
+    return std::make_shared<MeshData>(std::forward<Vertices>(vertices), type);
 }
 
 std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)

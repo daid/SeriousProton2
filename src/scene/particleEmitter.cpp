@@ -69,7 +69,7 @@ void ParticleEmitter::onUpdate(float delta)
     }
     
     if (!render_data.mesh)
-        render_data.mesh = MeshData::create(std::move(vertices));
+        render_data.mesh = MeshData::create(std::move(vertices), MeshData::Type::Dynamic);
     else
         render_data.mesh->update(std::move(vertices));
 }
