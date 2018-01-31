@@ -18,13 +18,13 @@ public:
         Dynamic
     };
     const sf::Texture* get();
-
+    int getRevision() { return revision; }
 protected:
-    Texture(Type type, string name)
-    : type(type), name(name), revision(0) {}
+    Texture(sf::Texture& texture, Type type, string name)
+    : texture(texture), type(type), name(name), revision(0) {}
 
     std::mutex mutex;
-    sf::Texture texture;
+    sf::Texture& texture;
     
     std::shared_ptr<sf::Image> image;
     Type type;

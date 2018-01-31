@@ -18,4 +18,12 @@ sf::Font* FontManager::load(string name)
     return font;
 }
 
+FontManager2 font_manager;
+
+Font* FontManager2::load(string name)
+{
+    io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
+    return new Font(name, stream);
+}
+
 };//!namespace sp

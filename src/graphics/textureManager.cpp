@@ -8,7 +8,7 @@ class TextureManagerTexture : public Texture
 {
 public:
     TextureManagerTexture(string resource_name)
-    : Texture(Type::Static, resource_name)
+    : Texture(texture, Type::Static, resource_name)
     {
         LOG(Info, "Loading texture:", resource_name);
         //TODO: Fallback texture
@@ -22,6 +22,8 @@ public:
         std::lock_guard<std::mutex> lock(mutex);
         this->image = image;
     }
+private:
+    sf::Texture texture;
 };
 
 TextureManager textureManager;
