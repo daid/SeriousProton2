@@ -2,6 +2,7 @@
 #define SP2_WINDOW_H
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <sp2/math/vector.h>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 #include <sp2/io/pointer.h>
@@ -29,9 +30,10 @@ private:
     void createRenderWindow();
     void render();
     void handleEvent(const sf::Event& event);
-    void pointerDown(io::Pointer::Button button, sf::Vector2f position, int id);
-    void pointerDrag(sf::Vector2f position, int id);
-    void pointerUp(sf::Vector2f position, int id);
+    void pointerDown(io::Pointer::Button button, Vector2d position, int id);
+    void pointerDrag(Vector2d position, int id);
+    void pointerUp(Vector2d position, int id);
+    Vector2d screenToGLPosition(int x, int y);
     
     string title;
     int antialiasing;

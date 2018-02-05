@@ -9,11 +9,12 @@ namespace gui {
 class Image : public Widget
 {
 public:
-    Image(P<Container> parent);
+    Image(P<Widget> parent);
     
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
+    virtual void updateRenderData() override;
 private:
     string texture;
 };

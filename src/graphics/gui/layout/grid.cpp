@@ -6,12 +6,13 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("grid", GridLayout);
 
-void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
+void GridLayout::update(P<Widget> container, Vector2d size)
 {
     sf::Vector2i grid_size;
-    for(Widget* w : container->children)
+    for(Node* n : container->getChildren())
     {
-        if (!w->isVisible())
+        P<Widget> w = P<Node>(n);
+        if (!w || !w->isVisible())
             continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
@@ -26,9 +27,10 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
     for(int n=0; n<grid_size.y; n++)
         row_height[n] = 0.0;
 
-    for(Widget* w : container->children)
+    for(Node* n : container->getChildren())
     {
-        if (!w->isVisible())
+        P<Widget> w = P<Node>(n);
+        if (!w || !w->isVisible())
             continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
@@ -61,19 +63,21 @@ void GridLayout::update(P<Container> container, const sf::FloatRect& rect)
             row_y[n] += row_height[m];
     }
     
-    for(Widget* w : container->children)
+    for(Node* n : container->getChildren())
     {
-        if (!w->isVisible())
+        P<Widget> w = P<Node>(n);
+        if (!w || !w->isVisible())
             continue;
         sf::Vector2i position = sf::Vector2i(w->layout.position);
         sf::Vector2i span = w->layout.span;
 
-        sf::FloatRect r(rect.left + col_x[position.x], rect.top + row_y[position.y], col_width[position.x], row_height[position.y]);
+        Vector2d cell_pos(col_x[position.x], row_y[position.y]);
+        Vector2d cell_size(col_width[position.x], row_height[position.y]);
         for(int n=1; n<span.x; n++)
-            r.width += col_width[position.x + n];
+            cell_size.x += col_width[position.x + n];
         for(int n=1; n<span.y; n++)
-            r.height += row_height[position.y + n];
-        basicLayout(r, w);
+            cell_size.y += row_height[position.y + n];
+        basicLayout(cell_pos, cell_size, *w);
     }
 }
 

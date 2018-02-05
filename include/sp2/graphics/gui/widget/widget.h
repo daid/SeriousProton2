@@ -1,12 +1,13 @@
 #ifndef SP2_GRAPHICS_GUI_WIDGET_H
 #define SP2_GRAPHICS_GUI_WIDGET_H
 
-#include <sp2/graphics/gui/container.h>
+#include <sp2/scene/node.h>
 #include <sp2/graphics/color.h>
 #include <sp2/math/vector.h>
 #include <sp2/pointerVector.h>
 #include <sp2/string.h>
 #include <sp2/variant.h>
+#include <sp2/alignment.h>
 #include <sp2/io/pointer.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/System/Time.hpp>
@@ -14,44 +15,31 @@
 namespace sp {
 namespace gui {
 
+class Layout;
 class ThemeData;
-class Widget : public Container
+class Widget : public Node
 {
 public:
     Widget(P<Widget> parent);
     virtual ~Widget();
 
-    enum class Alignment
-    {
-        TopLeft,
-        Top,
-        TopRight,
-        Left,
-        Center,
-        Right,
-        BottomLeft,
-        Bottom,
-        BottomRight
-    };
     class LayoutInfo
     {
     public:
-        Vector2f position;
-        Alignment alignment;
-        Vector2f size;
-        sf::Vector2i span;
-        float margin_left, margin_right, margin_top, margin_bottom;
-        Vector2f min_size;
-        Vector2f max_size;
-        bool fill_width;
-        bool fill_height;
-        bool lock_aspect_ratio;
-        bool match_content_size;
+        Vector2d position;
+        Alignment alignment = Alignment::TopLeft;
+        Vector2d size;
+        sf::Vector2i span{1, 1};
+        float margin_left = 0, margin_right = 0, margin_top = 0, margin_bottom = 0;
+        Vector2d min_size;
+        Vector2d max_size{std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+        bool fill_width = false;
+        bool fill_height = false;
+        bool lock_aspect_ratio = false;
+        bool match_content_size = false;
         
         P<Widget> anchor_widget;
-        Alignment anchor_point;
-        
-        sf::FloatRect rect;
+        Alignment anchor_point = Alignment::TopLeft;
     };
     enum class State
     {
@@ -65,15 +53,17 @@ public:
     typedef std::function<void(Variant value)> Callback;
     
     virtual void render(sf::RenderTarget& window);
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id);
-    virtual void onPointerDrag(sf::Vector2f position, int id);
-    virtual void onPointerUp(sf::Vector2f position, int id);
+    virtual void updateRenderData();
+    virtual void onUpdate(float delta) override;
+    virtual bool onPointerDown(io::Pointer::Button button, sp::Vector2d position, int id);
+    virtual void onPointerDrag(sp::Vector2d position, int id);
+    virtual void onPointerUp(sp::Vector2d position, int id);
     State getState() const;
     
     void setPosition(float x, float y, Alignment alignment);
-    void setPosition(sf::Vector2f v, Alignment alignment);
+    void setPosition(sp::Vector2d v, Alignment alignment);
     void setSize(float x, float y);
-    void setSize(sf::Vector2f v);
+    void setSize(sp::Vector2d v);
     void setVisible(bool visible);
     void show();
     void hide();
@@ -83,19 +73,23 @@ public:
     void disable();
     bool isEnabled();
     void setID(string id);
+
+    sp::Vector2d getRenderSize() { return render_size; }
     
     void setEventCallback(Callback callback);
     virtual void setAttribute(const string& key, const string& value);
     
     P<Widget> getWidgetWithID(const string& id);
-    template<class T> P<T> getWidgetAt(sp::Vector2f position)
+
+    template<class T> P<T> getWidgetAt(sp::Vector2d position)
     {
-        if (layout.rect.contains(position))
+        position -= getPosition2D();
+        if (position.x >= 0 && position.x <= render_size.x && position.y >= 0 && position.y <= render_size.y)
         {
-            for(PList<Widget>::ReverseIterator it = children.rbegin(); it != children.rend(); ++it)
+            for(PList<Node>::ReverseIterator it = getChildren().rbegin(); it != getChildren().rend(); ++it)
             {
-                Widget* w = *it;
-                if (w->isVisible())
+                P<Widget> w = P<Node>(*it);
+                if (w && w->isVisible())
                 {
                     P<T> result = w->getWidgetAt<T>(position);
                     if (result)
@@ -120,31 +114,36 @@ protected:
     void setFocusable(bool value);
 protected:
     void runCallback(Variant v);
+    void markRenderDataOutdated() { render_data_outdated = true; }
 
     void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    std::shared_ptr<MeshData> createStretched(Vector2d size);
     void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    std::shared_ptr<MeshData> createStretchedH(Vector2d size);
     void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
+    std::shared_ptr<MeshData> createStretchedV(Vector2d size);
     void renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, sp::Color color);
     void renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
     void renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
 private:
-    Widget();
+    Widget(P<Node> parent);
 
-    P<Widget> parent;
-    Layout* layout_manager;
-    bool visible;
-    bool enabled;
-    bool focus;
-    bool focusable;
-    bool hover;
+    Layout* layout_manager = nullptr;
+    sp::Vector2d render_size;
+    bool visible = true;
+    bool enabled = true;
+    bool focus = false;
+    bool focusable = false;
+    bool hover = false;
+    bool render_data_outdated = true;
 
     string id;
-    string theme_name;
+    string theme_name = "default";
     string theme_data_name;
     
     Callback callback;
     
-    void updateLayout();
+    void updateLayout(Vector2d position, Vector2d size);
 
 #ifdef DEBUG
     class AutoReloadData
@@ -161,6 +160,9 @@ private:
     static float text_scale_factor;
 
     friend class GraphicsLayer;
+    friend class Scene;
+    friend class RootWidget;
+    friend class Layout;
 };
 
 class WidgetClassRegistry : sf::NonCopyable

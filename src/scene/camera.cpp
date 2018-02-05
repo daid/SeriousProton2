@@ -4,18 +4,19 @@
 namespace sp {
 
 Camera::Camera(P<Node> parent)
-: Node(parent), type(Type::OrtographicFixedHeight)
+: Node(parent), type(Type::OrtographicVertical)
 {
     field_of_view = 60.0;
     view_distance = 1.0;
 }
 
-void Camera::setOrtographic(double view_distance, bool fixed_width)
+void Camera::setOrtographic(double view_distance, Direction direction)
 {
-    if (fixed_width)
-        this->type = Type::OrtographicFixedWidth;
-    else
-        this->type = Type::OrtographicFixedHeight;
+    switch(direction)
+    {
+    case Direction::Horizontal: this->type = Type::OrtographicHorizontal; break;
+    case Direction::Vertical: this->type = Type::OrtographicVertical; break;
+    }
     this->view_distance = view_distance;
 }
 
@@ -30,10 +31,10 @@ void Camera::setAspectRatio(double ratio)
 {
     switch(type)
     {
-    case Type::OrtographicFixedHeight:
+    case Type::OrtographicVertical:
         setProjectionMatrix(Matrix4x4d::ortho(-ratio * view_distance, ratio * view_distance, -view_distance, view_distance, -view_distance, view_distance));
         break;
-    case Type::OrtographicFixedWidth:
+    case Type::OrtographicHorizontal:
         setProjectionMatrix(Matrix4x4d::ortho(-view_distance, view_distance, -view_distance / ratio, view_distance / ratio, -view_distance, view_distance));
         break;
     case Type::Perspective:

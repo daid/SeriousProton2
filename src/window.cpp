@@ -1,7 +1,7 @@
 #include <sp2/window.h>
 #include <sp2/assert.h>
 #include <sp2/logging.h>
-#include <sp2/graphics/gui/graphicslayer.h>
+#include <sp2/graphics/graphicslayer.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -106,37 +106,37 @@ void Window::handleEvent(const sf::Event& event)
             default: break;
             }
             mouse_button_down_mask |= 1 << int(event.mouseButton.button);
-            pointerDown(button, sf::Vector2f(event.mouseButton.x, event.mouseButton.y), -1);
+            pointerDown(button, screenToGLPosition(event.mouseButton.x, event.mouseButton.y), -1);
         }
         break;
     case sf::Event::MouseMoved:
         if (mouse_button_down_mask)
-            pointerDrag(sf::Vector2f(event.mouseMove.x, event.mouseMove.y), -1);
+            pointerDrag(screenToGLPosition(event.mouseMove.x, event.mouseMove.y), -1);
         break;
     case sf::Event::MouseButtonReleased:
         mouse_button_down_mask &=~(1 << int(event.mouseButton.button));
         if (!mouse_button_down_mask)
-            pointerUp(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), -1);
+            pointerUp(screenToGLPosition(event.mouseButton.x, event.mouseButton.y), -1);
         break;
     case sf::Event::TouchBegan:
-        pointerDown(io::Pointer::Button::Touch, sf::Vector2f(event.touch.x, event.touch.y), event.touch.finger);
+        pointerDown(io::Pointer::Button::Touch, screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
         break;
     case sf::Event::TouchMoved:
-        pointerDrag(sf::Vector2f(event.touch.x, event.touch.y), event.touch.finger);
+        pointerDrag(screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
         break;
     case sf::Event::TouchEnded:
-        pointerUp(sf::Vector2f(event.touch.x, event.touch.y), event.touch.finger);
+        pointerUp(screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
         break;
     default:
         break;
     }
 }
 
-void Window::pointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+void Window::pointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     for(auto l : GraphicsLayer::layers)
     {
-        if (l->onPointerDown(button, sf::Vector2f(position.x / float(Window::window->render_window.getSize().x), position.y / float(Window::window->render_window.getSize().y)), id))
+        if (l->onPointerDown(button, position, id))
         {
             pointer_focus_layer[id] = l;
             return;
@@ -144,21 +144,27 @@ void Window::pointerDown(io::Pointer::Button button, sf::Vector2f position, int 
     }
 }
 
-void Window::pointerDrag(sf::Vector2f position, int id)
+void Window::pointerDrag(Vector2d position, int id)
 {
     auto it = pointer_focus_layer.find(id);
     if (it != pointer_focus_layer.end() && it->second)
-        it->second->onPointerDrag(sf::Vector2f(position.x / float(Window::window->render_window.getSize().x), position.y / float(Window::window->render_window.getSize().y)), id);
+        it->second->onPointerDrag(position, id);
 }
 
-void Window::pointerUp(sf::Vector2f position, int id)
+void Window::pointerUp(Vector2d position, int id)
 {
     auto it = pointer_focus_layer.find(id);
     if (it != pointer_focus_layer.end() && it->second)
     {
-        it->second->onPointerUp(sf::Vector2f(position.x / float(Window::window->render_window.getSize().x), position.y / float(Window::window->render_window.getSize().y)), id);
+        it->second->onPointerUp(position, id);
         pointer_focus_layer.erase(it);
     }
+}
+
+Vector2d Window::screenToGLPosition(int x, int y)
+{
+    sf::Vector2u size = render_window.getSize();
+    return Vector2d((double(x) / double(size.x) - 0.5) * 2.0, (0.5 - double(y) / double(size.y)) * 2.0);
 }
 
 };//!namespace sp

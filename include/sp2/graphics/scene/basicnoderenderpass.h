@@ -3,7 +3,7 @@
 
 #include <sp2/graphics/scene/renderpass.h>
 #include <sp2/graphics/scene/renderqueue.h>
-#include <map>
+#include <list>
 
 namespace sp {
 class Scene;
@@ -13,18 +13,27 @@ class BasicNodeRenderPass : public RenderPass
 {
 public:
     BasicNodeRenderPass(string target_layer);
-    BasicNodeRenderPass(string target_layer, P<Scene> scene);
-    BasicNodeRenderPass(string target_layer, P<Scene> scene, P<Camera> camera);
     
     virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) override;
+
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
+    virtual void onPointerDrag(Vector2d position, int id) override;
+    virtual void onPointerUp(Vector2d position, int id) override;
     
-    void setScene(P<Scene> scene);
-    void setCamera(P<Camera> camera);
+    void addScene(P<Scene> scene, P<Camera> camera=nullptr);
 private:
-    P<Scene> single_scene;
-    P<Camera> specific_camera;
+    class SceneWithCamera
+    {
+    public:
+        P<Scene> scene;
+        P<Camera> camera;
+    };
+    std::list<SceneWithCamera> scenes;
+    std::map<int, P<Scene>> pointer_scene;
+    std::map<int, P<Camera>> pointer_camera;
     
-    void renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
+    bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
+    void renderScene(P<Scene> scene, P<Camera> camera, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
     
     RenderQueue queue;
     void recursiveNodeRender(Node* node);

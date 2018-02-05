@@ -1,4 +1,6 @@
 #include <sp2/graphics/gui/theme.h>
+#include <sp2/graphics/fontManager.h>
+#include <sp2/graphics/textureManager.h>
 #include <sp2/logging.h>
 #include <sp2/io/keyValueTreeLoader.h>
 
@@ -40,8 +42,7 @@ void Theme::loadTheme(string name, string resource_name)
     P<Theme> theme = new Theme(name);
     for(unsigned int n=0; n<int(Widget::State::Count); n++)
     {
-        theme->fallback_data.states[n].forground_color = sp::Color::White;
-        theme->fallback_data.states[n].background_color = sp::Color::White;
+        theme->fallback_data.states[n].color = sp::Color::White;
     }
 
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
@@ -51,17 +52,15 @@ void Theme::loadTheme(string name, string resource_name)
         ThemeData::StateData global_data;
         ThemeData data;
 
-        global_data.background_image = input["background.image"];
-        if (input.find("background.color") != input.end())
-            global_data.background_color = Color::fromString(input["background.color"]);
+        if (input["image"] == "")
+            global_data.image = nullptr;
         else
-            global_data.background_color = Color::White;
-        global_data.forground_image = input["forground.image"];
-        if (input.find("forground.color") != input.end())
-            global_data.forground_color = Color::fromString(input["forground.color"]);
+            global_data.image = textureManager.get(input["image"]);
+        if (input.find("color") != input.end())
+            global_data.color = Color::fromString(input["color"]);
         else
-            global_data.forground_color = Color::White;
-        global_data.font = input["font"];
+            global_data.color = Color::White;
+        global_data.font = font_manager.get(input["font"]);
         global_data.text_size = stringutil::convert::toFloat(input["text.size"]);
         for(unsigned int n=0; n<int(Widget::State::Count); n++)
         {
@@ -85,16 +84,17 @@ void Theme::loadTheme(string name, string resource_name)
             }
             data.states[n] = global_data;
 
-            if (input.find("background.image." + postfix) != input.end())
-                data.states[n].background_image = input["background.image." + postfix];
-            if (input.find("background.color." + postfix) != input.end())
-                data.states[n].background_color = Color::fromString(input["background.color." + postfix]);
-            if (input.find("forground.image." + postfix) != input.end())
-                data.states[n].forground_image = input["forground.image." + postfix];
-            if (input.find("forground.color." + postfix) != input.end())
-                data.states[n].forground_color = Color::fromString(input["forground.color." + postfix]);
+            if (input.find("image." + postfix) != input.end())
+            {
+                if (input["image." + postfix] == "")
+                    data.states[n].image = nullptr;
+                else
+                    data.states[n].image = textureManager.get(input["image." + postfix]);
+            }
+            if (input.find("color." + postfix) != input.end())
+                data.states[n].color = Color::fromString(input["color." + postfix]);
             if (input.find("font." + postfix) != input.end())
-                data.states[n].font = input["font." + postfix];
+                data.states[n].font = font_manager.get(input["font." + postfix]);
             if (input.find("text.size." + postfix) != input.end())
                 data.states[n].text_size = stringutil::convert::toFloat(input["text.size." + postfix]);
         }

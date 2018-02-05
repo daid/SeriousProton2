@@ -7,20 +7,21 @@
 namespace sp {
 namespace gui {
 
+class Label;
 class Button : public Widget
 {
 public:
-    Button(P<Container> parent);
+    Button(P<Widget> parent);
 
     void setLabel(string label);
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;
-    virtual void onPointerUp(sf::Vector2f position, int id) override;
+    virtual void updateRenderData() override;
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
+    virtual void onPointerUp(Vector2d position, int id) override;
 private:
-    string label;
-    float text_size;
+    P<Label> label;
 };
 
 };//!namespace gui

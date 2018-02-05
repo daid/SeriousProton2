@@ -10,14 +10,14 @@ namespace gui {
 class Slider : public Widget
 {
 public:
-    Slider(P<Container> parent);
+    Slider(P<Widget> parent);
 
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void render(sf::RenderTarget& window) override;
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;
-    virtual void onPointerDrag(sf::Vector2f position, int id) override;
-    virtual void onPointerUp(sf::Vector2f position, int id) override;
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
+    virtual void onPointerDrag(Vector2d position, int id) override;
+    virtual void onPointerUp(Vector2d position, int id) override;
 private:
     float min_value, max_value;
     float value;

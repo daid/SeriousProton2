@@ -8,6 +8,7 @@
 #include <map>
 
 namespace sp {
+class Font;
 namespace gui {
 
 /**
@@ -32,12 +33,9 @@ public:
     class StateData
     {
     public:
-        string background_image;
-        sp::Color background_color;
-        string forground_image;
-        sp::Color forground_color;
-
-        string font;
+        Texture* image;
+        sp::Color color;
+        Font* font;
         float text_size;
     };
     StateData states[int(Widget::State::Count)];

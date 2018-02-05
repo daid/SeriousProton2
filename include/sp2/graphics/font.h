@@ -3,6 +3,7 @@
 
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <sp2/alignment.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/graphics/meshdata.h>
 #include <sp2/graphics/texture.h>
@@ -18,7 +19,7 @@ public:
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.
         Compare the texture revision to the revision that it initially had to check if the data is still valid or needs to be re-generated.
      */
-    std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size);
+    std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
     Texture* getTexture(int pixel_size);
 private:
     Font(string name, io::ResourceStreamPtr stream);

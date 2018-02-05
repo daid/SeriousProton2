@@ -3,7 +3,7 @@
 
 #include <sp2/string.h>
 #include <sp2/pointerVector.h>
-#include <sp2/graphics/gui/container.h>
+#include <sp2/graphics/gui/widget/widget.h>
 #include <SFML/Graphics/Rect.hpp>
 
 namespace sp {
@@ -13,10 +13,10 @@ class Layout : sf::NonCopyable
 {
 public:
     virtual ~Layout() {}
-    virtual void update(P<Container> container, const sf::FloatRect& rect);
+    virtual void update(P<Widget> container, Vector2d size);
 
 protected:
-    virtual void basicLayout(const sf::FloatRect& rect, Widget* widget);
+    virtual void basicLayout(Vector2d position, Vector2d size, Widget* widget);
 };
 
 class LayoutClassRegistry : sf::NonCopyable

@@ -1,5 +1,6 @@
 #include <sp2/graphics/gui/widget/label.h>
 #include <sp2/graphics/gui/theme.h>
+#include <sp2/graphics/fontManager.h>
 #include <sp2/engine.h>
 #include <SFML/Graphics.hpp>
 
@@ -8,7 +9,7 @@ namespace gui {
 
 SP_REGISTER_WIDGET("label", Label);
 
-Label::Label(P<Container> parent)
+Label::Label(P<Widget> parent)
 : Widget(parent)
 {
     loadThemeData("label");
@@ -19,18 +20,23 @@ Label::Label(P<Container> parent)
 
 void Label::setLabel(string label)
 {
-    this->label = label;
+    if (this->label != label)
+    {
+        this->label = label;
+        markRenderDataOutdated();
+    }
 }
 
 void Label::setAttribute(const string& key, const string& value)
 {
     if (key == "label" || key == "caption")
     {
-        label = value;
+        setLabel(value);
     }
     else if (key == "text_size" || key == "text.size")
     {
         text_size = stringutil::convert::toFloat(value);
+        markRenderDataOutdated();
     }
     else if (key == "text_alignment")
     {
@@ -43,10 +49,12 @@ void Label::setAttribute(const string& key, const string& value)
         else if (value == "bottomleft") text_alignment = Alignment::BottomLeft;
         else if (value == "bottom") text_alignment = Alignment::Bottom;
         else if (value == "bottomright") text_alignment = Alignment::BottomRight;
+        markRenderDataOutdated();
     }
     else if (key == "vertical")
     {
         vertical = stringutil::convert::toBool(value);
+        markRenderDataOutdated();
     }
     else
     {
@@ -56,12 +64,21 @@ void Label::setAttribute(const string& key, const string& value)
 
 void Label::render(sf::RenderTarget& window)
 {
+    //const ThemeData::StateData& t = theme->states[int(getState())];
+    //if (vertical)
+    //    renderTextVertical(window, getRect(), text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
+    //else
+    //    renderText(window, getRect(), text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
+}
+
+void Label::updateRenderData()
+{
     const ThemeData::StateData& t = theme->states[int(getState())];
-    //renderStretched(window, layout.rect, t.background_image, t.background_color);
-    if (vertical)
-        renderTextVertical(window, layout.rect, text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
-    else
-        renderText(window, layout.rect, text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
+
+    render_data.shader = Shader::get("internal:basic.shader");
+    render_data.mesh = t.font->createString(label, 32, text_size < 0 ? t.text_size : text_size, getRenderSize(), text_alignment);
+    render_data.texture = t.font->getTexture(32);
+    render_data.color = t.color;
 }
 
 };//!namespace gui

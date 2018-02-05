@@ -156,14 +156,14 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
             scene->collision_world2d->SetDebugDraw(nullptr);
             
             if (!mesh)
-                mesh = sp::MeshData::create(std::move(debug_renderer.vertices));
+                mesh = MeshData::create(std::move(debug_renderer.vertices), MeshData::Type::Dynamic);
             else
                 mesh->update(std::move(debug_renderer.vertices));
 
             queue.clear();
             RenderData render_data;
-            render_data.shader = sp::Shader::get("internal:color.shader");
-            render_data.type = sp::RenderData::Type::Normal;
+            render_data.shader = Shader::get("internal:color.shader");
+            render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(255, 255, 255, 64);
             queue.add(Matrix4x4d::identity(), render_data);

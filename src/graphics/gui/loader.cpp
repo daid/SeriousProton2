@@ -1,7 +1,9 @@
 #include <sp2/graphics/gui/loader.h>
-#include <sp2/graphics/gui/widget/widget.h>
+#include <sp2/graphics/gui/scene.h>
+#include <sp2/graphics/gui/widget/root.h>
 #include <sp2/io/keyValueTreeLoader.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 
 namespace sp {
 namespace gui {
@@ -13,6 +15,11 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
     if (!loader.tree)
         return nullptr;
     KeyValueTreeNode* root = loader.tree->findId(root_id);
+    if (!root_widget)
+    {
+        sp2assert(Scene::default_gui_scene, "Need to create a <sp::gui::Scene> before Widgets can be created");
+        root_widget = Scene::default_gui_scene->getRootWidget();
+    }
 
     if (root)
     {

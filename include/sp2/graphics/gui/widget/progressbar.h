@@ -10,7 +10,7 @@ namespace gui {
 class Progressbar : public Widget
 {
 public:
-    Progressbar(P<Container> parent);
+    Progressbar(P<Widget> parent);
     
     void setValue(float value);
     void setRange(float min_value, float max_value);

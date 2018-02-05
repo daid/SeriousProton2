@@ -8,7 +8,7 @@ namespace gui {
 
 SP_REGISTER_WIDGET("slider", Slider);
 
-Slider::Slider(P<Container> parent)
+Slider::Slider(P<Widget> parent)
 : Widget(parent)
 {
     loadThemeData("slider");
@@ -41,42 +41,45 @@ void Slider::setAttribute(const string& key, const string& value)
 void Slider::render(sf::RenderTarget& window)
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
-    renderStretched(window, layout.rect, t.background_image, t.background_color);
-    sf::FloatRect rect(layout.rect.left, layout.rect.top, std::min(layout.rect.width, layout.rect.height), std::min(layout.rect.width, layout.rect.height));
+    /*
+    renderStretched(window, getRect(), t.background_image, t.background_color);
+    sf::FloatRect rect(getRect().left, getRect().top, std::min(getRect().width, getRect().height), std::min(getRect().width, getRect().height));
     
     float f = (value - min_value) / (max_value - min_value);
-    if (layout.rect.width > layout.rect.height)
+    if (getRect().width > getRect().height)
     {
-        rect.left += (layout.rect.width - layout.rect.height) * f;
+        rect.left += (getRect().width - getRect().height) * f;
     }
     else
     {
-        rect.top += (layout.rect.height - layout.rect.width) * f;
+        rect.top += (getRect().height - getRect().width) * f;
     }
     
-    renderStretched(window, rect, t.forground_image, t.forground_color);
+    //renderStretched(window, rect, t.forground_image, t.forground_color);
+    */
 }
 
-bool Slider::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+bool Slider::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     onPointerDrag(position, id);
     return true;
 }
 
-void Slider::onPointerDrag(sf::Vector2f position, int id)
+void Slider::onPointerDrag(Vector2d position, int id)
 {
     float f;
-    if (layout.rect.width > layout.rect.height)
-        f = (position.x - layout.rect.left - layout.rect.height / 2.0) / (layout.rect.width - layout.rect.height);
+    Vector2d size = getRenderSize();
+    if (size.x > size.y)
+        f = (position.x - size.y / 2.0) / (size.x - size.y);
     else
-        f = (position.y - layout.rect.top - layout.rect.width / 2.0) / (layout.rect.height - layout.rect.width);
+        f = (position.y - size.x / 2.0) / (size.y - size.x);
     f = std::max(0.0f, std::min(f, 1.0f));
     value = (f * (max_value - min_value)) + min_value;
     
     runCallback(value);
 }
 
-void Slider::onPointerUp(sf::Vector2f position, int id)
+void Slider::onPointerUp(Vector2d position, int id)
 {
 }
 

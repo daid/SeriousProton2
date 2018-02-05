@@ -9,10 +9,11 @@ namespace gui {
 class Panel : public Widget
 {
 public:
-    Panel(P<Container> parent);
+    Panel(P<Widget> parent);
     
     virtual void render(sf::RenderTarget& window) override;
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;
+    virtual void updateRenderData() override;
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
 };
 
 };//!namespace gui

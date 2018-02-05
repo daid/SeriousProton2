@@ -3,6 +3,7 @@
 
 #include <sp2/pointerList.h>
 #include <sp2/io/pointer.h>
+#include <sp2/math/vector.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
 namespace sp {
@@ -19,9 +20,9 @@ public:
     void setPriority(int priority);
     
     virtual void render(sf::RenderTarget& window) = 0;
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) = 0;
-    virtual void onPointerDrag(sf::Vector2f position, int id) = 0;
-    virtual void onPointerUp(sf::Vector2f position, int id) = 0;
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
+    virtual void onPointerDrag(Vector2d position, int id) = 0;
+    virtual void onPointerUp(Vector2d position, int id) = 0;
 
     void setViewport(sf::FloatRect rect) { viewport = rect; }
 protected:

@@ -8,9 +8,15 @@ namespace sp {
 class Camera : public Node
 {
 public:
+    enum class Direction
+    {
+        Horizontal,
+        Vertical,
+    };
+
     Camera(P<Node> parent);
     
-    void setOrtographic(double view_distance = 1.0f, bool fixed_width=false);
+    void setOrtographic(double view_distance = 1.0f, Direction direction=Direction::Vertical);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
     
     void setAspectRatio(double ratio);
@@ -23,8 +29,8 @@ protected:
 
     enum class Type
     {
-        OrtographicFixedHeight,
-        OrtographicFixedWidth,
+        OrtographicHorizontal,
+        OrtographicVertical,
         Perspective
     };
 private:

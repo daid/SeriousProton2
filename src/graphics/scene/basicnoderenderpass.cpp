@@ -11,46 +11,98 @@ BasicNodeRenderPass::BasicNodeRenderPass(string target_layer)
 {
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene)
-: RenderPass(target_layer), single_scene(scene)
+void BasicNodeRenderPass::addScene(P<Scene> scene, P<Camera> camera)
 {
+    scenes.emplace_back();
+    SceneWithCamera& scene_data = scenes.back();
+    scene_data.scene = scene;
+    scene_data.camera = camera;
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene, P<Camera> camera)
-: RenderPass(target_layer), single_scene(scene), specific_camera(camera)
-{
-}
-
-
-void BasicNodeRenderPass::setScene(P<Scene> scene)
-{
-    single_scene = scene;
-}
-
-void BasicNodeRenderPass::setCamera(P<Camera> camera)
-{
-    specific_camera = camera;
-}
-    
 void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
 {
-    if (single_scene)
+    if (!scenes.empty())
     {
-        renderScene(*single_scene, target, layer, aspect_ratio);
+        for(SceneWithCamera& scene_data : scenes)
+        {
+            renderScene(scene_data.scene, scene_data.camera, target, layer, aspect_ratio);
+        }
     }else{
         for(Scene* scene : Scene::scenes)
         {
-            renderScene(scene, target, layer, aspect_ratio);
+            renderScene(scene, nullptr, target, layer, aspect_ratio);
         }
     }
 }
 
-void BasicNodeRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    P<Camera> camera = scene->getCamera();
-    if (specific_camera && specific_camera->getScene() == scene)
-        camera = specific_camera;
-    
+    if (!scenes.empty())
+    {
+        for(SceneWithCamera& scene_data : scenes)
+        {
+            if (privateOnPointerDown(scene_data.scene, scene_data.camera, button, position, id))
+                return true;
+        }
+    }
+    else
+    {
+        for(Scene* scene : Scene::scenes)
+        {
+            if (privateOnPointerDown(scene, nullptr, button, position, id))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id)
+{
+    if (!camera)
+        camera = scene->getCamera();
+    if (!camera)
+        return false;
+    Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
+    Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
+    if (scene->onPointerDown(button, ray, id))
+    {
+        pointer_scene[id] = scene;
+        pointer_camera[id] = camera;
+        return true;
+    }
+    return false;
+}
+
+void BasicNodeRenderPass::onPointerDrag(Vector2d position, int id)
+{
+    auto it = pointer_scene.find(id);
+    if (it != pointer_scene.end() && it->second)
+    {
+        P<Camera> camera = pointer_camera[id];
+        Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
+        Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
+        it->second->onPointerDrag(ray, id);
+    }
+}
+
+void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
+{
+    auto it = pointer_scene.find(id);
+    if (it != pointer_scene.end() && it->second)
+    {
+        P<Camera> camera = pointer_camera[id];
+        Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
+        Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
+        it->second->onPointerUp(ray, id);
+        pointer_scene.erase(it);
+    }
+}
+
+void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+{
+    if (!camera)
+        camera = scene->getCamera();
+
     if (scene->isEnabled() && camera)
     {
         camera->setAspectRatio(aspect_ratio);

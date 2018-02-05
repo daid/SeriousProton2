@@ -1,5 +1,5 @@
 #include <sp2/graphics/gui/widget/widget.h>
-#include <sp2/graphics/gui/graphicslayer.h>
+#include <sp2/graphics/gui/scene.h>
 #include <sp2/graphics/gui/layout/layout.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/gui/loader.h>
@@ -20,39 +20,17 @@ float Widget::text_scale_factor = 0.5;
 
 SP_REGISTER_WIDGET("", Widget);
 
-Widget::Widget()
+Widget::Widget(P<Widget> parent)
+: Node(parent)
 {
-    layout.span = sf::Vector2i(1, 1);
-    layout.margin_left = layout.margin_right = layout.margin_top = layout.margin_bottom = 0;
-    layout.max_size.x = layout.max_size.y = std::numeric_limits<float>::max();
-    layout.alignment = Alignment::TopLeft;
-    layout.fill_width = layout.fill_height = layout.lock_aspect_ratio = layout.match_content_size = false;
-
-    layout.anchor_point = Alignment::TopLeft;
-    
-    layout_manager = nullptr;
-    visible = true;
-    enabled = true;
-    focus = false;
-    focusable = false;
-    hover = false;
-    
-    theme_name = "default";
+    theme_name = parent->theme_name;
+    render_data.type = RenderData::Type::Normal;
 }
 
-Widget::Widget(P<Widget> parent)
-: Widget()
+Widget::Widget(P<Node> parent)
+: Node(parent)
 {
-    if (!parent)
-    {
-        sp2assert(GraphicsLayer::default_gui_layer, "Need to create a <sp::gui::GraphicsLayer> before Widgets can be created");
-        parent = GraphicsLayer::default_gui_layer->root;
-    }
-
-    this->parent = parent;
-    parent->children.add(this);
-    
-    theme_name = parent->theme_name;
+    render_data.type = RenderData::Type::Normal;
 }
 
 Widget::~Widget()
@@ -70,24 +48,40 @@ void Widget::loadThemeData(string name)
 void Widget::setFocusable(bool value)
 {
     focusable = value;
-    if (!focusable)
+    if (!focusable && focus)
+    {
+        render_data_outdated = true;
         focus = false;
+    }
 }
 
 void Widget::render(sf::RenderTarget& window)
 {
 }
 
-bool Widget::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+void Widget::updateRenderData()
+{
+}
+
+void Widget::onUpdate(float delta)
+{
+    if (render_data_outdated && visible)
+    {
+        render_data_outdated = false;
+        updateRenderData();
+    }
+}
+
+bool Widget::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     return false;
 }
 
-void Widget::onPointerDrag(sf::Vector2f position, int id)
+void Widget::onPointerDrag(Vector2d position, int id)
 {
 }
 
-void Widget::onPointerUp(sf::Vector2f position, int id)
+void Widget::onPointerUp(Vector2d position, int id)
 {
 }
 
@@ -109,7 +103,7 @@ void Widget::setPosition(float x, float y, Alignment alignment)
     layout.alignment = alignment;
 }
 
-void Widget::setPosition(sf::Vector2f v, Alignment alignment)
+void Widget::setPosition(Vector2d v, Alignment alignment)
 {
     layout.position = v;
     layout.alignment = alignment;
@@ -121,24 +115,44 @@ void Widget::setSize(float x, float y)
     layout.size.y = y;
 }
 
-void Widget::setSize(sf::Vector2f v)
+void Widget::setSize(Vector2d v)
 {
     layout.size = v;
 }
 
+static void recursiveSetRenderType(P<Widget> widget, RenderData::Type type)
+{
+    widget->render_data.type = type;
+    for(Node* child : widget->getChildren())
+    {
+        P<Widget> w = P<Node>(child);
+        if (!w)
+            continue;
+        if (w->isVisible())
+            recursiveSetRenderType(w, type);
+    }
+}
+
 void Widget::setVisible(bool visible)
 {
+    if (this->visible == visible)
+        return;
     this->visible = visible;
+    
+    if (visible)
+        recursiveSetRenderType(this, RenderData::Type::Normal);
+    else
+        recursiveSetRenderType(this, RenderData::Type::None);
 }
 
 void Widget::show()
 {
-    visible = true;
+    setVisible(true);
 }
 
 void Widget::hide()
 {
-    visible = false;
+    setVisible(false);
 }
 
 bool Widget::isVisible()
@@ -148,16 +162,19 @@ bool Widget::isVisible()
 
 void Widget::setEnable(bool enable)
 {
+    if (enabled != enable) markRenderDataOutdated();
     enabled = enable;
 }
 
 void Widget::enable()
 {
+    if (!enabled) markRenderDataOutdated();
     enabled = true;
 }
 
 void Widget::disable()
 {
+    if (enabled) markRenderDataOutdated();
     enabled = false;
 }
 
@@ -180,11 +197,11 @@ void Widget::setAttribute(const string& key, const string& value)
 {
     if (key == "size")
     {
-        layout.size = stringutil::convert::toVector2f(value);
+        layout.size = stringutil::convert::toVector2d(value);
     }
     else if (key == "position")
     {
-        layout.position = stringutil::convert::toVector2f(value);
+        layout.position = stringutil::convert::toVector2d(value);
     }
     else if (key == "margin")
     {
@@ -279,7 +296,7 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else if (key == "visible")
     {
-        visible = stringutil::convert::toBool(value);
+        setVisible(stringutil::convert::toBool(value));
     }
     else if (key == "tag")
     {
@@ -295,9 +312,12 @@ P<Widget> Widget::getWidgetWithID(const string& id)
 {
     if (this->id == id)
         return this;
-    for(Widget* child : children)
+    for(Node* child : getChildren())
     {
-        P<Widget> w = child->getWidgetWithID(id);
+        P<Widget> w = P<Node>(child);
+        if (!w)
+            continue;
+        w = w->getWidgetWithID(id);
         if (w)
             return w;
     }
@@ -316,7 +336,7 @@ void Widget::setupAutoReload(P<Widget> widget, const string& resource_name, cons
 }
 #endif
 
-void Widget::updateLayout()
+void Widget::updateLayout(Vector2d position, Vector2d size)
 {
 #ifdef DEBUG
     for(auto& data : auto_reload)
@@ -332,36 +352,36 @@ void Widget::updateLayout()
             data.last_modify_time = modify_time;
     }
 #endif
-
-    if (!layout_manager && !children.size())
-        return;
-    if (!layout_manager)
-        layout_manager = new Layout();
-    if (layout.match_content_size)
+    if (layout_manager || !getChildren().empty())
     {
-        layout_manager->update(this, layout.rect);
-        sf::FloatRect content_size(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-        for(Widget* child : children)
+        if (!layout_manager)
+            layout_manager = new Layout();
+
+        layout_manager->update(this, size);
+        if (layout.match_content_size)
         {
-            if (child->isVisible())
+            Vector2d content_size(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+            for(Node* child : getChildren())
             {
-                content_size.left = std::min(content_size.left, child->layout.rect.left - child->layout.margin_left);
-                content_size.top = std::min(content_size.top, child->layout.rect.top - child->layout.margin_top);
-                content_size.width = std::max(content_size.width + content_size.left, child->layout.rect.left + child->layout.rect.width + child->layout.margin_right) - content_size.left;
-                content_size.height = std::max(content_size.height + content_size.top, child->layout.rect.top + child->layout.rect.height + child->layout.margin_bottom) - content_size.top;
+                P<Widget> w = P<Node>(child);
+                if (w && w->isVisible())
+                {
+                    content_size.x = std::max(content_size.x, w->getPosition2D().x + w->getRenderSize().x + w->layout.margin_right);
+                    content_size.y = std::max(content_size.y, w->getPosition2D().y + w->getRenderSize().y + w->layout.margin_bottom);
+                }
+            }
+            if (content_size.x != std::numeric_limits<float>::min())
+            {
+                size = content_size;
+                layout.size = content_size;
             }
         }
-        layout.rect = content_size;
-        layout.size.x = content_size.width;
-        layout.size.y = content_size.height;
-    }else{
-        layout_manager->update(this, layout.rect);
     }
-    
-    for(Widget* child : children)
+    if (getPosition2D() != position || getRenderSize() != size)
     {
-        if (child->isVisible())
-            child->updateLayout();
+        Node::setPosition(position);
+        render_size = size;
+        render_data_outdated = true;
     }
 }
 
@@ -380,6 +400,16 @@ void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect
         renderStretchedH(window, rect, texture, color);
     }else{
         renderStretchedV(window, rect, texture, color);
+    }
+}
+
+std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)
+{
+    if (size.x >= size.y)
+    {
+        return createStretchedH(size);
+    }else{
+        return createStretchedV(size);
     }
 }
 
@@ -418,6 +448,48 @@ void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rec
     window.draw(a, texture_ptr);
 }
 
+std::shared_ptr<MeshData> Widget::createStretchedH(Vector2d size)
+{
+    MeshData::Vertices vertices;
+    vertices.reserve(18);
+    
+    float w = std::min(size.y / 2.0, size.x / 2.0);
+    Vector3f p0(0, 0, 0);
+    Vector3f p1(0, size.y, 0);
+    Vector3f p2(w, 0, 0);
+    Vector3f p3(w, size.y, 0);
+    Vector3f p4(size.x-w, 0, 0);
+    Vector3f p5(size.x-w, size.y, 0);
+    Vector3f p6(size.x, 0, 0);
+    Vector3f p7(size.x, size.y, 0);
+    
+    vertices.emplace_back(p0, sp::Vector2f(0, 1));
+    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p1, sp::Vector2f(0, 0));
+
+    vertices.emplace_back(p1, sp::Vector2f(0, 0));
+    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
+
+    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
+
+    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
+    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
+
+    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
+    vertices.emplace_back(p6, sp::Vector2f(1, 1));
+    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
+
+    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
+    vertices.emplace_back(p6, sp::Vector2f(1, 1));
+    vertices.emplace_back(p7, sp::Vector2f(1, 0));
+    
+    return MeshData::create(std::move(vertices));
+}
+
 void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
 {
     if (texture == "")
@@ -451,6 +523,48 @@ void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rec
         a[n].color = color;
     
     window.draw(a, texture_ptr);
+}
+
+std::shared_ptr<MeshData> Widget::createStretchedV(Vector2d size)
+{
+    MeshData::Vertices vertices;
+    vertices.reserve(18);
+    
+    float h = std::min(size.y / 2.0, size.x / 2.0);
+    Vector3f p0(0, 0, 0);
+    Vector3f p1(size.x, 0, 0);
+    Vector3f p2(0, h, 0);
+    Vector3f p3(size.x, h, 0);
+    Vector3f p4(0, size.y-h, 0);
+    Vector3f p5(size.x, size.y-h, 0);
+    Vector3f p6(0, size.y, 0);
+    Vector3f p7(size.x, size.y, 0);
+    
+    vertices.emplace_back(p0, sp::Vector2f(0, 1));
+    vertices.emplace_back(p1, sp::Vector2f(1, 1));
+    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
+
+    vertices.emplace_back(p1, sp::Vector2f(1, 1));
+    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
+
+    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
+    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
+
+    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
+
+    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
+    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p6, sp::Vector2f(0, 0));
+
+    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
+    vertices.emplace_back(p7, sp::Vector2f(1, 0));
+    vertices.emplace_back(p6, sp::Vector2f(0, 0));
+    
+    return MeshData::create(std::move(vertices));
 }
 
 void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, Color color)

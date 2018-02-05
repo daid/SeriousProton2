@@ -6,17 +6,17 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("vertical", VerticalLayout);
 
-void VerticalLayout::update(P<Container> container, const sf::FloatRect& rect)
+void VerticalLayout::update(P<Widget> container, Vector2d size)
 {
-    float y = rect.top;
-    for(Widget* w : container->children)
+    float y = size.y;
+    for(Node* n : container->getChildren())
     {
-        if (!w->isVisible())
+        P<Widget> w = P<Node>(n);
+        if (!w || !w->isVisible())
             continue;
         float h = w->layout.size.y + w->layout.margin_top + w->layout.margin_bottom;
-        sf::FloatRect r(rect.left, y, rect.width, h);
-        basicLayout(r, w);
-        y += h;
+        basicLayout(Vector2d(0, y - h), Vector2d(size.x, h), *w);
+        y -= h;
     }
 }
 

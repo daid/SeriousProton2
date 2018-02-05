@@ -331,6 +331,11 @@ public:
         return count;
     }
 
+    bool empty()
+    {
+        return list_start == nullptr;
+    }
+
     void sort(std::function<int(const P<T>& a, const P<T>& b)> compare_function)
     {
         for(_PListEntry* e = list_start; e && e->list_next; e=e->list_next)

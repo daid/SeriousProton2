@@ -12,8 +12,8 @@ namespace sp {
 std::unordered_map<string, P<Scene>> Scene::scene_mapping;
 PList<Scene> Scene::scenes;
 
-Scene::Scene(string scene_name)
-: scene_name(scene_name)
+Scene::Scene(string scene_name, int priority)
+: scene_name(scene_name), priority(priority)
 {
     root = new Node(this);
     collision_world2d = nullptr;
@@ -23,6 +23,9 @@ Scene::Scene(string scene_name)
     scene_mapping[scene_name] = this;
     
     scenes.add(this);
+    scenes.sort([](const P<Scene>& a, const P<Scene>& b){
+        return a->priority - b->priority;
+    });
 }
 
 Scene::~Scene()
@@ -57,6 +60,19 @@ void Scene::update(float delta)
     if (root)
         updateNode(delta, *root);
     onUpdate(delta);
+}
+
+bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
+{
+    return false;
+}
+
+void Scene::onPointerDrag(Ray3d ray, int id)
+{
+}
+
+void Scene::onPointerUp(Ray3d ray, int id)
+{
 }
 
 class Collision
@@ -252,14 +268,14 @@ public:
 	}
 };
 
-void Scene::queryCollisionAny(Vector2d start, Vector2d end, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Scene::queryCollisionAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
     if (!collision_world2d)
         return;
     
     Box2DRayCastCallbackAny callback;
     callback.callback = callback_function;
-    collision_world2d->RayCast(&callback, toVector(start), toVector(end));
+    collision_world2d->RayCast(&callback, toVector(ray.start), toVector(ray.end));
 }
 
 class Box2DRayCastCallbackAll : public b2RayCastCallback
@@ -293,13 +309,13 @@ public:
 	}
 };
 
-void Scene::queryCollisionAll(Vector2d start, Vector2d end, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Scene::queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
     if (!collision_world2d)
         return;
     
     Box2DRayCastCallbackAll callback;
-    collision_world2d->RayCast(&callback, toVector(start), toVector(end));
+    collision_world2d->RayCast(&callback, toVector(ray.start), toVector(ray.end));
     
     std::sort(callback.hits.begin(), callback.hits.end());
     

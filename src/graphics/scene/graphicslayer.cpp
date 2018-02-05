@@ -50,17 +50,37 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     sf::Shader::bind(nullptr);
 }
 
-bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id)
+bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
+    //TODO: Convert screen position to position within viewport
+    for(RenderPass* pass : render_passes)
+    {
+        if (pass->onPointerDown(button, position, id))
+        {
+            pointer_render_pass[id] = pass;
+            return true;
+        }
+    }
     return false;
 }
 
-void SceneGraphicsLayer::onPointerDrag(sf::Vector2f position, int id)
+void SceneGraphicsLayer::onPointerDrag(Vector2d position, int id)
 {
+    //TODO: Convert screen position to position within viewport
+    auto it = pointer_render_pass.find(id);
+    if (it != pointer_render_pass.end() && it->second)
+        it->second->onPointerDrag(position, id);
 }
 
-void SceneGraphicsLayer::onPointerUp(sf::Vector2f position, int id)
+void SceneGraphicsLayer::onPointerUp(Vector2d position, int id)
 {
+    //TODO: Convert screen position to position within viewport
+    auto it = pointer_render_pass.find(id);
+    if (it != pointer_render_pass.end() && it->second)
+    {
+        it->second->onPointerUp(position, id);
+        pointer_render_pass.erase(it);
+    }
 }
 
 void SceneGraphicsLayer::addRenderPass(P<RenderPass> render_pass)

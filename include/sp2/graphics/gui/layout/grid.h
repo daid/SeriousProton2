@@ -9,7 +9,7 @@ namespace gui {
 class GridLayout : public Layout
 {
 public:
-    virtual void update(P<Container> container, const sf::FloatRect& rect) override;
+    virtual void update(P<Widget> container, Vector2d size) override;
 };
 
 };//!namespace gui

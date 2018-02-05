@@ -16,13 +16,15 @@ public:
     virtual ~SceneGraphicsLayer();
     
     virtual void render(sf::RenderTarget& window) override;
-    virtual bool onPointerDown(io::Pointer::Button button, sf::Vector2f position, int id) override;
-    virtual void onPointerDrag(sf::Vector2f position, int id) override;
-    virtual void onPointerUp(sf::Vector2f position, int id) override;
+    virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
+    virtual void onPointerDrag(Vector2d position, int id) override;
+    virtual void onPointerUp(Vector2d position, int id) override;
     
     void addRenderPass(P<RenderPass> render_pass);
     void createRenderTarget(string name);
 private:
+    std::map<int, P<RenderPass>> pointer_render_pass;
+
     PList<RenderPass> render_passes;
     std::map<string, sf::RenderTexture*> targets;
 };

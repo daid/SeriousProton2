@@ -1,5 +1,4 @@
 #include <sp2/graphics/gui/layout/layout.h>
-#include <sp2/graphics/gui/widget/widget.h>
 
 namespace sp {
 namespace gui {
@@ -8,88 +7,92 @@ LayoutClassRegistry* LayoutClassRegistry::first;
 
 SP_REGISTER_LAYOUT("default", Layout);
 
-void Layout::update(P<Container> container, const sf::FloatRect& rect)
+void Layout::update(P<Widget> container, Vector2d size)
 {
-    for(Widget* w : container->children)
+    for(Node* n : container->getChildren())
     {
-        if (!w->isVisible())
+        P<Widget> w = P<Node>(n);
+        if (!w || !w->isVisible())
             continue;
-        basicLayout(rect, w);
+        basicLayout(Vector2d(0, 0), size, *w);
     }
 }
 
-void Layout::basicLayout(const sf::FloatRect& rect, Widget* widget)
+void Layout::basicLayout(Vector2d position, Vector2d size, Widget* widget)
 {
+    Vector2d result_position;
+    Vector2d result_size;
     switch(widget->layout.alignment)
     {
-    case Widget::Alignment::TopLeft:
-    case Widget::Alignment::BottomLeft:
-    case Widget::Alignment::Left:
-        widget->layout.rect.left = rect.left + widget->layout.position.x + widget->layout.margin_left;
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        result_position.x = position.x + widget->layout.position.x + widget->layout.margin_left;
         if (widget->layout.fill_width)
-            widget->layout.rect.width = rect.width - widget->layout.margin_left - widget->layout.margin_right + widget->layout.position.x;
+            result_size.x = size.x - widget->layout.margin_left - widget->layout.margin_right + widget->layout.position.x;
         else
-            widget->layout.rect.width = widget->layout.size.x;
+            result_size.x = widget->layout.size.x;
         break;
-    case Widget::Alignment::Top:
-    case Widget::Alignment::Center:
-    case Widget::Alignment::Bottom:
+    case Alignment::Top:
+    case Alignment::Center:
+    case Alignment::Bottom:
         if (widget->layout.fill_width)
-            widget->layout.rect.width = rect.width - widget->layout.margin_left - widget->layout.margin_right;
+            result_size.x = size.x - widget->layout.margin_left - widget->layout.margin_right;
         else
-            widget->layout.rect.width = widget->layout.size.x;
-        widget->layout.rect.left = rect.left + rect.width / 2.0f - widget->layout.rect.width / 2.0f;
+            result_size.x = widget->layout.size.x;
+        result_position.x = position.x + size.x / 2.0f - result_size.x / 2.0f;
         break;
-    case Widget::Alignment::TopRight:
-    case Widget::Alignment::Right:
-    case Widget::Alignment::BottomRight:
-        widget->layout.rect.left = rect.left + widget->layout.position.x + widget->layout.margin_left;
+    case Alignment::TopRight:
+    case Alignment::Right:
+    case Alignment::BottomRight:
+        result_position.x = position.x + widget->layout.position.x + widget->layout.margin_left;
         if (widget->layout.fill_width)
-            widget->layout.rect.width = rect.width - widget->layout.margin_left - widget->layout.margin_right + widget->layout.position.x;
+            result_size.x = size.x - widget->layout.margin_left - widget->layout.margin_right + widget->layout.position.x;
         else
-            widget->layout.rect.width = widget->layout.size.x;
-        widget->layout.rect.left = rect.left + rect.width - widget->layout.margin_right + widget->layout.position.x - widget->layout.rect.width;
+            result_size.x = widget->layout.size.x;
+        result_position.x = position.x + size.x - widget->layout.margin_right + widget->layout.position.x - result_size.x;
         break;
     }
 
     switch(widget->layout.alignment)
     {
-    case Widget::Alignment::TopLeft:
-    case Widget::Alignment::Top:
-    case Widget::Alignment::TopRight:
-        widget->layout.rect.top = rect.top + widget->layout.position.y + widget->layout.margin_top;
+    case Alignment::TopLeft:
+    case Alignment::Top:
+    case Alignment::TopRight:
+        result_position.y = position.y - widget->layout.position.y + widget->layout.margin_top;
         if (widget->layout.fill_height)
-            widget->layout.rect.height = rect.height - widget->layout.margin_top - widget->layout.margin_bottom + widget->layout.position.y;
+            result_size.y = size.y - widget->layout.margin_top - widget->layout.margin_bottom - widget->layout.position.y;
         else
-            widget->layout.rect.height = widget->layout.size.y;
+            result_size.y = widget->layout.size.y;
+        result_position.y = position.y + size.y - widget->layout.margin_top - widget->layout.position.y - result_size.y;
         break;
-    case Widget::Alignment::Left:
-    case Widget::Alignment::Center:
-    case Widget::Alignment::Right:
+    case Alignment::Left:
+    case Alignment::Center:
+    case Alignment::Right:
         if (widget->layout.fill_height)
-            widget->layout.rect.height = rect.height - widget->layout.margin_top - widget->layout.margin_bottom;
+            result_size.y = size.y - widget->layout.margin_top - widget->layout.margin_bottom;
         else
-            widget->layout.rect.height = widget->layout.size.y;
-        widget->layout.rect.top = rect.top + rect.height / 2.0f - widget->layout.rect.height / 2.0f;
+            result_size.y = widget->layout.size.y;
+        result_position.y = position.y + size.y / 2.0f - result_size.y / 2.0f;
         break;
-    case Widget::Alignment::BottomLeft:
-    case Widget::Alignment::Bottom:
-    case Widget::Alignment::BottomRight:
-        widget->layout.rect.top = rect.top + widget->layout.position.y + widget->layout.margin_top;
+    case Alignment::BottomLeft:
+    case Alignment::Bottom:
+    case Alignment::BottomRight:
+        result_position.y = position.y - widget->layout.position.y + widget->layout.margin_bottom;
         if (widget->layout.fill_height)
-            widget->layout.rect.height = rect.height - widget->layout.margin_top - widget->layout.margin_bottom + widget->layout.position.y;
+            result_size.y = size.y - widget->layout.margin_top - widget->layout.margin_bottom - widget->layout.position.y;
         else
-            widget->layout.rect.height = widget->layout.size.y;
-        widget->layout.rect.top = rect.top + rect.height - widget->layout.margin_bottom + widget->layout.position.y - widget->layout.rect.height;
+            result_size.y = widget->layout.size.y;
         break;
     }
     if (widget->layout.lock_aspect_ratio)
     {
         if (widget->layout.fill_height)
-            widget->layout.rect.width = widget->layout.rect.height / widget->layout.size.y * widget->layout.size.x;
+            result_size.x = result_size.y / widget->layout.size.y * widget->layout.size.x;
         if (widget->layout.fill_width)
-            widget->layout.rect.height = widget->layout.rect.width / widget->layout.size.x * widget->layout.size.y;
+            result_size.y = result_size.y / widget->layout.size.x * widget->layout.size.y;
     }
+    widget->updateLayout(result_position, result_size);
 }
 
 };//!namespace gui
