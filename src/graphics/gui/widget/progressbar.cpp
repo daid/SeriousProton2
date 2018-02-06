@@ -20,13 +20,21 @@ Progressbar::Progressbar(P<Widget> parent)
 
 void Progressbar::setValue(float value)
 {
-    this->value = value;
+    if (this->value != value)
+    {
+        this->value = value;
+        markRenderDataOutdated();
+    }
 }
 
 void Progressbar::setRange(float min_value, float max_value)
 {
-    this->min_value = min_value;
-    this->max_value = max_value;
+    if (this->min_value != min_value || this->max_value != max_value)
+    {
+        this->min_value = min_value;
+        this->max_value = max_value;
+        markRenderDataOutdated();
+    }
 }
 
 void Progressbar::setAttribute(const string& key, const string& value)
@@ -42,6 +50,7 @@ void Progressbar::setAttribute(const string& key, const string& value)
         else if (value == "bottomleft") alignment = Alignment::BottomLeft;
         else if (value == "bottom") alignment = Alignment::Bottom;
         else if (value == "bottomright") alignment = Alignment::BottomRight;
+        markRenderDataOutdated();
     }
     else if (key == "range")
     {
@@ -49,6 +58,7 @@ void Progressbar::setAttribute(const string& key, const string& value)
         max_value = v.y;
         if (v.x != v.y)
             min_value = v.x;
+        markRenderDataOutdated();
     }
     else
     {
@@ -60,52 +70,49 @@ void Progressbar::updateRenderData()
 {
     float f = (value - min_value) / (max_value - min_value);
     f = std::max(0.0f, std::min(f, 1.0f));
-/*TODO:GUI
     const ThemeData::StateData& t = theme->states[int(getState())];
-    sf::FloatRect rect = getRect();
-    
+    render_data.texture = t.texture;
+    render_data.color = t.color;
+    //TODO:GUI
     switch(alignment)
     {
     case Alignment::TopLeft:
     case Alignment::Top:
     case Alignment::TopRight:
-        //renderStretchedV(window, rect, t.background_image, t.background_color);
-        rect.height *= f;
+        render_data.mesh = createStretchedV(getRenderSize());
+        //rect.height *= f;
         //renderStretchedV(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
     case Alignment::BottomRight:
+        render_data.mesh = createStretchedV(getRenderSize());
         //renderStretchedV(window, rect, t.background_image, t.background_color);
-        rect.top += rect.height * (1.0 - f);
-        rect.height *= f;
+        //rect.top += rect.height * (1.0 - f);
+        //rect.height *= f;
         //renderStretchedV(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Left:
+        render_data.mesh = createStretchedH(getRenderSize());
         //renderStretchedH(window, rect, t.background_image, t.background_color);
-        rect.width *= f;
+        //rect.width *= f;
         //renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Right:
+        render_data.mesh = createStretchedH(getRenderSize());
         //renderStretchedH(window, rect, t.background_image, t.background_color);
-        rect.left += rect.width * (1.0 - f);
-        rect.width *= f;
+        //rect.left += rect.width * (1.0 - f);
+        //rect.width *= f;
         //renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     case Alignment::Center:
+        render_data.mesh = createStretchedH(getRenderSize());
         //renderStretchedH(window, rect, t.background_image, t.background_color);
-        rect.left += rect.width * (1.0 - f) * 0.5;
-        rect.width *= f;
+        //rect.left += rect.width * (1.0 - f) * 0.5;
+        //rect.width *= f;
         //renderStretchedH(window, rect, t.forground_image, getProgressColor());
         break;
     }
-    */
-}
-
-sp::Color Progressbar::getProgressColor()
-{
-    const ThemeData::StateData& t = theme->states[int(getState())];
-    return t.color;
 }
 
 };//!namespace gui

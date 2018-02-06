@@ -22,7 +22,7 @@ void Panel::updateRenderData()
 
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretchedHV(getRenderSize(), 25.0f);
-    render_data.texture = t.image;
+    render_data.texture = t.texture;
     render_data.color = t.color;
 }
 

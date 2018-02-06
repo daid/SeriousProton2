@@ -23,14 +23,17 @@ void Slider::setAttribute(const string& key, const string& value)
     if (key == "min" || key == "min_value")
     {
         min_value = stringutil::convert::toFloat(value);
+        markRenderDataOutdated();
     }
     else if (key == "max" || key == "max_value")
     {
         max_value = stringutil::convert::toFloat(value);
+        markRenderDataOutdated();
     }
     else if (key == "value")
     {
         this->value = stringutil::convert::toFloat(value);
+        markRenderDataOutdated();
     }
     else
     {
@@ -41,8 +44,10 @@ void Slider::setAttribute(const string& key, const string& value)
 void Slider::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
+    render_data.mesh = createStretched(getRenderSize());
+    render_data.texture = t.texture;
+    render_data.color = t.color;
     /*TODO:GUI
-    renderStretched(window, getRect(), t.background_image, t.background_color);
     sf::FloatRect rect(getRect().left, getRect().top, std::min(getRect().width, getRect().height), std::min(getRect().width, getRect().height));
     
     float f = (value - min_value) / (max_value - min_value);
@@ -54,7 +59,6 @@ void Slider::updateRenderData()
     {
         rect.top += (getRect().height - getRect().width) * f;
     }
-    
     //renderStretched(window, rect, t.forground_image, t.forground_color);
     */
 }

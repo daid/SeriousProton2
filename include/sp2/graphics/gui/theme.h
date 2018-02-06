@@ -33,7 +33,7 @@ public:
     class StateData
     {
     public:
-        Texture* image;
+        Texture* texture;
         sp::Color color;
         Font* font;
         float text_size;
