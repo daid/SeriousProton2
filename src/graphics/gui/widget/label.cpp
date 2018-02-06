@@ -16,6 +16,7 @@ Label::Label(P<Widget> parent, string theme_data_name)
     text_alignment = Alignment::Center;
     vertical = false;
     text_size = -1;
+    texture_revision = -1;
 }
 
 void Label::setLabel(string label)
@@ -67,9 +68,17 @@ void Label::updateRenderData()
     const ThemeData::StateData& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
-    render_data.mesh = t.font->createString(label, 32, text_size < 0 ? t.text_size : text_size, getRenderSize(), text_alignment);
-    render_data.texture = t.font->getTexture(32);
+    render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.text_size : text_size, getRenderSize(), text_alignment);
+    render_data.texture = t.font->getTexture(64);
+    texture_revision = render_data.texture->getRevision();
     render_data.color = t.color;
+}
+
+void Label::onUpdate(float delta)
+{
+    if (render_data.texture && render_data.texture->getRevision() != texture_revision)
+        markRenderDataOutdated();
+    Widget::onUpdate(delta);
 }
 
 };//!namespace gui

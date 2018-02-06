@@ -20,11 +20,13 @@ public:
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void updateRenderData() override;
+    virtual void onUpdate(float delta) override;
 private:
     Alignment text_alignment;
     string label;
     float text_size;
     bool vertical;
+    int texture_revision;
 };
 
 };//!namespace gui
