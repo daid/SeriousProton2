@@ -7,6 +7,7 @@
 namespace sp {
 namespace gui {
 
+class ThemeImage;
 class Progressbar : public Widget
 {
 public:
@@ -22,10 +23,10 @@ public:
     
     virtual void updateRenderData() override;
 protected:
-    Alignment alignment;
     float value;
     float min_value;
     float max_value;
+    P<ThemeImage> fill;
 };
 
 };//!namespace gui
