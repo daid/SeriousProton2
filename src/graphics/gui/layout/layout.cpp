@@ -87,10 +87,23 @@ void Layout::basicLayout(Vector2d position, Vector2d size, Widget* widget)
     }
     if (widget->layout.lock_aspect_ratio)
     {
-        if (widget->layout.fill_height)
-            result_size.x = result_size.y / widget->layout.size.y * widget->layout.size.x;
-        if (widget->layout.fill_width)
-            result_size.y = result_size.y / widget->layout.size.x * widget->layout.size.y;
+        double aspect = widget->layout.size.x / widget->layout.size.y;
+        if (widget->layout.fill_height && widget->layout.fill_width)
+        {
+            double current_aspect = result_size.x / result_size.y;
+            if (current_aspect > aspect)
+                result_size.x = result_size.y / aspect;
+            else
+                result_size.y = result_size.x * aspect;
+        }
+        else if (widget->layout.fill_height)
+        {
+            result_size.x = result_size.y / aspect;
+        }
+        else if (widget->layout.fill_width)
+        {
+            result_size.y = result_size.x * aspect;
+        }
     }
     widget->updateLayout(result_position, result_size);
 }

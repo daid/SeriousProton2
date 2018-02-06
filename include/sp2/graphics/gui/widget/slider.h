@@ -7,6 +7,7 @@
 namespace sp {
 namespace gui {
 
+class ThemeImage;
 class Slider : public Widget
 {
 public:
@@ -21,6 +22,7 @@ public:
 private:
     float min_value, max_value;
     float value;
+    P<ThemeImage> dial;
 };
 
 };//!namespace gui

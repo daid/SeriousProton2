@@ -1,4 +1,5 @@
 #include <sp2/graphics/gui/widget/slider.h>
+#include <sp2/graphics/gui/widget/themeimage.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/engine.h>
 #include <SFML/Graphics.hpp>
@@ -11,11 +12,16 @@ SP_REGISTER_WIDGET("slider", Slider);
 Slider::Slider(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("slider");
+    loadThemeData("slider.background");
 
     min_value = 0.0;
     max_value = 1.0;
     value = 0.5;
+    
+    dial = new ThemeImage(this, "slider.forground");
+    dial->layout.fill_width = false;
+    dial->layout.fill_height = false;
+    dial->layout.lock_aspect_ratio = true;
 }
 
 void Slider::setAttribute(const string& key, const string& value)
@@ -43,24 +49,32 @@ void Slider::setAttribute(const string& key, const string& value)
 
 void Slider::updateRenderData()
 {
+    Vector2d size(getRenderSize());
     const ThemeData::StateData& t = theme->states[int(getState())];
-    render_data.mesh = createStretched(getRenderSize());
+    render_data.shader = Shader::get("internal:basic.shader");
+    render_data.mesh = createStretched(size);
     render_data.texture = t.texture;
     render_data.color = t.color;
-    /*TODO:GUI
-    sf::FloatRect rect(getRect().left, getRect().top, std::min(getRect().width, getRect().height), std::min(getRect().width, getRect().height));
     
     float f = (value - min_value) / (max_value - min_value);
-    if (getRect().width > getRect().height)
+    if (size.x > size.y)
     {
-        rect.left += (getRect().width - getRect().height) * f;
+        dial->layout.size.x = size.y;
+        dial->layout.size.y = size.y;
+        dial->layout.position.x = (size.x - size.y) * f;
+        dial->layout.position.y = 0;
+        dial->layout.fill_width = false;
+        dial->layout.fill_height = true;
     }
     else
     {
-        rect.top += (getRect().height - getRect().width) * f;
+        dial->layout.size.x = size.x;
+        dial->layout.size.y = size.x;
+        dial->layout.position.x = 0;
+        dial->layout.position.y = size.y - size.x - (size.y - size.x) * f;
+        dial->layout.fill_width = true;
+        dial->layout.fill_height = false;
     }
-    //renderStretched(window, rect, t.forground_image, t.forground_color);
-    */
 }
 
 bool Slider::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
@@ -78,9 +92,13 @@ void Slider::onPointerDrag(Vector2d position, int id)
     else
         f = (position.y - size.x / 2.0) / (size.y - size.x);
     f = std::max(0.0f, std::min(f, 1.0f));
-    value = (f * (max_value - min_value)) + min_value;
-    
-    runCallback(value);
+    float new_value = (f * (max_value - min_value)) + min_value;
+    if (new_value != value)
+    {
+        value = new_value;
+        runCallback(value);
+        markRenderDataOutdated();
+    }
 }
 
 void Slider::onPointerUp(Vector2d position, int id)

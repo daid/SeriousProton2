@@ -28,7 +28,7 @@ public:
     public:
         Vector2d position;
         Alignment alignment = Alignment::TopLeft;
-        Vector2d size;
+        Vector2d size{1, 1};
         sf::Vector2i span{1, 1};
         float margin_left = 0, margin_right = 0, margin_top = 0, margin_bottom = 0;
         Vector2d min_size;

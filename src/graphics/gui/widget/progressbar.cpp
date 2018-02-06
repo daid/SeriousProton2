@@ -71,6 +71,7 @@ void Progressbar::updateRenderData()
     float f = (value - min_value) / (max_value - min_value);
     f = std::max(0.0f, std::min(f, 1.0f));
     const ThemeData::StateData& t = theme->states[int(getState())];
+    render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = t.texture;
     render_data.color = t.color;
     //TODO:GUI
