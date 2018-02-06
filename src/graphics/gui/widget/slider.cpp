@@ -38,10 +38,10 @@ void Slider::setAttribute(const string& key, const string& value)
     }
 }
 
-void Slider::render(sf::RenderTarget& window)
+void Slider::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
-    /*
+    /*TODO:GUI
     renderStretched(window, getRect(), t.background_image, t.background_color);
     sf::FloatRect rect(getRect().left, getRect().top, std::min(getRect().width, getRect().height), std::min(getRect().width, getRect().height));
     

@@ -10,7 +10,7 @@ namespace gui {
 class Label : public Widget
 {
 public:
-    Label(P<Widget> parent);
+    Label(P<Widget> parent, string theme_data_name="label");
 
     void setLabel(string label);
     
@@ -19,7 +19,6 @@ public:
     
     virtual void setAttribute(const string& key, const string& value) override;
     
-    virtual void render(sf::RenderTarget& window) override;
     virtual void updateRenderData() override;
 private:
     Alignment text_alignment;

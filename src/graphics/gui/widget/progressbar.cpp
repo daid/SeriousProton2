@@ -56,11 +56,11 @@ void Progressbar::setAttribute(const string& key, const string& value)
     }
 }
 
-void Progressbar::render(sf::RenderTarget& window)
+void Progressbar::updateRenderData()
 {
     float f = (value - min_value) / (max_value - min_value);
     f = std::max(0.0f, std::min(f, 1.0f));
-/*
+/*TODO:GUI
     const ThemeData::StateData& t = theme->states[int(getState())];
     sf::FloatRect rect = getRect();
     

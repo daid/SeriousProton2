@@ -55,10 +55,6 @@ void Widget::setFocusable(bool value)
     }
 }
 
-void Widget::render(sf::RenderTarget& window)
-{
-}
-
 void Widget::updateRenderData()
 {
 }
@@ -391,18 +387,6 @@ void Widget::runCallback(Variant v)
         callback(v);
 }
 
-void Widget::renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
-{
-    if (texture == "")
-        return;
-    if (rect.width >= rect.height)
-    {
-        renderStretchedH(window, rect, texture, color);
-    }else{
-        renderStretchedV(window, rect, texture, color);
-    }
-}
-
 std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)
 {
     if (size.x >= size.y)
@@ -411,41 +395,6 @@ std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)
     }else{
         return createStretchedV(size);
     }
-}
-
-void Widget::renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
-{
-    if (texture == "")
-        return;
-    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
-    sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
-    sf::VertexArray a(sf::TrianglesStrip, 8);
-    
-    float w = rect.height / 2.0f;
-    if (w * 2 > rect.width)
-        w = rect.width / 2.0f;
-    a[0].position = sf::Vector2f(rect.left, rect.top);
-    a[1].position = sf::Vector2f(rect.left, rect.top + rect.height);
-    a[2].position = sf::Vector2f(rect.left + w, rect.top);
-    a[3].position = sf::Vector2f(rect.left + w, rect.top + rect.height);
-    a[4].position = sf::Vector2f(rect.left + rect.width - w, rect.top);
-    a[5].position = sf::Vector2f(rect.left + rect.width - w, rect.top + rect.height);
-    a[6].position = sf::Vector2f(rect.left + rect.width, rect.top);
-    a[7].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height);
-    
-    a[0].texCoords = sf::Vector2f(0, 0);
-    a[1].texCoords = sf::Vector2f(0, texture_size.y);
-    a[2].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[3].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
-    a[4].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[5].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
-    a[6].texCoords = sf::Vector2f(texture_size.x, 0);
-    a[7].texCoords = sf::Vector2f(texture_size.x, texture_size.y);
-
-    for(int n=0; n<8; n++)
-        a[n].color = color;
-    
-    window.draw(a, texture_ptr);
 }
 
 std::shared_ptr<MeshData> Widget::createStretchedH(Vector2d size)
@@ -490,41 +439,6 @@ std::shared_ptr<MeshData> Widget::createStretchedH(Vector2d size)
     return MeshData::create(std::move(vertices));
 }
 
-void Widget::renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, Color color)
-{
-    if (texture == "")
-        return;
-    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
-    sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
-    sf::VertexArray a(sf::TrianglesStrip, 8);
-    
-    float h = rect.width / 2.0;
-    if (h * 2 > rect.height)
-        h = rect.height / 2.0f;
-    a[0].position = sf::Vector2f(rect.left, rect.top);
-    a[1].position = sf::Vector2f(rect.left + rect.width, rect.top);
-    a[2].position = sf::Vector2f(rect.left, rect.top + h);
-    a[3].position = sf::Vector2f(rect.left + rect.width, rect.top + h);
-    a[4].position = sf::Vector2f(rect.left, rect.top + rect.height - h);
-    a[5].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height - h);
-    a[6].position = sf::Vector2f(rect.left, rect.top + rect.height);
-    a[7].position = sf::Vector2f(rect.left + rect.width, rect.top + rect.height);
-
-    a[0].texCoords = sf::Vector2f(0, 0);
-    a[1].texCoords = sf::Vector2f(0, texture_size.y);
-    a[2].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[3].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
-    a[4].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[5].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y);
-    a[6].texCoords = sf::Vector2f(texture_size.x, 0);
-    a[7].texCoords = sf::Vector2f(texture_size.x, texture_size.y);
-
-    for(int n=0; n<8; n++)
-        a[n].color = color;
-    
-    window.draw(a, texture_ptr);
-}
-
 std::shared_ptr<MeshData> Widget::createStretchedV(Vector2d size)
 {
     MeshData::Vertices vertices;
@@ -567,168 +481,110 @@ std::shared_ptr<MeshData> Widget::createStretchedV(Vector2d size)
     return MeshData::create(std::move(vertices));
 }
 
-void Widget::renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, Color color)
+std::shared_ptr<MeshData> Widget::createStretchedHV(Vector2d size, double corner_size)
 {
-    if (texture == "")
-        return;
-    const sf::Texture* texture_ptr = textureManager.get(texture)->get();
-    sf::Vector2f texture_size = sf::Vector2f(texture_ptr->getSize());
-    sf::VertexArray a(sf::TrianglesStrip, 8);
+    MeshData::Vertices vertices;
+    vertices.reserve(9 * 6);
 
-    for(int n=0; n<8; n++)
-        a[n].color = color;
-    
-    corner_size = std::min(corner_size, rect.height / 2.0f);
-    corner_size = std::min(corner_size, rect.width / 2.0f);
-    
-    a[0].position = sf::Vector2f(rect.left, rect.top);
-    a[1].position = sf::Vector2f(rect.left, rect.top + corner_size);
-    a[2].position = sf::Vector2f(rect.left + corner_size, rect.top);
-    a[3].position = sf::Vector2f(rect.left + corner_size, rect.top + corner_size);
-    a[4].position = sf::Vector2f(rect.left + rect.width - corner_size, rect.top);
-    a[5].position = sf::Vector2f(rect.left + rect.width - corner_size, rect.top + corner_size);
-    a[6].position = sf::Vector2f(rect.left + rect.width, rect.top);
-    a[7].position = sf::Vector2f(rect.left + rect.width, rect.top + corner_size);
-    
-    a[0].texCoords = sf::Vector2f(0, 0);
-    a[1].texCoords = sf::Vector2f(0, texture_size.y / 2.0);
-    a[2].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[3].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y / 2.0);
-    a[4].texCoords = sf::Vector2f(texture_size.x / 2, 0);
-    a[5].texCoords = sf::Vector2f(texture_size.x / 2, texture_size.y / 2.0);
-    a[6].texCoords = sf::Vector2f(texture_size.x, 0);
-    a[7].texCoords = sf::Vector2f(texture_size.x, texture_size.y / 2.0);
+    corner_size = std::min(corner_size, size.x / 2.0f);
+    corner_size = std::min(corner_size, size.y / 2.0f);
 
-    window.draw(a, texture_ptr);
+    Vector3f p0(0, 0, 0);
+    Vector3f p1(corner_size, 0, 0);
+    Vector3f p2(size.x - corner_size, 0, 0);
+    Vector3f p3(size.x, 0, 0);
 
-    a[0].position.y = rect.top + rect.height - corner_size;
-    a[2].position.y = rect.top + rect.height - corner_size;
-    a[4].position.y = rect.top + rect.height - corner_size;
-    a[6].position.y = rect.top + rect.height - corner_size;
-    
-    a[0].texCoords.y = texture_size.y / 2.0;
-    a[2].texCoords.y = texture_size.y / 2.0;
-    a[4].texCoords.y = texture_size.y / 2.0;
-    a[6].texCoords.y = texture_size.y / 2.0;
-    
-    window.draw(a, texture_ptr);
+    Vector3f p4(0, corner_size, 0);
+    Vector3f p5(corner_size, corner_size, 0);
+    Vector3f p6(size.x - corner_size, corner_size, 0);
+    Vector3f p7(size.x, corner_size, 0);
 
-    a[1].position.y = rect.top + rect.height;
-    a[3].position.y = rect.top + rect.height;
-    a[5].position.y = rect.top + rect.height;
-    a[7].position.y = rect.top + rect.height;
-    
-    a[1].texCoords.y = texture_size.y;
-    a[3].texCoords.y = texture_size.y;
-    a[5].texCoords.y = texture_size.y;
-    a[7].texCoords.y = texture_size.y;
-    
-    window.draw(a, texture_ptr);
-}
+    Vector3f p8(0, size.y - corner_size, 0);
+    Vector3f p9(corner_size, size.y - corner_size, 0);
+    Vector3f p10(size.x - corner_size, size.y - corner_size, 0);
+    Vector3f p11(size.x, size.y - corner_size, 0);
 
-void Widget::renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
-{
-    sf::Text text_element(text, *fontManager.get(font_name), text_size / text_scale_factor);
-    float y = 0;
-    float x = 0;
-    
-    //The "base line" of the text draw is the "Y position where the text is drawn" + font_size.
-    //The height of normal text is 70% of the font_size.
-    //So use those properties to align the text. Depending on the localbounds does not work.
-    switch(alignment)
+    Vector3f p12(0, size.y, 0);
+    Vector3f p13(corner_size, size.y, 0);
+    Vector3f p14(size.x - corner_size, size.y, 0);
+    Vector3f p15(size.x, size.y, 0);
+
     {
-    case Alignment::TopLeft:
-    case Alignment::TopRight:
-    case Alignment::Top:
-        y = rect.top - 0.3 * text_size;
-        break;
-    case Alignment::BottomLeft:
-    case Alignment::BottomRight:
-    case Alignment::Bottom:
-        y = rect.top + rect.height - text_size;
-        break;
-    case Alignment::Left:
-    case Alignment::Right:
-    case Alignment::Center:
-        y = rect.top + rect.height / 2.0 - text_size * 0.7;
-        break;
-    }
-    
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        x = rect.left - text_element.getLocalBounds().left * text_scale_factor;
-        break;
-    case Alignment::TopRight:
-    case Alignment::BottomRight:
-    case Alignment::Right:
-        x = rect.left + rect.width - text_element.getLocalBounds().width * text_scale_factor - text_element.getLocalBounds().left * text_scale_factor;
-        break;
-    case Alignment::Top:
-    case Alignment::Bottom:
-    case Alignment::Center:
-        x = rect.left + rect.width / 2.0 - text_element.getLocalBounds().width * text_scale_factor / 2.0 - text_element.getLocalBounds().left * text_scale_factor;
-        break;
-    }
-    text_element.setScale(text_scale_factor, text_scale_factor);
-    text_element.setPosition(x, y);
-    text_element.setFillColor(color);
-    window.draw(text_element);
-}
+        vertices.emplace_back(p0, sp::Vector2f(0, 1));
+        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
 
-void Widget::renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, Color color)
-{
-    sf::Text text_element(text, *fontManager.get(font_name), text_size / text_scale_factor);
-    text_element.setRotation(-90);
-    float y = 0;
-    float x = 0;
-    
-    //The "base line" of the text draw is the "Y position where the text is drawn" + font_size.
-    //The height of normal text is 70% of the font_size.
-    //So use those properties to align the text. Depending on the localbounds does not work.
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::TopRight:
-    case Alignment::Top:
-        y = rect.top + text_element.getLocalBounds().width * text_scale_factor + text_element.getLocalBounds().left * text_scale_factor;
-        break;
-    case Alignment::BottomLeft:
-    case Alignment::BottomRight:
-    case Alignment::Bottom:
-        y = rect.top + rect.height + text_element.getLocalBounds().left * text_scale_factor;
-        break;
-    case Alignment::Left:
-    case Alignment::Right:
-    case Alignment::Center:
-        y = rect.top + rect.height / 2.0 + text_element.getLocalBounds().width * text_scale_factor / 2.0 + text_element.getLocalBounds().left * text_scale_factor;
-        break;
+        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
+
+        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
+        vertices.emplace_back(p3, sp::Vector2f(1, 1));
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p3, sp::Vector2f(1, 1));
+        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
     }
-    
-    switch(alignment)
     {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        x = rect.left + text_size * 0.3;
-        break;
-    case Alignment::TopRight:
-    case Alignment::BottomRight:
-    case Alignment::Right:
-        x = rect.left + rect.width - text_size;
-        break;
-    case Alignment::Top:
-    case Alignment::Bottom:
-    case Alignment::Center:
-        x = rect.left + rect.width / 2.0 - text_size * 0.7;
-        break;
+        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
+
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
+
+        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
+
+        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
     }
-    text_element.setScale(text_scale_factor, text_scale_factor);
-    text_element.setPosition(x, y);
-    text_element.setFillColor(color);
-    window.draw(text_element);
+    {
+        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p12, sp::Vector2f(0, 0));
+
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
+        vertices.emplace_back(p12, sp::Vector2f(0, 0));
+
+        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
+
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
+        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
+
+        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
+        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
+
+        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
+        vertices.emplace_back(p15, sp::Vector2f(1, 0));
+        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
+    }
+    return MeshData::create(std::move(vertices));
 }
 
 };//!namespace gui

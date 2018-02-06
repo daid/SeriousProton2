@@ -16,10 +16,10 @@ Button::Button(P<Widget> parent)
 : Widget(parent)
 {
     loadThemeData("button.background");
-    label = new Label(this);
+    label = new Label(this, "button.label");
     label->layout.fill_height = true;
     label->layout.fill_width = true;
-    //label->loadThemeData("button.label");
+    //TODO: Update label with "state"
 }
 
 void Button::setLabel(string value)
@@ -41,13 +41,6 @@ void Button::setAttribute(const string& key, const string& value)
     {
         Widget::setAttribute(key, value);
     }
-}
-
-void Button::render(sf::RenderTarget& window)
-{
-    //const ThemeData::StateData& t = theme->states[int(getState())];
-    //renderStretched(window, getRect(), t.image, t.color);
-    //renderText(window, getRect(), Alignment::Center, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
 }
 
 void Button::updateRenderData()

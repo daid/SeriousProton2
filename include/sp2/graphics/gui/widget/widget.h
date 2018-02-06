@@ -52,7 +52,6 @@ public:
     };
     typedef std::function<void(Variant value)> Callback;
     
-    virtual void render(sf::RenderTarget& window);
     virtual void updateRenderData();
     virtual void onUpdate(float delta) override;
     virtual bool onPointerDown(io::Pointer::Button button, sp::Vector2d position, int id);
@@ -116,15 +115,10 @@ protected:
     void runCallback(Variant v);
     void markRenderDataOutdated() { render_data_outdated = true; }
 
-    void renderStretched(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
     std::shared_ptr<MeshData> createStretched(Vector2d size);
-    void renderStretchedH(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
     std::shared_ptr<MeshData> createStretchedH(Vector2d size);
-    void renderStretchedV(sf::RenderTarget& window, const sf::FloatRect& rect, const string& texture, sp::Color color);
     std::shared_ptr<MeshData> createStretchedV(Vector2d size);
-    void renderStretchedHV(sf::RenderTarget& window, const sf::FloatRect& rect, float corner_size, const string& texture, sp::Color color);
-    void renderText(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
-    void renderTextVertical(sf::RenderTarget& window, const sf::FloatRect& rect, Alignment alignment, const string& text, const string& font_name, float text_size, sp::Color color);
+    std::shared_ptr<MeshData> createStretchedHV(Vector2d size, double corner_size);
 private:
     Widget(P<Node> parent);
 

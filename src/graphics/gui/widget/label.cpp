@@ -9,10 +9,10 @@ namespace gui {
 
 SP_REGISTER_WIDGET("label", Label);
 
-Label::Label(P<Widget> parent)
+Label::Label(P<Widget> parent, string theme_data_name)
 : Widget(parent)
 {
-    loadThemeData("label");
+    loadThemeData(theme_data_name);
     text_alignment = Alignment::Center;
     vertical = false;
     text_size = -1;
@@ -60,15 +60,6 @@ void Label::setAttribute(const string& key, const string& value)
     {
         Widget::setAttribute(key, value);
     }
-}
-
-void Label::render(sf::RenderTarget& window)
-{
-    //const ThemeData::StateData& t = theme->states[int(getState())];
-    //if (vertical)
-    //    renderTextVertical(window, getRect(), text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
-    //else
-    //    renderText(window, getRect(), text_alignment, label, t.font, text_size < 0 ? t.text_size : text_size, t.forground_color);
 }
 
 void Label::updateRenderData()

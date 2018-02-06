@@ -11,7 +11,6 @@ class Panel : public Widget
 public:
     Panel(P<Widget> parent);
     
-    virtual void render(sf::RenderTarget& window) override;
     virtual void updateRenderData() override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
 };
