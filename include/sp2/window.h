@@ -15,8 +15,6 @@ class GraphicsLayer;
 class Window : public AutoPointerObject
 {
 public:
-    sf::RenderWindow render_window;
-
     Window();
     Window(float aspect_ratio);
     
@@ -25,6 +23,8 @@ public:
 
     static P<Window> getInstance();
 private:
+    sf::RenderWindow render_window;
+
     virtual ~Window();
     
     void createRenderWindow();

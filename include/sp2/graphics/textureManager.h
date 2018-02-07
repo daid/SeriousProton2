@@ -22,6 +22,8 @@ private:
     sp::Color fallback_secondary_color;
     
     bool default_smooth;
+    
+    friend class TextureManagerTexture;
 };
 extern TextureManager textureManager;
 
