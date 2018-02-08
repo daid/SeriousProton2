@@ -64,6 +64,7 @@ void Widget::onUpdate(float delta)
     if (render_data_outdated && visible)
     {
         render_data_outdated = false;
+        render_data.order = getParent()->render_data.order + 1;
         updateRenderData();
     }
 }
