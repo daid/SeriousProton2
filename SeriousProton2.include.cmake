@@ -12,6 +12,34 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/GL/*.c"
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/Box2D/*.cpp"
     )
+
+    # Set our optimization flags.
+    set(OPTIMIZER_FLAGS "")
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        # On gcc, we want some general optimalizations that improve speed a lot.
+        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -flto -funsafe-math-optimizations")
+
+        # If we are compiling for a rasberry pi, we want to aggressively optimize for the CPU we are running on.
+        # Note that this check only works if we are compiling directly on the pi, as it is a dirty way of checkif if we are on the pi.
+        if(EXISTS /opt/vc/include/bcm_host.h OR COMPILE_FOR_PI)
+            set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -mcpu=native -mfpu=neon-vfpv4 -mfloat-abi=hard")
+        endif()
+    endif()
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OPTIMIZER_FLAGS}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPTIMIZER_FLAGS}")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
+
+    if(NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
+        set(CMAKE_CXX_STANDARD 11)
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
+
     add_executable(${EXECUTABLE_NAME} ${ARGN} ${SP2_SOURCES})
 
     target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/include")
@@ -23,5 +51,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     target_link_libraries(${EXECUTABLE_NAME} ${OPENGL_LIBRARIES})
     target_include_directories(${EXECUTABLE_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
 
-    target_link_libraries(${EXECUTABLE_NAME} dbghelp psapi)
+    if(WIN32)
+        target_link_libraries(${EXECUTABLE_NAME} dbghelp psapi wsock32 iphlpapi)
+    endif()
 endmacro()
