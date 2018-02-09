@@ -3,6 +3,7 @@
 namespace sp {
 namespace exception {
 
+void setupUnhandledExceptionHandler() __attribute__((weak));
 void setupUnhandledExceptionHandler()
 {
 }
