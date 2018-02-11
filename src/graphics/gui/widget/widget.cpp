@@ -64,7 +64,7 @@ void Widget::onUpdate(float delta)
     if (render_data_outdated && visible)
     {
         render_data_outdated = false;
-        render_data.order = getParent()->render_data.order + 1;
+        render_data.order = getParent()->render_data.order + 10;
         updateRenderData();
     }
 }
@@ -234,13 +234,14 @@ void Widget::setAttribute(const string& key, const string& value)
     {
         if (value == "topleft") layout.alignment = Alignment::TopLeft;
         else if (value == "top") layout.alignment = Alignment::Top;
-        else if (value == "right") layout.alignment = Alignment::TopRight;
+        else if (value == "topright") layout.alignment = Alignment::TopRight;
         else if (value == "left") layout.alignment = Alignment::Left;
         else if (value == "center") layout.alignment = Alignment::Center;
         else if (value == "right") layout.alignment = Alignment::Right;
         else if (value == "bottomleft") layout.alignment = Alignment::BottomLeft;
         else if (value == "bottom") layout.alignment = Alignment::Bottom;
         else if (value == "bottomright") layout.alignment = Alignment::BottomRight;
+        else LOG(Warning, "Unknown alignment:", value);
     }
     else if (key == "layout")
     {

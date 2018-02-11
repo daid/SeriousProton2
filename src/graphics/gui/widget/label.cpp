@@ -67,6 +67,7 @@ void Label::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
 
+    render_data.order -= 1;
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.text_size : text_size, getRenderSize(), text_alignment);
     render_data.texture = t.font->getTexture(64);

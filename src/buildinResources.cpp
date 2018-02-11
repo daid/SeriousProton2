@@ -22,6 +22,7 @@ void main()
 
 [FRAGMENT]
 #version 110
+
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -50,6 +51,7 @@ void main()
 
 [FRAGMENT]
 #version 110
+
 uniform sampler2D texture_map;
 uniform vec4 color;
 
