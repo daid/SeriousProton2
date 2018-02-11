@@ -358,20 +358,25 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
         layout_manager->update(this, size);
         if (layout.match_content_size)
         {
-            Vector2d content_size(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+            Vector2d content_size_min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+            Vector2d content_size_max(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
             for(Node* child : getChildren())
             {
                 P<Widget> w = P<Node>(child);
                 if (w && w->isVisible())
                 {
-                    content_size.x = std::max(content_size.x, w->getPosition2D().x + w->getRenderSize().x + w->layout.margin_right);
-                    content_size.y = std::max(content_size.y, w->getPosition2D().y + w->getRenderSize().y + w->layout.margin_bottom);
+                    Vector2d p0 = w->getPosition2D();
+                    Vector2d p1 = p0 + w->getRenderSize();
+                    content_size_min.x = std::min(content_size_min.x, p0.x - w->layout.margin_left);
+                    content_size_min.y = std::min(content_size_min.y, p0.y - w->layout.margin_bottom);
+                    content_size_max.x = std::max(content_size_max.x, p1.x + w->layout.margin_right);
+                    content_size_max.y = std::max(content_size_max.y, p1.y + w->layout.margin_top);
                 }
             }
-            if (content_size.x != std::numeric_limits<float>::min())
+            if (content_size_max.x != std::numeric_limits<float>::min())
             {
-                size = content_size;
-                layout.size = content_size;
+                size = content_size_max - content_size_min;
+                layout.size = size;
             }
         }
     }
