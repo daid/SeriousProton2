@@ -37,7 +37,7 @@ private:
     //As soon as we load a new glyph, the texture becomes invalid and needs to be updated.
     std::unordered_map<int, std::unordered_set<int>> loaded_glyphs;
     
-    Texture* bitmap_font;
+    Texture* bitmap_font = nullptr;
     Vector2d bitmap_glyph_size;
     std::unordered_map<int, Vector2d> bitmap_glyphs;
     
