@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.6.0)
+
 set(SERIOUS_PROTON2_BASE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 macro(serious_proton2_executable EXECUTABLE_NAME)
@@ -12,6 +14,12 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/GL/*.c"
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/Box2D/*.cpp"
     )
+    if(NOT WIN32)
+        list(FILTER SP2_SOURCES EXCLUDE REGEX .*/win32/.*)
+    endif()
+    if(NOT UNIX)
+        list(FILTER SP2_SOURCES EXCLUDE REGEX .*/unix/.*)
+    endif()
 
     # Set our optimization flags.
     set(OPTIMIZER_FLAGS "")

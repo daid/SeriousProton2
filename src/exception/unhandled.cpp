@@ -45,7 +45,7 @@ void unhandledExceptionHandler(const UnhandledExceptionInfo& info)
     //Returning here will drop to the platform specific exception handling.
 }
 
-void setupUnhandledExceptionHandler();
+void __attribute__((weak)) setupUnhandledExceptionHandler();
 
 class SetupUnhandledExceptionHandler
 {
