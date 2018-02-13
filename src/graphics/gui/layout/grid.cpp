@@ -46,7 +46,7 @@ void GridLayout::update(P<Widget> container, Vector2d size)
             row_height[position.y] = std::max(row_height[position.y], height);
         }
     }
-    //TODO: Handle the case where span > 1
+    //SP2TODO: Handle the case where span > 1
     
     float col_x[grid_size.x];
     float row_y[grid_size.y];

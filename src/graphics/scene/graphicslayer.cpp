@@ -34,7 +34,7 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     
     float aspect_ratio = double(pixel_width) / double(pixel_height);
 
-    //TODO: Figure out proper rendering order.
+    //SP2TODO: Figure out proper rendering order.
     for(RenderPass* pass : render_passes)
     {
         string target = pass->getTargetLayer();
@@ -52,7 +52,9 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
 
 bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    //TODO: Convert screen position to position within viewport
+    position = screenToViewportPosition(position);
+    if (position.x < -1.0 || position.y < -1.0 || position.x > 1.0 || position.y > 1.0)
+        return false;
     for(RenderPass* pass : render_passes)
     {
         if (pass->onPointerDown(button, position, id))
@@ -66,7 +68,7 @@ bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d posi
 
 void SceneGraphicsLayer::onPointerDrag(Vector2d position, int id)
 {
-    //TODO: Convert screen position to position within viewport
+    position = screenToViewportPosition(position);
     auto it = pointer_render_pass.find(id);
     if (it != pointer_render_pass.end() && it->second)
         it->second->onPointerDrag(position, id);
@@ -74,7 +76,7 @@ void SceneGraphicsLayer::onPointerDrag(Vector2d position, int id)
 
 void SceneGraphicsLayer::onPointerUp(Vector2d position, int id)
 {
-    //TODO: Convert screen position to position within viewport
+    position = screenToViewportPosition(position);
     auto it = pointer_render_pass.find(id);
     if (it != pointer_render_pass.end() && it->second)
     {

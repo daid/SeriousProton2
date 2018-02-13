@@ -26,6 +26,8 @@ public:
 
     void setViewport(sf::FloatRect rect) { viewport = rect; }
 protected:
+    Vector2d screenToViewportPosition(Vector2d position);
+
     sf::FloatRect viewport;
 private:
     bool enabled;

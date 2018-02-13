@@ -35,4 +35,13 @@ void GraphicsLayer::setPriority(int priority)
     });
 }
 
+Vector2d GraphicsLayer::screenToViewportPosition(Vector2d position)
+{
+    //Position is now in the range -1,-1 to 1,1. Where -1,-1 is the bottom left corner of the screen and 1,1 the top right.
+    //The viewport is defined in the range 0,0 to 1,1 in the same coordinates.
+    position.x = ((position.x + 1.0) / viewport.width) - 1.0 - viewport.left * 2.0 / viewport.width;
+    position.y = ((position.y + 1.0) / viewport.height) - 1.0 - viewport.top * 2.0 / viewport.height;
+    return position;
+}
+
 };//!namespace sp
