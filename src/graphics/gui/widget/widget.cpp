@@ -302,7 +302,10 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else
     {
-        LOG(Warning, "Tried to set unknown attribute:", key, "to", value);
+        if (id != "")
+            LOG(Warning, "Tried to set unknown widget attribute:", key, "to", value, "on", id);
+        else
+            LOG(Warning, "Tried to set unknown widget attribute:", key, "to", value);
     }
 }
 
