@@ -59,8 +59,8 @@ void Engine::run()
             if (event.type == sf::Event::Closed)
                 Window::window->render_window.close();
             Window::window->handleEvent(event);
+            io::Keybinding::handleEvent(event);
         }
-        io::Keybinding::updateAll();
         float delta = frame_time_clock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);
         delta = std::max(minimum_frame_time, delta);
@@ -71,7 +71,6 @@ void Engine::run()
         in_fixed_update = true;
         while(fixed_update_accumulator > fixed_update_delta)
         {
-            io::Keybinding::updateAllFixed();
             fixed_update_accumulator -= fixed_update_delta;
             for(Scene* scene : Scene::scenes)
             {
@@ -81,6 +80,7 @@ void Engine::run()
                     scene->postFixedUpdate(fixed_update_accumulator);
                 }
             }
+            io::Keybinding::allPostFixedUpdate();
         }
         in_fixed_update = false;
         for(Scene* scene : Scene::scenes)
@@ -101,7 +101,9 @@ void Engine::run()
 
         if (Window::window->render_window.isOpen())
             Window::window->render();
-        
+
+        io::Keybinding::allPostUpdate();
+
         fps_count++;
         if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
         {

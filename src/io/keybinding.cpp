@@ -15,6 +15,8 @@ Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
 : name(name), label(name)
 {
     key = default_key;
+    pointer_button = Pointer::Button::Unknown;
+    
     joystick_index = -1;
     joystick_button_index = -1;
     joystick_axis_enabled = false;
@@ -22,9 +24,10 @@ Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
     joystick_axis_positive = true;
     
     value = 0.0;
-    previous_value = 0.0;
-    fixed_value = 0.0;
-    fixed_previous_value = 0.0;
+    down_event = false;
+    up_event = false;
+    fixed_down_event = false;
+    fixed_up_event = false;
     
     for(Keybinding* other : keybindings)
         sp2assert(other->name != name, "Duplicate keybinding name");
@@ -39,28 +42,26 @@ void Keybinding::setKey(sf::Keyboard::Key key)
 bool Keybinding::get() const
 {
     if (Engine::getInstance()->isInFixedUpdate())
-        return fixed_value > 0.5;
-    return value > 0.5;
+        return value > 0.5 || fixed_down_event;
+    return value > 0.5 || down_event;
 }
 
 bool Keybinding::getDown() const
 {
     if (Engine::getInstance()->isInFixedUpdate())
-        return fixed_value > 0.5 && fixed_previous_value <= 0.5;
-    return value > 0.5 && previous_value <= 0.5;
+        return fixed_down_event;
+    return down_event;
 }
 
 bool Keybinding::getUp() const
 {
     if (Engine::getInstance()->isInFixedUpdate())
-        return fixed_value <= 0.5 && fixed_previous_value > 0.5;
-    return value <= 0.5 && previous_value > 0.5;
+        return !fixed_down_event && fixed_up_event;
+    return !down_event && up_event;
 }
 
 float Keybinding::getValue() const
 {
-    if (Engine::getInstance()->isInFixedUpdate())
-        return fixed_value;
     return value;
 }
 
@@ -89,6 +90,32 @@ void Keybinding::loadKeybindings(const string& filename)
             keybinding->key = sf::Keyboard::Key(entry["key"].int_value());
         else
             keybinding->key = sf::Keyboard::Unknown;
+        if (entry["pointer"].is_number())
+            keybinding->pointer_button = Pointer::Button(entry["pointer"].int_value());
+        else
+            keybinding->pointer_button = Pointer::Button::Unknown;
+        if (entry["joystick"].is_number())
+        {
+            keybinding->joystick_index = entry["joystick"].int_value();
+            if (entry["joystick_button"].is_number())
+                keybinding->joystick_button_index = entry["joystick_button"].int_value();
+            else
+                keybinding->joystick_button_index = -1;
+            if (entry["joystick_axis"].is_number())
+            {
+                keybinding->joystick_axis_enabled = true;
+                keybinding->joystick_axis = sf::Joystick::Axis(entry["joystick_axis"].int_value());
+                keybinding->joystick_axis_positive = entry["joystick_axis_positive"].bool_value();
+            }
+            else
+            {
+                keybinding->joystick_axis_enabled = false;
+            }
+        }
+        else
+        {
+            keybinding->joystick_index = -1;
+        }
     }
 }
 
@@ -100,6 +127,8 @@ void Keybinding::saveKeybindings(const string& filename)
         json11::Json::object data;
         if (keybinding->key != sf::Keyboard::Unknown)
             data["key"] = keybinding->key;
+        if (keybinding->pointer_button != Pointer::Button::Unknown)
+            data["pointer"] = int(keybinding->pointer_button);
         if (keybinding->joystick_index != -1)
         {
             data["joystick"] = keybinding->joystick_index;
@@ -119,50 +148,129 @@ void Keybinding::saveKeybindings(const string& filename)
     file << json.dump();
 }
 
-void Keybinding::update()
+void Keybinding::setValue(float value)
 {
-    previous_value = value;
-    value = 0.0;
-    
-    if (key != sf::Keyboard::Unknown)
+    if (this->value < 0.5 && value >= 0.5)
+        down_event = fixed_down_event = true;
+    if (this->value >= 0.5 && value < 0.5)
+        up_event = fixed_up_event = true;
+    this->value = value;
+}
+
+void Keybinding::postUpdate()
+{
+    if (down_event)
+        down_event = false;
+    else if (up_event)
+        up_event = false;
+}
+
+void Keybinding::postFixedUpdate()
+{
+    if (fixed_down_event)
+        fixed_down_event = false;
+    else if (fixed_up_event)
+        fixed_up_event = false;
+}
+
+void Keybinding::allPostUpdate()
+{
+    for(Keybinding* key : keybindings)
+        key->postUpdate();
+}
+
+void Keybinding::allPostFixedUpdate()
+{
+    for(Keybinding* key : keybindings)
+        key->postFixedUpdate();
+}
+
+void Keybinding::handleEvent(const sf::Event& event)
+{
+    switch(event.type)
     {
-        if (sf::Keyboard::isKeyPressed(key))
-            value = 1.0;
-    }
-    if (joystick_index != -1)
-    {
-        if (joystick_button_index != -1 && sf::Joystick::isButtonPressed(joystick_index, joystick_button_index))
-            value = 1.0;
-        if (joystick_axis_enabled)
+    case sf::Event::KeyPressed:
+        for(Keybinding* key : keybindings)
+            if (key->key == event.key.code)
+                key->setValue(1.0);
+        break;
+    case sf::Event::KeyReleased:
+        for(Keybinding* key : keybindings)
+            if (key->key == event.key.code)
+                key->setValue(0.0);
+        break;
+    case sf::Event::MouseButtonPressed:
         {
-            float f = sf::Joystick::getAxisPosition(joystick_index, joystick_axis);
-            if (!joystick_axis_positive)
-                f = -f;
-            if (f > 0.0)
-                value = f / 100.0f;
+            io::Pointer::Button button = io::Pointer::Button::Unknown;
+            switch(event.mouseButton.button)
+            {
+            case sf::Mouse::Left: button = io::Pointer::Button::Left; break;
+            case sf::Mouse::Middle: button = io::Pointer::Button::Middle; break;
+            case sf::Mouse::Right: button = io::Pointer::Button::Right; break;
+            default: break;
+            }
+            if (button != io::Pointer::Button::Unknown)
+                for(Keybinding* key : keybindings)
+                    if (key->pointer_button == button || key->pointer_button == io::Pointer::Button::Any)
+                            key->setValue(1.0);
         }
-    }
-}
-
-void Keybinding::updateFixed()
-{
-    fixed_previous_value = fixed_value;
-    fixed_value = value;
-}
-
-void Keybinding::updateAll()
-{
-    for(Keybinding* key : keybindings)
-    {
-        key->update();
-    }
-}
-
-void Keybinding::updateAllFixed()
-{
-    for(Keybinding* key : keybindings)
-    {
-        key->updateFixed();
+        break;
+    case sf::Event::MouseButtonReleased:
+        {
+            io::Pointer::Button button = io::Pointer::Button::Unknown;
+            switch(event.mouseButton.button)
+            {
+            case sf::Mouse::Left: button = io::Pointer::Button::Left; break;
+            case sf::Mouse::Middle: button = io::Pointer::Button::Middle; break;
+            case sf::Mouse::Right: button = io::Pointer::Button::Right; break;
+            default: break;
+            }
+            if (button != io::Pointer::Button::Unknown)
+                for(Keybinding* key : keybindings)
+                    if (key->pointer_button == button || key->pointer_button == io::Pointer::Button::Any)
+                        key->setValue(0.0);
+        }
+        break;
+    case sf::Event::MouseWheelScrolled:
+        break;
+    case sf::Event::TouchBegan:
+        for(Keybinding* key : keybindings)
+            if (key->pointer_button == io::Pointer::Button::Touch || key->pointer_button == io::Pointer::Button::Any)
+                key->setValue(1.0);
+        break;
+    case sf::Event::TouchEnded:
+        for(Keybinding* key : keybindings)
+            if (key->pointer_button == io::Pointer::Button::Touch || key->pointer_button == io::Pointer::Button::Any)
+                key->setValue(0.0);
+        break;
+    case sf::Event::JoystickButtonPressed:
+        for(Keybinding* key : keybindings)
+            if (key->joystick_index == int(event.joystickButton.joystickId) && key->joystick_button_index == int(event.joystickButton.button))
+                key->setValue(1.0);
+        break;
+    case sf::Event::JoystickButtonReleased:
+        for(Keybinding* key : keybindings)
+            if (key->joystick_index == int(event.joystickButton.joystickId) && key->joystick_button_index == int(event.joystickButton.button))
+                key->setValue(0.0);
+        break;
+    case sf::Event::JoystickMoved:
+        for(Keybinding* key : keybindings)
+            if (key->joystick_axis_enabled && key->joystick_index == int(event.joystickMove.joystickId) && key->joystick_axis == event.joystickMove.axis)
+                key->setValue(event.joystickMove.position);
+        break;
+    case sf::Event::JoystickDisconnected:
+        for(Keybinding* key : keybindings)
+            if (key->joystick_index == int(event.joystickButton.joystickId))
+                key->setValue(0.0);
+        break;
+    case sf::Event::LostFocus:
+        //Focus lost, release all keyboard keys.
+        for(Keybinding* key : keybindings)
+            if (key->key != sf::Keyboard::Unknown)
+                key->setValue(0.0);
+        break;
+    default:
+        break;
     }
 }
 

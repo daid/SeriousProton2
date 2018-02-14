@@ -3,8 +3,8 @@
 
 #include <sp2/string.h>
 #include <sp2/pointerList.h>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Joystick.hpp>
+#include <sp2/io/pointer.h>
+#include <SFML/Window/Event.hpp>
 
 namespace sp {
 class Engine;
@@ -21,7 +21,7 @@ public:
     
     void setKey(sf::Keyboard::Key key);
     
-    bool get() const;
+    bool get() const; //True when this key is currently being pressed.
     bool getDown() const; //True for 1 update cycle when the key is pressed.
     bool getUp() const; //True for 1 update cycle when the key is released.
     float getValue() const;
@@ -33,6 +33,8 @@ private:
     string label;
     
     sf::Keyboard::Key key;
+    Pointer::Button pointer_button;
+    
     int joystick_index;
     int joystick_button_index;
     bool joystick_axis_enabled;
@@ -40,14 +42,19 @@ private:
     bool joystick_axis_positive;
     
     float value;
-    float previous_value;
-    float fixed_value;
-    float fixed_previous_value;
+    bool down_event;
+    bool up_event;
+    bool fixed_down_event;
+    bool fixed_up_event;
 
-    void update();
-    void updateFixed();
-    static void updateAll();
-    static void updateAllFixed();
+    void setValue(float value);
+    void postUpdate();
+    void postFixedUpdate();
+    
+    static void allPostUpdate();
+    static void allPostFixedUpdate();
+    
+    static void handleEvent(const sf::Event& event);
     static PList<Keybinding> keybindings;
     
     friend class sp::Engine;
