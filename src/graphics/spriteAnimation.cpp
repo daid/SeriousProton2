@@ -144,21 +144,19 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
             Data::Animation::Frame& frame = animation.frames.back();
             
             sp::MeshData::Vertices vertices;
+            sp::MeshData::Indices indices{0,1,2, 2,1,3};
             vertices.emplace_back(p0, sp::Vector2f(u0, v1));
             vertices.emplace_back(p1, sp::Vector2f(u1, v1));
             vertices.emplace_back(p2, sp::Vector2f(u0, v0));
-            vertices.emplace_back(p2, sp::Vector2f(u0, v0));
-            vertices.emplace_back(p1, sp::Vector2f(u1, v1));
             vertices.emplace_back(p3, sp::Vector2f(u1, v0));
-            frame.normal_mesh = MeshData::create(std::move(vertices));
+            frame.normal_mesh = MeshData::create(std::move(vertices), std::move(indices));
             vertices.clear();
+            sp::MeshData::Indices indices2{0,1,2, 2,1,3};
             vertices.emplace_back(p0, sp::Vector2f(u1, v1));
             vertices.emplace_back(p1, sp::Vector2f(u0, v1));
             vertices.emplace_back(p2, sp::Vector2f(u1, v0));
-            vertices.emplace_back(p2, sp::Vector2f(u1, v0));
-            vertices.emplace_back(p1, sp::Vector2f(u0, v1));
             vertices.emplace_back(p3, sp::Vector2f(u0, v0));
-            frame.mirrored_mesh = MeshData::create(std::move(vertices));
+            frame.mirrored_mesh = MeshData::create(std::move(vertices), std::move(indices2));
             vertices.clear();
             
             frame.delay = delays[n % delays.size()];

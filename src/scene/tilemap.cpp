@@ -84,6 +84,7 @@ void Tilemap::updateMesh()
     float fv = 1.0 / float(texture_tile_count_y);
     
     MeshData::Vertices vertices;
+    MeshData::Indices indices;
     for(unsigned int y=0; y<tiles.size(); y++)
     {
         for(unsigned int x=0; x<tiles[y].size(); x++)
@@ -96,19 +97,24 @@ void Tilemap::updateMesh()
             int u = tile.index % texture_tile_count_x;
             int v = tile.index / texture_tile_count_x;
             
+            indices.emplace_back(vertices.size() + 0);
+            indices.emplace_back(vertices.size() + 1);
+            indices.emplace_back(vertices.size() + 2);
+            indices.emplace_back(vertices.size() + 2);
+            indices.emplace_back(vertices.size() + 1);
+            indices.emplace_back(vertices.size() + 3);
+            
             vertices.emplace_back(sf::Vector3f(px, py, 0.0f), sp::Vector2f(u * fu, (v + 1) * fv));
             vertices.emplace_back(sf::Vector3f(px + tile_width, py, 0.0f), sp::Vector2f((u + 1) * fu, (v + 1) * fv));
             vertices.emplace_back(sf::Vector3f(px, py + tile_height, 0.0f), sp::Vector2f(u * fu, v * fv));
-            vertices.emplace_back(sf::Vector3f(px, py + tile_height, 0.0f), sp::Vector2f(u * fu, v * fv));
-            vertices.emplace_back(sf::Vector3f(px + tile_width, py, 0.0f), sp::Vector2f((u + 1) * fu, (v + 1) * fv));
             vertices.emplace_back(sf::Vector3f(px + tile_width, py + tile_height, 0.0f), sp::Vector2f((u + 1) * fu, v * fv));
         }
     }
     
     if (!render_data.mesh)
-        render_data.mesh = MeshData::create(std::move(vertices));
+        render_data.mesh = MeshData::create(std::move(vertices), std::move(indices));
     else
-        render_data.mesh->update(std::move(vertices));
+        render_data.mesh->update(std::move(vertices), std::move(indices));
 }
 
 class TilemapCollisionBuilder

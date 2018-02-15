@@ -20,11 +20,15 @@ public:
 
 	virtual void DrawPolygon(const b2Vec2* bvertices, int32 vertexCount, const b2Color& color) override
 	{
+        Vector3f c(color.r, color.g, color.b);
         for(int n=0; n<vertexCount - 1; n+=2)
         {
-            vertices.emplace_back(sf::Vector3f(bvertices[n].x, bvertices[n].y, 0.0f));
-            vertices.emplace_back(sf::Vector3f(bvertices[(n + 1) % vertexCount].x, bvertices[(n + 1) % vertexCount].y, 0.0f));
-            vertices.emplace_back(sf::Vector3f(bvertices[(n + 2) % vertexCount].x, bvertices[(n + 2) % vertexCount].y, 0.0f));
+            indices.emplace_back(vertices.size());
+            vertices.emplace_back(Vector3f(bvertices[n].x, bvertices[n].y, 0.0f), c, Vector2f());
+            indices.emplace_back(vertices.size());
+            vertices.emplace_back(Vector3f(bvertices[(n + 1) % vertexCount].x, bvertices[(n + 1) % vertexCount].y, 0.0f), c, Vector2f());
+            indices.emplace_back(vertices.size());
+            vertices.emplace_back(Vector3f(bvertices[(n + 2) % vertexCount].x, bvertices[(n + 2) % vertexCount].y, 0.0f), c, Vector2f());
         }
 	}
 
@@ -35,11 +39,17 @@ public:
 
 	virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) override
 	{
+        Vector3f c(color.r, color.g, color.b);
+
+        int index = vertices.size();
+        vertices.emplace_back(Vector3f(center.x, center.y, 0.0f), c, Vector2f());
+        for(int n=0; n<16; n++)
+            vertices.emplace_back(Vector3f(center.x + std::sin(float(n) / 8 * pi) * radius, center.y + std::cos(float(n) / 8 * pi) * radius, 0.0f), c, Vector2f());
         for(int n=0; n<16; n++)
         {
-            vertices.emplace_back(sf::Vector3f(center.x + std::sin(float(n + 1) / 8 * pi) * radius, center.y + std::cos(float(n + 1) / 8 * pi) * radius, 0.0f));
-            vertices.emplace_back(sf::Vector3f(center.x + std::sin(float(n) / 8 * pi) * radius, center.y + std::cos(float(n) / 8 * pi) * radius, 0.0f));
-            vertices.emplace_back(sf::Vector3f(center.x, center.y, 0.0f));
+            indices.emplace_back(index);
+            indices.emplace_back(index + 1 + ((n + 1) % 16));
+            indices.emplace_back(index + 1 + n);
         }
 	}
 	
@@ -50,16 +60,24 @@ public:
 	
 	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override
 	{
+        Vector3f c(color.r, color.g, color.b);
+
         sp::Vector2f v0 = toVector<float>(p1);
         sp::Vector2f v1 = toVector<float>(p2);
         sp::Vector2f diff = sp::normalize(v1 - v0) * 0.2f;
         
-        vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
-        vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
-        vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f));
-        vertices.emplace_back(sf::Vector3f(v0.x, v0.y, 0.0f));
-        vertices.emplace_back(sf::Vector3f(v1.x, v1.y, 0.0f));
-        vertices.emplace_back(sf::Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f));
+        int index = vertices.size();
+        vertices.emplace_back(Vector3f(v0.x, v0.y, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f(v1.x, v1.y, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f), c, Vector2f());
+
+        indices.emplace_back(index);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 2);
+        indices.emplace_back(index);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 3);
 	}
 
 	virtual void DrawTransform(const b2Transform& xf) override
@@ -70,15 +88,23 @@ public:
 	virtual void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override
 	{
         size *= 0.05;
-        vertices.emplace_back(sf::Vector3f(p.x - size, p.y - size, 0.0f));
-        vertices.emplace_back(sf::Vector3f(p.x + size, p.y - size, 0.0f));
-        vertices.emplace_back(sf::Vector3f(p.x - size, p.y + size, 0.0f));
-        vertices.emplace_back(sf::Vector3f(p.x - size, p.y + size, 0.0f));
-        vertices.emplace_back(sf::Vector3f(p.x + size, p.y - size, 0.0f));
-        vertices.emplace_back(sf::Vector3f(p.x + size, p.y + size, 0.0f));
+        int index = vertices.size();
+        Vector3f c(color.r, color.g, color.b);
+        vertices.emplace_back(Vector3f(p.x - size, p.y - size, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f(p.x + size, p.y - size, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f(p.x - size, p.y + size, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f(p.x + size, p.y + size, 0.0f), c, Vector2f());
+
+        indices.emplace_back(index);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 2);
+        indices.emplace_back(index + 2);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 3);
 	}
 
     sp::MeshData::Vertices vertices;
+    sp::MeshData::Indices indices;
 };
 
 CollisionRenderPass::CollisionRenderPass(string target_layer)
@@ -156,13 +182,13 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
             scene->collision_world2d->SetDebugDraw(nullptr);
             
             if (!mesh)
-                mesh = MeshData::create(std::move(debug_renderer.vertices), MeshData::Type::Dynamic);
+                mesh = MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic);
             else
-                mesh->update(std::move(debug_renderer.vertices));
+                mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
 
             queue.clear();
             RenderData render_data;
-            render_data.shader = Shader::get("internal:color.shader");
+            render_data.shader = Shader::get("internal:normal_as_color.shader");
             render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(255, 255, 255, 64);

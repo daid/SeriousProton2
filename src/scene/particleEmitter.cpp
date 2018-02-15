@@ -24,7 +24,9 @@ void ParticleEmitter::emit(const Parameters& parameters)
 void ParticleEmitter::onUpdate(float delta)
 {
     MeshData::Vertices vertices;
-    vertices.reserve(particles.size() * 6);
+    MeshData::Indices indices;
+    vertices.reserve(particles.size() * 4);
+    indices.reserve(particles.size() * 6);
 
     for(auto it = particles.begin(); it != particles.end(); )
     {
@@ -36,12 +38,17 @@ void ParticleEmitter::onUpdate(float delta)
         
         float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
         sp::Vector3f color = Tween<sp::Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
+        
+        indices.emplace_back(vertices.size() + 0);
+        indices.emplace_back(vertices.size() + 1);
+        indices.emplace_back(vertices.size() + 2);
+        indices.emplace_back(vertices.size() + 2);
+        indices.emplace_back(vertices.size() + 1);
+        indices.emplace_back(vertices.size() + 3);
+        
         vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size,-size));
         vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
         vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
-
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
         vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size, size));
         
         particle.time += delta;
@@ -69,9 +76,9 @@ void ParticleEmitter::onUpdate(float delta)
     }
     
     if (!render_data.mesh)
-        render_data.mesh = MeshData::create(std::move(vertices), MeshData::Type::Dynamic);
+        render_data.mesh = MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic);
     else
-        render_data.mesh->update(std::move(vertices));
+        render_data.mesh->update(std::move(vertices), std::move(indices));
 }
 
 };//!namespace sp

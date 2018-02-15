@@ -45,19 +45,23 @@ public:
         float uv[2];
     };
     typedef std::vector<Vertex> Vertices;
+    typedef std::vector<uint16_t> Indices;
 
-    MeshData(Vertices&& vertices, Type type=Type::Static);
+    MeshData(Vertices&& vertices, Indices&& indices, Type type=Type::Static);
     ~MeshData();
     
     void render();
-    void update(Vertices&& vertices);
+    void update(Vertices&& vertices, Indices&& indices);
     
-    static std::shared_ptr<MeshData> create(Vertices&& vertices, Type type=Type::Static);
+    static std::shared_ptr<MeshData> create(Vertices&& vertices, Indices&& indices, Type type=Type::Static);
     static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
     static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
 private:
     Vertices vertices;
-    unsigned int vbo;
+    Indices indices;
+    unsigned int vertices_vbo;
+    unsigned int indices_vbo;
+
     bool dirty;
     int revision;
     Type type;

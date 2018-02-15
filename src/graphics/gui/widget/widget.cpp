@@ -410,191 +410,71 @@ std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)
 std::shared_ptr<MeshData> Widget::createStretchedH(Vector2d size)
 {
     MeshData::Vertices vertices;
-    vertices.reserve(18);
+    MeshData::Indices indices{0,2,1, 1,2,3, 2,4,3, 3,4,5, 4,6,5, 5,6,7};
+    vertices.reserve(8);
     
     float w = std::min(size.y / 2.0, size.x / 2.0);
-    Vector3f p0(0, 0, 0);
-    Vector3f p1(0, size.y, 0);
-    Vector3f p2(w, 0, 0);
-    Vector3f p3(w, size.y, 0);
-    Vector3f p4(size.x-w, 0, 0);
-    Vector3f p5(size.x-w, size.y, 0);
-    Vector3f p6(size.x, 0, 0);
-    Vector3f p7(size.x, size.y, 0);
+    vertices.emplace_back(Vector3f(0, 0, 0), Vector2f(0, 1));
+    vertices.emplace_back(Vector3f(0, size.y, 0), Vector2f(0, 0));
+    vertices.emplace_back(Vector3f(w, 0, 0), Vector2f(0.5, 1));
+    vertices.emplace_back(Vector3f(w, size.y, 0), Vector2f(0.5, 0));
+    vertices.emplace_back(Vector3f(size.x-w, 0, 0), Vector2f(0.5, 1));
+    vertices.emplace_back(Vector3f(size.x-w, size.y, 0), Vector2f(0.5, 0));
+    vertices.emplace_back(Vector3f(size.x, 0, 0), Vector2f(1, 1));
+    vertices.emplace_back(Vector3f(size.x, size.y, 0), Vector2f(1, 0));
     
-    vertices.emplace_back(p0, sp::Vector2f(0, 1));
-    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p1, sp::Vector2f(0, 0));
-
-    vertices.emplace_back(p1, sp::Vector2f(0, 0));
-    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
-
-    vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
-
-    vertices.emplace_back(p3, sp::Vector2f(0.5, 0));
-    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
-
-    vertices.emplace_back(p4, sp::Vector2f(0.5, 1));
-    vertices.emplace_back(p6, sp::Vector2f(1, 1));
-    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
-
-    vertices.emplace_back(p5, sp::Vector2f(0.5, 0));
-    vertices.emplace_back(p6, sp::Vector2f(1, 1));
-    vertices.emplace_back(p7, sp::Vector2f(1, 0));
-    
-    return MeshData::create(std::move(vertices));
+    return MeshData::create(std::move(vertices), std::move(indices));
 }
 
 std::shared_ptr<MeshData> Widget::createStretchedV(Vector2d size)
 {
     MeshData::Vertices vertices;
-    vertices.reserve(18);
+    MeshData::Indices indices{0,1,2, 1,3,2, 2,3,4, 3,5,4, 4,5,6, 5,7,6};
+    vertices.reserve(8);
     
     float h = std::min(size.y / 2.0, size.x / 2.0);
-    Vector3f p0(0, 0, 0);
-    Vector3f p1(size.x, 0, 0);
-    Vector3f p2(0, h, 0);
-    Vector3f p3(size.x, h, 0);
-    Vector3f p4(0, size.y-h, 0);
-    Vector3f p5(size.x, size.y-h, 0);
-    Vector3f p6(0, size.y, 0);
-    Vector3f p7(size.x, size.y, 0);
+    vertices.emplace_back(Vector3f(0, 0, 0), Vector2f(0, 1));
+    vertices.emplace_back(Vector3f(size.x, 0, 0), Vector2f(1, 1));
+    vertices.emplace_back(Vector3f(0, h, 0), Vector2f(0, 0.5));
+    vertices.emplace_back(Vector3f(size.x, h, 0), Vector2f(1, 0.5));
+    vertices.emplace_back(Vector3f(0, size.y-h, 0), Vector2f(0, 0.5));
+    vertices.emplace_back(Vector3f(size.x, size.y-h, 0), Vector2f(1, 0.5));
+    vertices.emplace_back(Vector3f(0, size.y, 0), Vector2f(0, 0));
+    vertices.emplace_back(Vector3f(size.x, size.y, 0), Vector2f(1, 0));
     
-    vertices.emplace_back(p0, sp::Vector2f(0, 1));
-    vertices.emplace_back(p1, sp::Vector2f(1, 1));
-    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
-
-    vertices.emplace_back(p1, sp::Vector2f(1, 1));
-    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
-
-    vertices.emplace_back(p2, sp::Vector2f(0, 0.5));
-    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-
-    vertices.emplace_back(p3, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-
-    vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p6, sp::Vector2f(0, 0));
-
-    vertices.emplace_back(p5, sp::Vector2f(1, 0.5));
-    vertices.emplace_back(p7, sp::Vector2f(1, 0));
-    vertices.emplace_back(p6, sp::Vector2f(0, 0));
-    
-    return MeshData::create(std::move(vertices));
+    return MeshData::create(std::move(vertices), std::move(indices));
 }
 
 std::shared_ptr<MeshData> Widget::createStretchedHV(Vector2d size, double corner_size)
 {
     MeshData::Vertices vertices;
-    vertices.reserve(9 * 6);
+    MeshData::Indices indices{0, 1, 4, 1, 5, 4, 1, 2, 5, 2, 6, 5, 2, 3, 6, 3, 7, 6, 4, 5, 8, 5, 9, 8, 5, 6, 9, 6, 10, 9, 6, 7, 10, 7, 11, 10, 8, 9, 12, 9, 13, 12, 9, 10, 13, 10, 14, 13, 10, 11, 14, 11, 15, 14};
+    vertices.reserve(16);
 
     corner_size = std::min(corner_size, size.x / 2.0f);
     corner_size = std::min(corner_size, size.y / 2.0f);
 
-    Vector3f p0(0, 0, 0);
-    Vector3f p1(corner_size, 0, 0);
-    Vector3f p2(size.x - corner_size, 0, 0);
-    Vector3f p3(size.x, 0, 0);
+    vertices.emplace_back(Vector3f(0, 0, 0), Vector2f(0, 1));
+    vertices.emplace_back(Vector3f(corner_size, 0, 0), Vector2f(0.5, 1));
+    vertices.emplace_back(Vector3f(size.x - corner_size, 0, 0), Vector2f(0.5, 1));
+    vertices.emplace_back(Vector3f(size.x, 0, 0), Vector2f(1, 1));
 
-    Vector3f p4(0, corner_size, 0);
-    Vector3f p5(corner_size, corner_size, 0);
-    Vector3f p6(size.x - corner_size, corner_size, 0);
-    Vector3f p7(size.x, corner_size, 0);
+    vertices.emplace_back(Vector3f(0, corner_size, 0), Vector2f(0, 0.5));
+    vertices.emplace_back(Vector3f(corner_size, corner_size, 0), Vector2f(0.5, 0.5));
+    vertices.emplace_back(Vector3f(size.x - corner_size, corner_size, 0), Vector2f(0.5, 0.5));
+    vertices.emplace_back(Vector3f(size.x, corner_size, 0), Vector2f(1, 0.5));
 
-    Vector3f p8(0, size.y - corner_size, 0);
-    Vector3f p9(corner_size, size.y - corner_size, 0);
-    Vector3f p10(size.x - corner_size, size.y - corner_size, 0);
-    Vector3f p11(size.x, size.y - corner_size, 0);
+    vertices.emplace_back(Vector3f(0, size.y - corner_size, 0), Vector2f(0, 0.5));
+    vertices.emplace_back(Vector3f(corner_size, size.y - corner_size, 0), Vector2f(0.5, 0.5));
+    vertices.emplace_back(Vector3f(size.x - corner_size, size.y - corner_size, 0), Vector2f(0.5, 0.5));
+    vertices.emplace_back(Vector3f(size.x, size.y - corner_size, 0), Vector2f(1, 0.5));
 
-    Vector3f p12(0, size.y, 0);
-    Vector3f p13(corner_size, size.y, 0);
-    Vector3f p14(size.x - corner_size, size.y, 0);
-    Vector3f p15(size.x, size.y, 0);
+    vertices.emplace_back(Vector3f(0, size.y, 0), Vector2f(0, 0));
+    vertices.emplace_back(Vector3f(corner_size, size.y, 0), Vector2f(0.5, 0));
+    vertices.emplace_back(Vector3f(size.x - corner_size, size.y, 0), Vector2f(0.5, 0));
+    vertices.emplace_back(Vector3f(size.x, size.y, 0), Vector2f(1, 0));
 
-    {
-        vertices.emplace_back(p0, sp::Vector2f(0, 1));
-        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-
-        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-
-        vertices.emplace_back(p1, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p2, sp::Vector2f(0.5, 1));
-        vertices.emplace_back(p3, sp::Vector2f(1, 1));
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p3, sp::Vector2f(1, 1));
-        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-    }
-    {
-        vertices.emplace_back(p4, sp::Vector2f(0, 0.5));
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
-
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
-
-        vertices.emplace_back(p5, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p6, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-
-        vertices.emplace_back(p7, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-    }
-    {
-        vertices.emplace_back(p8, sp::Vector2f(0, 0.5));
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p12, sp::Vector2f(0, 0));
-
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
-        vertices.emplace_back(p12, sp::Vector2f(0, 0));
-
-        vertices.emplace_back(p9, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
-
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
-        vertices.emplace_back(p13, sp::Vector2f(0.5, 0));
-
-        vertices.emplace_back(p10, sp::Vector2f(0.5, 0.5));
-        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
-
-        vertices.emplace_back(p11, sp::Vector2f(1, 0.5));
-        vertices.emplace_back(p15, sp::Vector2f(1, 0));
-        vertices.emplace_back(p14, sp::Vector2f(0.5, 0));
-    }
-    return MeshData::create(std::move(vertices));
+    return MeshData::create(std::move(vertices), std::move(indices));
 }
 
 };//!namespace gui

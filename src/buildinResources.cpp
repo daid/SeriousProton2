@@ -55,11 +55,40 @@ void main()
 uniform sampler2D texture_map;
 uniform vec4 color;
 
-varying vec2 v_uv;
-
 void main()
 {
     gl_FragColor = color;
+}
+)EOS"},
+
+    {"normal_as_color.shader", R"EOS(
+[VERTEX]
+#version 110
+
+uniform mat4 projection_matrix;
+uniform mat4 camera_matrix;
+uniform mat4 object_matrix;
+uniform vec3 object_scale;
+
+varying vec3 v_col;
+
+void main()
+{
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
+    v_col = gl_Normal;
+}
+
+[FRAGMENT]
+#version 110
+
+uniform sampler2D texture_map;
+uniform vec4 color;
+
+varying vec3 v_col;
+
+void main()
+{
+    gl_FragColor = vec4(v_col, color.a);
 }
 )EOS"},
 

@@ -97,6 +97,8 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
     }
 
     MeshData::Vertices vertices;
+    MeshData::Indices indices;
+    
     vertices.reserve(s.size() * 6);
     sp::Vector2f position;
     int previous_character = 0;
@@ -154,12 +156,17 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
             sf::Vector3f p2(left, bottom, 0.0f);
             sf::Vector3f p3(right, bottom, 0.0f);
 
+            indices.emplace_back(vertices.size() + 0);
+            indices.emplace_back(vertices.size() + 2);
+            indices.emplace_back(vertices.size() + 1);
+            indices.emplace_back(vertices.size() + 2);
+            indices.emplace_back(vertices.size() + 3);
+            indices.emplace_back(vertices.size() + 1);
+
             vertices.emplace_back(p0, sp::Vector2f(u0, v0));
-            vertices.emplace_back(p2, sp::Vector2f(u0, v1));
             vertices.emplace_back(p1, sp::Vector2f(u1, v0));
             vertices.emplace_back(p2, sp::Vector2f(u0, v1));
             vertices.emplace_back(p3, sp::Vector2f(u1, v1));
-            vertices.emplace_back(p1, sp::Vector2f(u1, v0));
         }
         position.x += glyph.advance * size_scale;
         max_line_width = std::max(max_line_width, position.x);
@@ -225,7 +232,7 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
         vertex.position[1] += y_offset;
     }
     
-    return std::make_shared<MeshData>(std::move(vertices));
+    return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
 Texture* Font::getTexture(int pixel_size)
