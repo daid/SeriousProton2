@@ -80,7 +80,7 @@ std::shared_ptr<MeshData> MeshData::create(Vertices&& vertices, Indices&& indice
     return std::make_shared<MeshData>(std::forward<Vertices>(vertices), std::forward<Indices>(indices), type);
 }
 
-std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
+std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size, Vector2f uv0, Vector2f uv1)
 {
     size *= 0.5f;
     
@@ -88,24 +88,24 @@ std::shared_ptr<MeshData> MeshData::createQuad(sp::Vector2f size)
     Indices indices{0,1,2,2,1,3};
     vertices.reserve(4);
     
-    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
-    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
-    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
-    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
+    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(uv0.x, uv1.y));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(uv1.x, uv1.y));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(uv0.x, uv0.y));
+    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(uv1.x, uv0.y));
     
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
-std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size)
+std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(sp::Vector2f size, Vector2f uv0, Vector2f uv1)
 {
     size *= 0.5f;
     
     Vertices vertices;
     Indices indices{0,1,2,2,1,3, 0,2,1,2,3,1};
-    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(0, 1));
-    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(1, 1));
-    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(0, 0));
-    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(1, 0));
+    vertices.emplace_back(sf::Vector3f(-size.x, -size.y, 0.0f), sp::Vector2f(uv0.x, uv1.y));
+    vertices.emplace_back(sf::Vector3f( size.x, -size.y, 0.0f), sp::Vector2f(uv1.x, uv1.y));
+    vertices.emplace_back(sf::Vector3f(-size.x,  size.y, 0.0f), sp::Vector2f(uv0.x, uv0.y));
+    vertices.emplace_back(sf::Vector3f( size.x,  size.y, 0.0f), sp::Vector2f(uv1.x, uv0.y));
     
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }

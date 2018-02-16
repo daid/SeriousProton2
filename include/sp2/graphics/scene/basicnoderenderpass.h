@@ -13,6 +13,8 @@ class BasicNodeRenderPass : public RenderPass
 {
 public:
     BasicNodeRenderPass(string target_layer);
+    BasicNodeRenderPass(string target_layer, P<Scene> scene);
+    BasicNodeRenderPass(string target_layer, P<Camera> camera);
     
     virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) override;
 
@@ -21,6 +23,10 @@ public:
     virtual void onPointerUp(Vector2d position, int id) override;
     
     void addScene(P<Scene> scene, P<Camera> camera=nullptr);
+protected:
+    virtual void addNodeToRenderQueue(Node* node);
+    
+    RenderQueue queue;
 private:
     class SceneWithCamera
     {
@@ -34,8 +40,6 @@ private:
     
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(P<Scene> scene, P<Camera> camera, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
-    
-    RenderQueue queue;
     void recursiveNodeRender(Node* node);
 };
 

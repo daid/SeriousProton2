@@ -54,8 +54,8 @@ public:
     void update(Vertices&& vertices, Indices&& indices);
     
     static std::shared_ptr<MeshData> create(Vertices&& vertices, Indices&& indices, Type type=Type::Static);
-    static std::shared_ptr<MeshData> createQuad(sp::Vector2f size);
-    static std::shared_ptr<MeshData> createDoubleSidedQuad(sp::Vector2f size);
+    static std::shared_ptr<MeshData> createQuad(Vector2f size, Vector2f uv0=Vector2f(0, 0), Vector2f uv1=Vector2f(1, 1));
+    static std::shared_ptr<MeshData> createDoubleSidedQuad(Vector2f size, Vector2f uv0=Vector2f(0, 0), Vector2f uv1=Vector2f(1, 1));
 private:
     Vertices vertices;
     Indices indices;

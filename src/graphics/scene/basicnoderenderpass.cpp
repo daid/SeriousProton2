@@ -11,6 +11,18 @@ BasicNodeRenderPass::BasicNodeRenderPass(string target_layer)
 {
 }
 
+BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene)
+: RenderPass(target_layer)
+{
+    addScene(scene);
+}
+
+BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Camera> camera)
+: RenderPass(target_layer)
+{
+    addScene(camera->getScene(), camera);
+}
+
 void BasicNodeRenderPass::addScene(P<Scene> scene, P<Camera> camera)
 {
     scenes.emplace_back();
@@ -114,13 +126,17 @@ void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, sf::Rend
 
 void BasicNodeRenderPass::recursiveNodeRender(Node* node)
 {
-    if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
-        queue.add(node->getGlobalTransform(), node->render_data);
-
+    addNodeToRenderQueue(node);
     for(Node* child : node->getChildren())
     {
         recursiveNodeRender(child);
     }
+}
+
+void BasicNodeRenderPass::addNodeToRenderQueue(Node* node)
+{
+    if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
+        queue.add(node->getGlobalTransform(), node->render_data);
 }
 
 };//!namespace sp
