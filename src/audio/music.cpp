@@ -17,6 +17,7 @@ bool Music::play(string resource_name)
         LOG(Error, "Failed to open", resource_name, "to play as music");
         return false;
     }
+    LOG(Info, "Playing music", resource_name);
     music.stop();
     if (!music.openFromStream(*stream))
         return false;
