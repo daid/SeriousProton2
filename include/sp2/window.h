@@ -7,11 +7,15 @@
 #include <sp2/string.h>
 #include <sp2/io/pointer.h>
 #include <map>
+#include <memory>
+
 
 namespace sp {
 namespace io { class Clipboard; }
 
 class GraphicsLayer;
+class Texture;
+class MeshData;
 class Window : public AutoPointerObject
 {
 public:
@@ -20,6 +24,9 @@ public:
     
     void setFullScreen(bool fullscreen);
     void setClearColor(sf::Color color);
+    void hideCursor();
+    void setDefaultCursor();
+    void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
 
     static P<Window> getInstance();
 private:
@@ -40,6 +47,8 @@ private:
     bool fullscreen;
     float aspect_ratio; //Aspect ratio in window mode (ignored in full screen)
     sf::Color clear_color;
+    Texture* cursor_texture;
+    std::shared_ptr<MeshData> cursor_mesh;
     
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer;

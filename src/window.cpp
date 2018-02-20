@@ -2,6 +2,7 @@
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/graphicslayer.h>
+#include <sp2/graphics/scene/renderqueue.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -43,6 +44,27 @@ void Window::setFullScreen(bool fullscreen)
 void Window::setClearColor(sf::Color color)
 {
     clear_color = color;
+}
+
+void Window::hideCursor()
+{
+    render_window.setMouseCursorVisible(false);
+    cursor_texture = nullptr;
+    cursor_mesh = nullptr;
+}
+
+void Window::setDefaultCursor()
+{
+    render_window.setMouseCursorVisible(true);
+    cursor_texture = nullptr;
+    cursor_mesh = nullptr;
+}
+
+void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
+{
+    render_window.setMouseCursorVisible(false);
+    cursor_texture = texture;
+    cursor_mesh = mesh;
 }
 
 void Window::createRenderWindow()
@@ -88,6 +110,24 @@ void Window::render()
         if (layer->isEnabled())
             layer->render(render_window);
     }
+    
+    if (cursor_mesh && cursor_texture)
+    {
+        Vector2d position = Vector2d(sf::Mouse::getPosition(render_window));
+        Vector2d window_size = Vector2d(render_window.getSize());
+        position.x = position.x - window_size.x / 2.0;
+        position.y = window_size.y / 2.0 - position.y;
+        
+        RenderQueue queue;
+        RenderData rd;
+        rd.type = RenderData::Type::Normal;
+        rd.shader = Shader::get("internal:basic.shader");
+        rd.mesh = cursor_mesh;
+        rd.texture = cursor_texture;
+        queue.add(Matrix4x4d::translate(position.x, position.y, 0), rd);
+        queue.render(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity(), render_window);
+    }
+    
     render_window.display();
 }
 

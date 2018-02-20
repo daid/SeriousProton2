@@ -18,6 +18,7 @@ Shader* Shader::get(string name)
     io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
     if (stream)
     {
+        LOG(Info, "Loading shader:", name);
         string vertex_shader;
         string fragment_shader;
         int type = -1;
@@ -34,6 +35,10 @@ Shader* Shader::get(string name)
                 fragment_shader += line + "\n";
         }
         new_shader->loadFromMemory(vertex_shader, fragment_shader);
+    }
+    else
+    {
+        LOG(Warning, "Failed to find shader:", name);
     }
     cached_shaders[name] = new_shader;
     return new_shader;
