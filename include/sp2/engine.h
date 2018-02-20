@@ -10,7 +10,7 @@ namespace sp {
 class Engine : public AutoPointerObject
 {
 public:
-    static constexpr float fixed_update_frequency = 30.0f;
+    static constexpr float fixed_update_frequency = 60.0f;
     static constexpr float fixed_update_delta = 1.0f / fixed_update_frequency;
 
     Engine();
@@ -39,6 +39,10 @@ private:
     float maximum_frame_time;
     float minimum_frame_time;
     float fixed_update_accumulator;
+
+#ifdef DEBUG
+    bool single_step_enabled;
+#endif
 };
 
 };//!namespace sp

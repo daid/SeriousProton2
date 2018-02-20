@@ -16,6 +16,11 @@ namespace sp {
 
 P<Engine> Engine::engine;
 
+#ifdef DEBUG
+io::Keybinding single_step_enable("single_step_enable", sf::Keyboard::Key::Tilde);
+io::Keybinding single_step_step("single_step_step", sf::Keyboard::Key::Tab);
+#endif
+
 Engine::Engine()
 {
     sp2assert(!engine, "SP2 does not support more then 1 engine.");
@@ -67,6 +72,16 @@ void Engine::run()
         delta *= game_speed;
         if (paused)
             delta = 0;
+#ifdef DEBUG
+        if (single_step_enable.getDown())
+            single_step_enabled = !single_step_enabled;
+        if (single_step_enabled)
+        {
+            delta = 0;
+            if (single_step_step.getDown())
+                delta = fixed_update_delta;
+        }
+#endif
         fixed_update_accumulator += delta;
         in_fixed_update = true;
         while(fixed_update_accumulator > fixed_update_delta)
