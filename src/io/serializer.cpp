@@ -38,6 +38,7 @@ Serializer::Handler::~Handler()
         fwrite("SP2:data", 8, 1, f);
         std::vector<uint8_t> header_data;
         current_data_block = &header_data;
+        addUnsignedInt(1);
         addUnsignedInt(string_table.size());
         addUnsignedInt(main_objects.size());
         addUnsignedInt(data_blocks.size());
@@ -131,6 +132,9 @@ bool Serializer::Handler::readFile()
     if (fread(buffer, 8, 1, f) != 1)
         return false;
     if (memcmp(buffer, "SP2:data", 8) != 0)
+        return false;
+    int version = readUnsignedIntFromStream(f);
+    if (version != 1)
         return false;
     int string_count = readUnsignedIntFromStream(f);
     if (string_count < 0)
