@@ -41,7 +41,7 @@ private:
     float fixed_update_accumulator;
 
 #ifdef DEBUG
-    bool single_step_enabled;
+    bool single_step_enabled = false;
 #endif
 };
 
