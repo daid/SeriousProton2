@@ -42,25 +42,28 @@ public:
     PList<Node>& getChildren();
     void setParent(P<Node> new_parent);
     
-    void setPosition(sp::Vector2d position);
-    void setPosition(sp::Vector3d position);
+    void setPosition(Vector2d position);
+    void setPosition(Vector3d position);
     void setRotation(double rotation);
     void setRotation(Quaterniond rotation);
-    void setLinearVelocity(sp::Vector2d velocity);
-    void setLinearVelocity(sp::Vector3d velocity);
+    void setLinearVelocity(Vector2d velocity);
+    void setLinearVelocity(Vector3d velocity);
     void setAngularVelocity(double velocity);
     void setAngularVelocity(Quaterniond velocity);
     
-    sp::Vector2d getPosition2D();
+    Vector2d getPosition2D();
     double getRotation2D();
-    sp::Vector2d getLocalPoint2D(sp::Vector2d v);
+    Vector2d getLocalPoint2D(Vector2d v);
     
-    sp::Vector2d getGlobalPosition2D();
+    Vector2d getGlobalPosition2D();
     double getGlobalRotation2D();
-    sp::Vector2d getGlobalPoint2D(sp::Vector2d v);
+    Vector2d getGlobalPoint2D(Vector2d v);
     
-    sp::Vector2d getLinearVelocity2D();
+    Vector2d getLinearVelocity2D();
     double getAngularVelocity2D();
+
+    Vector3d getPosition3D();
+    Quaterniond getRotation3D();
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     const Matrix4x4d& getLocalTransform() const { return local_transform; }

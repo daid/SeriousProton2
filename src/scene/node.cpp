@@ -175,6 +175,16 @@ double Node::getAngularVelocity2D()
     return 0.0;
 }
 
+Vector3d Node::getPosition3D()
+{
+    return translation;
+}
+
+Quaterniond Node::getRotation3D()
+{
+    return rotation;
+}
+
 void Node::setCollisionShape(const collision::Shape& shape)
 {
     shape.create(this);
