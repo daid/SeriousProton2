@@ -7,23 +7,13 @@
 
 namespace sp {
 
-class FontManager : public io::DirectLoader<sf::Font>
-{
-protected:
-    virtual sf::Font* load(string name);
-private:
-    std::map<string, io::ResourceStreamPtr> resource_streams;
-};
-
-extern FontManager fontManager;
-
-class FontManager2 : public io::DirectLoader<Font>
+class FontManager : public io::DirectLoader<Font>
 {
 protected:
     virtual Font* load(string name);
 };
 
-extern FontManager2 font_manager;
+extern FontManager font_manager;
 
 };//!namespace sp
 

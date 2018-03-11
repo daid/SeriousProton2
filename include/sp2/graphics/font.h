@@ -41,7 +41,7 @@ private:
     Vector2d bitmap_glyph_size;
     std::unordered_map<int, Vector2d> bitmap_glyphs;
     
-    friend class FontManager2;
+    friend class FontManager;
 };
 
 };//!namespace sp
