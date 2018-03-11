@@ -3,10 +3,11 @@
 
 #include <sp2/graphics/scene/renderdata.h>
 #include <sp2/string.h>
+#include <sp2/nonCopyable.h>
 
 namespace sp {
 
-class Animation : sf::NonCopyable
+class Animation : NonCopyable
 {
 public:
     virtual void play(string key, float speed=1.0) = 0;

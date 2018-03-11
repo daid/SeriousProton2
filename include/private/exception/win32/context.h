@@ -2,7 +2,7 @@
 #define SP2_EXCEPTION_WINDOWS_CONTEXT_H
 
 #include <sp2/exception/addressInfo.h>
-#include <SFML/System/NonCopyable.hpp>
+#include <sp2/nonCopyable.h>
 
 #include <windows.h>
 #include <psapi.h>
@@ -11,7 +11,7 @@
 namespace sp {
 namespace exception {
 
-class Win32ExceptionContext : sf::NonCopyable
+class Win32ExceptionContext : NonCopyable
 {
 public:
     Win32ExceptionContext();
@@ -22,7 +22,7 @@ public:
     const CONTEXT* input_context;
 };
 
-class Win32StackWalkContext : sf::NonCopyable
+class Win32StackWalkContext : NonCopyable
 {
 public:
     Win32StackWalkContext(Win32ExceptionContext& exception_context);

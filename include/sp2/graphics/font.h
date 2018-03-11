@@ -1,8 +1,8 @@
 #ifndef SP2_GRAPHICS_FONT_H
 #define SP2_GRAPHICS_FONT_H
 
-#include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <sp2/nonCopyable.h>
 #include <sp2/alignment.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/graphics/meshdata.h>
@@ -12,7 +12,7 @@
 
 namespace sp {
 
-class Font : sf::NonCopyable
+class Font : NonCopyable
 {
 public:
     /** Create a meshData for the given string.

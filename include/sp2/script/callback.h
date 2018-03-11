@@ -9,7 +9,7 @@
 namespace sp {
 namespace script {
 
-class Callback : public sf::NonCopyable
+class Callback : public NonCopyable
 {
 public:
     Callback();

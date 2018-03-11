@@ -1,14 +1,14 @@
 #ifndef SP2_POINTER_H
 #define SP2_POINTER_H
 
-#include <SFML/System/NonCopyable.hpp>
+#include <sp2/nonCopyable.h>
 #include <sp2/pointerBase.h>
 #include <ostream>
 #include <typeinfo>
 
 namespace sp {
 
-class AutoPointerObject : sf::NonCopyable
+class AutoPointerObject : NonCopyable
 {
 private:
     _PBase* pointer_list_start;

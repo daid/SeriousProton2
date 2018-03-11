@@ -159,7 +159,7 @@ private:
     friend class Layout;
 };
 
-class WidgetClassRegistry : sf::NonCopyable
+class WidgetClassRegistry : NonCopyable
 {
 public:
     static WidgetClassRegistry* first;

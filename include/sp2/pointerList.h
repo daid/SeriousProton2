@@ -14,7 +14,7 @@ class _PListEntry;
 class _PListIteratorBase;
 class _PListReverseIteratorBase;
 
-class _PListBase : sf::NonCopyable
+class _PListBase : NonCopyable
 {
 public:
     _PListBase()
@@ -40,7 +40,7 @@ protected:
     friend class _PListReverseIteratorBase;
 };
 
-class _PListEntry : sf::NonCopyable
+class _PListEntry : NonCopyable
 {
 public:
     AutoPointerObject* object;
@@ -55,7 +55,7 @@ public:
     static _PListEntry* create();
 };
 
-class _PListIteratorBase : sf::NonCopyable
+class _PListIteratorBase : NonCopyable
 {
 public:
     _PListIteratorBase(_PListBase* list)
@@ -140,7 +140,7 @@ protected:
     friend class _PListBase;
 };
 
-class _PListReverseIteratorBase : sf::NonCopyable
+class _PListReverseIteratorBase : NonCopyable
 {
 public:
     _PListReverseIteratorBase(_PListBase* list)

@@ -3,7 +3,6 @@
 
 #include <sp2/string.h>
 #include <sp2/pointer.h>
-#include <SFML/System/NonCopyable.hpp>
 
 namespace sp {
 class KeyValueTree;
@@ -13,7 +12,7 @@ namespace gui {
 
 class Widget;
 
-class Loader : sf::NonCopyable
+class Loader : NonCopyable
 {
 public:
     static P<Widget> load(string resource_name, string root_id, P<Widget> root=nullptr, bool auto_reload=false);

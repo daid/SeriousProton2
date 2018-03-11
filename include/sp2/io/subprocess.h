@@ -2,12 +2,12 @@
 #define SP2_IO_SUBPROCESS_H
 
 #include <sp2/string.h>
-#include <SFML/System/NonCopyable.hpp>
+#include <sp2/nonCopyable.h>
 
 namespace sp {
 namespace io {
 
-class Subprocess : sf::NonCopyable
+class Subprocess : NonCopyable
 {
 public:
     class Data;

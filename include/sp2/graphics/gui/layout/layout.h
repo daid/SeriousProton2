@@ -9,7 +9,7 @@
 namespace sp {
 namespace gui {
 
-class Layout : sf::NonCopyable
+class Layout : NonCopyable
 {
 public:
     virtual ~Layout() {}
@@ -19,7 +19,7 @@ protected:
     virtual void basicLayout(Vector2d position, Vector2d size, Widget* widget);
 };
 
-class LayoutClassRegistry : sf::NonCopyable
+class LayoutClassRegistry : NonCopyable
 {
 public:
     static LayoutClassRegistry* first;

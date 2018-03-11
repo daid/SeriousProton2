@@ -1,14 +1,14 @@
 #ifndef SP2_GRAPHICS_MESHDATA_H
 #define SP2_GRAPHICS_MESHDATA_H
 
-#include <SFML/System/NonCopyable.hpp>
+#include <sp2/nonCopyable.h>
 #include <sp2/math/vector.h>
 #include <sp2/string.h>
 #include <memory>
 
 namespace sp {
 
-class MeshData : public sf::NonCopyable
+class MeshData : NonCopyable
 {
 public:
     enum class Type

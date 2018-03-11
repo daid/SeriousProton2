@@ -2,14 +2,14 @@
 #define SP2_GRAPHICS_TEXTURE_H
 
 #include <sp2/string.h>
+#include <sp2/nonCopyable.h>
 #include <SFML/Graphics/Texture.hpp>
 #include <thread>
 #include <mutex>
-#include <SFML/System/NonCopyable.hpp>
 
 namespace sp {
 
-class Texture : public sf::NonCopyable
+class Texture : NonCopyable
 {
 public:
     enum class Type

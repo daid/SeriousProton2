@@ -1,7 +1,7 @@
 #ifndef SP2_POINTER_BASE_H
 #define SP2_POINTER_BASE_H
 
-#include <SFML/System/NonCopyable.hpp>
+#include <sp2/nonCopyable.h>
 
 namespace sp {
 

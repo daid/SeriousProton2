@@ -20,7 +20,7 @@ private:
     template<class T> friend class LazyLoader;
 };
 
-template<class T> class LazyLoader : sf::NonCopyable
+template<class T> class LazyLoader : NonCopyable
 {
 public:
     T* get(string name)

@@ -10,7 +10,7 @@
 namespace sp {
 namespace io {
 
-template<class T> class DirectLoader : sf::NonCopyable
+template<class T> class DirectLoader : NonCopyable
 {
 public:
     T* get(string name)
