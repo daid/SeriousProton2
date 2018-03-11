@@ -26,34 +26,34 @@ std::vector<float> toFloatArray(const string& s)
     return result;
 }
 
-sp::Vector2d toVector2d(const string& s)
+Vector2d toVector2d(const string& s)
 {
     double f = toFloat(s);
     if (s.find(",") > -1)
     {
-        return sp::Vector2d(f, toFloat(s.substr(s. find(",") + 1).strip()));
+        return Vector2d(f, toFloat(s.substr(s. find(",") + 1).strip()));
     }
-    return sp::Vector2d(f, f);
+    return Vector2d(f, f);
 }
 
-sf::Vector2f toVector2f(const string& s)
+Vector2f toVector2f(const string& s)
 {
     float f = toFloat(s);
     if (s.find(",") > -1)
     {
-        return sf::Vector2f(f, toFloat(s.substr(s. find(",") + 1).strip()));
+        return Vector2f(f, toFloat(s.substr(s. find(",") + 1).strip()));
     }
-    return sf::Vector2f(f, f);
+    return Vector2f(f, f);
 }
 
-sf::Vector2i toVector2i(const string& s)
+Vector2i toVector2i(const string& s)
 {
     int i = toInt(s);
     if (s.find(",") > -1)
     {
-        return sf::Vector2i(i, toInt(s.substr(s. find(",") + 1).strip()));
+        return Vector2i(i, toInt(s.substr(s. find(",") + 1).strip()));
     }
-    return sf::Vector2i(i, i);
+    return Vector2i(i, i);
 }
 
 };//!namespace convert

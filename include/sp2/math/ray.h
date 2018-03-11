@@ -1,10 +1,7 @@
 #ifndef SP2_MATH_RAY_H
 #define SP2_MATH_RAY_H
 
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
 #include <cmath>
-
 #include <sp2/math/vector.h>
 
 namespace sp {

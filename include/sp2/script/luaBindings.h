@@ -62,7 +62,7 @@ template<class T> int pushToLua(T* obj)
     return 1;
 }
 
-template<typename T> int pushToLua(sf::Vector2<T> f)
+template<typename T> int pushToLua(Vector2<T> f)
 {
     int x = pushToLua(f.x);
     int y = pushToLua(f.y);

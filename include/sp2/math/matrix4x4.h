@@ -3,11 +3,10 @@
 
 #include <sp2/math/matrix.impl.h>
 #include <sp2/math/quaternion.h>
+#include <sp2/math/vector.h>
 
 #include <cmath>
 #include <cstring>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
 #include <SFML/Graphics/Glsl.hpp>
 
 namespace sp {
@@ -111,7 +110,7 @@ public:
         );
     }
 
-    static Matrix4x4 translate(sf::Vector3<T>& v)
+    static Matrix4x4 translate(Vector3<T>& v)
     {
         return Matrix4x4(
             1, 0, 0, v.x,
@@ -185,34 +184,34 @@ public:
         return Matrix4x4(Matrix<T, 4>::operator*(m));
     }
 
-    sf::Vector2<T> operator*(const sf::Vector2<T>& v) const
+    Vector2<T> operator*(const Vector2<T>& v) const
     {
-        return sf::Vector2<T>(
+        return Vector2<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[12],
             this->data[1] * v.x + this->data[5] * v.y + this->data[13]
         );
     }
     
-    sf::Vector3<T> operator*(const sf::Vector3<T>& v) const
+    Vector3<T> operator*(const Vector3<T>& v) const
     {
-        return sf::Vector3<T>(
+        return Vector3<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z + this->data[12],
             this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z + this->data[13],
             this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z + this->data[14]
         );
     }
 
-    sf::Vector2<T> applyDirection(const sf::Vector2<T>& v) const
+    Vector2<T> applyDirection(const Vector2<T>& v) const
     {
-        return sf::Vector2<T>(
+        return Vector2<T>(
             this->data[0] * v.x + this->data[4] * v.y,
             this->data[1] * v.x + this->data[5] * v.y
         );
     }
     
-    sf::Vector3<T> applyDirection(const sf::Vector3<T>& v) const
+    Vector3<T> applyDirection(const Vector3<T>& v) const
     {
-        return sf::Vector3<T>(
+        return Vector3<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z,
             this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z,
             this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z

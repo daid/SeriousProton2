@@ -5,7 +5,6 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/engine.h>
-#include <SFML/Graphics.hpp>
 
 namespace sp {
 namespace gui {

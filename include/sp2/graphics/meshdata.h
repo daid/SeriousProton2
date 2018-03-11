@@ -21,19 +21,19 @@ public:
     public:
         Vertex() {}
         
-        Vertex(sp::Vector3f pos)
+        Vertex(Vector3f pos)
         {
             position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
             normal[0] = 0.0; normal[1] = 0.0; normal[2] = 0.0;
             uv[0] = 0.0; uv[1] = 0.0;
         }
-        Vertex(sp::Vector3f pos, sp::Vector2f uv)
+        Vertex(Vector3f pos, Vector2f uv)
         {
             position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
             normal[0] = 0.0; normal[1] = 0.0; normal[2] = 0.0;
             this->uv[0] = uv.x; this->uv[1] = uv.y;
         }
-        Vertex(sp::Vector3f pos, sp::Vector3f norm, sp::Vector2f uv)
+        Vertex(Vector3f pos, Vector3f norm, Vector2f uv)
         {
             position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
             normal[0] = norm.x; normal[1] = norm.y; normal[2] = norm.z;

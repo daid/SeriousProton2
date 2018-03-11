@@ -11,13 +11,13 @@ public:
     class Parameters
     {
     public:
-        sp::Vector3f position;
-        sp::Vector3f velocity;
-        sp::Vector3f acceleration;
+        Vector3f position;
+        Vector3f velocity;
+        Vector3f acceleration;
         float start_size;
         float end_size;
-        sp::Vector3f start_color;
-        sp::Vector3f end_color; 
+        Vector3f start_color;
+        Vector3f end_color; 
         float lifetime;
         float time;
 

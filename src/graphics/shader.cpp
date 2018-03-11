@@ -1,4 +1,5 @@
 #include <sp2/graphics/shader.h>
+#include <sp2/graphics/opengl.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/logging.h>
 

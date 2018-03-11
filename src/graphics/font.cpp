@@ -151,10 +151,10 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
             float top = position.y - glyph.bounds.top * size_scale;
             float bottom = position.y - glyph.bounds.top * size_scale - glyph.bounds.height * size_scale;
 
-            sf::Vector3f p0(left, top, 0.0f);
-            sf::Vector3f p1(right, top, 0.0f);
-            sf::Vector3f p2(left, bottom, 0.0f);
-            sf::Vector3f p3(right, bottom, 0.0f);
+            Vector3f p0(left, top, 0.0f);
+            Vector3f p1(right, top, 0.0f);
+            Vector3f p2(left, bottom, 0.0f);
+            Vector3f p3(right, bottom, 0.0f);
 
             indices.emplace_back(vertices.size() + 0);
             indices.emplace_back(vertices.size() + 2);

@@ -34,8 +34,8 @@ std::vector<float> toFloatArray(const string& s);
     Will try to convert "x, y" into a vector. If the y value is missing (only a single number) then the x value is copied into the y value as well.
 */
 sp::Vector2d toVector2d(const string& s);
-sf::Vector2f toVector2f(const string& s);
-sf::Vector2i toVector2i(const string& s);
+sp::Vector2f toVector2f(const string& s);
+sp::Vector2i toVector2i(const string& s);
 
 };//!namespace convert
 };//!namespace stringutil

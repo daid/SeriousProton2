@@ -113,8 +113,10 @@ void Window::render()
     
     if (cursor_mesh && cursor_texture)
     {
-        Vector2d position = Vector2d(sf::Mouse::getPosition(render_window));
-        Vector2d window_size = Vector2d(render_window.getSize());
+        sf::Vector2i mouse_pos = sf::Mouse::getPosition(render_window);
+    
+        Vector2d position(mouse_pos.x, mouse_pos.y);
+        Vector2d window_size(render_window.getSize().x, render_window.getSize().y);
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
         

@@ -216,7 +216,7 @@ void Scene::queryCollision(sp::Vector2d position, double range, std::function<bo
         return;
     Box2DQueryCallback callback;
     callback.callback = [callback_function, position, range](Node* node) {
-        if (length(node->getGlobalPosition2D() - position) <= range)
+        if ((node->getGlobalPosition2D() - position).length() <= range)
             return callback_function(node);
         return true;
     };

@@ -42,7 +42,7 @@ void Theme::loadTheme(string name, string resource_name)
     P<Theme> theme = new Theme(name);
     for(unsigned int n=0; n<int(Widget::State::Count); n++)
     {
-        theme->fallback_data.states[n].color = sp::Color::White;
+        theme->fallback_data.states[n].color = sp::Color(1, 1, 1);
     }
 
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
@@ -59,7 +59,7 @@ void Theme::loadTheme(string name, string resource_name)
         if (input.find("color") != input.end())
             global_data.color = Color::fromString(input["color"]);
         else
-            global_data.color = Color::White;
+            global_data.color = Color(1, 1, 1);
         global_data.font = font_manager.get(input["font"]);
         global_data.text_size = stringutil::convert::toFloat(input["text.size"]);
         for(unsigned int n=0; n<int(Widget::State::Count); n++)

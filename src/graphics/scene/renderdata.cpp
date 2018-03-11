@@ -4,7 +4,7 @@ namespace sp {
 
 RenderData::RenderData()
 {
-    color = Color::White;
+    color = Color(1, 1, 1);
     type = Type::None;
     order = 0;
     scale = sp::Vector3f(1.0, 1.0, 1.0);

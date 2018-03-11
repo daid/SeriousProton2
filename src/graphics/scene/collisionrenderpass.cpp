@@ -4,8 +4,8 @@
 #include <sp2/scene/node.h>
 #include <sp2/scene/camera.h>
 #include <sp2/logging.h>
+#include <sp2/io/keybinding.h>
 #include <Box2D/Box2D.h>
-#include <SFML/Window/Keyboard.hpp>
 #include <private/collision/box2dVector.h>
 
 namespace sp {
@@ -62,9 +62,9 @@ public:
 	{
         Vector3f c(color.r, color.g, color.b);
 
-        sp::Vector2f v0 = toVector<float>(p1);
-        sp::Vector2f v1 = toVector<float>(p2);
-        sp::Vector2f diff = sp::normalize(v1 - v0) * 0.2f;
+        Vector2f v0 = toVector<float>(p1);
+        Vector2f v1 = toVector<float>(p2);
+        Vector2f diff = (v1 - v0).normalized() * 0.2f;
         
         int index = vertices.size();
         vertices.emplace_back(Vector3f(v0.x, v0.y, 0.0f), c, Vector2f());
@@ -191,7 +191,7 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
             render_data.shader = Shader::get("internal:normal_as_color.shader");
             render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
-            render_data.color = Color(255, 255, 255, 64);
+            render_data.color = Color(1, 1, 1, 0.25);
             queue.add(Matrix4x4d::identity(), render_data);
 
             queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);

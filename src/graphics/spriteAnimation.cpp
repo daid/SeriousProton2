@@ -109,20 +109,20 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
         if (line_length <= 0)
             line_length = frames.size();
         std::vector<float> delays = stringutil::convert::toFloatArray(data["delay"]);
-        sf::Vector2f texture_size = stringutil::convert::toVector2f(data["texture_size"]);
-        sf::Vector2f position = stringutil::convert::toVector2f(data["position"]);
-        sf::Vector2f offset = stringutil::convert::toVector2f(data["offset"]);
-        sf::Vector2f frame_size = stringutil::convert::toVector2f(data["frame_size"]);
-        sf::Vector2f size = stringutil::convert::toVector2f(data["size"]) / 2.0f;
-        sf::Vector2f margin = stringutil::convert::toVector2f(data["margin"]);
+        Vector2f texture_size = stringutil::convert::toVector2f(data["texture_size"]);
+        Vector2f position = stringutil::convert::toVector2f(data["position"]);
+        Vector2f offset = stringutil::convert::toVector2f(data["offset"]);
+        Vector2f frame_size = stringutil::convert::toVector2f(data["frame_size"]);
+        Vector2f size = stringutil::convert::toVector2f(data["size"]) / 2.0f;
+        Vector2f margin = stringutil::convert::toVector2f(data["margin"]);
         
         offset.x = offset.x / frame_size.x * size.x * 2.0;
         offset.y = offset.y / frame_size.y * size.y * 2.0;
         
-        sf::Vector3f p0 = sf::Vector3f(-size.x + offset.x, -size.y + offset.y, 0.0f);
-        sf::Vector3f p1 = sf::Vector3f( size.x + offset.x, -size.y + offset.y, 0.0f);
-        sf::Vector3f p2 = sf::Vector3f(-size.x + offset.x,  size.y + offset.y, 0.0f);
-        sf::Vector3f p3 = sf::Vector3f( size.x + offset.x,  size.y + offset.y, 0.0f);
+        Vector3f p0 = Vector3f(-size.x + offset.x, -size.y + offset.y, 0.0f);
+        Vector3f p1 = Vector3f( size.x + offset.x, -size.y + offset.y, 0.0f);
+        Vector3f p2 = Vector3f(-size.x + offset.x,  size.y + offset.y, 0.0f);
+        Vector3f p3 = Vector3f( size.x + offset.x,  size.y + offset.y, 0.0f);
         
         total_frames += frames.size();
         for(unsigned int n=0; n<frames.size(); n++)

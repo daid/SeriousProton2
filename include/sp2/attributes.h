@@ -5,4 +5,6 @@
 // Example are the keybindings, we want to initilize our list of key bindings before any of the keybindings itself is initialized.
 #define SP2_INIT_EARLY __attribute__((init_priority(101)))
 
+#define SP2_DEPRECATED(msg) __attribute__((deprecated(msg)))
+
 #endif//ATTRIBUTES_H

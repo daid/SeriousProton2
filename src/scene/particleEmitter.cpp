@@ -37,7 +37,7 @@ void ParticleEmitter::onUpdate(float delta)
         particle.position += particle.velocity * delta;
         
         float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
-        sp::Vector3f color = Tween<sp::Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
+        Vector3f color = Tween<Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
         
         indices.emplace_back(vertices.size() + 0);
         indices.emplace_back(vertices.size() + 1);

@@ -8,14 +8,14 @@ SP_REGISTER_LAYOUT("grid", GridLayout);
 
 void GridLayout::update(P<Widget> container, Vector2d size)
 {
-    sf::Vector2i grid_size;
+    Vector2i grid_size;
     for(Node* n : container->getChildren())
     {
         P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
-        sf::Vector2i position = sf::Vector2i(w->layout.position);
-        sf::Vector2i span = w->layout.span;
+        Vector2i position = Vector2i(w->layout.position);
+        Vector2i span = w->layout.span;
         grid_size.x = std::max(grid_size.x, position.x + span.x);
         grid_size.y = std::max(grid_size.y, position.y + span.y);
     }
@@ -32,8 +32,8 @@ void GridLayout::update(P<Widget> container, Vector2d size)
         P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
-        sf::Vector2i position = sf::Vector2i(w->layout.position);
-        sf::Vector2i span = w->layout.span;
+        Vector2i position = Vector2i(w->layout.position);
+        Vector2i span = w->layout.span;
         
         if (span.x == 1)
         {
@@ -68,8 +68,8 @@ void GridLayout::update(P<Widget> container, Vector2d size)
         P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
-        sf::Vector2i position = sf::Vector2i(w->layout.position);
-        sf::Vector2i span = w->layout.span;
+        Vector2i position = Vector2i(w->layout.position);
+        Vector2i span = w->layout.span;
 
         Vector2d cell_pos(col_x[position.x], row_y[position.y]);
         Vector2d cell_size(col_width[position.x], row_height[position.y]);

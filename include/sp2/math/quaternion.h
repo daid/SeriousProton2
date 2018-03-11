@@ -1,10 +1,7 @@
 #ifndef SP2_MATH_QUATERNION_H
 #define SP2_MATH_QUATERNION_H
 
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
 #include <cmath>
-
 #include <sp2/math/vector.h>
 
 namespace sp {
@@ -32,24 +29,24 @@ public:
         );
     }
     
-    template<typename VT> sf::Vector2<VT> operator*(const sf::Vector2<VT>& v) const
+    template<typename VT> Vector2<VT> operator*(const Vector2<VT>& v) const
     {
         T vMult = 2.0 * (x * v.x + y * v.y);
         T crossMult = 2.0 * w;
         T pMult = crossMult * w - 1.0;
 
-        return sf::Vector2<VT>(
+        return Vector2<VT>(
             pMult * v.x + vMult * x + crossMult * (- z * v.y),
             pMult * v.y + vMult * y + crossMult * (z * v.x));
     }
 
-    template<typename VT> sf::Vector3<VT> operator*(const sf::Vector3<VT>& v) const
+    template<typename VT> Vector3<VT> operator*(const Vector3<VT>& v) const
     {
         T vMult = 2.0 * (x * v.x + y * v.y + z * v.z);
         T crossMult = 2.0 * w;
         T pMult = crossMult * w - 1.0;
 
-        return sf::Vector3<VT>(
+        return Vector3<VT>(
             pMult * v.x + vMult * x + crossMult * (y * v.z - z * v.y),
             pMult * v.y + vMult * y + crossMult * (z * v.x - x * v.z),
             pMult * v.z + vMult * z + crossMult * (x * v.y - y * v.x));
@@ -69,9 +66,9 @@ public:
         w /= len;
     }
     
-    static Quaternion fromAxisAngle(sf::Vector3<T> axis, T angle)
+    static Quaternion fromAxisAngle(Vector3<T> axis, T angle)
     {
-        sf::Vector3<T> a = sp::normalize(axis);
+        Vector3<T> a = axis.normalized();
         T half_angle = (angle / 2.0) / 180.0 * pi;
         T c = std::cos(half_angle);
         T s = std::sin(half_angle);

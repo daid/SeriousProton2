@@ -104,10 +104,10 @@ void Tilemap::updateMesh()
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 3);
             
-            vertices.emplace_back(sf::Vector3f(px, py, 0.0f), sp::Vector2f(u * fu, (v + 1) * fv));
-            vertices.emplace_back(sf::Vector3f(px + tile_width, py, 0.0f), sp::Vector2f((u + 1) * fu, (v + 1) * fv));
-            vertices.emplace_back(sf::Vector3f(px, py + tile_height, 0.0f), sp::Vector2f(u * fu, v * fv));
-            vertices.emplace_back(sf::Vector3f(px + tile_width, py + tile_height, 0.0f), sp::Vector2f((u + 1) * fu, v * fv));
+            vertices.emplace_back(Vector3f(px, py, 0.0f), Vector2f(u * fu, (v + 1) * fv));
+            vertices.emplace_back(Vector3f(px + tile_width, py, 0.0f), Vector2f((u + 1) * fu, (v + 1) * fv));
+            vertices.emplace_back(Vector3f(px, py + tile_height, 0.0f), Vector2f(u * fu, v * fv));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, 0.0f), Vector2f((u + 1) * fu, v * fv));
         }
     }
     

@@ -1,7 +1,6 @@
 #ifndef SP2_GRAPHICS_COLOR_H
 #define SP2_GRAPHICS_COLOR_H
 
-#include <SFML/Graphics/Color.hpp>
 #include <sp2/math/vector.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/string.h>
@@ -35,26 +34,25 @@ public:
     double value;
 };
 
-class Color : public sf::Color
+class Color
 {
 public:
+    //rgba: 0.0-1.0
+    float r, g, b, a;
+
     Color()
-    : sf::Color()
+    : r(0), g(0), b(0), a(1.0)
     {
     }
 
-    Color(const sf::Color& color)
-    : sf::Color(color)
+    explicit Color(uint32_t color)
+    : r(((color >> 24) & 0xFF) / 255.0f), g(((color >> 16) & 0xFF) / 255.0f), b(((color >> 8) & 0xFF) / 255.0f), a(((color >> 0) & 0xFF) / 255.0f)
     {
-    }
-    
-    Color(uint32_t color)
-    : sf::Color(color)
-    {
+        
     }
 
-    Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
-    : sf::Color(red, green, blue, alpha)
+    Color(float red, float green, float blue, float alpha = 1.0f)
+    : r(red), g(green), b(blue), a(alpha)
     {
     }
     
@@ -66,39 +64,39 @@ public:
 
         if (hsv.hue < 60)
         {
-            r = (c + m) * 255;
-            g = (x + m) * 255;
-            b = (m) * 255;
+            r = c + m;
+            g = x + m;
+            b = m;
         }
         else if (hsv.hue < 120)
         {
-            r = (x + m) * 255;
-            g = (c + m) * 255;
-            b = (m) * 255;
+            r = x + m;
+            g = c + m;
+            b = m;
         }
         else if (hsv.hue < 180)
         {
-            r = (m) * 255;
-            g = (c + m) * 255;
-            b = (x + m) * 255;
+            r = m;
+            g = c + m;
+            b = x + m;
         }
         else if (hsv.hue < 240)
         {
-            r = (m) * 255;
-            g = (x + m) * 255;
-            b = (c + m) * 255;
+            r = m;
+            g = x + m;
+            b = c + m;
         }
         else if (hsv.hue < 300)
         {
-            r = (x + m) * 255;
-            g = (m) * 255;
-            b = (c + m) * 255;
+            r = x + m;
+            g = m;
+            b = c + m;
         }
         else
         {
-            r = (c + m) * 255;
-            g = (m) * 255;
-            b = (x + m) * 255;
+            r = c + m;
+            g = m;
+            b = x + m;
         }
     }
 
@@ -112,19 +110,24 @@ public:
                 return Color(stringutil::convert::toInt(s.substr(1, 5), 16) << 16 | stringutil::convert::toInt(s.substr(5), 16));  //toInt(16) fails with 8 bytes, so split the convertion in 2 sections.
         }
         LOG(Error, "Failed to parse color string", s);
-        return Color::White;
+        return Color(1, 1, 1);
     }
     
     string toString()
     {
-        if (a == 0xFF)
+        if (a == 1.0f)
         {
-            return "#" + string::hex(toInteger() >> 8, 6);
+            return "#" + string::hex(toInt() >> 8, 6);
         }
         else
         {
-            return "#" + string::hex(toInteger(), 8);
+            return "#" + string::hex(toInt(), 8);
         }
+    }
+    
+    uint32_t toInt()
+    {
+        return (int(r * 255) << 24) | (int(g * 255) << 16) | (int(b * 255) << 8) | int(a * 255);
     }
 private:
 };

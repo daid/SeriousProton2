@@ -2,7 +2,6 @@
 #include <sp2/graphics/gui/widget/themeimage.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/engine.h>
-#include <SFML/Graphics.hpp>
 
 namespace sp {
 namespace gui {
