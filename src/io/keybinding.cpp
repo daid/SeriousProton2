@@ -9,7 +9,7 @@
 namespace sp {
 namespace io {
 
-static std::unordered_map<string, sf::Keyboard::Key> sfml_key_names = {
+static std::unordered_map<string, sf::Keyboard::Key> sfml_key_names SP2_INIT_EARLY = {
     {"A", sf::Keyboard::A},
     {"B", sf::Keyboard::B},
     {"C", sf::Keyboard::C},
