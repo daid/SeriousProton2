@@ -18,7 +18,7 @@ const ThemeData* Theme::getData(string element)
     if (n == -1)
     {
         LOG(Warning, "Cannot find", element, "in theme", name);
-        return &fallback_data;
+        return &data.begin()->second;
     }
     return getData(element.substr(0, n));
 }
@@ -40,10 +40,6 @@ P<Theme> Theme::getTheme(string name)
 void Theme::loadTheme(string name, string resource_name)
 {
     P<Theme> theme = new Theme(name);
-    for(unsigned int n=0; n<int(Widget::State::Count); n++)
-    {
-        theme->fallback_data.states[n].color = sp::Color(1, 1, 1);
-    }
 
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
     for(auto& it : tree->getFlattenNodesByIds())

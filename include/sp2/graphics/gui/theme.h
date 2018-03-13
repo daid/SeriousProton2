@@ -54,7 +54,6 @@ private:
 
     string name;
     std::map<string, ThemeData> data;
-    ThemeData fallback_data;
     
     static std::map<string, P<Theme>> themes;
 };
