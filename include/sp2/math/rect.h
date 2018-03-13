@@ -11,7 +11,7 @@ template<typename T> class Rect
 public:
     Rect() {}
     Rect(Vector2<T> position, Vector2<T> size) : position(position), size(size) {}
-    Rect(T x, T y, T w, T h) : position(x, y), size(x, y) {}
+    Rect(T x, T y, T w, T h) : position(x, y), size(w, h) {}
     
     Vector2<T> position;
     Vector2<T> size;
