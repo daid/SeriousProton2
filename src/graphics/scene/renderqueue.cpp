@@ -19,7 +19,7 @@ void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
     render_list.emplace_back(transform, data);
 }
 
-void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform, sf::RenderTarget& target)
+void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform)
 {
     std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)

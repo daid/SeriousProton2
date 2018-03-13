@@ -127,7 +127,7 @@ void Window::render()
         rd.mesh = cursor_mesh;
         rd.texture = cursor_texture;
         queue.add(Matrix4x4d::translate(position.x, position.y, 0), rd);
-        queue.render(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity(), render_window);
+        queue.render(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
     }
     
     render_window.display();

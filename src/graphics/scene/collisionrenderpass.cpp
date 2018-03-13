@@ -137,7 +137,7 @@ void CollisionRenderPass::setCamera(P<Camera> camera)
     specific_camera = camera;
 }
 
-void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+void CollisionRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
     {
@@ -155,16 +155,16 @@ void CollisionRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> laye
         return;
     if (single_scene)
     {
-        renderScene(*single_scene, target, layer, aspect_ratio);
+        renderScene(*single_scene, layer, aspect_ratio);
     }else{
         for(Scene* scene : Scene::scenes)
         {
-            renderScene(scene, target, layer, aspect_ratio);
+            renderScene(scene, layer, aspect_ratio);
         }
     }
 }
 
-void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+void CollisionRenderPass::renderScene(Scene* scene, P<GraphicsLayer> layer, float aspect_ratio)
 {    
     P<Camera> camera = scene->getCamera();
     if (specific_camera && specific_camera->getScene() == scene)
@@ -194,7 +194,7 @@ void CollisionRenderPass::renderScene(Scene* scene, sf::RenderTarget& target, P<
             render_data.color = Color(1, 1, 1, 0.25);
             queue.add(Matrix4x4d::identity(), render_data);
 
-            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
+            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
         }
     }
 }

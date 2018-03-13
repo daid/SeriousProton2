@@ -16,7 +16,7 @@ public:
     BasicNodeRenderPass(string target_layer, P<Scene> scene);
     BasicNodeRenderPass(string target_layer, P<Camera> camera);
     
-    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) override;
+    virtual void render(P<GraphicsLayer> layer, float aspect_ratio) override;
 
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
@@ -39,7 +39,7 @@ private:
     std::map<int, P<Camera>> pointer_camera;
     
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
-    void renderScene(P<Scene> scene, P<Camera> camera, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio);
+    void renderScene(P<Scene> scene, P<Camera> camera, P<GraphicsLayer> layer, float aspect_ratio);
     void recursiveNodeRender(Node* node);
 };
 

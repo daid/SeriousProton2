@@ -38,10 +38,11 @@ void SceneGraphicsLayer::render(sf::RenderTarget& window)
     for(RenderPass* pass : render_passes)
     {
         string target = pass->getTargetLayer();
+        //TODO: window or *targets[target] as target.
         if (target == "window")
-            pass->render(window, this, aspect_ratio);
+            pass->render(this, aspect_ratio);
         else
-            pass->render(*targets[target], this, aspect_ratio);
+            pass->render(this, aspect_ratio);
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -31,18 +31,18 @@ void BasicNodeRenderPass::addScene(P<Scene> scene, P<Camera> camera)
     scene_data.camera = camera;
 }
 
-void BasicNodeRenderPass::render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+void BasicNodeRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
 {
     if (!scenes.empty())
     {
         for(SceneWithCamera& scene_data : scenes)
         {
-            renderScene(scene_data.scene, scene_data.camera, target, layer, aspect_ratio);
+            renderScene(scene_data.scene, scene_data.camera, layer, aspect_ratio);
         }
     }else{
         for(Scene* scene : Scene::scenes)
         {
-            renderScene(scene, nullptr, target, layer, aspect_ratio);
+            renderScene(scene, nullptr, layer, aspect_ratio);
         }
     }
 }
@@ -110,7 +110,7 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     }
 }
 
-void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio)
+void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, P<GraphicsLayer> layer, float aspect_ratio)
 {
     if (!camera)
         camera = scene->getCamera();
@@ -120,7 +120,7 @@ void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, sf::Rend
         camera->setAspectRatio(aspect_ratio);
         queue.clear();
         recursiveNodeRender(*scene->getRoot());
-        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse(), target);
+        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
     }
 }
 

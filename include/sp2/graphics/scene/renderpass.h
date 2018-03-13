@@ -11,7 +11,7 @@ class RenderPass : public AutoPointerObject
 public:
     RenderPass(string target_layer);
     
-    virtual void render(sf::RenderTarget& target, P<GraphicsLayer> layer, float aspect_ratio) = 0;
+    virtual void render(P<GraphicsLayer> layer, float aspect_ratio) = 0;
 
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);
