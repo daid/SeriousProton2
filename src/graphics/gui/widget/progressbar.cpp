@@ -54,6 +54,10 @@ void Progressbar::setAttribute(const string& key, const string& value)
             min_value = v.x;
         markRenderDataOutdated();
     }
+    else if (key == "theme_data")
+    {
+        fill->setAttribute(key, value);
+    }
     else
     {
         Widget::setAttribute(key, value);
@@ -68,7 +72,7 @@ void Progressbar::updateRenderData()
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = t.texture;
     render_data.color = t.color;
-    
+
     fill->layout.size = getRenderSize();
     switch(fill->layout.alignment)
     {

@@ -17,6 +17,7 @@ void ThemeImage::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
     
+    render_data.order -= 2;
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretched(getRenderSize());
     render_data.texture = t.texture;

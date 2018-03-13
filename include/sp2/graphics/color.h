@@ -48,7 +48,6 @@ public:
     explicit Color(uint32_t color)
     : r(((color >> 24) & 0xFF) / 255.0f), g(((color >> 16) & 0xFF) / 255.0f), b(((color >> 8) & 0xFF) / 255.0f), a(((color >> 0) & 0xFF) / 255.0f)
     {
-        
     }
 
     Color(float red, float green, float blue, float alpha = 1.0f)
