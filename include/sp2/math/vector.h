@@ -1,8 +1,8 @@
 #ifndef SP2_MATH_VECTOR_H
 #define SP2_MATH_VECTOR_H
 
-#include "Vector2.h"
-#include "Vector3.h"
+#include "vector2.h"
+#include "vector3.h"
 #include <cmath>
 #include <ostream>
 
