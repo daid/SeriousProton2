@@ -98,6 +98,7 @@ public:
             g = m;
             b = x + m;
         }
+        a = 1.0;
     }
 
     static Color fromString(string s)

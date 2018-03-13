@@ -17,8 +17,8 @@ namespace sp {
 P<Engine> Engine::engine;
 
 #ifdef DEBUG
-io::Keybinding single_step_enable("single_step_enable", sf::Keyboard::Key::Tilde);
-io::Keybinding single_step_step("single_step_step", sf::Keyboard::Key::Tab);
+io::Keybinding single_step_enable("single_step_enable", "Tilde");
+io::Keybinding single_step_step("single_step_step", "Tab");
 #endif
 
 Engine::Engine()

@@ -24,26 +24,26 @@ public:
     string(const char* str) : std::string(str) {}
     string(const char* str, int length) : std::string(str, length) {}
 
-    string(const char c) : std::string()
+    explicit string(const char c) : std::string()
     {
         push_back(c);
     }
 
-    string(const int nr) : std::string()
+    explicit string(const int nr) : std::string()
     {
         std::ostringstream stream;
         stream << nr;
         *this = stream.str();
     }
 
-    string(const unsigned int nr) : std::string()
+    explicit string(const unsigned int nr) : std::string()
     {
         std::ostringstream stream;
         stream << nr;
         *this = stream.str();
     }
 
-    string(const float nr, int decimals = 2) : std::string()
+    explicit string(const float nr, int decimals = 2) : std::string()
     {
         std::ostringstream stream;
         stream << std::fixed << std::setprecision(decimals);
@@ -51,7 +51,7 @@ public:
         *this = stream.str();
     }
 
-    string(const double nr, int decimals = 2) : std::string()
+    explicit string(const double nr, int decimals = 2) : std::string()
     {
         std::ostringstream stream;
         stream << std::fixed << std::setprecision(decimals);

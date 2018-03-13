@@ -9,18 +9,122 @@
 namespace sp {
 namespace io {
 
+static std::unordered_map<string, sf::Keyboard::Key> sfml_key_names = {
+    {"A", sf::Keyboard::A},
+    {"B", sf::Keyboard::B},
+    {"C", sf::Keyboard::C},
+    {"D", sf::Keyboard::D},
+    {"E", sf::Keyboard::E},
+    {"F", sf::Keyboard::F},
+    {"G", sf::Keyboard::G},
+    {"H", sf::Keyboard::H},
+    {"I", sf::Keyboard::I},
+    {"J", sf::Keyboard::J},
+    {"K", sf::Keyboard::K},
+    {"L", sf::Keyboard::L},
+    {"M", sf::Keyboard::M},
+    {"N", sf::Keyboard::N},
+    {"O", sf::Keyboard::O},
+    {"P", sf::Keyboard::P},
+    {"Q", sf::Keyboard::Q},
+    {"R", sf::Keyboard::R},
+    {"S", sf::Keyboard::S},
+    {"T", sf::Keyboard::T},
+    {"U", sf::Keyboard::U},
+    {"V", sf::Keyboard::V},
+    {"W", sf::Keyboard::W},
+    {"X", sf::Keyboard::X},
+    {"Y", sf::Keyboard::Y},
+    {"Z", sf::Keyboard::Z},
+    {"Num0", sf::Keyboard::Num0},
+    {"Num1", sf::Keyboard::Num1},
+    {"Num2", sf::Keyboard::Num2},
+    {"Num3", sf::Keyboard::Num3},
+    {"Num4", sf::Keyboard::Num4},
+    {"Num5", sf::Keyboard::Num5},
+    {"Num6", sf::Keyboard::Num6},
+    {"Num7", sf::Keyboard::Num7},
+    {"Num8", sf::Keyboard::Num8},
+    {"Num9", sf::Keyboard::Num9},
+    {"Escape", sf::Keyboard::Escape},
+    {"LControl", sf::Keyboard::LControl},
+    {"LShift", sf::Keyboard::LShift},
+    {"LAlt", sf::Keyboard::LAlt},
+    {"LSystem", sf::Keyboard::LSystem},
+    {"RControl", sf::Keyboard::RControl},
+    {"RShift", sf::Keyboard::RShift},
+    {"RAlt", sf::Keyboard::RAlt},
+    {"RSystem", sf::Keyboard::RSystem},
+    {"Menu", sf::Keyboard::Menu},
+    {"LBracket", sf::Keyboard::LBracket},
+    {"RBracket", sf::Keyboard::RBracket},
+    {"SemiColon", sf::Keyboard::SemiColon},
+    {"Comma", sf::Keyboard::Comma},
+    {"Period", sf::Keyboard::Period},
+    {"Quote", sf::Keyboard::Quote},
+    {"Slash", sf::Keyboard::Slash},
+    {"BackSlash", sf::Keyboard::BackSlash},
+    {"Tilde", sf::Keyboard::Tilde},
+    {"Equal", sf::Keyboard::Equal},
+    {"Dash", sf::Keyboard::Dash},
+    {"Space", sf::Keyboard::Space},
+    {"Return", sf::Keyboard::Return},
+    {"BackSpace", sf::Keyboard::BackSpace},
+    {"Tab", sf::Keyboard::Tab},
+    {"PageUp", sf::Keyboard::PageUp},
+    {"PageDown", sf::Keyboard::PageDown},
+    {"End", sf::Keyboard::End},
+    {"Home", sf::Keyboard::Home},
+    {"Insert", sf::Keyboard::Insert},
+    {"Delete", sf::Keyboard::Delete},
+    {"Add", sf::Keyboard::Add},
+    {"Subtract", sf::Keyboard::Subtract},
+    {"Multiply", sf::Keyboard::Multiply},
+    {"Divide", sf::Keyboard::Divide},
+    {"Left", sf::Keyboard::Left},
+    {"Right", sf::Keyboard::Right},
+    {"Up", sf::Keyboard::Up},
+    {"Down", sf::Keyboard::Down},
+    {"Numpad0", sf::Keyboard::Numpad0},
+    {"Numpad1", sf::Keyboard::Numpad1},
+    {"Numpad2", sf::Keyboard::Numpad2},
+    {"Numpad3", sf::Keyboard::Numpad3},
+    {"Numpad4", sf::Keyboard::Numpad4},
+    {"Numpad5", sf::Keyboard::Numpad5},
+    {"Numpad6", sf::Keyboard::Numpad6},
+    {"Numpad7", sf::Keyboard::Numpad7},
+    {"Numpad8", sf::Keyboard::Numpad8},
+    {"Numpad9", sf::Keyboard::Numpad9},
+    {"F1", sf::Keyboard::F1},
+    {"F2", sf::Keyboard::F2},
+    {"F3", sf::Keyboard::F3},
+    {"F4", sf::Keyboard::F4},
+    {"F5", sf::Keyboard::F5},
+    {"F6", sf::Keyboard::F6},
+    {"F7", sf::Keyboard::F7},
+    {"F8", sf::Keyboard::F8},
+    {"F9", sf::Keyboard::F9},
+    {"F10", sf::Keyboard::F10},
+    {"F11", sf::Keyboard::F11},
+    {"F12", sf::Keyboard::F12},
+    {"F13", sf::Keyboard::F13},
+    {"F14", sf::Keyboard::F14},
+    {"F15", sf::Keyboard::F15},
+    {"Pause", sf::Keyboard::Pause},
+};
+
 PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 
-Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
+Keybinding::Keybinding(string name, string default_key)
 : name(name), label(name)
 {
-    key = default_key;
+    setKey(default_key);
     pointer_button = Pointer::Button::Unknown;
     
     joystick_index = -1;
     joystick_button_index = -1;
     joystick_axis_enabled = false;
-    joystick_axis = sf::Joystick::X;
+    joystick_axis = -1;
     joystick_axis_positive = true;
     
     value = 0.0;
@@ -34,9 +138,23 @@ Keybinding::Keybinding(string name, sf::Keyboard::Key default_key)
     keybindings.add(this);
 }
 
-void Keybinding::setKey(sf::Keyboard::Key key)
+void Keybinding::setKey(string key)
 {
-    this->key = key;
+    auto it = sfml_key_names.find(key);
+    if (it == sfml_key_names.end())
+        this->key_number = -1;
+    else
+        this->key_number = it->second;
+}
+
+string Keybinding::getKey()
+{
+    for(auto it : sfml_key_names)
+    {
+        if (it.second == key_number)
+            return it.first;
+    }
+    return "Unknown";
 }
 
 bool Keybinding::get() const
@@ -86,10 +204,10 @@ void Keybinding::loadKeybindings(const string& filename)
         const json11::Json& entry = json[keybinding->name];
         if (!entry.is_object())
             continue;
-        if (entry["key"].is_number())
-            keybinding->key = sf::Keyboard::Key(entry["key"].int_value());
+        if (entry["key"].is_string())
+            keybinding->setKey(entry["key"].string_value());
         else
-            keybinding->key = sf::Keyboard::Unknown;
+            keybinding->key_number = -1;
         if (entry["pointer"].is_number())
             keybinding->pointer_button = Pointer::Button(entry["pointer"].int_value());
         else
@@ -104,7 +222,7 @@ void Keybinding::loadKeybindings(const string& filename)
             if (entry["joystick_axis"].is_number())
             {
                 keybinding->joystick_axis_enabled = true;
-                keybinding->joystick_axis = sf::Joystick::Axis(entry["joystick_axis"].int_value());
+                keybinding->joystick_axis = entry["joystick_axis"].int_value();
                 keybinding->joystick_axis_positive = entry["joystick_axis_positive"].bool_value();
             }
             else
@@ -125,8 +243,8 @@ void Keybinding::saveKeybindings(const string& filename)
     for(Keybinding* keybinding : keybindings)
     {
         json11::Json::object data;
-        if (keybinding->key != sf::Keyboard::Unknown)
-            data["key"] = keybinding->key;
+        if (keybinding->key_number != -1)
+            data["key"] = keybinding->getKey();
         if (keybinding->pointer_button != Pointer::Button::Unknown)
             data["pointer"] = int(keybinding->pointer_button);
         if (keybinding->joystick_index != -1)
@@ -191,12 +309,12 @@ void Keybinding::handleEvent(const sf::Event& event)
     {
     case sf::Event::KeyPressed:
         for(Keybinding* key : keybindings)
-            if (key->key == event.key.code)
+            if (key->key_number == event.key.code)
                 key->setValue(1.0);
         break;
     case sf::Event::KeyReleased:
         for(Keybinding* key : keybindings)
-            if (key->key == event.key.code)
+            if (key->key_number == event.key.code)
                 key->setValue(0.0);
         break;
     case sf::Event::MouseButtonPressed:
@@ -266,7 +384,7 @@ void Keybinding::handleEvent(const sf::Event& event)
     case sf::Event::LostFocus:
         //Focus lost, release all keyboard keys.
         for(Keybinding* key : keybindings)
-            if (key->key != sf::Keyboard::Unknown)
+            if (key->key_number != -1)
                 key->setValue(0.0);
         break;
     default:

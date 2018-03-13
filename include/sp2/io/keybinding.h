@@ -14,12 +14,13 @@ namespace io {
 class Keybinding : public AutoPointerObject
 {
 public:
-    Keybinding(string name, sf::Keyboard::Key default_key = sf::Keyboard::Unknown);
+    Keybinding(string name, string default_key = "");
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
     
-    void setKey(sf::Keyboard::Key key);
+    void setKey(string key);
+    string getKey();
     
     bool get() const; //True when this key is currently being pressed.
     bool getDown() const; //True for 1 update cycle when the key is pressed.
@@ -32,15 +33,15 @@ private:
     string name;
     string label;
     
-    sf::Keyboard::Key key;
+    int key_number;
     Pointer::Button pointer_button;
     
     int joystick_index;
     int joystick_button_index;
     bool joystick_axis_enabled;
-    sf::Joystick::Axis joystick_axis;
+    int joystick_axis;
     bool joystick_axis_positive;
-    
+
     float value;
     bool down_event;
     bool up_event;
