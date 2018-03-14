@@ -105,8 +105,8 @@ public:
 
         std::map<string, int> string_table_lookup;
         std::vector<string> string_table;
-        std::list<std::vector<uint8_t>> data_blocks;
-        std::vector<uint8_t>* current_data_block = nullptr;
+        std::vector<std::vector<uint8_t>> data_blocks;
+        int current_data_block = -1;
         std::map<int, int> main_objects;
         std::map<string, int> key_lookup;
         int read_index;

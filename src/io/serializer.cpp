@@ -36,32 +36,34 @@ Serializer::Handler::~Handler()
         if (!f)
             return;
         fwrite("SP2:data", 8, 1, f);
-        std::vector<uint8_t> header_data;
-        current_data_block = &header_data;
+        current_data_block = data_blocks.size();
+        data_blocks.emplace_back();
         addUnsignedInt(1);
         addUnsignedInt(string_table.size());
         addUnsignedInt(main_objects.size());
-        addUnsignedInt(data_blocks.size());
-        fwrite(header_data.data(), header_data.size(), 1, f);
+        addUnsignedInt(data_blocks.size() - 1);
+        fwrite(data_blocks.back().data(), data_blocks.back().size(), 1, f);
         for(string s : string_table)
         {
-            header_data.clear();
+            data_blocks.back().clear();
             addUnsignedInt(s.size());
-            fwrite(header_data.data(), header_data.size(), 1, f);
+            fwrite(data_blocks.back().data(), data_blocks.back().size(), 1, f);
             fwrite(s.c_str(), s.size(), 1, f);
         }
-        header_data.clear();
+        data_blocks.back().clear();
         for(auto it : main_objects)
         {
             addUnsignedInt(it.first);
             addUnsignedInt(it.second);
         }
-        fwrite(header_data.data(), header_data.size(), 1, f);
+        fwrite(data_blocks.back().data(), data_blocks.back().size(), 1, f);
         for(auto& block : data_blocks)
         {
-            header_data.clear();
+            if (&block == &data_blocks.back())
+                continue;
+            data_blocks.back().clear();
             addUnsignedInt(block.size());
-            fwrite(header_data.data(), header_data.size(), 1, f);
+            fwrite(data_blocks.back().data(), data_blocks.back().size(), 1, f);
             fwrite(block.data(), block.size(), 1, f);
         }
         fclose(f);
@@ -107,14 +109,7 @@ bool Serializer::Handler::read(string name, ISerializable& object)
     if (main_object_it == main_objects.end())
         return false;
     
-    auto data_block_it = data_blocks.begin();
-    for(int n=0; n<main_object_it->second; n++)
-    {
-        ++data_block_it;
-        if (data_block_it == data_blocks.end())
-            return false;
-    }
-    current_data_block = &*data_block_it;
+    current_data_block = main_object_it->second;
     buildKeyLookup();
     object.serialize(*this);
     return true;
@@ -189,15 +184,15 @@ void Serializer::Handler::write(string name, ISerializable& object)
     
     main_objects[addToStringTable(name)] = data_blocks.size();
     //Create our first data block to fill it with this object.
+    current_data_block = data_blocks.size();
     data_blocks.emplace_back();
-    current_data_block = &data_blocks.back();
     object.serialize(*this);
 }
 
 bool Serializer::Handler::buildKeyLookup()
 {
     key_lookup.clear();
-    for(read_index=0; read_index<int(current_data_block->size());)
+    for(read_index=0; read_index<int(data_blocks[current_data_block].size());)
     {
         int string_index = readUnsignedInt();
         key_lookup[string_table[string_index]] = read_index;
@@ -281,14 +276,14 @@ void Serializer::Handler::processValue(string& value)
 
 void Serializer::Handler::processValue(ISerializable& value)
 {
-    std::vector<uint8_t>* previous_data_block = current_data_block;
+    int previous_data_block = current_data_block;
     
     if (mode == Mode::Write)
     {
         int index = data_blocks.size();
 
+        current_data_block = data_blocks.size();
         data_blocks.emplace_back();
-        current_data_block = &data_blocks.back();
         value.serialize(*this);
 
         current_data_block = previous_data_block;
@@ -300,10 +295,7 @@ void Serializer::Handler::processValue(ISerializable& value)
         int previous_read_index = read_index;
         std::map<string, int> string_lookup_backup(std::move(key_lookup));
         
-        auto it = data_blocks.begin();
-        for(int n=0; n<index; n++)
-            ++it;
-        current_data_block = &*it;
+        current_data_block = index;
         buildKeyLookup();
         value.serialize(*this);
 
@@ -319,10 +311,10 @@ void Serializer::Handler::addUnsignedInt(int number)
     sp2assert(mode == Mode::Write, "Tried to add data while not in write mode");
     while(number > 127)
     {
-        current_data_block->push_back(0x80 | (number & 0x7f));
+        data_blocks[current_data_block].push_back(0x80 | (number & 0x7f));
         number >>= 7;
     }
-    current_data_block->push_back(number);
+    data_blocks[current_data_block].push_back(number);
 }
 
 int Serializer::Handler::readUnsignedInt()
@@ -331,12 +323,12 @@ int Serializer::Handler::readUnsignedInt()
     sp2assert(read_index >= 0, "Tried to read data while no valid read pointer");
     int result = 0;
     int shift = 0;
-    while((*current_data_block)[read_index] & 0x80)
+    while(data_blocks[current_data_block][read_index] & 0x80)
     {
-        result |= int((*current_data_block)[read_index++] & 0x7f) << shift;
+        result |= int(data_blocks[current_data_block][read_index++] & 0x7f) << shift;
         shift += 7;
     }
-    result |= int((*current_data_block)[read_index++]) << shift;
+    result |= int(data_blocks[current_data_block][read_index++]) << shift;
     return result;
 }
 
@@ -351,36 +343,36 @@ void Serializer::Handler::addSignedInt(int number)
     }
     if (number < 63)
     {
-        current_data_block->push_back(number | neg_mask);
+        data_blocks[current_data_block].push_back(number | neg_mask);
         return;
     }
-    current_data_block->push_back(0x80 | neg_mask | (number & 0x3f));
+    data_blocks[current_data_block].push_back(0x80 | neg_mask | (number & 0x3f));
     number >>= 6;
     while(number > 127)
     {
-        current_data_block->push_back(0x80 | (number & 0x7f));
+        data_blocks[current_data_block].push_back(0x80 | (number & 0x7f));
         number >>= 7;
     }
-    current_data_block->push_back(number);
+    data_blocks[current_data_block].push_back(number);
 }
 
 int Serializer::Handler::readSignedInt()
 {
     sp2assert(mode == Mode::Read, "Tried to read data while not in read mode");
     sp2assert(read_index >= 0, "Tried to read data while no valid read pointer");
-    int result = (*current_data_block)[read_index] & 0x3f;
+    int result = data_blocks[current_data_block][read_index] & 0x3f;
     int shift = 6;
     bool neg = false;
-    if ((*current_data_block)[read_index] & 0x40)
+    if (data_blocks[current_data_block][read_index] & 0x40)
         neg = true;
-    if ((*current_data_block)[read_index++] & 0x80)
+    if (data_blocks[current_data_block][read_index++] & 0x80)
     {
-        while((*current_data_block)[read_index] & 0x80)
+        while(data_blocks[current_data_block][read_index] & 0x80)
         {
-            result |= int((*current_data_block)[read_index++] & 0x7f) << shift;
+            result |= int(data_blocks[current_data_block][read_index++] & 0x7f) << shift;
             shift += 7;
         }
-        result |= int((*current_data_block)[read_index++]) << shift;
+        result |= int(data_blocks[current_data_block][read_index++]) << shift;
     }
     if (neg)
         result = -result;
@@ -391,15 +383,15 @@ void Serializer::Handler::processDataBlock(void* data, int size)
 {
     if (mode == Mode::Write)
     {
-        int offset = current_data_block->size();
-        current_data_block->resize(offset + size);
-        memcpy(&(*current_data_block)[offset], data, size);
+        int offset = data_blocks[current_data_block].size();
+        data_blocks[current_data_block].resize(offset + size);
+        memcpy(&data_blocks[current_data_block][offset], data, size);
     }
     if (mode == Mode::Read)
     {
         if (read_index < 0)
             return;
-        memcpy(data, &(*current_data_block)[read_index], size);
+        memcpy(data, &data_blocks[current_data_block][read_index], size);
         read_index += size;
     }
 }
