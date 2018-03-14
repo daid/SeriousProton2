@@ -41,7 +41,7 @@ void Window::setFullScreen(bool fullscreen)
     createRenderWindow();
 }
 
-void Window::setClearColor(sf::Color color)
+void Window::setClearColor(sp::Color color)
 {
     clear_color = color;
 }
@@ -98,12 +98,12 @@ void Window::createRenderWindow()
     render_window.setFramerateLimit(60);
     render_window.setMouseCursorVisible(true);
     
-    clear_color = sf::Color(20, 20, 20);
+    clear_color = Color(0.1, 0.1, 0.1);
 }
 
 void Window::render()
 {
-    render_window.clear(clear_color);
+    render_window.clear(sf::Color(clear_color.toInt()));
     render_window.setActive();
     for(GraphicsLayer* layer : GraphicsLayer::layers)
     {

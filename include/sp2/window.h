@@ -6,6 +6,7 @@
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 #include <sp2/io/pointer.h>
+#include <sp2/graphics/color.h>
 #include <map>
 #include <memory>
 
@@ -23,7 +24,7 @@ public:
     Window(float aspect_ratio);
     
     void setFullScreen(bool fullscreen);
-    void setClearColor(sf::Color color);
+    void setClearColor(Color color);
     void hideCursor();
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
@@ -46,7 +47,7 @@ private:
     int antialiasing;
     bool fullscreen;
     float aspect_ratio; //Aspect ratio in window mode (ignored in full screen)
-    sf::Color clear_color;
+    Color clear_color;
     Texture* cursor_texture;
     std::shared_ptr<MeshData> cursor_mesh;
     

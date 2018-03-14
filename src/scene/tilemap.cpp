@@ -83,6 +83,9 @@ void Tilemap::updateMesh()
     float fu = 1.0 / float(texture_tile_count_x);
     float fv = 1.0 / float(texture_tile_count_y);
     
+    float u_offset = 0.0;
+    float v_offset = 0.0;
+    
     MeshData::Vertices vertices;
     MeshData::Indices indices;
     for(unsigned int y=0; y<tiles.size(); y++)
@@ -104,10 +107,10 @@ void Tilemap::updateMesh()
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 3);
             
-            vertices.emplace_back(Vector3f(px, py, 0.0f), Vector2f(u * fu, (v + 1) * fv));
-            vertices.emplace_back(Vector3f(px + tile_width, py, 0.0f), Vector2f((u + 1) * fu, (v + 1) * fv));
-            vertices.emplace_back(Vector3f(px, py + tile_height, 0.0f), Vector2f(u * fu, v * fv));
-            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, 0.0f), Vector2f((u + 1) * fu, v * fv));
+            vertices.emplace_back(Vector3f(px, py, 0.0f), Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+            vertices.emplace_back(Vector3f(px + tile_width, py, 0.0f), Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+            vertices.emplace_back(Vector3f(px, py + tile_height, 0.0f), Vector2f(u * fu + u_offset, v * fv + v_offset));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, 0.0f), Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
         }
     }
     
