@@ -339,11 +339,11 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
 #ifdef DEBUG
     for(auto& data : auto_reload)
     {
-        sf::Time modify_time = io::ResourceProvider::getModifyTime(data.resource_name);
+        std::chrono::system_clock::time_point modify_time = io::ResourceProvider::getModifyTime(data.resource_name);
         if (modify_time == data.last_modify_time)
             continue;
         LOG(Info, "Reloading:", data.resource_name, data.root_id);
-        sf::sleep(sf::seconds(0.1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         delete *data.widget;
         data.widget = sp::gui::Loader::load(data.resource_name, data.root_id, this);
         if (data.widget)

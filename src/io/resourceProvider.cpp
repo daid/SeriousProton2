@@ -66,15 +66,15 @@ ResourceStreamPtr ResourceProvider::get(const string filename)
     return nullptr;
 }
 
-sf::Time ResourceProvider::getModifyTime(const string filename)
+std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const string filename)
 {
     for(ResourceProvider* rp : providers)
     {
-        sf::Time time = rp->getFileModifyTime(filename);
-        if (time != sf::Time::Zero)
+        std::chrono::system_clock::time_point time = rp->getFileModifyTime(filename);
+        if (time != std::chrono::system_clock::time_point())
             return time;
     }
-    return sf::Time::Zero;
+    return std::chrono::system_clock::time_point();
 }
 
 std::vector<string> ResourceProvider::find(string search_pattern)

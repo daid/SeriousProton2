@@ -143,7 +143,7 @@ private:
     class AutoReloadData
     {
     public:
-        sf::Time last_modify_time;
+        std::chrono::system_clock::time_point last_modify_time;
         string resource_name;
         string root_id;
         P<Widget> widget;
