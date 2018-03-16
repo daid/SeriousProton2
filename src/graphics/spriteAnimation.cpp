@@ -118,11 +118,12 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
 
 void SpriteAnimation::Data::load(string resource_name)
 {
+#ifdef DEBUG
     revision++;
+#endif
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
     if (!tree)
         return;
-    revision++;
     animations.clear();
     int total_frames = 0;
     for(auto& it : tree->getFlattenNodesByIds())
