@@ -108,7 +108,9 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
     if (it != cache.end())
         return std::unique_ptr<Animation>(new SpriteAnimation(*it->second));
     Data* result = new Data();
+#ifdef DEBUG
     result->revision = -1;
+#endif
     result->load(resource_name);
     cache[resource_name] = result;
     return std::unique_ptr<Animation>(new SpriteAnimation(*result));
