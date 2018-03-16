@@ -57,7 +57,7 @@ ResourceStreamPtr DirectoryResourceProvider::getStream(const string filename)
     return nullptr;
 }
 
-std::chrono::system_clock::time_point DirectoryResourceProvider::getFileModifyTime(const string filename)
+std::chrono::system_clock::time_point DirectoryResourceProvider::getResourceModifyTime(const string filename)
 {
     struct stat stat_info;
     if (stat((base_path + "/" + filename).c_str(), &stat_info) != 0)
@@ -65,7 +65,7 @@ std::chrono::system_clock::time_point DirectoryResourceProvider::getFileModifyTi
     return std::chrono::system_clock::from_time_t(stat_info.st_mtime);
 }
 
-std::vector<string> DirectoryResourceProvider::findFilenames(string search_pattern)
+std::vector<string> DirectoryResourceProvider::findResources(string search_pattern)
 {
     std::vector<string> found_files;
     findResources(found_files, "", search_pattern);

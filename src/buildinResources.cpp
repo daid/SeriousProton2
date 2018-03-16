@@ -5,7 +5,8 @@ namespace sp {
 static io::InternalResourceProvider buildin_resources({
     {"basic.shader", R"EOS(
 [VERTEX]
-#version 110
+#version 120
+precision highp float;
 
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
@@ -21,7 +22,8 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
+#version 120
+precision highp float;
 
 uniform sampler2D texture_map;
 uniform vec4 color;

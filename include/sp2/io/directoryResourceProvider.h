@@ -12,8 +12,8 @@ public:
     DirectoryResourceProvider(string base_path);
     
     virtual ResourceStreamPtr getStream(const string filename) override;
-    virtual std::chrono::system_clock::time_point getFileModifyTime(const string filename) override;
-    virtual std::vector<string> findFilenames(const string search_pattern) override;
+    virtual std::chrono::system_clock::time_point getResourceModifyTime(const string filename) override;
+    virtual std::vector<string> findResources(const string search_pattern) override;
 
 private:
     string base_path;

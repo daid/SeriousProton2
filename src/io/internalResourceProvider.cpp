@@ -62,7 +62,7 @@ ResourceStreamPtr InternalResourceProvider::getStream(const string filename)
     return std::make_shared<InternalResourceStream>(it->second);
 }
 
-std::vector<string> InternalResourceProvider::findFilenames(string search_pattern)
+std::vector<string> InternalResourceProvider::findResources(string search_pattern)
 {
     std::vector<string> found_files;
     return found_files;

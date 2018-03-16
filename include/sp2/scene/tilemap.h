@@ -19,6 +19,7 @@ public:
     
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
     int getTileIndex(int x, int y);
+    Collision getTileCollision(int x, int y);
     
     virtual void onFixedUpdate();
 private:

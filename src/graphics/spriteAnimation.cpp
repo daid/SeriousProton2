@@ -10,6 +10,9 @@ SpriteAnimation::SpriteAnimation(const Data& data)
 : data(data), animation(nullptr)
 {
     flip = false;
+#ifdef DEBUG
+    revision = data.revision;
+#endif
 }
 
 void SpriteAnimation::play(string key, float speed)
@@ -37,6 +40,28 @@ void SpriteAnimation::setFlags(int flags)
 
 void SpriteAnimation::update(float delta, RenderData& render_data)
 {
+#ifdef DEBUG
+    if (io::ResourceProvider::getModifyTime(data.resource_name) != data.resource_update_time)
+    {
+        string animation_name;
+        for(auto it : data.animations)
+            if (&it.second == animation)
+                animation_name = it.first;
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        LOG(Info, "Reloading sprite animation:", data.resource_name);
+        animation = nullptr;
+        (const_cast<Data*>(&data))->load(data.resource_name);
+        
+        
+        play(animation_name, speed);
+    }
+    if (data.revision != revision)
+    {
+        animation = nullptr;
+        revision = data.revision;
+    }
+#endif
     if (!animation)
     {
         render_data.type = RenderData::Type::None;
@@ -75,21 +100,32 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
         render_data.mesh = frame.normal_mesh;
 }
 
-std::map<string, SpriteAnimation::Data> SpriteAnimation::cache;
+std::map<string, SpriteAnimation::Data*> SpriteAnimation::cache;
 
 std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
 {
-    Data& result = cache[resource_name];
-    if (!result.animations.empty())
-        return std::unique_ptr<Animation>(new SpriteAnimation(result));
+    auto it = cache.find(resource_name);
+    if (it != cache.end())
+        return std::unique_ptr<Animation>(new SpriteAnimation(*it->second));
+    Data* result = new Data();
+    result->revision = -1;
+    result->load(resource_name);
+    cache[resource_name] = result;
+    return std::unique_ptr<Animation>(new SpriteAnimation(*result));
+}
 
+void SpriteAnimation::Data::load(string resource_name)
+{
+    revision++;
     P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
     if (!tree)
-        return std::unique_ptr<Animation>(new SpriteAnimation(result));
+        return;
+    revision++;
+    animations.clear();
     int total_frames = 0;
     for(auto& it : tree->getFlattenNodesByIds())
     {
-        Data::Animation& animation = result.animations[it.first];
+        Data::Animation& animation = animations[it.first];
         std::map<string, string>& data = it.second;
         
         animation.texture = textureManager.get(data["texture"]);
@@ -162,10 +198,12 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
             frame.delay = delays[n % delays.size()];
         }
     }
-    LOG(Info, "Got", result.animations.size(), "animations, with a total of", total_frames, "frames");
-    
-    tree.destroy();
-    return std::unique_ptr<Animation>(new SpriteAnimation(result));
+    LOG(Info, "Got", animations.size(), "animations, with a total of", total_frames, "frames");
+
+#ifdef DEBUG
+    this->resource_name = resource_name;
+    this->resource_update_time = io::ResourceProvider::getModifyTime(resource_name);
+#endif
 }
 
 };//!namespace sp

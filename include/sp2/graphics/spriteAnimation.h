@@ -11,10 +11,10 @@ namespace sp {
 class SpriteAnimation : public Animation
 {
 public:
-    virtual void play(string key, float speed=1.0);
-    virtual void setFlags(int flags);
+    virtual void play(string key, float speed=1.0) override;
+    virtual void setFlags(int flags) override;
 protected:
-    virtual void update(float delta, RenderData& render_data);
+    virtual void update(float delta, RenderData& render_data) override;
 
 private:
     class Data
@@ -37,6 +37,13 @@ private:
         };
         
         std::map<string, Animation> animations;
+#ifdef DEBUG
+        string resource_name;
+        std::chrono::system_clock::time_point resource_update_time;
+        int revision;
+#endif
+
+        void load(string resource_name);
     };
 
     SpriteAnimation(const Data& data);
@@ -48,11 +55,14 @@ private:
     bool playing;
     unsigned int keyframe;
     bool flip;
+#ifdef DEBUG
+    int revision;
+#endif
 public:
     static std::unique_ptr<Animation> load(string resource_name);
     static constexpr int FlipFlag = 0x0001;
 private:
-    static std::map<string, Data> cache;
+    static std::map<string, Data*> cache;
 };
 
 };//!namespace sp

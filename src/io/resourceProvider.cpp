@@ -70,7 +70,7 @@ std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const stri
 {
     for(ResourceProvider* rp : providers)
     {
-        std::chrono::system_clock::time_point time = rp->getFileModifyTime(filename);
+        std::chrono::system_clock::time_point time = rp->getResourceModifyTime(filename);
         if (time != std::chrono::system_clock::time_point())
             return time;
     }
@@ -82,7 +82,7 @@ std::vector<string> ResourceProvider::find(string search_pattern)
     std::vector<string> found_files;
     for(ResourceProvider* rp : providers)
     {
-        std::vector<string> res = rp->findFilenames(search_pattern);
+        std::vector<string> res = rp->findResources(search_pattern);
         found_files.insert(found_files.end(), res.begin(), res.end());
     }
     return found_files;

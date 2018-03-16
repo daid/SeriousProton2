@@ -69,6 +69,15 @@ int Tilemap::getTileIndex(int x, int y)
     return tiles[y][x].index;
 }
 
+Tilemap::Collision Tilemap::getTileCollision(int x, int y)
+{
+    if (y < 0 || y >= int(tiles.size()))
+        return Collision::Open;
+    if (x < 0 || x >= int(tiles[0].size()))
+        return Collision::Open;
+    return tiles[y][x].collision;
+}
+
 void Tilemap::onFixedUpdate()
 {
     if (!dirty)
