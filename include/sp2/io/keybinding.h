@@ -34,13 +34,6 @@ private:
     string label;
     
     int key_number;
-    Pointer::Button pointer_button;
-    
-    int joystick_index;
-    int joystick_button_index;
-    bool joystick_axis_enabled;
-    int joystick_axis;
-    bool joystick_axis_positive;
 
     float value;
     bool down_event;
@@ -56,7 +49,14 @@ private:
     static void allPostFixedUpdate();
     
     static void handleEvent(const sf::Event& event);
+    static void updateKeys(int key_number, float value);
+    
     static PList<Keybinding> keybindings;
+    
+    static constexpr int keyboard_mask = (1 << 16);
+    static constexpr int pointer_mask =  (2 << 16);
+    static constexpr int joystick_button_mask = (3 << 16);
+    static constexpr int joystick_axis_mask = (4 << 16);
     
     friend class sp::Engine;
 };
