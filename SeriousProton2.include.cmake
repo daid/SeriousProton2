@@ -13,6 +13,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/json11/*.cpp"
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/GL/*.c"
         "${SERIOUS_PROTON2_BASE_DIR}/extlibs/Box2D/*.cpp"
+        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/src/*.c"
     )
     if(NOT WIN32)
         list(FILTER SP2_SOURCES EXCLUDE REGEX .*/win32/.*)
@@ -52,6 +53,8 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
 
     target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/include")
     target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
+    target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/include")
+    add_definitions("-DFT2_BUILD_LIBRARY")
 
     target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES})
     target_include_directories(${EXECUTABLE_NAME} PUBLIC ${SFML_INCLUDE_DIR})
