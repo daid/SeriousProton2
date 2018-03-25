@@ -7,7 +7,9 @@ FontManager font_manager;
 Font* FontManager::load(string name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
-    return new Font(name, stream);
+    if (name.endswith(".txt"))
+        return new BitmapFont(name, stream);
+    return new FreetypeFont(name, stream);
 }
 
 };//!namespace sp
