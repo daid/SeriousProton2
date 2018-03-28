@@ -2,8 +2,9 @@
 #define SP2_KEY_VALUE_TREE_H
 
 #include <sp2/string.h>
-#include <sp2/pointer.h>
+#include <sp2/nonCopyable.h>
 #include <map>
+#include <memory>
 
 namespace sp {
 
@@ -16,7 +17,7 @@ public:
     std::vector<KeyValueTreeNode> child_nodes;
 };
 
-class KeyValueTree : public AutoPointerObject
+class KeyValueTree : public NonCopyable
 {
 public:
     std::vector<KeyValueTreeNode> root_nodes;
@@ -27,6 +28,7 @@ private:
     KeyValueTreeNode* findId(KeyValueTreeNode& node, const string& id);
     void buildFlattenNodesByIds(std::map<string, std::map<string, string>>& results, const KeyValueTreeNode& node, std::map<string, string> key_values);
 };
+typedef std::shared_ptr<KeyValueTree> KeyValueTreePtr;
 
 };//!namespace sp
 

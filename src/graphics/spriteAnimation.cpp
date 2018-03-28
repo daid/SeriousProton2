@@ -121,7 +121,7 @@ void SpriteAnimation::Data::load(string resource_name)
 #ifdef DEBUG
     revision++;
 #endif
-    P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
+    KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
     if (!tree)
         return;
     animations.clear();

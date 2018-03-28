@@ -41,7 +41,7 @@ void Theme::loadTheme(string name, string resource_name)
 {
     P<Theme> theme = new Theme(name);
 
-    P<KeyValueTree> tree = io::KeyValueTreeLoader::load(resource_name);
+    KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
     for(auto& it : tree->getFlattenNodesByIds())
     {
         std::map<string, string>& input = it.second;
@@ -57,7 +57,7 @@ void Theme::loadTheme(string name, string resource_name)
         else
             global_data.color = Color(1, 1, 1);
         global_data.font = font_manager.get(input["font"]);
-        global_data.text_size = stringutil::convert::toFloat(input["text.size"]);
+        global_data.size = stringutil::convert::toFloat(input["size"]);
         for(unsigned int n=0; n<int(Widget::State::Count); n++)
         {
             string postfix = "?";
@@ -91,13 +91,12 @@ void Theme::loadTheme(string name, string resource_name)
                 data.states[n].color = Color::fromString(input["color." + postfix]);
             if (input.find("font." + postfix) != input.end())
                 data.states[n].font = font_manager.get(input["font." + postfix]);
-            if (input.find("text.size." + postfix) != input.end())
-                data.states[n].text_size = stringutil::convert::toFloat(input["text.size." + postfix]);
+            if (input.find("size." + postfix) != input.end())
+                data.states[n].size = stringutil::convert::toFloat(input["size." + postfix]);
         }
 
         theme->data[it.first] = data;
     }
-    tree.destroy();
 }
 
 Theme::Theme(string name)

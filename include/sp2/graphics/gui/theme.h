@@ -35,8 +35,8 @@ public:
     public:
         Texture* texture;
         sp::Color color;
+        float size; //general size parameter, depends on the widget type what it means.
         Font* font;
-        float text_size;
     };
     StateData states[int(Widget::State::Count)];
 };

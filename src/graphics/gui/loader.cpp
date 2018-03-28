@@ -33,10 +33,8 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
             LOG(Warning, "Cannot use 'auto reload' on sp::gui::Loader in release builds");
 #endif
         }
-        loader.tree.destroy();
         return result;
     }
-    loader.tree.destroy();
     return nullptr;
 }
 

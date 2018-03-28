@@ -3,11 +3,9 @@
 
 #include <sp2/string.h>
 #include <sp2/pointer.h>
+#include <sp2/keyValueTree.h>
 
 namespace sp {
-class KeyValueTree;
-class KeyValueTreeNode;
-
 namespace gui {
 
 class Widget;
@@ -18,7 +16,7 @@ public:
     static P<Widget> load(string resource_name, string root_id, P<Widget> root=nullptr, bool auto_reload=false);
 
 private:
-    P<KeyValueTree> tree;
+    KeyValueTreePtr tree;
     P<Widget> createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters);
     void loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters);
     string getType(KeyValueTreeNode& node, std::map<string, string>& parameters);

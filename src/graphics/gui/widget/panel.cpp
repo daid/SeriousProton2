@@ -20,7 +20,7 @@ void Panel::updateRenderData()
     const ThemeData::StateData& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
-    render_data.mesh = createStretchedHV(getRenderSize(), 25.0f);
+    render_data.mesh = createStretchedHV(getRenderSize(), t.size);
     render_data.texture = t.texture;
     render_data.color = t.color;
 }

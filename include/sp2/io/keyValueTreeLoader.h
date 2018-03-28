@@ -10,10 +10,10 @@ namespace io {
 class KeyValueTreeLoader
 {
 public:
-    static P<KeyValueTree> load(string resource_name);
+    static KeyValueTreePtr load(string resource_name);
 
 private:
-    P<KeyValueTree> result;
+    KeyValueTreePtr result;
     ResourceStreamPtr stream;
     
     KeyValueTreeLoader(string resource_name);

@@ -12,7 +12,7 @@ public:
     ParsingException(string message) : message(message) {}
 };
 
-P<KeyValueTree> KeyValueTreeLoader::load(string resource_name)
+KeyValueTreePtr KeyValueTreeLoader::load(string resource_name)
 {
     try
     {
@@ -27,7 +27,7 @@ P<KeyValueTree> KeyValueTreeLoader::load(string resource_name)
 
 KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
 {
-    result = new KeyValueTree();
+    result = std::make_shared<KeyValueTree>();
 
     stream = ResourceProvider::get(resource_name);
     if (!stream)
