@@ -11,13 +11,13 @@ ThemeImage::ThemeImage(P<Widget> parent, string theme_data_name)
 : Widget(parent)
 {
     loadThemeData(theme_data_name);
+    setAttribute("order", "-2");
 }
 
 void ThemeImage::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
     
-    render_data.order -= 2;
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretched(getRenderSize());
     render_data.texture = t.texture;

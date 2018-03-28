@@ -130,6 +130,7 @@ private:
     bool focusable = false;
     bool hover = false;
     bool render_data_outdated = true;
+    int render_order;
 
     string id;
     string theme_name = "default";

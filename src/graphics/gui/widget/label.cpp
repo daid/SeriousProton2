@@ -16,6 +16,8 @@ Label::Label(P<Widget> parent, string theme_data_name)
     vertical = false;
     text_size = -1;
     texture_revision = -1;
+    
+    setAttribute("order", "-1");
 }
 
 void Label::setLabel(string label)
@@ -66,7 +68,6 @@ void Label::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
 
-    render_data.order -= 1;
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
     {

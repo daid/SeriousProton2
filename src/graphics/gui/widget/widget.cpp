@@ -22,6 +22,7 @@ Widget::Widget(P<Widget> parent)
 {
     theme_name = parent->theme_name;
     render_data.type = RenderData::Type::Normal;
+    render_order = 0;
 }
 
 Widget::Widget(P<Node> parent)
@@ -61,7 +62,7 @@ void Widget::onUpdate(float delta)
     if (render_data_outdated && visible)
     {
         render_data_outdated = false;
-        render_data.order = getParent()->render_data.order + 10;
+        render_data.order = getParent()->render_data.order + 10 + render_order;
         updateRenderData();
     }
 }
@@ -292,6 +293,10 @@ void Widget::setAttribute(const string& key, const string& value)
     else if (key == "visible")
     {
         setVisible(stringutil::convert::toBool(value));
+    }
+    else if (key == "order")
+    {
+        render_order = stringutil::convert::toInt(value);
     }
     else if (key == "tag")
     {
