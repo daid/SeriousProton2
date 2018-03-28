@@ -101,6 +101,8 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
         }
         else if (line.find(":") > 0)
         {
+            while(line.endswith("\\"))
+                line = line.substr(0, -1) + "\n" + stream->readLine().strip();
             string key = line.substr(0, line.find(":")).strip();
             string value = line.substr(line.find(":") + 1).strip();
             node->items[key] = value;
