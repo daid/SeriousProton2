@@ -21,7 +21,7 @@ Widget::Widget(P<Widget> parent)
 : Node(parent)
 {
     theme_name = parent->theme_name;
-    render_data.type = RenderData::Type::Normal;
+    render_data.type = parent->render_data.type;
     render_order = 0;
 }
 

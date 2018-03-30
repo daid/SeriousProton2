@@ -388,7 +388,7 @@ std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, flo
 {
     MeshData::Vertices vertices;
     MeshData::Indices indices;
-    
+
     vertices.reserve(s.size() * 6);
     sp::Vector2f position;
     int line_count = 1;
