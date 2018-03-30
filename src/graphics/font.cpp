@@ -319,6 +319,7 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
 {
     Vector2d texture_size, pixel_glyph_size;
     std::vector<string> lines;
+    std::vector<string> special_lines;
     while(stream->tell() != stream->getSize())
     {
         string line = stream->readLine();
@@ -346,6 +347,10 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
         {
             lines.push_back(value);
         }
+        else if (key == "special")
+        {
+            special_lines.push_back(value);
+        }
         else
         {
             LOG(Warning, "Ignoring line in bitmap font file:", line);
@@ -363,6 +368,20 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
         }
         y++;
     }
+    for(string line : special_lines)
+    {
+        std::vector<string> parts = line.split(",", 3);
+        if (parts.size() != 4)
+        {
+            LOG(Warning, "Ignoring malformed special line in font:", line);
+            continue;
+        }
+        int x = stringutil::convert::toInt(parts[0].strip());
+        int y = stringutil::convert::toInt(parts[1].strip());
+        int w = stringutil::convert::toInt(parts[2].strip());
+        
+        specials[parts[3].strip()] = Rect2d(Vector2d(glyph_size.x * x, glyph_size.y * y), Vector2d(glyph_size.x * w, glyph_size.y));
+    }
 }
 
 std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
@@ -374,8 +393,51 @@ std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, flo
     sp::Vector2f position;
     int line_count = 1;
     float max_line_width = 0;
-    for(auto character : s)
+    for(unsigned int index=0; index<s.length(); index++)
     {
+        bool done_special = false;
+        for(auto it : specials)
+        {
+            if (strncmp(it.first.c_str(), &s[index], it.first.length()) == 0)
+            {
+                float u0 = it.second.position.x;
+                float v0 = it.second.position.y;
+                float u1 = u0 + it.second.size.x;
+                float v1 = v0 + it.second.size.y;
+
+                float left = position.x;
+                float right = position.x + text_size * it.second.size.x / glyph_size.x;
+                float top = position.y + text_size;
+                float bottom = position.y;
+
+                Vector3f p0(left, top, 0.0f);
+                Vector3f p1(right, top, 0.0f);
+                Vector3f p2(left, bottom, 0.0f);
+                Vector3f p3(right, bottom, 0.0f);
+
+                indices.emplace_back(vertices.size() + 0);
+                indices.emplace_back(vertices.size() + 2);
+                indices.emplace_back(vertices.size() + 1);
+                indices.emplace_back(vertices.size() + 2);
+                indices.emplace_back(vertices.size() + 3);
+                indices.emplace_back(vertices.size() + 1);
+
+                vertices.emplace_back(p0, sp::Vector2f(u0, v0));
+                vertices.emplace_back(p1, sp::Vector2f(u1, v0));
+                vertices.emplace_back(p2, sp::Vector2f(u0, v1));
+                vertices.emplace_back(p3, sp::Vector2f(u1, v1));
+
+                index += it.first.length() - 1;
+                
+                position.x += text_size * it.second.size.x / glyph_size.x;
+                max_line_width = std::max(max_line_width, position.x);
+                done_special = true;
+                break;
+            }
+        }
+        if (done_special)
+            continue;
+        char character = s[index];
         if (character == '\n')
         {
             position.x = 0;
