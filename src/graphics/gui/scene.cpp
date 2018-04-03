@@ -81,14 +81,17 @@ void Scene::onPointerUp(Ray3d ray, int id)
     if (it != pointer_widget.end() && it->second)
     {
         it->second->onPointerUp(position - it->second->getGlobalPosition2D(), id);
-        bool dehover = true;
-        for(auto i : pointer_widget)
-            if (i.first != id && i.second == it->second)
-                dehover = false;
-        if (dehover)
+        if (it->second) //The widget might have been deleted by the pointer-up event.
         {
-            it->second->hover = false;
-            it->second->markRenderDataOutdated();
+            bool dehover = true;
+            for(auto i : pointer_widget)
+                if (i.first != id && i.second == it->second)
+                    dehover = false;
+            if (dehover)
+            {
+                it->second->hover = false;
+                it->second->markRenderDataOutdated();
+            }
         }
         pointer_widget.erase(it);
     }
