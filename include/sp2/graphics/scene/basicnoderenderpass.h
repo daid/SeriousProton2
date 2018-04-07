@@ -13,7 +13,6 @@ class BasicNodeRenderPass : public RenderPass
 {
 public:
     BasicNodeRenderPass();
-    BasicNodeRenderPass(P<Scene> scene);
     BasicNodeRenderPass(P<Camera> camera);
     
     virtual void render(P<GraphicsLayer> layer, float aspect_ratio) override;
@@ -22,19 +21,13 @@ public:
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
     
-    void addScene(P<Scene> scene, P<Camera> camera=nullptr);
+    void addCamera(P<Camera> camera);
 protected:
     virtual void addNodeToRenderQueue(Node* node);
     
     RenderQueue queue;
 private:
-    class SceneWithCamera
-    {
-    public:
-        P<Scene> scene;
-        P<Camera> camera;
-    };
-    std::list<SceneWithCamera> scenes;
+    PList<Camera> cameras;
     std::map<int, P<Scene>> pointer_scene;
     std::map<int, P<Camera>> pointer_camera;
     

@@ -10,31 +10,23 @@ BasicNodeRenderPass::BasicNodeRenderPass()
 {
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(P<Scene> scene)
-{
-    addScene(scene);
-}
-
 BasicNodeRenderPass::BasicNodeRenderPass(P<Camera> camera)
 {
-    addScene(camera->getScene(), camera);
+    addCamera(camera);
 }
 
-void BasicNodeRenderPass::addScene(P<Scene> scene, P<Camera> camera)
+void BasicNodeRenderPass::addCamera(P<Camera> camera)
 {
-    scenes.emplace_back();
-    SceneWithCamera& scene_data = scenes.back();
-    scene_data.scene = scene;
-    scene_data.camera = camera;
+    cameras.add(camera);
 }
 
 void BasicNodeRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
 {
-    if (!scenes.empty())
+    if (!cameras.empty())
     {
-        for(SceneWithCamera& scene_data : scenes)
+        for(Camera* camera : cameras)
         {
-            renderScene(scene_data.scene, scene_data.camera, layer, aspect_ratio);
+            renderScene(camera->getScene(), camera, layer, aspect_ratio);
         }
     }else{
         for(Scene* scene : Scene::scenes)
@@ -46,11 +38,11 @@ void BasicNodeRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
 
 bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    if (!scenes.empty())
+    if (!cameras.empty())
     {
-        for(SceneWithCamera& scene_data : scenes)
+        for(Camera* camera : cameras)
         {
-            if (privateOnPointerDown(scene_data.scene, scene_data.camera, button, position, id))
+            if (privateOnPointerDown(camera->getScene(), camera, button, position, id))
                 return true;
         }
     }
