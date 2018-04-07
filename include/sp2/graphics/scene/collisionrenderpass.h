@@ -12,9 +12,9 @@ class Camera;
 class CollisionRenderPass : public RenderPass
 {
 public:
-    CollisionRenderPass(string target_layer);
-    CollisionRenderPass(string target_layer, P<Scene> scene);
-    CollisionRenderPass(string target_layer, P<Scene> scene, P<Camera> camera);
+    CollisionRenderPass();
+    CollisionRenderPass(P<Scene> scene);
+    CollisionRenderPass(P<Scene> scene, P<Camera> camera);
     
     virtual void render(P<GraphicsLayer> layer, float aspect_ratio) override;
 

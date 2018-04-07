@@ -21,6 +21,8 @@ public:
     int getTileIndex(int x, int y);
     Collision getTileCollision(int x, int y);
     
+    Vector2i getSize();
+    
     virtual void onFixedUpdate();
 private:
     class Tile

@@ -9,18 +9,13 @@ namespace sp {
 class RenderPass : public AutoPointerObject
 {
 public:
-    RenderPass(string target_layer);
+    RenderPass();
     
     virtual void render(P<GraphicsLayer> layer, float aspect_ratio) = 0;
 
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);
     virtual void onPointerUp(Vector2d position, int id);
-    
-    string getTargetLayer() const;
-    virtual std::vector<string> getSourceLayers() const;
-private:
-    string target_layer;
 };
 
 };//!namespace sp

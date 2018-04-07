@@ -78,6 +78,13 @@ Tilemap::Collision Tilemap::getTileCollision(int x, int y)
     return tiles[y][x].collision;
 }
 
+Vector2i Tilemap::getSize()
+{
+    if (tiles.size() < 1)
+        return Vector2i(0, 0);
+    return Vector2i(tiles[0].size(), tiles.size());
+}
+
 void Tilemap::onFixedUpdate()
 {
     if (!dirty)

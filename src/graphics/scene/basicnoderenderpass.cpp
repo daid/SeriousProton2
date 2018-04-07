@@ -6,19 +6,16 @@
 
 namespace sp {
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer)
-: RenderPass(target_layer)
+BasicNodeRenderPass::BasicNodeRenderPass()
 {
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Scene> scene)
-: RenderPass(target_layer)
+BasicNodeRenderPass::BasicNodeRenderPass(P<Scene> scene)
 {
     addScene(scene);
 }
 
-BasicNodeRenderPass::BasicNodeRenderPass(string target_layer, P<Camera> camera)
-: RenderPass(target_layer)
+BasicNodeRenderPass::BasicNodeRenderPass(P<Camera> camera)
 {
     addScene(camera->getScene(), camera);
 }

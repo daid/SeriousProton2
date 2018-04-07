@@ -107,25 +107,25 @@ public:
     sp::MeshData::Indices indices;
 };
 
-CollisionRenderPass::CollisionRenderPass(string target_layer)
-: RenderPass(target_layer)
+CollisionRenderPass::CollisionRenderPass()
 {
     enabled = true;
     enabled_toggled = false;
 }
 
-CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene)
-: RenderPass(target_layer), single_scene(scene)
+CollisionRenderPass::CollisionRenderPass(P<Scene> scene)
+: single_scene(scene)
 {
     enabled = true;
+    enabled_toggled = false;
 }
 
-CollisionRenderPass::CollisionRenderPass(string target_layer, P<Scene> scene, P<Camera> camera)
-: RenderPass(target_layer), single_scene(scene), specific_camera(camera)
+CollisionRenderPass::CollisionRenderPass(P<Scene> scene, P<Camera> camera)
+: single_scene(scene), specific_camera(camera)
 {
     enabled = true;
+    enabled_toggled = false;
 }
-
 
 void CollisionRenderPass::setScene(P<Scene> scene)
 {

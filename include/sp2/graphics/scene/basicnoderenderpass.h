@@ -12,9 +12,9 @@ class Camera;
 class BasicNodeRenderPass : public RenderPass
 {
 public:
-    BasicNodeRenderPass(string target_layer);
-    BasicNodeRenderPass(string target_layer, P<Scene> scene);
-    BasicNodeRenderPass(string target_layer, P<Camera> camera);
+    BasicNodeRenderPass();
+    BasicNodeRenderPass(P<Scene> scene);
+    BasicNodeRenderPass(P<Camera> camera);
     
     virtual void render(P<GraphicsLayer> layer, float aspect_ratio) override;
 
