@@ -15,7 +15,7 @@ public:
     SceneGraphicsLayer(int priority);
     virtual ~SceneGraphicsLayer();
     
-    virtual void render(sf::RenderTarget& window) override;
+    virtual void render(sf::RenderTarget& target) override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;

@@ -17,16 +17,12 @@ public:
         Static,
         Dynamic
     };
-    const sf::Texture* get();
+    virtual const sf::Texture* get() = 0;
     int getRevision() { return revision; }
 protected:
-    Texture(sf::Texture& texture, Type type, string name)
-    : texture(texture), type(type), name(name), revision(0) {}
+    Texture(Type type, string name)
+    : type(type), name(name), revision(0) {}
 
-    std::mutex mutex;
-    sf::Texture& texture;
-    
-    std::shared_ptr<sf::Image> image;
     Type type;
     string name;
     int revision;

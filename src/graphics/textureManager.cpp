@@ -10,7 +10,7 @@ class TextureManagerTexture : public Texture
 {
 public:
     TextureManagerTexture(string resource_name)
-    : Texture(texture, Type::Static, resource_name)
+    : Texture(Type::Static, resource_name)
     {
         LOG(Info, "Loading texture:", resource_name);
         //TODO: Fallback texture
@@ -23,8 +23,27 @@ public:
         std::lock_guard<std::mutex> lock(mutex);
         this->image = image;
     }
+    
+    virtual const sf::Texture* get() override
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (image)
+        {
+            LOG(Info, "Loaded image", name, image->getSize().x, "x", image->getSize().y);
+            if (!texture.loadFromImage(*image))
+            {
+                LOG(Warning, "loadFromImage failed for", name);
+            }
+            image = nullptr;
+            revision++;
+        }
+        return &texture;
+    }
 private:
+    std::mutex mutex;
+
     sf::Texture texture;
+    std::shared_ptr<sf::Image> image;
 };
 
 TextureManager::TextureManager()

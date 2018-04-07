@@ -9,6 +9,7 @@
 
 namespace sp {
 
+class RenderTexture;
 class GraphicsLayer : public AutoPointerObject
 {
 public:
@@ -19,6 +20,8 @@ public:
     bool isEnabled();
     
     void setPriority(int priority);
+    void setTarget(RenderTexture* render_texture);
+    RenderTexture* getTarget();
     
     virtual void render(sf::RenderTarget& window) = 0;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
@@ -33,6 +36,7 @@ protected:
 private:
     bool enabled;
     int priority;
+    RenderTexture* render_texture;
     
     static void sortLayers();
     static PList<GraphicsLayer> layers;

@@ -17,11 +17,11 @@ SceneGraphicsLayer::~SceneGraphicsLayer()
         delete pass;
 }
 
-void SceneGraphicsLayer::render(sf::RenderTarget& window)
+void SceneGraphicsLayer::render(sf::RenderTarget& target)
 {
-    int pixel_width = viewport.size.x * window.getSize().x;
-    int pixel_height = viewport.size.y * window.getSize().y;
-    glViewport(viewport.position.x * window.getSize().x, viewport.position.y * window.getSize().y, pixel_width, pixel_height);
+    int pixel_width = viewport.size.x * target.getSize().x;
+    int pixel_height = viewport.size.y * target.getSize().y;
+    glViewport(viewport.position.x * target.getSize().x, viewport.position.y * target.getSize().y, pixel_width, pixel_height);
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

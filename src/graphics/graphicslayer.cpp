@@ -9,6 +9,7 @@ GraphicsLayer::GraphicsLayer(int priority)
     enabled = true;
     layers.add(this);
     setPriority(priority);
+    render_texture = nullptr;
     viewport = Rect2d(0, 0, 1, 1);
 }
 
@@ -33,6 +34,16 @@ void GraphicsLayer::setPriority(int priority)
     layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
     });
+}
+
+void GraphicsLayer::setTarget(RenderTexture* render_texture)
+{
+    this->render_texture = render_texture;
+}
+
+RenderTexture* GraphicsLayer::getTarget()
+{
+    return render_texture;
 }
 
 Vector2d GraphicsLayer::screenToViewportPosition(Vector2d position)

@@ -2,6 +2,7 @@
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/graphicslayer.h>
+#include <sp2/graphics/renderTexture.h>
 #include <sp2/graphics/scene/renderqueue.h>
 #include <SFML/Window/Event.hpp>
 
@@ -104,15 +105,26 @@ void Window::createRenderWindow()
 void Window::render()
 {
     render_window.clear(sf::Color(clear_color.toInt()));
-    render_window.setActive();
     for(GraphicsLayer* layer : GraphicsLayer::layers)
     {
         if (layer->isEnabled())
-            layer->render(render_window);
+        {
+            if (layer->getTarget())
+            {
+                layer->render(layer->getTarget()->activateRenderTarget());
+            }
+            else
+            {
+                render_window.setActive();
+                layer->render(render_window);
+            }
+        }
     }
     
     if (cursor_mesh && cursor_texture)
     {
+        render_window.setActive();
+
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(render_window);
     
         Vector2d position(mouse_pos.x, mouse_pos.y);

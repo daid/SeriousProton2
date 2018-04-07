@@ -29,7 +29,7 @@ class FreetypeFontTexture : public Texture
 {
 public:
     FreetypeFontTexture(string name, int pixel_size)
-    : Texture(texture, Type::Dynamic, name)
+    : Texture(Type::Dynamic, name)
     {
         sf::Image image;
         image.create(pixel_size * 16, pixel_size * 16, sf::Color(255, 255, 255, 0));
@@ -91,6 +91,10 @@ public:
         return info;
     }
 
+    virtual const sf::Texture* get() override
+    {
+        return &texture;
+    }
 private:
     int findRowFor(Vector2i size)
     {
