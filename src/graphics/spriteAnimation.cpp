@@ -144,6 +144,11 @@ void SpriteAnimation::Data::load(string resource_name)
             for(int n=0; n<frame_count; n++)
                 frames.push_back(n);
         }
+        std::vector<sp::string> flip = data["flip"].split(",");
+        while(flip.size() < frames.size())
+        {
+            flip.push_back(flip[0]);
+        }
         int line_length = stringutil::convert::toInt(data["line_length"]);
         if (line_length <= 0)
             line_length = frames.size();
@@ -173,6 +178,16 @@ void SpriteAnimation::Data::load(string resource_name)
             float u1 = u0 + frame_size.x;
             float v0 = position.y + (frame_size.y + margin.y) * y;
             float v1 = v0 + frame_size.y;
+            
+            if (flip[n].strip().upper() == "H")
+                std::swap(u0, u1);
+            if (flip[n].strip().upper() == "V")
+                std::swap(v0, v1);
+            if (flip[n].strip().upper() == "HV")
+            {
+                std::swap(u0, u1);
+                std::swap(v0, v1);
+            }
             
             u0 /= texture_size.x;
             u1 /= texture_size.x;
