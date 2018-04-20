@@ -17,10 +17,11 @@ string Clipboard::virtual_clipboard;
 string Clipboard::get()
 {
 #ifdef __WIN32__
-    if (!Window::window)
+    if (Window::windows.size() < 1)
         return "";
+    P<Window> window = *Window::windows.begin();
 
-    if (!OpenClipboard(Window::window->render_window.getSystemHandle()))
+    if (!OpenClipboard(window->render_window.getSystemHandle()))
     {
         LOG(Warning, "Failed to open the clipboard for reading");
         return "";
@@ -62,7 +63,9 @@ string Clipboard::get()
 void Clipboard::set(string value)
 {
 #ifdef __WIN32__
-    if (!OpenClipboard(Window::window->render_window.getSystemHandle()))
+    P<Window> window = *Window::windows.begin();
+
+    if (!OpenClipboard(window->render_window.getSystemHandle()))
     {
         LOG(Warning, "Failed to open the clipboard for writing");
         return;

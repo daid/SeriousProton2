@@ -8,7 +8,7 @@
 
 namespace sp {
 
-P<Window> Window::window;
+PList<Window> Window::windows;
 
 Window::Window()
 : Window(0.0)
@@ -17,8 +17,8 @@ Window::Window()
 
 Window::Window(float aspect_ratio)
 {
-    sp2assert(!window, "SP2 does not support more then 1 window.");
-    window = this;
+    sp2assert(windows.size() == 0, "SP2 does not support more then 1 window.");
+    windows.add(this);
     antialiasing = 0;
     fullscreen = false;
     this->aspect_ratio = aspect_ratio;
@@ -29,11 +29,6 @@ Window::Window(float aspect_ratio)
 
 Window::~Window()
 {
-}
-
-P<Window> Window::getInstance()
-{
-    return window;
 }
 
 void Window::setFullScreen(bool fullscreen)
@@ -66,6 +61,11 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
     render_window.setMouseCursorVisible(false);
     cursor_texture = texture;
     cursor_mesh = mesh;
+}
+
+void Window::addLayer(P<GraphicsLayer> layer)
+{
+    graphics_layers.add(layer);
 }
 
 void Window::createRenderWindow()
@@ -105,7 +105,10 @@ void Window::createRenderWindow()
 void Window::render()
 {
     render_window.clear(sf::Color(clear_color.toInt()));
-    for(GraphicsLayer* layer : GraphicsLayer::layers)
+    graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
+        return a->priority - b->priority;
+    });
+    for(GraphicsLayer* layer : graphics_layers)
     {
         if (layer->isEnabled())
         {
@@ -188,7 +191,7 @@ void Window::handleEvent(const sf::Event& event)
 
 void Window::pointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    for(auto l : GraphicsLayer::layers)
+    for(auto l : graphics_layers)
     {
         if (l->onPointerDown(button, position, id))
         {

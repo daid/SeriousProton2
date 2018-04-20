@@ -9,6 +9,7 @@
 
 namespace sp {
 
+class Window;
 class RenderTexture;
 class GraphicsLayer : public AutoPointerObject
 {
@@ -38,9 +39,6 @@ private:
     int priority;
     RenderTexture* render_texture;
     
-    static void sortLayers();
-    static PList<GraphicsLayer> layers;
-
     friend class Window;
     friend class Engine;
 };

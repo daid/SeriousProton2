@@ -48,7 +48,7 @@ Engine::~Engine()
 
 void Engine::run()
 {
-    sp2assert(Window::window, "Before the engine is run, a Window needs to be created.");
+    sp2assert(Window::windows.size() > 0, "Before the engine is run, a Window needs to be created.");
     
     glewInit();
     
@@ -56,14 +56,16 @@ void Engine::run()
     int fps_count = 0;
     sf::Clock fps_counter_clock;
     LOG(Info, "Engine started");
-    while(Window::window->render_window.isOpen())
+    
+    P<Window> window = *Window::windows.begin();
+    while(window->render_window.isOpen())
     {
         sf::Event event;
-        while (Window::window->render_window.pollEvent(event))
+        while (window->render_window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
-                Window::window->render_window.close();
-            Window::window->handleEvent(event);
+                window->render_window.close();
+            window->handleEvent(event);
             io::Keybinding::handleEvent(event);
         }
         float delta = frame_time_clock.restart().asSeconds();
@@ -114,8 +116,8 @@ void Engine::run()
         if (multiplayer::Client::getInstance())
             multiplayer::Client::getInstance()->update();
 
-        if (Window::window->render_window.isOpen())
-            Window::window->render();
+        if (window->render_window.isOpen())
+            window->render();
 
         io::Keybinding::allPostUpdate();
 
@@ -152,7 +154,8 @@ bool Engine::getPause()
 
 void Engine::shutdown()
 {
-    Window::window->render_window.close();
+    for(Window* window : Window::windows)
+        window->render_window.close();
 }
 
 };//!namespace sp
