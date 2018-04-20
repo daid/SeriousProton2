@@ -76,4 +76,15 @@ template <typename T> static inline std::ostream& operator<<(std::ostream& strea
 
 };//!namespace sp
 
+namespace std
+{
+    template<typename T> struct hash<sp::Vector2<T> >
+    {
+        std::size_t operator()(const sp::Vector2<T>& v) const
+        {
+            return int(v.x) ^ (int(v.y) << 8);
+        }
+    };
+}
+
 #endif//SP2_MATH_VECTOR_H

@@ -7,6 +7,7 @@
 #include <sp2/math/vector.h>
 #include <sp2/math/ray.h>
 #include <sp2/io/pointer.h>
+#include <sp2/script/bindingObject.h>
 
 #include <unordered_map>
 
@@ -20,7 +21,7 @@ class Shape2D;
 
 class Node;
 class Camera;
-class Scene : public AutoPointerObject
+class Scene : public ScriptBindingObject
 {
 public:
     Scene(string scene_name, int priority=0);

@@ -31,6 +31,8 @@ varying vec2 v_uv;
 void main()
 {
     gl_FragColor = texture2D(texture_map, v_uv) * color;
+    if (gl_FragColor.a == 0.0)
+        discard;
 }
 )EOS"},
 
@@ -47,6 +49,8 @@ uniform vec3 object_scale;
 void main()
 {
     gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
+    if (gl_FragColor.a == 0.0)
+        discard;
 }
 
 [FRAGMENT]

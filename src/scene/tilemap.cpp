@@ -60,6 +60,31 @@ void Tilemap::setTile(int x, int y, int index, Collision collision)
     dirty = true;
 }
 
+void Tilemap::setTileZOffset(int x, int y, double z_offset)
+{
+    sp2assert(x >= 0, "Tile position must be equal or larger then zero");
+    sp2assert(y >= 0, "Tile position must be equal or larger then zero");
+    
+    int width = x + 1;
+    if (tiles.size())
+        width = std::max(int(tiles[0].size()), width);
+    if(int(tiles.size()) < y + 1)
+    {
+        int old_height = tiles.size();
+        tiles.resize(y + 1);
+        for(int n=old_height; n<int(tiles.size()); n++)
+            tiles[n].resize(width);
+    }
+    if (int(tiles[0].size()) != width)
+    {
+        for(int n=0; n<int(tiles.size()); n++)
+            tiles[n].resize(width);
+    }
+    
+    tiles[y][x].z_offset = z_offset;
+    dirty = true;
+}
+
 int Tilemap::getTileIndex(int x, int y)
 {
     if (y < 0 || y >= int(tiles.size()))
@@ -123,10 +148,10 @@ void Tilemap::updateMesh()
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 3);
             
-            vertices.emplace_back(Vector3f(px, py, 0.0f), Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-            vertices.emplace_back(Vector3f(px + tile_width, py, 0.0f), Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-            vertices.emplace_back(Vector3f(px, py + tile_height, 0.0f), Vector2f(u * fu + u_offset, v * fv + v_offset));
-            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, 0.0f), Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+            vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u * fu + u_offset, v * fv + v_offset));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
         }
     }
     

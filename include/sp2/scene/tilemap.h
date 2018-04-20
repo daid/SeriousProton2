@@ -18,6 +18,7 @@ public:
     Tilemap(P<Node> parent, string texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y);
     
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
+    void setTileZOffset(int x, int y, double z_offset);
     int getTileIndex(int x, int y);
     Collision getTileCollision(int x, int y);
     
@@ -28,9 +29,10 @@ private:
     class Tile
     {
     public:
-        Tile() : index(-1), collision(Collision::Open) {}
+        Tile() : index(-1), z_offset(0), collision(Collision::Open) {}
 
         int index;
+        double z_offset;
         Collision collision;
     };
 

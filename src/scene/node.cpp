@@ -59,12 +59,21 @@ PList<Node>& Node::getChildren()
 
 void Node::setParent(P<Node> new_parent)
 {
-    sp2assert(new_parent->scene == scene, "Tried to switch node from one scene to a different one. This is not supported.");
     sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
     
     parent->children.remove(P<Node>(this));
     parent = new_parent;
     parent->children.add(this);
+
+    if (new_parent->scene != scene)
+    {
+        scene = new_parent->scene;
+        for(Node* child : children)
+        {
+            sp2assert(child->children.size() == 0, "Implementation incomplete...");
+            child->scene = new_parent->scene;
+        }
+    }
     
     updateGlobalTransform();
 }
