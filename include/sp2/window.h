@@ -58,6 +58,7 @@ private:
     std::map<int, P<GraphicsLayer>> pointer_focus_layer;
 
     static PList<Window> windows;
+    static bool anyWindowOpen();
     
     //Engine needs to be able to access the render window, as this is needed for event polling.
     friend class Engine;

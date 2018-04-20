@@ -17,7 +17,6 @@ Window::Window()
 
 Window::Window(float aspect_ratio)
 {
-    sp2assert(windows.size() == 0, "SP2 does not support more then 1 window.");
     windows.add(this);
     antialiasing = 0;
     fullscreen = false;
@@ -222,6 +221,18 @@ Vector2d Window::screenToGLPosition(int x, int y)
 {
     sf::Vector2u size = render_window.getSize();
     return Vector2d((double(x) / double(size.x) - 0.5) * 2.0, (0.5 - double(y) / double(size.y)) * 2.0);
+}
+
+bool Window::anyWindowOpen()
+{
+    for(Window* window : windows)
+    {
+        if (window->render_window.isOpen())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 };//!namespace sp

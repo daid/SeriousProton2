@@ -57,16 +57,18 @@ void Engine::run()
     sf::Clock fps_counter_clock;
     LOG(Info, "Engine started");
     
-    P<Window> window = *Window::windows.begin();
-    while(window->render_window.isOpen())
+    while(Window::anyWindowOpen())
     {
         sf::Event event;
-        while (window->render_window.pollEvent(event))
+        for(Window* window : Window::windows)
         {
-            if (event.type == sf::Event::Closed)
-                window->render_window.close();
-            window->handleEvent(event);
-            io::Keybinding::handleEvent(event);
+            while (window->render_window.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
+                    window->render_window.close();
+                window->handleEvent(event);
+                io::Keybinding::handleEvent(event);
+            }
         }
         float delta = frame_time_clock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);
@@ -116,8 +118,11 @@ void Engine::run()
         if (multiplayer::Client::getInstance())
             multiplayer::Client::getInstance()->update();
 
-        if (window->render_window.isOpen())
-            window->render();
+        for(Window* window : Window::windows)
+        {
+            if (window->render_window.isOpen())
+                window->render();
+        }
 
         io::Keybinding::allPostUpdate();
 
