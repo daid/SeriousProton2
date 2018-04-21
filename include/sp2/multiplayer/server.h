@@ -1,6 +1,7 @@
 #ifndef SP2_MULTIPLAYER_SERVER_H
 #define SP2_MULTIPLAYER_SERVER_H
 
+#include <sp2/updatable.h>
 #include <sp2/scene/node.h>
 
 #include <SFML/Network/Packet.hpp>
@@ -11,10 +12,9 @@
 #include <unordered_map>
 
 namespace sp {
-class Engine;
 namespace multiplayer {
 
-class Server : public AutoPointerObject
+class Server : public Updatable
 {
 public:
     Server(int port_nr);
@@ -63,13 +63,12 @@ private:
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
     void addNewObject(Node* node);
     
-    void update();
+    virtual void onUpdate(float delta) override;
     
     void buildCreatePacket(sf::Packet& packet, Node* node);
     void sendToAllConnectedClients(sf::Packet& packet);
 
     friend class Node::Multiplayer;
-    friend class ::sp::Engine;
 public:
     static Server* getInstance() { return instance; }
 private:

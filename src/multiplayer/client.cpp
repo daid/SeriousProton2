@@ -9,13 +9,8 @@
 namespace sp {
 namespace multiplayer {
 
-Client* Client::instance;
-    
 Client::Client(string hostname, int port_nr)
 {
-    sp2assert(!instance, "Only a single multiplayer::Client instance can exists");
-    instance = this;
-    
     socket.setBlocking(false);
     socket.connect(sf::IpAddress(hostname), port_nr);
     
@@ -24,10 +19,9 @@ Client::Client(string hostname, int port_nr)
 
 Client::~Client()
 {
-    instance = nullptr;
 }
     
-void Client::update()
+void Client::onUpdate(float delta)
 {
     sf::Packet packet;
     

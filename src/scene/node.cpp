@@ -279,6 +279,7 @@ void Node::Multiplayer::enable()
         return;
     if (node->parent)
         sp2assert(node->parent->multiplayer.enable_replication, "Parent of a multiplayer enabled object should also be multiplayer enabled.");
+
     //If a server is already running, let it know there is a new object for it to process.
     multiplayer::Server* server = multiplayer::Server::getInstance();
     if (!server)

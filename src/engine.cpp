@@ -1,5 +1,6 @@
 #include <sp2/engine.h>
 #include <sp2/window.h>
+#include <sp2/updatable.h>
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
@@ -48,8 +49,6 @@ Engine::~Engine()
 
 void Engine::run()
 {
-    sp2assert(Window::windows.size() > 0, "Before the engine is run, a Window needs to be created.");
-    
     glewInit();
     
     sf::Clock frame_time_clock;
@@ -112,12 +111,11 @@ void Engine::run()
             if (scene->isEnabled())
                 scene->update(delta);
         }
+        for(Updatable* updatable : Updatable::updatables)
+        {
+            updatable->onUpdate(delta);
+        }
         
-        if (multiplayer::Server::getInstance())
-            multiplayer::Server::getInstance()->update();
-        if (multiplayer::Client::getInstance())
-            multiplayer::Client::getInstance()->update();
-
         for(Window* window : Window::windows)
         {
             if (window->render_window.isOpen())

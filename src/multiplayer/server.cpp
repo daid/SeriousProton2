@@ -50,7 +50,7 @@ void Server::recursiveAddInitial(Node* node)
     }
 }
 
-void Server::update()
+void Server::onUpdate(float delta)
 {
     //When creating new objects, we first send out packets for all objects to be created.
     //And then we send out variable value updates. This because else we could update a pointer variable to an object that does not exist yet.

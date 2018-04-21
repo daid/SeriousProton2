@@ -2,7 +2,7 @@
 #define SP2_MULTIPLAYER_CLIENT_H
 
 #include <sp2/string.h>
-#include <sp2/pointer.h>
+#include <sp2/updatable.h>
 
 #include <SFML/Network/TcpSocket.hpp>
 
@@ -12,7 +12,7 @@ namespace sp {
 class Engine;
 namespace multiplayer {
 
-class Client : public AutoPointerObject
+class Client : public Updatable
 {
 public:
     enum State
@@ -34,14 +34,10 @@ private:
     State state;
     uint32_t client_id;
     
-    void update();
+    virtual void onUpdate(float delta) override;
     void send(sf::Packet& packet);
     
     friend class ::sp::Engine;
-public:
-    static Client* getInstance() { return instance; }
-private:
-    static Client* instance;
 };
 
 };//!namespace multiplayer
