@@ -6,37 +6,43 @@
 namespace sp {
 namespace multiplayer {
 
-class ReplicationLinkBase
+class ReplicationLinkBase : NonCopyable
 {
 public:
     virtual ~ReplicationLinkBase() {}
     virtual bool isChanged() = 0;
-    virtual void handleSend(sf::Packet& packet) = 0;
-    virtual void handleReceived(sf::Packet& packet) = 0;
+    virtual void initialSend(sf::Packet& packet) { send(packet); }
+    virtual void send(sf::Packet& packet) = 0;
+    virtual void receive(sf::Packet& packet) = 0;
 };
 
-template<typename T> class ReplicationLink
+template<typename T> class ReplicationLink : public ReplicationLinkBase
 {
 public:
-    virtual bool isChanged() override
+    ReplicationLink(T& value)
+    : value(value), previous_value(value)
     {
-        if (*value_ptr == previous_value)
-            return false;
-        previous_value = *value_ptr;
-        return true;
     }
 
-    virtual void handleSend(sf::Packet& packet) override
+    virtual bool isChanged() override
     {
-        packet << *value_ptr;
+        if (value == previous_value)
+            return false;
+        previous_value = value;
+        return true;
     }
     
-    virtual void handleReceived(sf::Packet& packet) override
+    virtual void send(sf::Packet& packet) override
     {
-        packet >> *value_ptr;
+        packet << value;
+    }
+    
+    virtual void receive(sf::Packet& packet) override
+    {
+        packet >> value;
     }
 private:
-    T* value_ptr;
+    T& value;
     T previous_value;
 };
 

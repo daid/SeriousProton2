@@ -10,13 +10,8 @@
 namespace sp {
 namespace multiplayer {
 
-Server* Server::instance;
-
 Server::Server(int port_nr)
 {
-    sp2assert(!instance, "Only a single multiplayer::Server instance can exists");
-    instance = this;
-
     if (new_connection_listener.listen(port_nr) != sf::Socket::Done)
         LOG(Error, "Failed to listen on port: ", port_nr);
     new_connection_listener.setBlocking(false);
@@ -24,34 +19,31 @@ Server::Server(int port_nr)
     
     next_client_id = 1;
     next_object_id = 1;
-    
-    for(Scene* scene : Scene::scenes)
-    {
-        recursiveAddInitial(*scene->getRoot());
-    }
 }
 
 Server::~Server()
 {
     delete new_connection_socket;
-    
-    instance = nullptr;
 }
 
-void Server::recursiveAddInitial(Node* node)
+void Server::recursiveAddNewNodes(Node* node)
 {
-    if (node->multiplayer.enable_replication)
+    if (node->multiplayer.enabled)
     {
-        addNewObject(node);
+        if (node->multiplayer.id == 0)
+            addNewObject(node);
         for(Node* child : node->getChildren())
-        {
-            recursiveAddInitial(child);
-        }
+            recursiveAddNewNodes(child);
     }
 }
 
 void Server::onUpdate(float delta)
 {
+    for(Scene* scene : Scene::scenes)
+    {
+        recursiveAddNewNodes(*scene->getRoot());
+    }
+
     //When creating new objects, we first send out packets for all objects to be created.
     //And then we send out variable value updates. This because else we could update a pointer variable to an object that does not exist yet.
     for(Node* node : new_nodes)
@@ -72,9 +64,8 @@ void Server::onUpdate(float delta)
             for(unsigned int n=0; n<node->multiplayer.replication_links.size(); n++)
             {
                 ReplicationLinkBase* replication_link = node->multiplayer.replication_links[n];
-                replication_link->isChanged();
                 packet << uint16_t(n);
-                replication_link->handleSend(packet);
+                replication_link->initialSend(packet);
             }
             sendToAllConnectedClients(packet);
         }
@@ -95,7 +86,7 @@ void Server::onUpdate(float delta)
                 if (replication_link->isChanged())
                 {
                     packet << uint16_t(n);
-                    replication_link->handleSend(packet);
+                    replication_link->send(packet);
                 }
             }
             if (packet.getDataSize() != zero_data_size)
@@ -164,7 +155,7 @@ void Server::onUpdate(float delta)
                             {
                                 ReplicationLinkBase* replication_link = it.second->multiplayer.replication_links[n];
                                 packet << uint16_t(n);
-                                replication_link->handleSend(packet);
+                                replication_link->send(packet);
                             }
                             client->send(packet);
                         }
@@ -225,8 +216,9 @@ void Server::buildCreatePacket(sf::Packet& packet, Node* node)
     }
     else
     {
+        //This node is the root node of a scene, so setup our scene information.
         P<Scene> scene = node->getScene();
-        packet << PacketIDs::create_scene << node->multiplayer.getId() << scene->getSceneName();
+        packet << PacketIDs::setup_scene << node->multiplayer.getId() << scene->getSceneName();
     }
 }
 

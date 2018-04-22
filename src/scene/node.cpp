@@ -9,6 +9,7 @@
 #include <cmath>
 #include <typeindex>
 
+
 namespace sp {
 
 Node::Node(P<Node> parent)
@@ -60,6 +61,7 @@ PList<Node>& Node::getChildren()
 void Node::setParent(P<Node> new_parent)
 {
     sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
+    sp2assert(!multiplayer.isEnabled(), "Tried to switch parents on a multiplayer enabled node. This is not supported.");
     
     parent->children.remove(P<Node>(this));
     parent = new_parent;
@@ -263,7 +265,7 @@ void Node::modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation)
 Node::Multiplayer::Multiplayer(Node* node)
 : node(node)
 {
-    enable_replication = false;
+    enabled = false;
     id = 0;
 }
 
@@ -275,16 +277,15 @@ Node::Multiplayer::~Multiplayer()
 
 void Node::Multiplayer::enable()
 {
-    if (enable_replication)
+    if (enabled)
         return;
     if (node->parent)
-        sp2assert(node->parent->multiplayer.enable_replication, "Parent of a multiplayer enabled object should also be multiplayer enabled.");
+        sp2assert(node->parent->multiplayer.enabled, "Parent of a multiplayer enabled object should also be multiplayer enabled.");
+}
 
-    //If a server is already running, let it know there is a new object for it to process.
-    multiplayer::Server* server = multiplayer::Server::getInstance();
-    if (!server)
-        return;
-    server->addNewObject(node);
+bool Node::Multiplayer::isEnabled()
+{
+    return enabled;
 }
 
 };//!namespace sp

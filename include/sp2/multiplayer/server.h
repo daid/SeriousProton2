@@ -59,7 +59,7 @@ private:
     sf::TcpListener new_connection_listener;
     sf::TcpSocket* new_connection_socket;
     
-    void recursiveAddInitial(Node* node);
+    void recursiveAddNewNodes(Node* node);
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
     void addNewObject(Node* node);
     
@@ -69,10 +69,6 @@ private:
     void sendToAllConnectedClients(sf::Packet& packet);
 
     friend class Node::Multiplayer;
-public:
-    static Server* getInstance() { return instance; }
-private:
-    static Server* instance;
 };
 
 };//!namespace multiplayer

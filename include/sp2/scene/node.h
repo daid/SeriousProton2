@@ -98,6 +98,7 @@ public:
         ~Multiplayer();
         
         void enable();
+        bool isEnabled();
 
         template<typename T> void replicate(T& var)
         {
@@ -107,7 +108,7 @@ public:
         uint64_t getId() const { return id; }
     private:
         Node* node;
-        bool enable_replication;
+        bool enabled;
         uint64_t id;
         std::vector<multiplayer::ReplicationLinkBase*> replication_links;
         

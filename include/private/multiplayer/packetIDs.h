@@ -19,11 +19,15 @@ public:
     //When the game speed changes, we need to update this to the clients. As this is an engine global, we have a special handling for this.
     static constexpr uint8_t change_game_speed = 0x03;
     
+    //Create a new object, gives the typeid, and all the members to set.
     static constexpr uint8_t create_object = 0x10;
+    //Update members of an object
     static constexpr uint8_t update_object = 0x11;
+    //Delete a specific object
     static constexpr uint8_t delete_object = 0x12;
 
-    static constexpr uint8_t create_scene = 0x20;
+    //Scenes should already exist on the client, this packet is to link an multiplayer ID to a scene.
+    static constexpr uint8_t setup_scene = 0x20;
     
     //Alive packet. Empty packet that is being send from the server to indicate that the server is still connected to the client.
     //TCP timeouts will handle disconnecting clients from the server. Clients need to have extra timeout handling.
