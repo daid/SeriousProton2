@@ -14,7 +14,7 @@
 namespace sp {
 namespace multiplayer {
 
-class Server : public Updatable
+class Server : public Updatable, public NodeRegistry
 {
 public:
     Server(int port_nr);
@@ -53,7 +53,6 @@ private:
     //List of newly created objects.
     PList<Node> new_nodes;
 
-    std::unordered_map<uint64_t, P<Node>> node_by_id;
     std::list<ClientInfo> clients;
     
     sf::TcpListener new_connection_listener;
@@ -64,6 +63,7 @@ private:
     void addNewObject(Node* node);
     
     virtual void onUpdate(float delta) override;
+    virtual void onDeleted(uint64_t id) override;
     
     void buildCreatePacket(sf::Packet& packet, Node* node);
     void sendToAllConnectedClients(sf::Packet& packet);

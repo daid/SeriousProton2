@@ -3,6 +3,7 @@
 
 #include <sp2/string.h>
 #include <sp2/updatable.h>
+#include <sp2/multiplayer/nodeRegistry.h>
 
 #include <SFML/Network/TcpSocket.hpp>
 
@@ -10,9 +11,10 @@
 
 namespace sp {
 class Engine;
+class Node;
 namespace multiplayer {
 
-class Client : public Updatable
+class Client : public Updatable, public NodeRegistry
 {
 public:
     enum State

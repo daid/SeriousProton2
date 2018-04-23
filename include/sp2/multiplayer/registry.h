@@ -2,6 +2,7 @@
 #define SP2_MULTIPLAYER_REGISTRY_H
 
 #include <sp2/string.h>
+#include <sp2/pointer.h>
 
 #include <typeindex>
 #include <unordered_map>
@@ -18,7 +19,7 @@ namespace multiplayer {
 class ClassEntry
 {
 public:
-    typedef Node* (*create_object_function_t)(Node* parent);
+    typedef Node* (*create_object_function_t)(P<Node> parent);
     
     ClassEntry(string class_name, std::type_index type_index, create_object_function_t create_function);
 private:
@@ -39,7 +40,7 @@ private:
     friend class Client;
 };
 
-template<class T> Node* __objectCreateFunction(Node* parent)
+template<class T> Node* __objectCreateFunction(P<Node> parent)
 {
     return new T(parent);
 }

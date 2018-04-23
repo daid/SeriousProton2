@@ -53,7 +53,7 @@ void Server::onUpdate(float delta)
         
         sendToAllConnectedClients(packet);
         
-        node_by_id[node->multiplayer.getId()] = node;
+        addNode(node);
     }
     for(Node* node : new_nodes)
     {
@@ -65,44 +65,29 @@ void Server::onUpdate(float delta)
             {
                 ReplicationLinkBase* replication_link = node->multiplayer.replication_links[n];
                 packet << uint16_t(n);
-                replication_link->initialSend(packet);
+                replication_link->initialSend(*this, packet);
             }
             sendToAllConnectedClients(packet);
         }
     }
     new_nodes.clear();
     
-    std::vector<uint64_t> delete_list;
-    for(auto it : node_by_id)
-    {
-        if (it.second)
-        {
-            sf::Packet packet;
-            packet << PacketIDs::update_object << it.second->multiplayer.getId();
-            unsigned int zero_data_size = packet.getDataSize();
-            for(unsigned int n=0; n<it.second->multiplayer.replication_links.size(); n++)
-            {
-                ReplicationLinkBase* replication_link = it.second->multiplayer.replication_links[n];
-                if (replication_link->isChanged())
-                {
-                    packet << uint16_t(n);
-                    replication_link->send(packet);
-                }
-            }
-            if (packet.getDataSize() != zero_data_size)
-                sendToAllConnectedClients(packet);
-        }
-        else
-        {
-            delete_list.push_back(it.first);
-        }
-    }
-    for(auto id : delete_list)
+    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
     {
         sf::Packet packet;
-        packet << PacketIDs::delete_object << id;
-        sendToAllConnectedClients(packet);
-        node_by_id.erase(id);
+        packet << PacketIDs::update_object << it->second->multiplayer.getId();
+        unsigned int zero_data_size = packet.getDataSize();
+        for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
+        {
+            ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
+            if (replication_link->isChanged())
+            {
+                packet << uint16_t(n);
+                replication_link->send(*this, packet);
+            }
+        }
+        if (packet.getDataSize() != zero_data_size)
+            sendToAllConnectedClients(packet);
     }
     
     //Check for new connections.
@@ -118,7 +103,7 @@ void Server::onUpdate(float delta)
         client.state = ClientInfo::State::WaitingForAuthentication;
         sf::Packet packet;
         packet << PacketIDs::request_authentication << PacketIDs::magic_sp2_value;
-        if (client.socket->send(packet) == sf::Socket::Partial)
+        if (client.socket->send(packet) != sf::Socket::Done)
             client.send_queue.push_back(packet);
         clients.push_back(client);
 
@@ -139,36 +124,37 @@ void Server::onUpdate(float delta)
                 switch(packet_id)
                 {
                 case PacketIDs::request_authentication:
-                    for(auto it : node_by_id)
                     {
-                        sf::Packet packet;
-                        buildCreatePacket(packet, *it.second);
-                        client->send(packet);
+                        sf::Packet send_packet;
+                        send_packet << PacketIDs::set_client_id << client->client_id;
+                        client->send(send_packet);
                     }
-                    for(auto it : node_by_id)
                     {
-                        if (it.second->multiplayer.replication_links.size() > 0)
+                        sf::Packet send_packet;
+                        send_packet << PacketIDs::change_game_speed << Engine::getInstance()->getGameSpeed();
+                        client->send(send_packet);
+                    }
+
+                    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+                    {
+                        sf::Packet send_packet;
+                        buildCreatePacket(send_packet, *it->second);
+                        client->send(send_packet);
+                    }
+                    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+                    {
+                        if (it->second->multiplayer.replication_links.size() > 0)
                         {
-                            sf::Packet packet;
-                            packet << PacketIDs::update_object << it.second->multiplayer.getId();
-                            for(unsigned int n=0; n<it.second->multiplayer.replication_links.size(); n++)
+                            sf::Packet send_packet;
+                            send_packet << PacketIDs::update_object << it->first;
+                            for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
                             {
-                                ReplicationLinkBase* replication_link = it.second->multiplayer.replication_links[n];
-                                packet << uint16_t(n);
-                                replication_link->send(packet);
+                                ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
+                                send_packet << uint16_t(n);
+                                replication_link->send(*this, send_packet);
                             }
-                            client->send(packet);
+                            client->send(send_packet);
                         }
-                    }
-                    {
-                        sf::Packet packet;
-                        packet << PacketIDs::set_client_id << client->client_id;
-                        client->send(packet);
-                    }
-                    {
-                        sf::Packet packet;
-                        packet << PacketIDs::change_game_speed << Engine::getInstance()->getGameSpeed();
-                        client->send(packet);
                     }
                     client->state = ClientInfo::State::Connected;
                     break;
@@ -220,6 +206,13 @@ void Server::buildCreatePacket(sf::Packet& packet, Node* node)
         P<Scene> scene = node->getScene();
         packet << PacketIDs::setup_scene << node->multiplayer.getId() << scene->getSceneName();
     }
+}
+
+void Server::onDeleted(uint64_t id)
+{
+    sf::Packet packet;
+    packet << PacketIDs::delete_object << id;
+    sendToAllConnectedClients(packet);
 }
 
 void Server::addNewObject(Node* node)
