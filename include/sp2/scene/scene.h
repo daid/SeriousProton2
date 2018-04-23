@@ -82,6 +82,9 @@ private:
 
 public:
     static P<Scene> get(string name) { return scene_mapping[name]; }
+
+    static const PList<Scene>& all() { return scenes; }
+private:
     static PList<Scene> scenes;
 };
 

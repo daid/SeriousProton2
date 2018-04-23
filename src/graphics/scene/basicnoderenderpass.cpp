@@ -29,7 +29,7 @@ void BasicNodeRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
             renderScene(camera->getScene(), camera, layer, aspect_ratio);
         }
     }else{
-        for(Scene* scene : Scene::scenes)
+        for(Scene* scene : Scene::all())
         {
             renderScene(scene, nullptr, layer, aspect_ratio);
         }
@@ -48,7 +48,7 @@ bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d pos
     }
     else
     {
-        for(Scene* scene : Scene::scenes)
+        for(Scene* scene : Scene::all())
         {
             if (privateOnPointerDown(scene, nullptr, button, position, id))
                 return true;

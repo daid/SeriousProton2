@@ -90,7 +90,7 @@ void Engine::run()
         while(fixed_update_accumulator > fixed_update_delta)
         {
             fixed_update_accumulator -= fixed_update_delta;
-            for(Scene* scene : Scene::scenes)
+            for(Scene* scene : Scene::all())
             {
                 if (scene->isEnabled())
                 {
@@ -101,12 +101,12 @@ void Engine::run()
             io::Keybinding::allPostFixedUpdate();
         }
         in_fixed_update = false;
-        for(Scene* scene : Scene::scenes)
+        for(Scene* scene : Scene::all())
         {
             if (scene->isEnabled())
                 scene->postFixedUpdate(fixed_update_accumulator);
         }
-        for(Scene* scene : Scene::scenes)
+        for(Scene* scene : Scene::all())
         {
             if (scene->isEnabled())
                 scene->update(delta);

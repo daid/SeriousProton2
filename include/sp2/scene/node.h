@@ -39,7 +39,7 @@ public:
 
     P<Node> getParent();
     P<Scene> getScene();
-    PList<Node>& getChildren();
+    const PList<Node>& getChildren();
     void setParent(P<Node> new_parent);
     
     void setPosition(Vector2d position);

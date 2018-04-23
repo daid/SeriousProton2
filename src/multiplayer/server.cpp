@@ -39,7 +39,7 @@ void Server::recursiveAddNewNodes(Node* node)
 
 void Server::onUpdate(float delta)
 {
-    for(Scene* scene : Scene::scenes)
+    for(Scene* scene : Scene::all())
     {
         recursiveAddNewNodes(*scene->getRoot());
     }

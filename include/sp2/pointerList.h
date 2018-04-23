@@ -303,9 +303,9 @@ public:
             e = removeEntry(e);
     }
 
-    Iterator begin()
+    Iterator begin() const
     {
-        return Iterator(this);
+        return Iterator(const_cast<PList*>(this));
     }
 
     const Iterator end() const
@@ -313,9 +313,9 @@ public:
         return Iterator();
     }
 
-    ReverseIterator rbegin()
+    ReverseIterator rbegin() const
     {
-        return ReverseIterator(this);
+        return ReverseIterator(const_cast<PList*>(this));
     }
     
     const ReverseIterator rend() const
@@ -323,7 +323,7 @@ public:
         return ReverseIterator();
     }
     
-    int size()
+    int size() const
     {
         int count = 0;
         for(_PListEntry* e = list_start; e; e=e->list_next)
@@ -331,7 +331,7 @@ public:
         return count;
     }
 
-    bool empty()
+    bool empty() const
     {
         return list_start == nullptr;
     }

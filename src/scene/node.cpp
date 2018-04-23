@@ -4,13 +4,15 @@
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <sp2/multiplayer/server.h>
+#include <sp2/multiplayer/registry.h>
 #include <Box2D/Box2D.h>
 #include <private/collision/box2dVector.h>
 #include <cmath>
 #include <typeindex>
 
-
 namespace sp {
+
+REGISTER_MULTIPLAYER_CLASS(Node);
 
 Node::Node(P<Node> parent)
 : multiplayer(this), parent(parent)
@@ -53,7 +55,7 @@ P<Scene> Node::getScene()
     return scene;
 }
 
-PList<Node>& Node::getChildren()
+const PList<Node>& Node::getChildren()
 {
     return children;
 }
@@ -281,6 +283,7 @@ void Node::Multiplayer::enable()
         return;
     if (node->parent)
         sp2assert(node->parent->multiplayer.enabled, "Parent of a multiplayer enabled object should also be multiplayer enabled.");
+    enabled = true;
 }
 
 bool Node::Multiplayer::isEnabled()
