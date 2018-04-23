@@ -4,7 +4,6 @@
 #include <sp2/scene/node.h>
 #include <sp2/graphics/color.h>
 #include <sp2/math/vector.h>
-#include <sp2/pointerVector.h>
 #include <sp2/string.h>
 #include <sp2/variant.h>
 #include <sp2/alignment.h>

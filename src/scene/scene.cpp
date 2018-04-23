@@ -30,7 +30,7 @@ Scene::Scene(string scene_name, int priority)
 
 Scene::~Scene()
 {
-    delete *root;
+    root.destroy();
     if (collision_world2d)
         delete collision_world2d;
 

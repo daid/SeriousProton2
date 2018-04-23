@@ -94,8 +94,7 @@ void Client::onUpdate(float delta)
             uint64_t id;
             packet >> id;
             P<Node> node = getNode(id);
-            if (node)
-                delete *node;
+            node.destroy();
             }break;
 
         case PacketIDs::setup_scene:{

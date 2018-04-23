@@ -349,7 +349,7 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
             continue;
         LOG(Info, "Reloading:", data.resource_name, data.root_id);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        delete *data.widget;
+        data.widget.destroy();
         data.widget = sp::gui::Loader::load(data.resource_name, data.root_id, this);
         if (data.widget)
             data.last_modify_time = modify_time;
