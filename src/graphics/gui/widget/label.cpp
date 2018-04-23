@@ -85,5 +85,5 @@ void Label::onUpdate(float delta)
     Widget::onUpdate(delta);
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

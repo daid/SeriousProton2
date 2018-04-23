@@ -35,6 +35,6 @@ private:
     std::vector<Item> render_list;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_RENDERPASS_H

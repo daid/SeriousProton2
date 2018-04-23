@@ -91,6 +91,6 @@ string decode(string data)
     return result;
 }
 
-};//!namespace base64
-};//!namespace stringutil
-};//!namespace sp
+};//namespace base64
+};//namespace stringutil
+};//namespace sp

@@ -54,5 +54,5 @@ void Sound::setVolume(float volume)
     }
 }
 
-};//!namespace audio
-};//!namespace sp
+};//namespace audio
+};//namespace sp

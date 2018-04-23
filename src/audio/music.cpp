@@ -37,5 +37,5 @@ void Music::setVolume(float volume)
     music.setVolume(volume);
 }
 
-};//!namespace audio
-};//!namespace sp
+};//namespace audio
+};//namespace sp

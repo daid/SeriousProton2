@@ -382,6 +382,6 @@ template<typename T> static inline std::ostream& operator<<(std::ostream& os, co
     return os;
 }
 
-};//!namespace sp
+};//namespace sp
 
 #endif//MATRIX_4X4_H

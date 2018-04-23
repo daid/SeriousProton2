@@ -56,8 +56,8 @@ private:
     std::map<string, T*> cached_items;
 };
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp
 
 
 #endif//SP2_LAZY_LOADER_H

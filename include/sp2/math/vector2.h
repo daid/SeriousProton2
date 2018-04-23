@@ -74,7 +74,7 @@ template <typename T> static inline std::ostream& operator<<(std::ostream& strea
     return stream;
 }
 
-};//!namespace sp
+};//namespace sp
 
 namespace std
 {

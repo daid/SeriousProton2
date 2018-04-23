@@ -35,6 +35,6 @@ public:
     bool operator<(const RenderData& data) const;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_RENDERDATA_H

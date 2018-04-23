@@ -14,5 +14,5 @@ Callback::~Callback()
     lua_settable(global_lua_state, LUA_REGISTRYINDEX);
 }
 
-};//!namespace script
-};//!namespace sp
+};//namespace script
+};//namespace sp

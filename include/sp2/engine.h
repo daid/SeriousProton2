@@ -45,7 +45,7 @@ private:
 #endif
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_ENGINE_H
 

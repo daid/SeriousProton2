@@ -22,7 +22,7 @@ private:
     string getType(KeyValueTreeNode& node, std::map<string, string>& parameters);
 };
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_LOADER_H

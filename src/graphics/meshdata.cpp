@@ -110,4 +110,4 @@ std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(Vector2f size, Vector2
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
-}//!namespace sp
+}//namespace sp

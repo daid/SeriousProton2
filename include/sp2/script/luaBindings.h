@@ -162,7 +162,7 @@ static inline string convertFromLua(typeIdentifier<string>, int index)
     return luaL_checkstring(global_lua_state, index);
 }
 
-};//!namespace script
-};//!namespace sp
+};//namespace script
+};//namespace sp
 
 #endif//SP2_SCRIPT_LUA_BINDINGS_H

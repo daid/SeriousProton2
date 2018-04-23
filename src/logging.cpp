@@ -41,4 +41,4 @@ void Logger::logEnd()
     *stream << "\n";
 }
 
-};//!namespace sp
+};//namespace sp

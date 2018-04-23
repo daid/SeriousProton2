@@ -17,7 +17,7 @@ public:
 private:
 };
 
-};//!namespace audio
-};//!namespace sp
+};//namespace audio
+};//namespace sp
 
 #endif//SP2_AUDIO_MUSIC_H

@@ -19,4 +19,4 @@ void RenderPass::onPointerUp(Vector2d position, int id)
 {
 }
 
-};//!namespace sp
+};//namespace sp

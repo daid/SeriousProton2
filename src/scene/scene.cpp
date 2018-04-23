@@ -326,4 +326,4 @@ void Scene::queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vect
     }
 }
 
-};//!namespace sp
+};//namespace sp

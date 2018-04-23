@@ -235,4 +235,4 @@ bool Window::anyWindowOpen()
     return false;
 }
 
-};//!namespace sp
+};//namespace sp

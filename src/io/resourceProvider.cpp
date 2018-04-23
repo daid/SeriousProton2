@@ -88,5 +88,5 @@ std::vector<string> ResourceProvider::find(string search_pattern)
     return found_files;
 }
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp

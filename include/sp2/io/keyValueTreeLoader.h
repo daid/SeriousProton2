@@ -20,7 +20,7 @@ private:
     void parseNode(KeyValueTreeNode* node);
 };
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp
 
 #endif//SP2_IO_KEYVALUETREE_LOADER_H

@@ -43,8 +43,8 @@ private:
     std::condition_variable condition;
 };
 
-};//!namespace threading
-};//!namespace sp
+};//namespace threading
+};//namespace sp
 
 
 #endif//SP2_THREADING_QUEUE_H

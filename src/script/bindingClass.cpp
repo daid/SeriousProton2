@@ -32,4 +32,4 @@ void ScriptBindingClass::bind(sp::string name, sp::script::Callback& callback)
     lua_settable(sp::script::global_lua_state, -3);
 }
 
-};//!namespace sp
+};//namespace sp

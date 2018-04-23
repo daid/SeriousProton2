@@ -409,5 +409,5 @@ int Serializer::Handler::addToStringTable(string str)
     return it->second;
 }
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp

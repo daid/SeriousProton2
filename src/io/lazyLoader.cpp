@@ -23,5 +23,5 @@ void LazyLoaderManager::addWork(std::function<void()> f)
     }
 }
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp

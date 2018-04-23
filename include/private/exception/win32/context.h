@@ -42,7 +42,7 @@ public:
     STACKFRAME64 stack_frame;
 };
 
-};//!namespace exception
-};//!namespace sp
+};//namespace exception
+};//namespace sp
 
 #endif//SP2_EXCEPTION_DUMMY_CONTEXT_H

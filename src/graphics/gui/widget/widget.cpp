@@ -479,5 +479,5 @@ std::shared_ptr<MeshData> Widget::createStretchedHV(Vector2d size, double corner
     return MeshData::create(std::move(vertices), std::move(indices));
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

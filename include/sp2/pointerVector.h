@@ -149,6 +149,6 @@ private:
     std::vector<P<T>> items;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_POINTER_VECTOR_H

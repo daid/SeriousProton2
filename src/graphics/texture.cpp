@@ -4,4 +4,4 @@
 
 namespace sp {
 
-};//!namespace sp
+};//namespace sp

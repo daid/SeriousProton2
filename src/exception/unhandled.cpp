@@ -67,5 +67,5 @@ void setUnhandledExceptionCallback(UnhandledExceptionCallback callback)
     unhandled_exception_callback = callback;
 }
 
-};//!namespace exception
-};//!namespace sp
+};//namespace exception
+};//namespace sp

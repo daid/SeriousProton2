@@ -114,5 +114,5 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
     }
 }
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp

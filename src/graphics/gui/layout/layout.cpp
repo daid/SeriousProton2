@@ -108,5 +108,5 @@ void Layout::basicLayout(Vector2d position, Vector2d size, Widget* widget)
     widget->updateLayout(result_position, result_size);
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

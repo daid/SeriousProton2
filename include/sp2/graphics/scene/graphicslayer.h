@@ -29,6 +29,6 @@ private:
     std::map<string, sf::RenderTexture*> targets;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_GRAPHICSLAYER_H

@@ -141,5 +141,5 @@ bool Subprocess::isRunning()
 #endif//__linux__
 }
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp

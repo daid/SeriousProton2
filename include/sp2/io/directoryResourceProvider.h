@@ -21,7 +21,7 @@ private:
     void findResources(std::vector<string>& found_files, const string path, const string search_pattern);
 };
 
-};//!namespace io
-};//!namespace sp
+};//namespace io
+};//namespace sp
 
 #endif//SP2_IO_DIRECTORYRESOURCEPROVIDER_H

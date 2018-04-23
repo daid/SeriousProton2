@@ -49,4 +49,4 @@ Shader::Shader()
 {
 }
 
-};//!namespace sp
+};//namespace sp

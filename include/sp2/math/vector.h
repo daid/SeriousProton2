@@ -19,6 +19,6 @@ template <typename T> T angleDifference(const T& angle_a, const T& angle_b)
     return ret;
 }
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_MATH_VECTOR_H

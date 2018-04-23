@@ -371,6 +371,6 @@ public:
     }
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_POINTER_VECTOR_H

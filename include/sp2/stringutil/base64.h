@@ -10,9 +10,9 @@ namespace base64 {
 string encode(string data);
 string decode(string data);
 
-};//!namespace base64
-};//!namespace stringutil
-};//!namespace sp
+};//namespace base64
+};//namespace stringutil
+};//namespace sp
 
 #endif//SP2_STRINGUTIL_BASE64_H
 

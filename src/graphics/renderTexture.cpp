@@ -45,4 +45,4 @@ sf::RenderTarget& RenderTexture::activateRenderTarget()
     return render_texture[index];
 }
 
-};//!namespace sp
+};//namespace sp

@@ -2,11 +2,12 @@
 #define SP2_TWEEN_H
 
 #include <sp2/graphics/color.h>
-/**
-Tweening functions. Allows for none-linear effects and stuff.
- */
+
 namespace sp {
 
+/** Tweening functions.
+    Allows for none-linear effects and stuff.
+ */
 template<typename T> class Tween
 {
 protected:
@@ -46,6 +47,6 @@ public:
 
 template<> Color Tween<Color>::tweenApply(float f, const Color& value0, const Color& value1);
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_TWEEN_H

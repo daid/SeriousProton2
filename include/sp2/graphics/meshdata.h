@@ -52,6 +52,10 @@ public:
     
     void render();
     void update(Vertices&& vertices, Indices&& indices);
+
+    int getRevision() { return revision; }
+    const Vertices& getVertices() { return vertices; }
+    const Indices& getIndices() { return indices; }
     
     static std::shared_ptr<MeshData> create(Vertices&& vertices, Indices&& indices, Type type=Type::Static);
     static std::shared_ptr<MeshData> createQuad(Vector2f size, Vector2f uv0=Vector2f(0, 0), Vector2f uv1=Vector2f(1, 1));
@@ -69,6 +73,6 @@ private:
     MeshData(Type type);
 };
 
-}//!namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_MESHDATA_H

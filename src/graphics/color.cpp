@@ -29,4 +29,4 @@ HsvColor::HsvColor(const sp::Color& color)
         hue += 360.0;
 }
 
-};//!namespace sp
+};//namespace sp

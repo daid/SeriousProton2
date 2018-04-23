@@ -100,5 +100,5 @@ bool Environment::load(sp::io::ResourceStreamPtr resource)
     return true;
 }
 
-};//!namespace script
-};//!namespace sp
+};//namespace script
+};//namespace sp

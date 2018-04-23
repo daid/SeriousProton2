@@ -62,7 +62,7 @@ public:
     virtual void onEnable() {}
     virtual void onDisable() {}
     
-    string getSceneName() const { return scene_name; }
+    string getName() const { return scene_name; }
     
     friend class collision::Shape2D;
     friend class CollisionRenderPass;
@@ -88,6 +88,6 @@ private:
     static PList<Scene> scenes;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_SCENE_SCENE_H

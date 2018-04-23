@@ -161,4 +161,4 @@ void Engine::shutdown()
         window->render_window.close();
 }
 
-};//!namespace sp
+};//namespace sp

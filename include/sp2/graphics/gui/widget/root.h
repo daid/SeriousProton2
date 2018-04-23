@@ -16,7 +16,7 @@ private:
     Vector2d gui_size;
 };
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_ROOT_H

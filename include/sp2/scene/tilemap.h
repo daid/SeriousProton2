@@ -49,6 +49,6 @@ private:
     friend class TilemapCollisionBuilder;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_SCENE_TILEMAP_NODE_H

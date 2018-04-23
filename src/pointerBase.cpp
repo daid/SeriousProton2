@@ -52,4 +52,4 @@ void _PBase::take(_PBase& p)
     p.ptr = nullptr;
 }
 
-}//!namespace sp
+}//namespace sp

@@ -81,7 +81,7 @@ private:
     uint64_t previous_id;
 };
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp
 
 #endif//SP2_MULTIPLAYER_REPLICATION_H

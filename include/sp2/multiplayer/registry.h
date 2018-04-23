@@ -46,7 +46,7 @@ template<class T> Node* __objectCreateFunction(P<Node> parent)
     return new T(parent);
 }
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp
 
 #endif//SP2_MULTIPLAYER_CLIENT_H

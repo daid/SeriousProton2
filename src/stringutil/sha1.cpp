@@ -115,5 +115,5 @@ string SHA1::base64()
     return base64::encode(result);
 }
 
-};//!namespace stringutil
-};//!namespace sp
+};//namespace stringutil
+};//namespace sp

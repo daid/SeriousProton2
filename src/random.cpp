@@ -29,4 +29,4 @@ int irandom(int imin, int imax)
     return std::uniform_int_distribution<>(imin, imax)(random_engine);
 }
 
-};//!namespace sp
+};//namespace sp

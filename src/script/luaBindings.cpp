@@ -80,5 +80,5 @@ int pushToLua(double f)
     return 1;
 }
 
-};//!namespace script
-};//!namespace sp
+};//namespace script
+};//namespace sp

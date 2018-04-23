@@ -37,8 +37,8 @@ sp::Vector2d toVector2d(const string& s);
 sp::Vector2f toVector2f(const string& s);
 sp::Vector2i toVector2i(const string& s);
 
-};//!namespace convert
-};//!namespace stringutil
-};//!namespace sp
+};//namespace convert
+};//namespace stringutil
+};//namespace sp
 
 #endif//SP2_STRINGUTIL_CONVERT_H

@@ -28,5 +28,5 @@ void VerticalFlowLayout::update(P<Widget> container, Vector2d size)
     }
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

@@ -224,4 +224,4 @@ void SpriteAnimation::Data::load(string resource_name)
 #endif
 }
 
-};//!namespace sp
+};//namespace sp

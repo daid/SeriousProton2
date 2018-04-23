@@ -108,6 +108,6 @@ template<typename T> static inline std::ostream& operator<<(std::ostream& os, co
     return os;
 }
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_POINTER_H

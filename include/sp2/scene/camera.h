@@ -40,6 +40,6 @@ private:
     sp::Matrix4x4d projection_matrix;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_SCENE_CAMERA_H

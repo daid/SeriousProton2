@@ -18,6 +18,6 @@ protected:
     friend class Scene;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SPRITE_MANAGER_H

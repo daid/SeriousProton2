@@ -51,4 +51,4 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
     }
 }
 
-};//!namespace sp
+};//namespace sp

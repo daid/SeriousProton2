@@ -199,4 +199,4 @@ void CollisionRenderPass::renderScene(Scene* scene, P<GraphicsLayer> layer, floa
     }
 }
 
-};//!namespace sp
+};//namespace sp

@@ -37,7 +37,7 @@ public:
     static constexpr uint64_t magic_sp2_value = 0x33a7a0651d1394b1;
 };
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp
 
 #endif//SP2_MULTIPLAYER_PACKET_IDS_H

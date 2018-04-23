@@ -112,5 +112,5 @@ string Loader::getType(KeyValueTreeNode& node, std::map<string, string>& paramet
     return "";
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

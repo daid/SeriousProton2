@@ -78,7 +78,7 @@ private:
     static void logEnd();
 };
 
-};//!namespace sp
+};//namespace sp
 
 #define LOG(level, ...) sp::Logger::log(sp::Logger::Level::level, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
 

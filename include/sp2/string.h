@@ -658,7 +658,7 @@ public:
 };
 #undef _WHITESPACE
 
-};//!namespace sp
+};//namespace sp
 
 namespace std
 {

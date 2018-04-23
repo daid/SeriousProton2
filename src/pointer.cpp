@@ -28,4 +28,4 @@ AutoPointerObject::~AutoPointerObject()
     }
 }
 
-};//!namespace sp
+};//namespace sp

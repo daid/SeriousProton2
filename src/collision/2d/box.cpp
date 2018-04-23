@@ -19,5 +19,5 @@ void Box2D::createFixture(b2Body* body) const
     createFixtureOnBody(body, &shape);
 }
 
-};//!namespace collision
-};//!namespace sp
+};//namespace collision
+};//namespace sp

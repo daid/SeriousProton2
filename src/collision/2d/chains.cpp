@@ -37,5 +37,5 @@ void Chains2D::createFixture(b2Body* body) const
     }
 }
 
-};//!namespace collision
-};//!namespace sp
+};//namespace collision
+};//namespace sp

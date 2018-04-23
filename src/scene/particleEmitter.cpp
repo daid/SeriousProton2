@@ -81,4 +81,4 @@ void ParticleEmitter::onUpdate(float delta)
         render_data.mesh->update(std::move(vertices), std::move(indices));
 }
 
-};//!namespace sp
+};//namespace sp

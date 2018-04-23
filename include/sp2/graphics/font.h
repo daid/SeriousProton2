@@ -81,6 +81,6 @@ private:
     friend class FontManager;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_FONT_H

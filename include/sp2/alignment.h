@@ -16,6 +16,6 @@ enum class Alignment
     BottomRight
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_ALIGNMENT_H

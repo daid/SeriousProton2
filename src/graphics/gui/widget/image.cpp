@@ -46,5 +46,5 @@ void Image::updateRenderData()
     render_data.texture = textureManager.get(texture);
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

@@ -386,6 +386,6 @@ void Server::Connection::sendWebsocketTextPacket(string data)
     socket.send(data.data(), data.size());
 }
 
-};//!namespace http
-};//!namespace io
-};//!namespace sp
+};//namespace http
+};//namespace io
+};//namespace sp

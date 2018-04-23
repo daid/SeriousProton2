@@ -62,4 +62,4 @@ sp::Vector2f Camera::worldToScreen(sp::Vector2d position)
     return (sp::Vector2f(screen_position_normalized) + sp::Vector2f(1, 1)) / 2.0f;
 }
 
-};//!namespace sp
+};//namespace sp

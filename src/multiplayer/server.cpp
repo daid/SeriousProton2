@@ -204,7 +204,7 @@ void Server::buildCreatePacket(sf::Packet& packet, Node* node)
     {
         //This node is the root node of a scene, so setup our scene information.
         P<Scene> scene = node->getScene();
-        packet << PacketIDs::setup_scene << node->multiplayer.getId() << scene->getSceneName();
+        packet << PacketIDs::setup_scene << node->multiplayer.getId() << scene->getName();
     }
 }
 
@@ -232,5 +232,5 @@ void Server::sendToAllConnectedClients(sf::Packet& packet)
     }
 }
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp

@@ -18,6 +18,6 @@ public:
     virtual void onPointerUp(Vector2d position, int id);
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_RENDERPASS_H

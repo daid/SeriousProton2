@@ -16,7 +16,7 @@ public:
 typedef std::function<void(const UnhandledExceptionInfo& info)> UnhandledExceptionCallback;
 void setUnhandledExceptionCallback(UnhandledExceptionCallback callback);
 
-};//!namespace exception
-};//!namespace sp
+};//namespace exception
+};//namespace sp
 
 #endif//SP2_EXCEPTION_UNHANDLED_H

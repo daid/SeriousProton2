@@ -56,6 +56,6 @@ Vector2i toVector2i(const string& s)
     return Vector2i(i, i);
 }
 
-};//!namespace convert
-};//!namespace stringutil
-};//!namespace sp
+};//namespace convert
+};//namespace stringutil
+};//namespace sp

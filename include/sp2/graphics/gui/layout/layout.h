@@ -39,7 +39,7 @@ public:
 #define SP_REGISTER_LAYOUT(name, class_name) \
     sp::gui::LayoutClassRegistry layout_class_registry ## class_name (name, []() { return new class_name(); });
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_LAYOUT_H

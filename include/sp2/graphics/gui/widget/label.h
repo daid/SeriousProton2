@@ -29,8 +29,8 @@ private:
     int texture_revision;
 };
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_LABEL_H
 

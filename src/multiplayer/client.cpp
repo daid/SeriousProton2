@@ -148,5 +148,5 @@ void Client::send(sf::Packet& packet)
 }
 
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp

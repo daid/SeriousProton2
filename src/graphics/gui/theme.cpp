@@ -121,5 +121,5 @@ Theme::~Theme()
 {
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

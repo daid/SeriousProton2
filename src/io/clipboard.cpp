@@ -103,5 +103,5 @@ void Clipboard::set(string value)
     virtual_clipboard = value;
 }
 
-};//!namespace sp
-};//!namespace io
+};//namespace sp
+};//namespace io

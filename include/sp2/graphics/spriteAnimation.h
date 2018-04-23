@@ -65,6 +65,6 @@ private:
     static std::map<string, Data*> cache;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_GRAPHICS_SPRITE_ANIMATION_H

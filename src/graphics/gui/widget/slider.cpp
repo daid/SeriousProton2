@@ -104,5 +104,5 @@ void Slider::onPointerUp(Vector2d position, int id)
 {
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

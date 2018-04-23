@@ -12,4 +12,4 @@ Font* FontManager::load(string name)
     return new FreetypeFont(name, stream);
 }
 
-};//!namespace sp
+};//namespace sp

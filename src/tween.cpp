@@ -12,4 +12,4 @@ template<> Color Tween<Color>::tweenApply(float f, const Color& value0, const Co
     );
 }
 
-};//!namespace sp
+};//namespace sp

@@ -8,7 +8,7 @@ namespace exception {
 
 void fillAddressInfoFromCoffSymbols(Win32ExceptionContext& exception_context, AddressInfo& info);
 
-};//!namespace exception
-};//!namespace sp
+};//namespace exception
+};//namespace sp
 
 #endif//SP2_EXCEPTION_DUMMY_CONTEXT_H

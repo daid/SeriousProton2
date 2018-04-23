@@ -98,4 +98,4 @@ sf::Texture* TextureManager::loadFallback()
 }
 */
 
-};//!namespace sp
+};//namespace sp

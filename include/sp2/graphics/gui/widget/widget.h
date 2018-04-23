@@ -180,7 +180,7 @@ public:
 #define SP_REGISTER_WIDGET(name, class_name) \
     sp::gui::WidgetClassRegistry widget_class_registry ## class_name (name, [](sp::P<sp::gui::Widget> parent) { return new class_name(parent); });
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_WIDGET_H

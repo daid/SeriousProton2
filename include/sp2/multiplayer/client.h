@@ -42,7 +42,7 @@ private:
     friend class ::sp::Engine;
 };
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp
 
 #endif//SP2_MULTIPLAYER_CLIENT_H

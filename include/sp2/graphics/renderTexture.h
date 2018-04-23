@@ -36,6 +36,6 @@ private:
     sf::RenderTexture render_texture[2];
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//RENDER_TEXTURE_H

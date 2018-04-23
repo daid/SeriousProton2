@@ -103,5 +103,5 @@ void Progressbar::updateRenderData()
     }
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

@@ -90,4 +90,4 @@ void SceneGraphicsLayer::createRenderTarget(string name)
     targets[name] = new sf::RenderTexture();
 }
 
-};//!namespace sp
+};//namespace sp

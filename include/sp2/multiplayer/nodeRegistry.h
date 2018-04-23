@@ -27,7 +27,7 @@ private:
     std::unordered_map<uint64_t, P<Node>> node_by_id;
 };
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp
 
 #endif//SP2_MULTIPLAYER_OBJECT_REGISTRY_H

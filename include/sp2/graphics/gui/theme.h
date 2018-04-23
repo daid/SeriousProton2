@@ -58,7 +58,7 @@ private:
     static std::map<string, P<Theme>> themes;
 };
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_THEME_H

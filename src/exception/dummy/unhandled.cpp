@@ -7,5 +7,5 @@ void __attribute__((weak)) setupUnhandledExceptionHandler()
 {
 }
 
-};//!namespace exception
-};//!namespace sp
+};//namespace exception
+};//namespace sp

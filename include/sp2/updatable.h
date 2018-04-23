@@ -22,6 +22,6 @@ private:
     friend class Engine;
 };
 
-};//!namespace sp
+};//namespace sp
 
 #endif//SP2_UPDATABLE_H

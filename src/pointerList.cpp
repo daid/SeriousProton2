@@ -97,4 +97,4 @@ void _PListBase::insert(AutoPointerObject* item)
     list_end = new_entry;
 }
 
-};//!namespace sp
+};//namespace sp

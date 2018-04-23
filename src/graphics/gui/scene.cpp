@@ -102,5 +102,5 @@ P<RootWidget> Scene::getRootWidget()
     return root_widget;
 }
 
-};//!namespace gui
-};//!namespace sp
+};//namespace gui
+};//namespace sp

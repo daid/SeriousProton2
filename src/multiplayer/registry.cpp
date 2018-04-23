@@ -23,5 +23,5 @@ void ClassEntry::fillMappings()
     }
 }
 
-};//!namespace multiplayer
-};//!namespace sp
+};//namespace multiplayer
+};//namespace sp

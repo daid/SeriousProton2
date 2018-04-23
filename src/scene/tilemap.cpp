@@ -316,4 +316,4 @@ void Tilemap::updateCollision()
     setCollisionShape(builder.result);
 }
 
-};//!namespace sp
+};//namespace sp
