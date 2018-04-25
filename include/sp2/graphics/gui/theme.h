@@ -10,22 +10,6 @@ namespace sp {
 class Font;
 namespace gui {
 
-/**
-    A theme is used to style different widgets.
-    A single theme contains information on how to style different widget elements.
-    
-    Each element describes the the following properties:
-    * background image
-    * background color
-    * font
-    * text size
-    * text color
-    With the possibility to distingish with the following states:
-    * normal
-    * disabled
-    * focused
-    * hover
-**/
 class ThemeData
 {
 public:
@@ -40,6 +24,24 @@ public:
     StateData states[int(Widget::State::Count)];
 };
 
+/** The Theme class is used by the sp::gui::widget classes to style themselves.
+    
+    Themes are loaded from a text resource, and referenced from sp::gui::widget classes.
+
+    A single theme contains information on how to style different widget elements.
+    
+    Each element describes the the following properties:
+    - texture
+    - color
+    - font
+    - size
+   
+    With the possibility to distingish with the following states:
+    - normal: Default state
+    - disabled: When enabled is false
+    - focused: When this gui element has keyboard focus (last clicked)
+    - hover: When the mouse pointer is on top of it
+**/
 class Theme : public AutoPointerObject
 {
 public:
