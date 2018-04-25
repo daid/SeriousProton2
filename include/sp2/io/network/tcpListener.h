@@ -26,6 +26,12 @@ public:
     bool accept(TcpSocket& socket);
 
     void setBlocking(bool blocking);
+
+private:
+    bool isLastErrorNonBlocking();
+
+    int handle = -1;
+    bool blocking = true;
 };
 
 };//namespace network

@@ -36,7 +36,9 @@ private:
 
     std::string send_queue;
     bool blocking = true;
-    int handle;
+    int handle = -1;
+    
+    friend class TcpListener;
 };
 
 };//namespace network
