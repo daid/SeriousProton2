@@ -1,8 +1,8 @@
 #ifndef SP2_IO_NETWORK_TCP_SOCKET_H
 #define SP2_IO_NETWORK_TCP_SOCKET_H
 
-#include <sp2/nonCopyable.h>
 #include <sp2/io/network/address.h>
+#include <sp2/io/network/socketBase.h>
 
 
 namespace sp {
@@ -10,7 +10,7 @@ namespace io {
 namespace network {
 
 
-class TcpSocket : NonCopyable
+class TcpSocket : public SocketBase
 {
 public:
     TcpSocket();
@@ -28,15 +28,10 @@ public:
     //void send(const DataBuffer& buffer);
     //bool receive(DataBuffer& buffer);
 
-    void setBlocking(bool blocking);
-
 private:
-    bool isLastErrorNonBlocking();
     bool sendSendQueue();
 
     std::string send_queue;
-    bool blocking = true;
-    int handle = -1;
     
     friend class TcpListener;
 };

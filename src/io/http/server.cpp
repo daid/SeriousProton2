@@ -1,4 +1,5 @@
 #include <sp2/io/http/server.h>
+#include <sp2/io/network/selector.h>
 #include <sp2/stringutil/sha1.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/logging.h>
@@ -11,7 +12,7 @@ namespace http {
 
 Server::Server(int port_nr)
 {
-    if (listen_socket.listen(port_nr) != sf::Socket::Done)
+    if (!listen_socket.listen(port_nr))
     {
         LOG(Error, "Failed to listen on port:", port_nr, "for http server");
         return;
@@ -50,39 +51,38 @@ void Server::sendToWebsockets(string url, string data)
 
 void Server::handlerThread()
 {
-    sf::SocketSelector selector;
+    sp::io::network::Selector selector;
     selector.add(listen_socket);
     while(true)
     {
-        if (selector.wait(sf::milliseconds(1000)))
+        selector.wait(1000);
+
+        std::lock_guard<std::mutex> lock(mutex);
+        if (selector.isReady(listen_socket))
         {
-            std::lock_guard<std::mutex> lock(mutex);
-            if (selector.isReady(listen_socket))
+            connections.emplace_back(*this);
+            Connection& connection = connections.back();
+            listen_socket.accept(connection.socket);
+            selector.add(connection.socket);
+        }
+        for(auto it = connections.begin(); it != connections.end();)
+        {
+            Connection& connection = *it;
+            if (selector.isReady(connection.socket))
             {
-                connections.emplace_back(*this);
-                Connection& connection = connections.back();
-                listen_socket.accept(connection.socket);
-                selector.add(connection.socket);
-            }
-            for(auto it = connections.begin(); it != connections.end();)
-            {
-                Connection& connection = *it;
-                if (selector.isReady(connection.socket))
-                {
-                    if (connection.update())
-                    {
-                        it++;
-                    }
-                    else
-                    {
-                        selector.remove(connection.socket);
-                        it = connections.erase(it);
-                    }
-                }
-                else
+                if (connection.update())
                 {
                     it++;
                 }
+                else
+                {
+                    selector.remove(connection.socket);
+                    it = connections.erase(it);
+                }
+            }
+            else
+            {
+                it++;
             }
         }
     }
@@ -123,7 +123,8 @@ bool Server::Connection::update()
 {
     char receive_buffer[4096];
     size_t received_size;
-    if (socket.receive(receive_buffer, sizeof(receive_buffer) - buffer.size(), received_size) != sf::Socket::Done)
+    received_size = socket.receive(receive_buffer, sizeof(receive_buffer) - buffer.size());
+    if (received_size < 1)
         return false;
     buffer.resize(buffer.size() + received_size);
     memcpy(&buffer[buffer.size()] - received_size, receive_buffer, received_size);

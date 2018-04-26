@@ -139,38 +139,6 @@ size_t TcpSocket::receive(void* data, size_t size)
 //void send(const DataBuffer& buffer);
 //bool receive(DataBuffer& buffer);
 
-void TcpSocket::setBlocking(bool blocking)
-{
-    this->blocking = blocking;
-    if (!isConnected())
-        return;
-
-#ifdef __WIN32
-   unsigned long mode = blocking ? 0 : 1;
-   ::ioctlsocket(handle, FIONBIO, &mode);
-#else
-    int flags = ::fcntl(handle, F_GETFL, 0);
-    if (blocking)
-        flags &=~O_NONBLOCK;
-    else
-        flags |= O_NONBLOCK;
-    ::fcntl(handle, F_SETFL, flags);
-#endif
-}
-
-bool TcpSocket::isLastErrorNonBlocking()
-{
-#ifdef __WIN32
-    int error = ::WSAGetLastError();
-    if (error == WSAEWOULDBLOCK || error == WSAEALREADY)
-        return true;
-#else
-    if (errno == EAGAIN || errno == EINPROGRESS || errno == EWOULDBLOCK)
-        return true;
-#endif
-    return false;
-}
-
 bool TcpSocket::sendSendQueue()
 {
     if (send_queue.size() < 1)

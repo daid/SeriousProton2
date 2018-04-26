@@ -16,7 +16,10 @@ public:
     UdpSocket();
     UdpSocket(UdpSocket&& socket);
     ~UdpSocket();
-    
+
+    bool bind(int port);
+    void close();
+
     void send(const DataBuffer& buffer, const Address& address, int port);
     bool receive(DataBuffer& buffer, Address& address, int& port);
 

@@ -1,9 +1,8 @@
 #ifndef SP2_IO_NETWORK_TCP_LISTENER_H
 #define SP2_IO_NETWORK_TCP_LISTENER_H
 
-#include <sp2/nonCopyable.h>
-#include <sp2/string.h>
 #include <sp2/io/network/address.h>
+#include <sp2/io/network/socketBase.h>
 
 
 namespace sp {
@@ -12,7 +11,7 @@ namespace network {
 
 
 class TcpSocket;
-class TcpListener : NonCopyable
+class TcpListener : public SocketBase
 {
 public:
     TcpListener();
@@ -24,14 +23,6 @@ public:
     bool isListening();
 
     bool accept(TcpSocket& socket);
-
-    void setBlocking(bool blocking);
-
-private:
-    bool isLastErrorNonBlocking();
-
-    int handle = -1;
-    bool blocking = true;
 };
 
 };//namespace network

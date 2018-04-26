@@ -3,7 +3,8 @@
 
 #include <sp2/string.h>
 #include <sp2/updatable.h>
-#include <SFML/Network.hpp>
+#include <sp2/io/network/tcpListener.h>
+#include <sp2/io/network/tcpSocket.h>
 #include <list>
 #include <thread>
 #include <mutex>
@@ -52,14 +53,14 @@ private:
     std::map<string, std::function<string(const Request&)>> http_handlers;
     std::map<string, std::function<void(const string& data)>> websocket_handlers;
 
-    sf::TcpListener listen_socket;
+    sp::io::network::TcpListener listen_socket;
     
     class Connection : sp::NonCopyable
     {
     public:
         Connection(Server& server);
 
-        sf::TcpSocket socket;
+        sp::io::network::TcpSocket socket;
         string buffer;
         Server& server;
         

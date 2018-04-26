@@ -121,38 +121,6 @@ bool TcpListener::accept(TcpSocket& socket)
     return true;
 }
 
-void TcpListener::setBlocking(bool blocking)
-{
-    this->blocking = blocking;
-    if (!isListening())
-        return;
-
-#ifdef __WIN32
-   unsigned long mode = blocking ? 0 : 1;
-   ::ioctlsocket(handle, FIONBIO, &mode);
-#else
-    int flags = ::fcntl(handle, F_GETFL, 0);
-    if (blocking)
-        flags &=~O_NONBLOCK;
-    else
-        flags |= O_NONBLOCK;
-    ::fcntl(handle, F_SETFL, flags);
-#endif
-}
-
-bool TcpListener::isLastErrorNonBlocking()
-{
-#ifdef __WIN32
-    int error = WSAGetLastError();
-    if (error == WSAEWOULDBLOCK || error == WSAEALREADY)
-        return true;
-#else
-    if (errno == EAGAIN || errno == EINPROGRESS || errno == EWOULDBLOCK)
-        return true;
-#endif
-    return false;
-}
-
 };//namespace network
 };//namespace io
 };//namespace sp
