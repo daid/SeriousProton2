@@ -43,6 +43,7 @@ bool TcpListener::listen(int port)
         ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&optval, sizeof(int));
 
         struct sockaddr_in6 server_addr;
+        memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin6_family = AF_INET6;
         server_addr.sin6_addr = in6addr_any;
         server_addr.sin6_port = ::htons(port);
@@ -63,6 +64,7 @@ bool TcpListener::listen(int port)
         ::setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof(int));
 
         struct sockaddr_in server_addr;
+        memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
         server_addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
         server_addr.sin_port = ::htons(port);
@@ -116,7 +118,7 @@ bool TcpListener::accept(TcpSocket& socket)
         socket.close();
     socket.handle = result;
     socket.setBlocking(socket.blocking);
-    return false;
+    return true;
 }
 
 void TcpListener::setBlocking(bool blocking)
