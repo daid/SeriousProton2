@@ -3,7 +3,6 @@
 
 #include <sp2/graphics/scene/renderdata.h>
 #include <sp2/math/matrix4x4.h>
-#include <SFML/Graphics/RenderTarget.hpp>
 #include <vector>
 
 namespace sp {

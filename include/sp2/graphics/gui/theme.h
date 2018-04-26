@@ -3,7 +3,6 @@
 
 #include <sp2/string.h>
 #include <sp2/graphics/gui/widget/widget.h>
-#include <SFML/Graphics/Color.hpp>
 #include <map>
 
 namespace sp {

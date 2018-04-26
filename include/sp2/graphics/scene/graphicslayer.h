@@ -3,7 +3,6 @@
 
 #include <sp2/graphics/graphicslayer.h>
 #include <sp2/pointerList.h>
-#include <SFML/Graphics/RenderTexture.hpp>
 #include <map>
 
 namespace sp {
@@ -21,12 +20,10 @@ public:
     virtual void onPointerUp(Vector2d position, int id) override;
     
     void addRenderPass(P<RenderPass> render_pass);
-    void createRenderTarget(string name);
 private:
     std::map<int, P<RenderPass>> pointer_render_pass;
 
     PList<RenderPass> render_passes;
-    std::map<string, sf::RenderTexture*> targets;
 };
 
 };//namespace sp

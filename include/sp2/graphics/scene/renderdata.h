@@ -5,7 +5,6 @@
 #include <sp2/graphics/shader.h>
 #include <sp2/graphics/color.h>
 #include <sp2/graphics/texture.h>
-#include <SFML/Graphics/RenderTarget.hpp>
 #include <vector>
 #include <memory>
 

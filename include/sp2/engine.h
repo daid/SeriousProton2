@@ -1,7 +1,6 @@
 #ifndef SP2_ENGINE_H
 #define SP2_ENGINE_H
 
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 

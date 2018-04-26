@@ -5,7 +5,6 @@
 #include <sp2/pointer.h>
 #include <sp2/pointerList.h>
 #include <SFML/System/InputStream.hpp>
-#include <SFML/System/Time.hpp>
 #include <memory>
 #include <chrono>
 

@@ -8,8 +8,7 @@
 #include <sp2/variant.h>
 #include <sp2/alignment.h>
 #include <sp2/io/pointer.h>
-#include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/System/Time.hpp>
+
 
 namespace sp {
 namespace gui {

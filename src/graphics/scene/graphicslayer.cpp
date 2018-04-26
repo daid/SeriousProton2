@@ -85,9 +85,4 @@ void SceneGraphicsLayer::addRenderPass(P<RenderPass> render_pass)
     render_passes.add(render_pass);
 }
 
-void SceneGraphicsLayer::createRenderTarget(string name)
-{
-    targets[name] = new sf::RenderTexture();
-}
-
 };//namespace sp
