@@ -48,11 +48,11 @@ private:
     void* ft_face;
     void* ft_stream_rec;
     
-    //We need to keep the resource stream open, as the sf::Font instance keeps it open as well.
+    //We need to keep the resource stream open, as the freetype keeps it open as well.
     //So we store the reference here.
     io::ResourceStreamPtr font_resource_stream;
     
-    //Keep a cache of wrapped sf::Texture objects per font size
+    //Keep a cache of wrapped Texture objects per font size
     std::unordered_map<int, FreetypeFontTexture*> texture_cache;
     //Keep track of glyphs that are loaded in the texture already.
     //As soon as we load a new glyph, the texture becomes invalid and needs to be updated.

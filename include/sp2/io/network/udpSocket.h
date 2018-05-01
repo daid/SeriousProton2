@@ -20,6 +20,9 @@ public:
     bool bind(int port);
     void close();
 
+    void send(const void* data, size_t size);
+    size_t receive(void* data, size_t size);
+
     void send(const DataBuffer& buffer, const Address& address, int port);
     bool receive(DataBuffer& buffer, Address& address, int& port);
 
