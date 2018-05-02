@@ -51,6 +51,7 @@ bool TcpSocket::connect(const Address& host, int port)
         if (addr_info.family == AF_INET && sizeof(struct sockaddr_in) == addr_info.addr.length())
         {
             struct sockaddr_in server_addr;
+            memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             server_addr.sin_port = ::htons(port);
             if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
@@ -62,6 +63,7 @@ bool TcpSocket::connect(const Address& host, int port)
         if (addr_info.family == AF_INET6 && sizeof(struct sockaddr_in6) == addr_info.addr.length())
         {
             struct sockaddr_in6 server_addr;
+            memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             server_addr.sin6_port = ::htons(port);
             if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
