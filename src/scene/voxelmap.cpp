@@ -14,7 +14,7 @@ Voxelmap::Voxelmap(P<Node> parent, string texture, float voxel_size, int texture
 Voxelmap::Voxelmap(P<Node> parent, string texture, float voxel_size, int texture_tile_count_x, int texture_tile_count_y)
 : sp::Node(parent), voxel_size(voxel_size), texture_tile_count_x(texture_tile_count_x), texture_tile_count_y(texture_tile_count_y)
 {
-    render_data.shader = Shader::get("internal:basic.shader");
+    render_data.shader = Shader::get("internal:basic_shaded.shader");
     render_data.texture = textureManager.get(texture);
     render_data.type = RenderData::Type::Normal;
     render_data.order = -1;
@@ -133,10 +133,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(0, 0, 1);
-                    vertices.emplace_back(p0 + Vector3f(0, 0, voxel_size), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, 0, voxel_size - d.offset.z * voxel_size), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, voxel_size - d.offset.z * voxel_size), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, voxel_size - d.offset.z * voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, voxel_size - d.offset.z * voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
                 if (d.down_tile > -1 && !isSolid(sp::Vector3i(x, y, z - 1)))
                 {
@@ -151,10 +151,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(0, 0, -1);
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, 0, 0), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, 0), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, d.offset.z * voxel_size), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, d.offset.z * voxel_size), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, 0, d.offset.z * voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, d.offset.z * voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
                 if (d.front_tile > -1 && !isSolid(sp::Vector3i(x, y - 1, z)))
                 {
@@ -169,10 +169,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(0, -1, 0);
-                    vertices.emplace_back(p0 + Vector3f(0, 0, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, 0, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, d.offset.y * voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, d.offset.y * voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, d.offset.y * voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, d.offset.y * voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
                 if (d.back_tile > -1 && !isSolid(sp::Vector3i(x, y + 1, z)))
                 {
@@ -187,10 +187,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(0, 1, 0);
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size - d.offset.y * voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, voxel_size - d.offset.y * voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size - d.offset.y * voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(0, voxel_size - d.offset.y * voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
                 if (d.left_tile > -1 && !isSolid(sp::Vector3i(x - 1, y, z)))
                 {
@@ -205,10 +205,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(-1, 0, 0);
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, 0, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(0, 0, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(d.offset.x * voxel_size, voxel_size, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(d.offset.x * voxel_size, 0, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(d.offset.x * voxel_size, voxel_size, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(d.offset.x * voxel_size, 0, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
                 if (d.right_tile > -1 && !isSolid(sp::Vector3i(x + 1, y, z)))
                 {
@@ -223,10 +223,10 @@ void Voxelmap::updateMesh()
                     indices.emplace_back(vertices.size() + 3);
                     
                     sp::Vector3f normal(1, 0, 0);
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, 0, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
-                    vertices.emplace_back(p0 + Vector3f(voxel_size, voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size - d.offset.x * voxel_size, 0, 0), normal, Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size - d.offset.x * voxel_size, voxel_size, 0), normal, Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size - d.offset.x * voxel_size, 0, voxel_size), normal, Vector2f(u * fu + u_offset, v * fv + v_offset));
+                    vertices.emplace_back(p0 + Vector3f(voxel_size - d.offset.x * voxel_size, voxel_size, voxel_size), normal, Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
                 }
             }
         }

@@ -53,7 +53,7 @@ void main()
 {
     gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
     v_uv = gl_MultiTexCoord0.xy;
-    v_normal = (object_matrix * vec4(gl_Normal, 0.0)).xyz;
+    v_normal = (camera_matrix * object_matrix * vec4(gl_Normal, 0.0)).xyz;
     v_offset = (camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0)).xyz;
 }
 

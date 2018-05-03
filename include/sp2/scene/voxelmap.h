@@ -18,6 +18,7 @@ public:
         int front_tile = -1;
         int back_tile = -1;
         
+        sp::Vector3f offset;
         bool solid = true;
     };
 
