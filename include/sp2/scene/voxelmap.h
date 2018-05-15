@@ -11,6 +11,9 @@ public:
     class Data
     {
     public:
+        Data() {}
+        Data(int up, int side, int down) { up_tile = up; down_tile = down; left_tile = right_tile =  front_tile = back_tile = side; }
+    
         int up_tile = -1;
         int down_tile = -1;
         int left_tile = -1;

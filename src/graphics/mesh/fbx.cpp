@@ -240,7 +240,7 @@ std::shared_ptr<MeshData> FbxLoader::load(string resource_name)
         
         int idx0 = -1;
         int idx1 = -1;
-        for(int n=0; n<index_data.size(); n++)
+        for(unsigned int n=0; n<index_data.size(); n++)
         {
             int vertex_idx = index_data[n];
             if (vertex_idx < 0)

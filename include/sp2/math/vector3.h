@@ -26,19 +26,27 @@ public:
     {
     }
 
-    inline T length()
+    inline T length() const
     {
         return std::sqrt(x * x + y * y + z * z);
     }
     
-    inline Vector3<T> normalized()
+    inline Vector3<T> normalized() const
     {
         return *this / length();
     }
     
-    inline T dot(const Vector3<T>& v)
+    inline T dot(const Vector3<T>& v) const
     {
         return x * v.x + y * v.y + z * v.z;
+    }
+    
+    inline Vector3<T> cross(const Vector3<T>& v) const
+    {
+        return Vector3<T>(
+            y * v.z - z * v.y,
+            z * v.x - x * v.z, 
+            x * v.y - y * v.x);
     }
 };
 

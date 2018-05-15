@@ -116,6 +116,7 @@ void Node::setRotation(double rotation)
 void Node::setRotation(Quaterniond rotation)
 {
     this->rotation = rotation;
+    this->rotation.normalize();
     if (collision_body2d)
     {
         //TODO: Update collision body rotation

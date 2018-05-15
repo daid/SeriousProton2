@@ -57,6 +57,12 @@ public:
         return std::sqrt(x * x + y * y + z * z + w * w);
     }
     
+    Quaternion<T> normalized()
+    {
+        T len = std::sqrt(x * x + y * y + z * z + w * w);
+        return Quaternion<T>(x / len, y / len, z / len, w / len);
+    }
+    
     void normalize()
     {
         T len = std::sqrt(x * x + y * y + z * z + w * w);
@@ -66,7 +72,38 @@ public:
         w /= len;
     }
     
-    static Quaternion fromAxisAngle(Vector3<T> axis, T angle)
+    Quaternion slerp(const Quaternion<T>& other, T t)
+    {
+        Quaternion<T> v = other;
+        v.normalize();
+        T dot = x * other.x + y * other.y + z * other.z + w * other.w;
+        if (dot < 0)
+        {
+            v.x = -v.x;
+            v.y = -v.y;
+            v.z = -v.z;
+            v.w = -v.w;
+            dot = -dot;
+        }
+        if (dot > 0.9999)
+        {
+            Quaternion<T> result(x + (v.x - x) * t, y + (v.y - y) * t, z + (v.z - z) * t, w + (v.w - w) * t);
+            result.normalize();
+            return result;
+        }
+        
+        T theta_0 = std::acos(dot);
+        T theta = theta_0 * t;
+        T sin_theta = std::sin(theta);
+        T sin_theta_0 = std::sin(theta_0);
+
+        T s0 = std::cos(theta) - dot * sin_theta / sin_theta_0;
+        T s1 = sin_theta / sin_theta_0;
+
+        return Quaternion<T>(x * s0 + v.x * s1, y * s0 + v.y * s1, z * s0 + v.z * s1, w * s0 + v.w * s1);
+    }
+    
+    static Quaternion fromAxisAngle(const Vector3<T>& axis, T angle)
     {
         Vector3<T> a = axis.normalized();
         T half_angle = (angle / 2.0) / 180.0 * pi;
@@ -85,6 +122,12 @@ public:
         Quaternion q(0, 0, s, c);
         q.normalize();
         return q;
+    }
+    
+    static Quaternion fromVectorToVector(const Vector3<T> v0, const Vector3<T>& v1)
+    {
+        Vector3<T> a = v0.cross(v1);
+        return Quaternion<T>(a.x, a.y, a.z, std::sqrt(v0.dot(v0) + v1.dot(v1)) + v0.dot(v1));
     }
 };
 

@@ -65,6 +65,7 @@ void Voxelmap::setVoxelData(int index, const Data& data)
     if (int(voxel_data.size()) <= index)
         voxel_data.resize(index + 1);
     voxel_data[index] = data;
+    dirty = true;
 }
 
 Vector3i Voxelmap::getSize()
