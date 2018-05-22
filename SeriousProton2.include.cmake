@@ -6,15 +6,16 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
     find_package(SFML 2.3 REQUIRED system window graphics network audio)
     find_package(OpenGL REQUIRED)
+    find_package(zlib REQUIRED)
 
-    file(GLOB_RECURSE SP2_SOURCES
-        "${SERIOUS_PROTON2_BASE_DIR}/src/*.cpp"
-        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/lua/*.c"
-        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/json11/*.cpp"
-        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/GL/*.c"
-        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/Box2D/*.cpp"
-        "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/src/*.c"
-    )
+    file(GLOB_RECURSE SP2_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/src/*.cpp")
+    file(GLOB_RECURSE LUA_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/lua/*.c")
+    file(GLOB_RECURSE JSON11_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/json11/*.cpp")
+    file(GLOB_RECURSE GLEW_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/GL/*.c")
+    file(GLOB_RECURSE BOX2D_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/Box2D/*.cpp")
+    # file(GLOB_RECURSE BULLET_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/bullet/*.cpp")
+    file(GLOB_RECURSE FREETYPE_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/src/*.c")
+
     if(NOT WIN32)
         list(FILTER SP2_SOURCES EXCLUDE REGEX .*/win32/.*)
     endif()
@@ -43,30 +44,35 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
 
-    if(NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
-        set(CMAKE_CXX_STANDARD 11)
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    endif()
+    set(CMAKE_CXX_STANDARD 11)
+
+    add_library(box2d STATIC ${BOX2D_SOURCES})
+    target_include_directories(box2d PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
+    # add_library(bullet STATIC ${BULLET_SOURCES})
+    # target_include_directories(bullet PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs/bullet")
+    # target_compile_definitions(bullet PRIVATE "-DB3_USE_CLEW")
+    add_library(lua STATIC ${LUA_SOURCES})
+    target_include_directories(lua PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
+    add_library(glew STATIC ${GLEW_SOURCES})
+    target_include_directories(glew PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
+    target_link_libraries(glew ${OPENGL_LIBRARIES})
+    target_include_directories(glew PUBLIC ${OPENGL_INCLUDE_DIR})
+    add_library(json11 STATIC ${JSON11_SOURCES})
+    target_include_directories(json11 PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
+    add_library(sp2freetype STATIC ${FREETYPE_SOURCES})
+    target_include_directories(sp2freetype PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/include")
+    target_compile_definitions(sp2freetype PRIVATE "-DFT2_BUILD_LIBRARY")
 
     add_executable(${EXECUTABLE_NAME} ${ARGN} ${SP2_SOURCES})
-
+    target_link_libraries(${EXECUTABLE_NAME} PUBLIC box2d lua glew json11 sp2freetype)
     target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/include")
-    target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
-    target_include_directories(${EXECUTABLE_NAME} PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs/freetype-2.9/include")
-    add_definitions("-DFT2_BUILD_LIBRARY")
-
-    target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES})
-    target_include_directories(${EXECUTABLE_NAME} PUBLIC ${SFML_INCLUDE_DIR})
-
-    target_link_libraries(${EXECUTABLE_NAME} ${OPENGL_LIBRARIES})
-    target_include_directories(${EXECUTABLE_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
-
+    target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${SFML_LIBRARIES} ${ZLIB_LIBRARIES})
+    target_include_directories(${EXECUTABLE_NAME} PUBLIC ${SFML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
     if(WIN32)
-        target_link_libraries(${EXECUTABLE_NAME} dbghelp psapi wsock32 iphlpapi)
+        target_link_libraries(${EXECUTABLE_NAME} PUBLIC dbghelp psapi ws2_32 iphlpapi)
     endif()
     if(UNIX)
         find_package(Threads)
-        target_link_libraries(${EXECUTABLE_NAME} ${CMAKE_THREAD_LIBS_INIT})
+        target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     endif()
 endmacro()
