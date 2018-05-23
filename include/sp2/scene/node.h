@@ -10,6 +10,7 @@
 #include <sp2/multiplayer/replication.h>
 
 class b2Body;
+class btRigidBody;
 
 namespace sp {
 namespace multiplayer {
@@ -19,6 +20,7 @@ class Client;
 namespace collision {
 class Shape;
 class Shape2D;
+class Shape3D;
 }
 class Node;
 class CollisionInfo
@@ -121,7 +123,8 @@ private:
     P<Scene> scene;
     P<Node> parent;
     PList<Node> children;
-    b2Body* collision_body2d;
+    b2Body* collision_body2d = nullptr;
+    btRigidBody* collision_body3d = nullptr;
     
     Vector3d translation;
     Quaterniond rotation;
@@ -137,6 +140,7 @@ private:
 
     friend class Scene;
     friend class collision::Shape2D;
+    friend class collision::Shape3D;
 };
 
 };//namespace sp

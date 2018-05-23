@@ -18,6 +18,7 @@ void Shape2D::create(Node* node) const
     b2World* world = node->getScene()->collision_world2d;
 
     sp2assert(node->parent == node->getScene()->getRoot(), "2D collision shapes can only be added to top level nodes.");
+    sp2assert(node->collision_body3d == nullptr, "When setting a 2D collision shape, the node should not have a 3D collision shape");
 
     if (!node->collision_body2d)
     {

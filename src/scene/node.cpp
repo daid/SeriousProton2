@@ -6,7 +6,9 @@
 #include <sp2/multiplayer/server.h>
 #include <sp2/multiplayer/registry.h>
 #include <Box2D/Box2D.h>
+#include <btBulletDynamicsCommon.h>
 #include <private/collision/box2dVector.h>
+#include <private/collision/bulletVector.h>
 #include <cmath>
 #include <typeindex>
 
@@ -21,7 +23,6 @@ Node::Node(P<Node> parent)
     
     scene = parent->scene;
     parent->children.add(this);
-    collision_body2d = nullptr;
     
     local_transform = Matrix4x4d::identity();
     updateGlobalTransform();
@@ -40,7 +41,9 @@ Node::Node(Scene* scene)
 Node::~Node()
 {
     if (collision_body2d)
-        scene->destroyCollisionBody2D(collision_body2d);
+        scene->destroyCollisionBody(collision_body2d);
+    if (collision_body3d)
+        scene->destroyCollisionBody(collision_body3d);
     for(Node* child : children)
         delete child;
 }
@@ -87,9 +90,9 @@ void Node::setPosition(sp::Vector2d position)
     translation.x = position.x;
     translation.y = position.y;
     if (collision_body2d)
-    {
         collision_body2d->SetTransform(toVector(position), collision_body2d->GetAngle());
-    }
+    if (collision_body3d)
+        collision_body3d->getWorldTransform().setOrigin(toVector(sp::Vector3d(position.x, position.y, 0)));
     updateLocalTransform();
 }
 
@@ -97,8 +100,11 @@ void Node::setPosition(sp::Vector3d position)
 {
     translation = position;
     if (collision_body2d)
-    {
         collision_body2d->SetTransform(toVector(sp::Vector2d(translation.x, translation.y)), collision_body2d->GetAngle());
+    if (collision_body3d)
+    {
+        collision_body3d->getWorldTransform().setOrigin(toVector(position));
+        collision_body3d->activate();
     }
     updateLocalTransform();
 }
@@ -107,9 +113,9 @@ void Node::setRotation(double rotation)
 {
     this->rotation = Quaterniond::fromAngle(rotation);
     if (collision_body2d)
-    {
         collision_body2d->SetTransform(collision_body2d->GetPosition(), rotation / 180.0 * pi);
-    }
+    if (collision_body3d)
+        collision_body3d->getWorldTransform().setRotation(toQuadernion(this->rotation));
     updateLocalTransform();
 }
 
@@ -118,18 +124,28 @@ void Node::setRotation(Quaterniond rotation)
     this->rotation = rotation;
     this->rotation.normalize();
     if (collision_body2d)
-    {
-        //TODO: Update collision body rotation
-        //collision_body2d->SetTransform(collision_body2d->GetPosition(), rotation / 180.0 * pi);
-    }
+        collision_body2d->SetTransform(collision_body2d->GetPosition(), getRotation2D() / 180.0 * pi);
+    if (collision_body3d)
+        collision_body3d->getWorldTransform().setRotation(toQuadernion(rotation));
     updateLocalTransform();
 }
 
 void Node::setLinearVelocity(sp::Vector2d velocity)
 {
     if (collision_body2d)
-    {
         collision_body2d->SetLinearVelocity(toVector(velocity));
+    if (collision_body3d)
+        collision_body3d->setLinearVelocity(toVector(sp::Vector3d(velocity.x, velocity.y, 0)));
+}
+
+void Node::setLinearVelocity(Vector3d velocity)
+{
+    if (collision_body2d)
+        collision_body2d->SetLinearVelocity(toVector(sp::Vector2d(velocity.x, velocity.y)));
+    if (collision_body3d)
+    {
+        collision_body3d->setLinearVelocity(toVector(velocity));
+        collision_body3d->activate();
     }
 }
 
@@ -137,6 +153,8 @@ void Node::setAngularVelocity(double velocity)
 {
     if (collision_body2d)
         collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
+    if (collision_body3d)
+        collision_body3d->setAngularVelocity(btVector3(0, 0, velocity));
 }
 
 Vector2d Node::getPosition2D()
@@ -172,8 +190,11 @@ sp::Vector2d Node::getGlobalPoint2D(sp::Vector2d v)
 sp::Vector2d Node::getLinearVelocity2D()
 {
     if (collision_body2d)
-    {
         return toVector<double>(collision_body2d->GetLinearVelocity());
+    if (collision_body3d)
+    {
+        sp::Vector3d v = toVector<double>(collision_body3d->getLinearVelocity());
+        return sp::Vector2d(v.x, v.y);
     }
     return sp::Vector2d(0.0, 0.0);
 }
@@ -181,9 +202,7 @@ sp::Vector2d Node::getLinearVelocity2D()
 double Node::getAngularVelocity2D()
 {
     if (collision_body2d)
-    {
         return collision_body2d->GetAngularVelocity() / pi * 180.0f;
-    }
     return 0.0;
 }
 
@@ -205,7 +224,7 @@ void Node::setCollisionShape(const collision::Shape& shape)
 void Node::removeCollisionShape()
 {
     if (collision_body2d)
-        scene->destroyCollisionBody2D(collision_body2d);
+        scene->destroyCollisionBody(collision_body2d);
     collision_body2d = nullptr;
 }
 

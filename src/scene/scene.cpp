@@ -5,7 +5,9 @@
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <Box2D/Box2D.h>
+#include <btBulletDynamicsCommon.h>
 #include <private/collision/box2dVector.h>
+#include <private/collision/bulletVector.h>
 
 namespace sp {
 
@@ -16,7 +18,6 @@ Scene::Scene(string scene_name, int priority)
 : scene_name(scene_name), priority(priority)
 {
     root = new Node(this);
-    collision_world2d = nullptr;
     enabled = true;
 
     sp2assert(scene_mapping.find(scene_name) == scene_mapping.end(), "Cannot create two scenes with the same name.");
@@ -33,6 +34,14 @@ Scene::~Scene()
     root.destroy();
     if (collision_world2d)
         delete collision_world2d;
+    if (collision_world3d)
+    {
+        delete collision_world3d;
+        delete collision_solver3d;
+        delete collision_broadphase3d;
+        delete collision_dispatcher3d;
+        delete collision_configuration3d;
+    }
 
     scene_mapping.erase(scene_name);
 }
@@ -155,6 +164,31 @@ void Scene::fixedUpdate()
             }
         }
     }
+    if (collision_world3d)
+    {
+        collision_world3d->stepSimulation(Engine::fixed_update_delta);
+        //TODO: Collisions events
+        /*
+    int numManifolds = world->getDispatcher()->getNumManifolds();
+    for (int i = 0; i < numManifolds; i++)
+    {
+        btPersistentManifold* contactManifold =  world->getDispatcher()->getManifoldByIndexInternal(i);
+        const btCollisionObject* obA = contactManifold->getBody0();
+        const btCollisionObject* obB = contactManifold->getBody1();
+
+        int numContacts = contactManifold->getNumContacts();
+        for (int j = 0; j < numContacts; j++)
+        {
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            if (pt.getDistance() < 0.f)
+            {
+                const btVector3& ptA = pt.getPositionWorldOnA();
+                const btVector3& ptB = pt.getPositionWorldOnB();
+                const btVector3& normalOnB = pt.m_normalWorldOnB;
+            }
+        }
+    }        */
+    }
 }
 
 void Scene::postFixedUpdate(float delta)
@@ -165,6 +199,16 @@ void Scene::postFixedUpdate(float delta)
         {
             Node* node = (Node*)body->GetUserData();
             node->modifyPositionByPhysics(toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
+        }
+    }
+    if (collision_world3d)
+    {
+        for(int index=0; index<collision_world3d->getNumCollisionObjects(); index++)
+        {
+            btCollisionObject* obj = collision_world3d->getCollisionObjectArray()[index];
+            Node* node = (Node*)obj->getUserPointer();
+            btTransform transform = obj->getWorldTransform();
+            node->modifyPositionByPhysics(toVector<double>(transform.getOrigin()), toQuadernion<double>(transform.getRotation()));
         }
     }
 }
@@ -191,9 +235,17 @@ void Scene::fixedUpdateNode(P<Node> node)
     }
 }
 
-void Scene::destroyCollisionBody2D(b2Body* collision_body2d)
+void Scene::destroyCollisionBody(b2Body* collision_body2d)
 {
     collision_world2d->DestroyBody(collision_body2d);
+}
+
+void Scene::destroyCollisionBody(btRigidBody* collision_body3d)
+{
+    collision_world3d->removeCollisionObject(collision_body3d);
+    btCollisionShape* shape = collision_body3d->getCollisionShape();
+    delete collision_body3d;
+    delete shape;
 }
 
 class Box2DQueryCallback : public b2QueryCallback

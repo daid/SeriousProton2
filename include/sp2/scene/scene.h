@@ -13,10 +13,18 @@
 
 class b2World;
 class b2Body;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btBroadphaseInterface;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+class btRigidBody;
+
 
 namespace sp {
 namespace collision {
 class Shape2D;
+class Shape3D;
 }
 
 class Node;
@@ -55,7 +63,8 @@ public:
     //Return false to stop searching for colliding objects.
     void queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function);
     
-    void destroyCollisionBody2D(b2Body* collision_body2d);
+    void destroyCollisionBody(b2Body* collision_body2d);
+    void destroyCollisionBody(btRigidBody* collision_body3d);
     
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}
@@ -65,13 +74,19 @@ public:
     string getName() const { return scene_name; }
     
     friend class collision::Shape2D;
+    friend class collision::Shape3D;
     friend class CollisionRenderPass;
 private:
     string scene_name;
     
     P<Node> root;
     P<Camera> camera;
-    b2World* collision_world2d;
+    b2World* collision_world2d = nullptr;
+    btDefaultCollisionConfiguration* collision_configuration3d = nullptr;
+    btCollisionDispatcher* collision_dispatcher3d = nullptr;
+    btBroadphaseInterface* collision_broadphase3d = nullptr;
+    btSequentialImpulseConstraintSolver* collision_solver3d = nullptr;
+    btDiscreteDynamicsWorld* collision_world3d = nullptr;
     bool enabled;
     int priority;
 
