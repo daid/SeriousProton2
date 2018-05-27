@@ -6,10 +6,18 @@
 namespace sp {
 
 ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin origin)
-: sp::Node(parent)
+: sp::Node(parent), origin(origin)
 {
     particles.reserve(initial_buffer_size);
-    render_data.shader = Shader::get("internal:particle.shader");
+    switch(origin)
+    {
+    case Origin::Global:
+        render_data.shader = Shader::get("internal:global_particle.shader");
+        break;
+    case Origin::Local:
+        render_data.shader = Shader::get("internal:local_particle.shader");
+        break;
+    }
     render_data.texture = textureManager.get("particle.png");
     render_data.type = RenderData::Type::Transparent;
     
@@ -19,6 +27,11 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin
 void ParticleEmitter::emit(const Parameters& parameters)
 {
     particles.push_back(parameters);
+    if (origin == Origin::Global)
+    {
+        Parameters& p = particles.back();
+        p.position += sp::Vector3f(getGlobalPosition3D());
+    }
 }
 
 void ParticleEmitter::onUpdate(float delta)
@@ -31,7 +44,6 @@ void ParticleEmitter::onUpdate(float delta)
     for(auto it = particles.begin(); it != particles.end(); )
     {
         Parameters& particle = *it;
-        
         
         particle.velocity += particle.acceleration * delta;
         particle.position += particle.velocity * delta;

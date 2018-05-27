@@ -216,6 +216,16 @@ Quaterniond Node::getRotation3D()
     return rotation;
 }
 
+Vector3d Node::getGlobalPosition3D()
+{
+    return global_transform * Vector3d(0, 0, 0);
+}
+
+Vector3d Node::getGlobalPoint3D(Vector3d v)
+{
+    return global_transform * v;
+}
+
 void Node::setCollisionShape(const collision::Shape& shape)
 {
     shape.create(this);

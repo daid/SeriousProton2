@@ -66,6 +66,9 @@ public:
 
     Vector3d getPosition3D();
     Quaterniond getRotation3D();
+
+    Vector3d getGlobalPosition3D();
+    Vector3d getGlobalPoint3D(Vector3d v);
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     const Matrix4x4d& getLocalTransform() const { return local_transform; }

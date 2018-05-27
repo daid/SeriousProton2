@@ -57,7 +57,9 @@ public:
     virtual void onUpdate(float delta) override;
 protected:
     bool auto_destroy;
-public:
+
+private:
+    Origin origin;
     std::vector<Parameters> particles;
 };
 
