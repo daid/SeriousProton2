@@ -127,9 +127,9 @@ void Engine::run()
         fps_count++;
         if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
         {
-            double fps = double(fps_count) / fps_counter_clock.restart().asSeconds();
+            current_fps = double(fps_count) / fps_counter_clock.restart().asSeconds();
             fps_count = 0;
-            LOG(Debug, "FPS:", fps);
+            LOG(Debug, "FPS:", current_fps);
         }
     }
     LOG(Info, "Engine closing down");

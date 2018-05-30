@@ -1,8 +1,6 @@
 #ifndef SP2_MATH_VECTOR_H
 #define SP2_MATH_VECTOR_H
 
-#include "vector2.h"
-#include "vector3.h"
 #include <cmath>
 #include <ostream>
 
@@ -20,5 +18,8 @@ template <typename T> T angleDifference(const T& angle_a, const T& angle_b)
 }
 
 };//namespace sp
+
+#include "vector2.h"
+#include "vector3.h"
 
 #endif//SP2_MATH_VECTOR_H

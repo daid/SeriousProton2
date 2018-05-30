@@ -4,6 +4,8 @@
 #include <cmath>
 #include <ostream>
 
+#include <sp2/math/vector.h>
+
 namespace sp {
 
 template<typename T> class Vector2
@@ -48,7 +50,13 @@ public:
 
     T angle()
     {
-        return std::atan2(y, x) / 3.14159265358979323846 * 180.0f;
+        return std::atan2(y, x) / pi * 180.0f;
+    }
+
+    inline Vector2<T> rotate(T angle)
+    {
+        angle = angle / 180.0 * pi;
+        return Vector2<T>(std::cos(angle), std::sin(angle));
     }
 };
 

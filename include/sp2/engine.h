@@ -26,6 +26,8 @@ public:
     // Check if we are currently calling onUpdateFixed.
     bool isInFixedUpdate() { return in_fixed_update; }
     
+    float getFPS() { return current_fps; }
+    
     static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
@@ -39,6 +41,7 @@ private:
     float minimum_frame_time;
     float fixed_update_accumulator;
 
+    float current_fps = 0.0;
 #ifdef DEBUG
     bool single_step_enabled = false;
 #endif
