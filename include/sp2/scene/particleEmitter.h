@@ -55,7 +55,7 @@ public:
     void emit(const Parameters& parameters);
     
     virtual void onUpdate(float delta) override;
-protected:
+
     bool auto_destroy;
 
 private:

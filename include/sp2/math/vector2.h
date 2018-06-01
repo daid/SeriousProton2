@@ -56,7 +56,9 @@ public:
     inline Vector2<T> rotate(T angle)
     {
         angle = angle / 180.0 * pi;
-        return Vector2<T>(std::cos(angle), std::sin(angle));
+        T s = std::sin(angle);
+        T c = std::cos(angle);
+        return Vector2<T>(c * x - s * y, s * x + c * y);
     }
 };
 

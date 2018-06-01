@@ -97,6 +97,7 @@ void Window::createRenderWindow()
     render_window.setVerticalSyncEnabled(false);
     render_window.setFramerateLimit(60);
     render_window.setMouseCursorVisible(true);
+    render_window.setKeyRepeatEnabled(false);
     
     clear_color = Color(0.1, 0.1, 0.1);
 }
