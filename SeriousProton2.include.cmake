@@ -6,7 +6,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
     find_package(SFML 2.3 REQUIRED system window graphics network audio)
     find_package(OpenGL REQUIRED)
-    find_package(zlib REQUIRED)
+    find_package(ZLIB REQUIRED)
 
     file(GLOB_RECURSE SP2_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/src/*.cpp")
     file(GLOB_RECURSE LUA_SOURCES "${SERIOUS_PROTON2_BASE_DIR}/extlibs/lua/*.c")
