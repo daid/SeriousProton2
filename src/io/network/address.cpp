@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <ifaddrs.h>
 #include <errno.h>
 #endif
@@ -22,8 +23,8 @@ namespace network {
 
 Address::Address(string hostname)
 {
-    static bool wsa_startup_done = false;
 #ifdef __WIN32
+    static bool wsa_startup_done = false;
     if (!wsa_startup_done)
     {
         WSADATA wsa_data;
@@ -96,12 +97,17 @@ Address Address::getLocalAddress()
     struct ifaddrs* addrs;
     if (!::getifaddrs(&addrs))
     {
-        for(struct ifaddrs* addr = addrs, addr != nullptr; addr = addr->ifa_next)
+        for(struct ifaddrs* addr = addrs; addr != nullptr; addr = addr->ifa_next)
         {
-            if (addr->ifa_addr->sa_family == AF_INET || addr->ifa_addr->sa_family == AF_INET6)
+            if (addr->ifa_addr->sa_family == AF_INET)
             {
-                ::getnameinfo(addr->ifa_addr, addr->ifa_addrlen, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
-                addr_info.emplace_back(addr->ifa_addr->sa_family, buffer, ua->Address.lpSockaddr, ua->Address.iSockaddrLength);
+                ::getnameinfo(addr->ifa_addr, sizeof(struct sockaddr_in), buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
+                addr_info.emplace_back(addr->ifa_addr->sa_family, buffer, addr->ifa_addr, sizeof(struct sockaddr_in));
+            }
+            if (addr->ifa_addr->sa_family == AF_INET6)
+            {
+                ::getnameinfo(addr->ifa_addr, sizeof(struct sockaddr_in6), buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
+                addr_info.emplace_back(addr->ifa_addr->sa_family, buffer, addr->ifa_addr, sizeof(struct sockaddr_in6));
             }
         }
         freeifaddrs(addrs);

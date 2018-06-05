@@ -10,6 +10,8 @@ static constexpr int flags = 0;
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
+#include <netdb.h>
 static constexpr int flags = MSG_NOSIGNAL;
 #endif
 
@@ -165,7 +167,7 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
     {
         struct sockaddr_in6 from_addr;
         memset(&from_addr, 0, sizeof(from_addr));
-        int from_addr_len = sizeof(from_addr);
+        socklen_t from_addr_len = sizeof(from_addr);
         int result = ::recvfrom(handle, (char*)data, size, flags, (sockaddr*)&from_addr, &from_addr_len);
         if (result >= 0)
         {
@@ -190,7 +192,7 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
     {
         struct sockaddr_in from_addr;
         memset(&from_addr, 0, sizeof(from_addr));
-        int from_addr_len = sizeof(from_addr);
+        socklen_t from_addr_len = sizeof(from_addr);
         int result = ::recvfrom(handle, (char*)data, size, flags, (sockaddr*)&from_addr, &from_addr_len);
         if (result >= 0)
         {

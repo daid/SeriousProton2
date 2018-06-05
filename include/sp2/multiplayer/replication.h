@@ -4,6 +4,11 @@
 #include <sp2/multiplayer/nodeRegistry.h>
 #include <SFML/Network/Packet.hpp>
 
+//static inline sf::Packet& operator<<(sf::Packet& packet, uint16_t n) { return packet << sf::Uint16(n); }
+static inline sf::Packet& operator<<(sf::Packet& packet, const uint64_t& n) { return packet << sf::Uint64(n); }
+//static inline sf::Packet& operator>>(sf::Packet& packet, uint16_t& n) { sf::Uint16 _n; return packet >> _n; n = _n; }
+static inline sf::Packet& operator>>(sf::Packet& packet, uint64_t& n) { sf::Uint64 _n; return packet >> _n; n = _n; }
+
 namespace sp {
 namespace multiplayer {
 
@@ -67,7 +72,7 @@ public:
     virtual void send(NodeRegistry& registry, sf::Packet& packet) override
     {
         uint64_t id = object ? object.multiplayer.getId() : 0;
-        packet << id;
+        packet << sf::Uint64(id);
     }
     
     virtual void receive(NodeRegistry& registry, sf::Packet& packet) override

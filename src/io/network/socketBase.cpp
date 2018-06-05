@@ -11,6 +11,7 @@ static constexpr int flags = 0;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 static constexpr int flags = MSG_NOSIGNAL;
 #endif
 

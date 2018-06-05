@@ -60,7 +60,7 @@ void Server::onUpdate(float delta)
         if (node->multiplayer.replication_links.size() > 0)
         {
             sf::Packet packet;
-            packet << PacketIDs::update_object << node->multiplayer.getId();
+            packet << PacketIDs::update_object << sf::Uint64(node->multiplayer.getId());
             for(unsigned int n=0; n<node->multiplayer.replication_links.size(); n++)
             {
                 ReplicationLinkBase* replication_link = node->multiplayer.replication_links[n];
@@ -75,7 +75,7 @@ void Server::onUpdate(float delta)
     for(auto it = nodeBegin(); it != nodeEnd(); ++it)
     {
         sf::Packet packet;
-        packet << PacketIDs::update_object << it->second->multiplayer.getId();
+        packet << PacketIDs::update_object << sf::Uint64(it->second->multiplayer.getId());
         unsigned int zero_data_size = packet.getDataSize();
         for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
         {
@@ -102,7 +102,7 @@ void Server::onUpdate(float delta)
         next_client_id ++;
         client.state = ClientInfo::State::WaitingForAuthentication;
         sf::Packet packet;
-        packet << PacketIDs::request_authentication << PacketIDs::magic_sp2_value;
+        packet << PacketIDs::request_authentication << sf::Uint64(PacketIDs::magic_sp2_value);
         if (client.socket->send(packet) != sf::Socket::Done)
             client.send_queue.push_back(packet);
         clients.push_back(client);
@@ -146,7 +146,7 @@ void Server::onUpdate(float delta)
                         if (it->second->multiplayer.replication_links.size() > 0)
                         {
                             sf::Packet send_packet;
-                            send_packet << PacketIDs::update_object << it->first;
+                            send_packet << PacketIDs::update_object << sf::Uint64(it->first);
                             for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
                             {
                                 ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
@@ -198,20 +198,20 @@ void Server::buildCreatePacket(sf::Packet& packet, Node* node)
 
     if (parent)
     {
-        packet << PacketIDs::create_object << node->multiplayer.getId() << e->second << parent->multiplayer.getId();
+        packet << PacketIDs::create_object << sf::Uint64(node->multiplayer.getId()) << e->second << sf::Uint64(parent->multiplayer.getId());
     }
     else
     {
         //This node is the root node of a scene, so setup our scene information.
         P<Scene> scene = node->getScene();
-        packet << PacketIDs::setup_scene << node->multiplayer.getId() << scene->getName();
+        packet << PacketIDs::setup_scene << sf::Uint64(node->multiplayer.getId()) << scene->getName();
     }
 }
 
 void Server::onDeleted(uint64_t id)
 {
     sf::Packet packet;
-    packet << PacketIDs::delete_object << id;
+    packet << PacketIDs::delete_object << sf::Uint64(id);
     sendToAllConnectedClients(packet);
 }
 

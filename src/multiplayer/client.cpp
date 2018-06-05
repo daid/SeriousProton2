@@ -38,7 +38,7 @@ void Client::onUpdate(float delta)
         {
         case PacketIDs::request_authentication:{
             sf::Packet reply;
-            reply << PacketIDs::request_authentication << PacketIDs::magic_sp2_value;
+            reply << PacketIDs::request_authentication << sf::Uint64(PacketIDs::magic_sp2_value);
             send(reply);
             }break;
         case PacketIDs::set_client_id:{
