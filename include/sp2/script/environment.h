@@ -25,15 +25,16 @@ public:
         typedef RET(*FT)(ARGS...);
 
         //Get the environment table from the registry.
-        lua_pushlightuserdata(global_lua_state, this);
-        lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
         
-        lua_pushstring(global_lua_state, name.c_str());
         FT* f = reinterpret_cast<FT*>(lua_newuserdata(sp::script::global_lua_state, sizeof(FT)));
         *f = func;
         
         lua_pushcclosure(sp::script::global_lua_state, &script::callFunction<RET, ARGS...>, 1);
-        lua_settable(sp::script::global_lua_state, -3);
+        lua_setfield(sp::script::global_lua_state, -2, name.c_str());
+        
+        //Pop the table
+        lua_pop(global_lua_state, 1);
     }
     
     bool load(sp::io::ResourceStreamPtr resource);
@@ -41,9 +42,8 @@ public:
     template<typename... ARGS> bool call(string global_function, ARGS... args)
     {
         //Get the environment table from the registry.
-        lua_pushlightuserdata(global_lua_state, this);
-        lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
-        
+        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+
         lua_pushstring(sp::script::global_lua_state, global_function.c_str());
         lua_gettable(global_lua_state, -2);
         

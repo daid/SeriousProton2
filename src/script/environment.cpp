@@ -11,37 +11,32 @@ Environment::Environment()
 
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G}, "__ptr": this}    
-    lua_pushlightuserdata(global_lua_state, this);
     lua_newtable(global_lua_state); //environment
     
     lua_newtable(global_lua_state); //environment metatable
-    lua_pushstring(global_lua_state, "__index");
     lua_pushglobaltable(global_lua_state);
-    lua_rawset(global_lua_state, -3);
+    lua_setfield(global_lua_state, -2, "__index");
     lua_setmetatable(global_lua_state, -2);
     
     //Create __ptr in this environment.
     lua_pushlightuserdata(global_lua_state, this);
-    lua_pushstring(global_lua_state, "__ptr");
-    lua_rawset(global_lua_state, -3);
+    lua_setfield(global_lua_state, -2, "__ptr");
     
-    lua_settable(global_lua_state, LUA_REGISTRYINDEX);
+    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
 Environment::~Environment()
 {
     //Remove our environment from the registry.
     //REGISTRY[this] = nil
-    lua_pushlightuserdata(global_lua_state, this);
     lua_pushnil(global_lua_state);
-    lua_settable(global_lua_state, LUA_REGISTRYINDEX);
+    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
 void Environment::setGlobal(string name, lua_CFunction function)
 {
     //Get the environment table from the registry.
-    lua_pushlightuserdata(global_lua_state, this);
-    lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table, with our environment as first upvalue.
     lua_pushstring(global_lua_state, name.c_str());
@@ -56,13 +51,11 @@ void Environment::setGlobal(string name, lua_CFunction function)
 void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
 {
     //Get the environment table from the registry.
-    lua_pushlightuserdata(global_lua_state, this);
-    lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    lua_pushstring(global_lua_state, name.c_str());
     pushToLua(ptr);
-    lua_settable(global_lua_state, -3);
+    lua_setfield(global_lua_state, -2, name.c_str());
     
     //Pop the table
     lua_pop(global_lua_state, 1);
@@ -84,8 +77,7 @@ bool Environment::load(sp::io::ResourceStreamPtr resource)
     }
 
     //Get the environment table from the registry.
-    lua_pushlightuserdata(global_lua_state, this);
-    lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
     //set the environment table it as 1st upvalue
     lua_setupvalue(global_lua_state, -2, 1);
     
