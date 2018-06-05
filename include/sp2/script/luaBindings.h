@@ -64,9 +64,28 @@ template<class T> int pushToLua(T* obj)
 
 template<typename T> int pushToLua(Vector2<T> f)
 {
-    int x = pushToLua(f.x);
-    int y = pushToLua(f.y);
-    return x + y;
+    lua_newtable(global_lua_state);
+    luaL_getmetatable(global_lua_state, "vector2");
+    lua_setmetatable(global_lua_state, -2);
+    lua_pushnumber(global_lua_state, f.x);
+    lua_setfield(global_lua_state, -2, "x");
+    lua_pushnumber(global_lua_state, f.y);
+    lua_setfield(global_lua_state, -2, "y");
+    return 1;
+}
+
+template<typename T> int pushToLua(Vector3<T> f)
+{
+    lua_newtable(global_lua_state);
+    luaL_getmetatable(global_lua_state, "vector3");
+    lua_setmetatable(global_lua_state, -2);
+    lua_pushnumber(global_lua_state, f.x);
+    lua_setfield(global_lua_state, -2, "x");
+    lua_pushnumber(global_lua_state, f.y);
+    lua_setfield(global_lua_state, -2, "y");
+    lua_pushnumber(global_lua_state, f.z);
+    lua_setfield(global_lua_state, -2, "z");
+    return 1;
 }
 
 template<class TYPE, typename RET> class callClassHelper
@@ -160,6 +179,55 @@ static inline double convertFromLua(typeIdentifier<double>, int index)
 static inline string convertFromLua(typeIdentifier<string>, int index)
 {
     return luaL_checkstring(global_lua_state, index);
+}
+
+template<typename T> Vector2<T> convertFromLua(typeIdentifier<Vector2<T>>, int index)
+{
+    luaL_checktype(global_lua_state, index, LUA_TTABLE);
+    lua_getfield(global_lua_state, index, "x");
+    if (lua_isnil(global_lua_state, -1))
+    {
+        lua_pop(global_lua_state, 1);
+        lua_geti(global_lua_state, index, 1);
+    }
+    lua_getfield(global_lua_state, index, "y");
+    if (lua_isnil(global_lua_state, -1))
+    {
+        lua_pop(global_lua_state, 1);
+        lua_geti(global_lua_state, index, 2);
+    }
+    T x = lua_tonumber(global_lua_state, -2);
+    T y = lua_tonumber(global_lua_state, -1);
+    lua_pop(global_lua_state, 2);
+    return Vector2<T>(x, y);
+}
+
+template<typename T> Vector3<T> convertFromLua(typeIdentifier<Vector3<T>>, int index)
+{
+    luaL_checktype(global_lua_state, index, LUA_TTABLE);
+    lua_getfield(global_lua_state, index, "x");
+    if (lua_isnil(global_lua_state, -1))
+    {
+        lua_pop(global_lua_state, 1);
+        lua_geti(global_lua_state, index, 1);
+    }
+    lua_getfield(global_lua_state, index, "y");
+    if (lua_isnil(global_lua_state, -1))
+    {
+        lua_pop(global_lua_state, 1);
+        lua_geti(global_lua_state, index, 2);
+    }
+    lua_getfield(global_lua_state, index, "z");
+    if (lua_isnil(global_lua_state, -1))
+    {
+        lua_pop(global_lua_state, 1);
+        lua_geti(global_lua_state, index, 3);
+    }
+    T x = lua_tonumber(global_lua_state, -3);
+    T y = lua_tonumber(global_lua_state, -2);
+    T z = lua_tonumber(global_lua_state, -1);
+    lua_pop(global_lua_state, 3);
+    return Vector3<T>(x, y, z);
 }
 
 };//namespace script

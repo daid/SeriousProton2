@@ -30,6 +30,7 @@ static int luaLogFunction(lua_State* lua)
     return 0;
 }
 
+void addVectorMetatables();
 void createGlobalLuaState()
 {
     sp2assert(global_lua_state == nullptr, "createGlobalLuaState should only be called once");
@@ -54,6 +55,8 @@ void createGlobalLuaState()
     lua_pushcfunction(global_lua_state, lazyLoading);
     lua_settable(global_lua_state, -3);
     lua_pop(global_lua_state, 1);
+
+    addVectorMetatables();
 }
 
 int pushToLua(bool b)
