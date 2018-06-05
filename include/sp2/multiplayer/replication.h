@@ -4,10 +4,10 @@
 #include <sp2/multiplayer/nodeRegistry.h>
 #include <SFML/Network/Packet.hpp>
 
-//static inline sf::Packet& operator<<(sf::Packet& packet, uint16_t n) { return packet << sf::Uint16(n); }
+#ifndef __WIN32
 static inline sf::Packet& operator<<(sf::Packet& packet, const uint64_t& n) { return packet << sf::Uint64(n); }
-//static inline sf::Packet& operator>>(sf::Packet& packet, uint16_t& n) { sf::Uint16 _n; return packet >> _n; n = _n; }
 static inline sf::Packet& operator>>(sf::Packet& packet, uint64_t& n) { sf::Uint64 _n; return packet >> _n; n = _n; }
+#endif//__WIN32
 
 namespace sp {
 namespace multiplayer {
