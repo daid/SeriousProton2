@@ -44,8 +44,7 @@ public:
         //Get the environment table from the registry.
         lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
 
-        lua_pushstring(sp::script::global_lua_state, global_function.c_str());
-        lua_gettable(global_lua_state, -2);
+        lua_getfield(global_lua_state, -1, global_function.c_str());
         
         if (lua_isfunction(global_lua_state, -1))
         {

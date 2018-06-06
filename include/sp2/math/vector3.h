@@ -33,7 +33,10 @@ public:
     
     inline Vector3<T> normalized() const
     {
-        return *this / length();
+        T f = length();
+        if (f < 0.000001)
+            return Vector3<T>(1, 0, 0);
+        return *this / f;
     }
     
     inline T dot(const Vector3<T>& v) const

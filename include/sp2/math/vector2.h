@@ -35,7 +35,10 @@ public:
     
     inline Vector2<T> normalized()
     {
-        return *this / length();
+        T f = length();
+        if (f < 0.000001)
+            return Vector2<T>(1, 0);
+        return *this / f;
     }
     
     inline T cross(const Vector2<T>& v)

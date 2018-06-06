@@ -5,6 +5,13 @@
 namespace sp {
 namespace script {
 
+static int vector2Create(lua_State* L)
+{
+    double x = luaL_checknumber(L, 1);
+    double y = luaL_checknumber(L, 2);
+    return pushToLua(Vector2d(x, y));
+}
+
 static int vector2Add(lua_State* L)
 {
     Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
@@ -102,6 +109,14 @@ static luaL_Reg vector2_functions[] = {
     {nullptr, nullptr},
 };
 
+static int vector3Create(lua_State* L)
+{
+    double x = luaL_checknumber(L, 1);
+    double y = luaL_checknumber(L, 2);
+    double z = luaL_checknumber(L, 3);
+    return pushToLua(Vector3d(x, y, z));
+}
+
 static int vector3Add(lua_State* L)
 {
     Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
@@ -198,6 +213,9 @@ void addVectorMetatables()
     lua_setfield(global_lua_state, -2, "__index");
     luaL_setfuncs(global_lua_state, vector3_functions, 0);
     lua_pop(global_lua_state, 1);
+    
+    lua_register(global_lua_state, "Vector2", vector2Create);
+    lua_register(global_lua_state, "Vector3", vector3Create);
 }
 
 };//namespace script

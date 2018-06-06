@@ -148,8 +148,8 @@ template<typename RET, typename... ARGS> int callFunction(lua_State*)
 template<typename T> T* convertFromLua(typeIdentifier<T*>, int index)
 {
     luaL_checktype(global_lua_state, index, LUA_TTABLE);
-    lua_pushstring(global_lua_state, "__ptr");
-    lua_gettable(global_lua_state, index);
+    lua_getfield(global_lua_state, index, "__ptr");
+    luaL_checktype(global_lua_state, -1, LUA_TLIGHTUSERDATA);
 
     T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(global_lua_state, -1)));
     lua_pop(global_lua_state, 1);
