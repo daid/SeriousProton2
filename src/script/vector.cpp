@@ -143,6 +143,32 @@ static int vector3ToString(lua_State* L)
     return 1;
 }
 
+static int vector3Length(lua_State* L)
+{
+    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
+    return pushToLua(v0.length());
+}
+
+static int vector3Normalized(lua_State* L)
+{
+    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
+    return pushToLua(v0.normalized());
+}
+
+static int vector3Dot(lua_State* L)
+{
+    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(v0.dot(v1));
+}
+
+static int vector3Cross(lua_State* L)
+{
+    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(v0.cross(v1));
+}
+
 static luaL_Reg vector3_functions[] = {
     {"__add", vector3Add},
     {"__sub", vector3Sub},
@@ -150,6 +176,13 @@ static luaL_Reg vector3_functions[] = {
     {"__div", vector3Div},
     {"__unm", vector3Unm},
     {"__tostring", vector3ToString},
+    {"__len", vector3Length},
+    {"length", vector3Length},
+    {"normalized", vector3Normalized},
+    {"dot", vector3Dot},
+    {"cross", vector3Cross},
+    //{"angle", vector2Angle},
+    //{"rotate", vector2Rotate},
     {nullptr, nullptr},
 };
 
