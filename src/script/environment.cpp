@@ -39,11 +39,15 @@ void Environment::setGlobal(string name, lua_CFunction function)
     lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table, with our environment as first upvalue.
-    lua_pushvalue(global_lua_state, -1);
     if (function)
+    {
+        lua_pushvalue(global_lua_state, -1);
         lua_pushcclosure(global_lua_state, function, 1);
+    }
     else
+    {
         lua_pushnil(global_lua_state);
+    }
     lua_setfield(global_lua_state, -2, name.c_str());
     
     //Pop the table
