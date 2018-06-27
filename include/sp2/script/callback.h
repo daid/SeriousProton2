@@ -34,15 +34,15 @@ public:
         return false;
     }
 private:
-    int pushArgs()
+    int pushArgs(lua_State* L)
     {
         return 0;
     }
 
-    template<typename ARG, typename... ARGS> int pushArgs(ARG arg, ARGS... args)
+    template<typename ARG, typename... ARGS> int pushArgs(lua_State* L, ARG arg, ARGS... args)
     {
-        pushToLua(arg);
-        return 1 + pushArgs(args...);
+        pushToLua(L, arg);
+        return 1 + pushArgs(L, args...);
     }
 };
 

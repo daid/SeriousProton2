@@ -7,24 +7,24 @@ namespace script {
 
 lua_State* global_lua_state;
 
-static int luaLogFunction(lua_State* lua)
+static int luaLogFunction(lua_State* L)
 {
     sp::string log_line;
-    int count = lua_gettop(lua);  /* number of arguments */
-    lua_getglobal(lua, "tostring");
+    int count = lua_gettop(L);  /* number of arguments */
+    lua_getglobal(L, "tostring");
     for (int index=1; index<=count; index++)
     {
-        lua_pushvalue(lua, -1);  /* function to be called */
-        lua_pushvalue(lua, index);   /* value to print */
-        lua_call(lua, 1, 1);
+        lua_pushvalue(L, -1);  /* function to be called */
+        lua_pushvalue(L, index);   /* value to print */
+        lua_call(L, 1, 1);
         size_t size;
-        const char* s = lua_tolstring(lua, -1, &size);  /* get result */
+        const char* s = lua_tolstring(L, -1, &size);  /* get result */
         if (s == nullptr)
-            return luaL_error(lua, "'tostring' must return a string to 'print'");
+            return luaL_error(L, "'tostring' must return a string to 'print'");
         if (index > 1)
             log_line += "\t";
         log_line += s;
-        lua_pop(lua, 1);  /* pop result */
+        lua_pop(L, 1);  /* pop result */
     }
     LOG(Info, log_line);
     return 0;
@@ -59,27 +59,27 @@ void createGlobalLuaState()
     addVectorMetatables();
 }
 
-int pushToLua(bool b)
+int pushToLua(lua_State* L, bool b)
 {
-    lua_pushboolean(global_lua_state, b);
+    lua_pushboolean(L, b);
     return 1;
 }
 
-int pushToLua(int i)
+int pushToLua(lua_State* L, int i)
 {
-    lua_pushinteger(global_lua_state, i);
+    lua_pushinteger(L, i);
     return 1;
 }
 
-int pushToLua(float f)
+int pushToLua(lua_State* L, float f)
 {
-    lua_pushnumber(global_lua_state, f);
+    lua_pushnumber(L, f);
     return 1;
 }
 
-int pushToLua(double f)
+int pushToLua(lua_State* L, double f)
 {
-    lua_pushnumber(global_lua_state, f);
+    lua_pushnumber(L, f);
     return 1;
 }
 

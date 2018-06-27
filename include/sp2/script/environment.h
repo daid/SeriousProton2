@@ -48,7 +48,7 @@ public:
         
         if (lua_isfunction(global_lua_state, -1))
         {
-            int arg_count = pushArgs(args...);
+            int arg_count = pushArgs(global_lua_state, args...);
             if (lua_pcall(global_lua_state, arg_count, 0, 0))
             {
                 LOG(Error, "Function call error:", global_function, ":", lua_tostring(global_lua_state, -1));
@@ -63,15 +63,15 @@ public:
     }
 
 private:
-    int pushArgs()
+    int pushArgs(lua_State* L)
     {
         return 0;
     }
 
-    template<typename ARG, typename... ARGS> int pushArgs(ARG arg, ARGS... args)
+    template<typename ARG, typename... ARGS> int pushArgs(lua_State* L, ARG arg, ARGS... args)
     {
-        pushToLua(arg);
-        return 1 + pushArgs(args...);
+        pushToLua(L, arg);
+        return 1 + pushArgs(L, args...);
     }
 };
 

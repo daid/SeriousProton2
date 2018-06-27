@@ -9,87 +9,87 @@ static int vector2Create(lua_State* L)
 {
     double x = luaL_checknumber(L, 1);
     double y = luaL_checknumber(L, 2);
-    return pushToLua(Vector2d(x, y));
+    return pushToLua(L, Vector2d(x, y));
 }
 
 static int vector2Add(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    Vector2<lua_Number> v1 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 2);
-    return pushToLua(v0 + v1);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    Vector2<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 2);
+    return pushToLua(L, v0 + v1);
 }
 
 static int vector2Sub(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    Vector2<lua_Number> v1 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 2);
-    return pushToLua(v0 - v1);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    Vector2<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 2);
+    return pushToLua(L, v0 - v1);
 }
 
 static int vector2Mul(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    lua_Number v1 = convertFromLua(typeIdentifier<lua_Number>{}, 2);
-    return pushToLua(v0 * v1);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    lua_Number v1 = convertFromLua(L, typeIdentifier<lua_Number>{}, 2);
+    return pushToLua(L, v0 * v1);
 }
 
 static int vector2Div(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    lua_Number v1 = convertFromLua(typeIdentifier<lua_Number>{}, 2);
-    return pushToLua(v0 / v1);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    lua_Number v1 = convertFromLua(L, typeIdentifier<lua_Number>{}, 2);
+    return pushToLua(L, v0 / v1);
 }
 
 static int vector2Unm(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    return pushToLua(-v0);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    return pushToLua(L, -v0);
 }
 
 static int vector2ToString(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
     lua_pushstring(L, ("{" + string(v0.x) + "," + string(v0.y) + "}").c_str());
     return 1;
 }
 
 static int vector2Length(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    return pushToLua(v0.length());
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    return pushToLua(L, v0.length());
 }
 
 static int vector2Normalized(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    return pushToLua(v0.normalized());
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    return pushToLua(L, v0.normalized());
 }
 
 static int vector2Dot(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    Vector2<lua_Number> v1 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 2);
-    return pushToLua(v0.dot(v1));
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    Vector2<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 2);
+    return pushToLua(L, v0.dot(v1));
 }
 
 static int vector2Cross(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    Vector2<lua_Number> v1 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 2);
-    return pushToLua(v0.cross(v1));
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    Vector2<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 2);
+    return pushToLua(L, v0.cross(v1));
 }
 
 static int vector2Angle(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    return pushToLua(v0.angle());
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    return pushToLua(L, v0.angle());
 }
 
 static int vector2Rotate(lua_State* L)
 {
-    Vector2<lua_Number> v0 = convertFromLua(typeIdentifier<Vector2<lua_Number>>{}, 1);
-    lua_Number v1 = convertFromLua(typeIdentifier<lua_Number>{}, 2);
-    return pushToLua(v0.rotate(v1));
+    Vector2<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector2<lua_Number>>{}, 1);
+    lua_Number v1 = convertFromLua(L, typeIdentifier<lua_Number>{}, 2);
+    return pushToLua(L, v0.rotate(v1));
 }
 
 static luaL_Reg vector2_functions[] = {
@@ -114,74 +114,74 @@ static int vector3Create(lua_State* L)
     double x = luaL_checknumber(L, 1);
     double y = luaL_checknumber(L, 2);
     double z = luaL_checknumber(L, 3);
-    return pushToLua(Vector3d(x, y, z));
+    return pushToLua(L, Vector3d(x, y, z));
 }
 
 static int vector3Add(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
-    return pushToLua(v0 + v1);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(L, v0 + v1);
 }
 
 static int vector3Sub(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
-    return pushToLua(v0 - v1);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(L, v0 - v1);
 }
 
 static int vector3Mul(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    lua_Number v1 = convertFromLua(typeIdentifier<lua_Number>{}, 2);
-    return pushToLua(v0 * v1);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    lua_Number v1 = convertFromLua(L, typeIdentifier<lua_Number>{}, 2);
+    return pushToLua(L, v0 * v1);
 }
 
 static int vector3Div(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    lua_Number v1 = convertFromLua(typeIdentifier<lua_Number>{}, 2);
-    return pushToLua(v0 / v1);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    lua_Number v1 = convertFromLua(L, typeIdentifier<lua_Number>{}, 2);
+    return pushToLua(L, v0 / v1);
 }
 
 static int vector3Unm(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    return pushToLua(-v0);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    return pushToLua(L, -v0);
 }
 
 static int vector3ToString(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
     lua_pushstring(L, ("{" + string(v0.x) + "," + string(v0.y) + "," + string(v0.z) + "}").c_str());
     return 1;
 }
 
 static int vector3Length(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    return pushToLua(v0.length());
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    return pushToLua(L, v0.length());
 }
 
 static int vector3Normalized(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    return pushToLua(v0.normalized());
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    return pushToLua(L, v0.normalized());
 }
 
 static int vector3Dot(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
-    return pushToLua(v0.dot(v1));
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(L, v0.dot(v1));
 }
 
 static int vector3Cross(lua_State* L)
 {
-    Vector3<lua_Number> v0 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 1);
-    Vector3<lua_Number> v1 = convertFromLua(typeIdentifier<Vector3<lua_Number>>{}, 2);
-    return pushToLua(v0.cross(v1));
+    Vector3<lua_Number> v0 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 1);
+    Vector3<lua_Number> v1 = convertFromLua(L, typeIdentifier<Vector3<lua_Number>>{}, 2);
+    return pushToLua(L, v0.cross(v1));
 }
 
 static luaL_Reg vector3_functions[] = {

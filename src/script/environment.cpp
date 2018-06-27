@@ -60,7 +60,7 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    pushToLua(ptr);
+    pushToLua(global_lua_state, ptr);
     lua_setfield(global_lua_state, -2, name.c_str());
     
     //Pop the table

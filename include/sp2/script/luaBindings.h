@@ -21,212 +21,212 @@ template<std::size_t ...> struct sequence{};
 template<std::size_t N, std::size_t ...S> struct sequenceGenerator : sequenceGenerator<N-1, N-1, S...>{};
 template<std::size_t ...S> struct sequenceGenerator<0, S...>{ typedef sequence<S...> type; };
 
-template<typename... ARGS, std::size_t... N> std::tuple<ARGS...> getArgs(sequence<N...>)
+template<typename... ARGS, std::size_t... N> std::tuple<ARGS...> getArgs(lua_State* L, sequence<N...>)
 {
-    return std::tuple<ARGS...>{convertFromLua(typeIdentifier<ARGS>{}, N + 1)...};
+    return std::tuple<ARGS...>{convertFromLua(L, typeIdentifier<ARGS>{}, N + 1)...};
 }
 
-template<typename... ARGS> std::tuple<ARGS...> getArgs()
+template<typename... ARGS> std::tuple<ARGS...> getArgs(lua_State* L)
 {
-    return getArgs<ARGS...>(typename sequenceGenerator<sizeof... (ARGS)>::type());
+    return getArgs<ARGS...>(L, typename sequenceGenerator<sizeof... (ARGS)>::type());
 }
 
-int pushToLua(bool b);
-int pushToLua(int i);
-int pushToLua(float f);
-int pushToLua(double f);
+int pushToLua(lua_State* L, bool b);
+int pushToLua(lua_State* L, int i);
+int pushToLua(lua_State* L, float f);
+int pushToLua(lua_State* L, double f);
 
-template<class T> int pushToLua(sp::P<T> obj)
+template<class T> int pushToLua(lua_State* L, sp::P<T> obj)
 {
     if (obj)
     {
         sp::ScriptBindingObject* ptr = *obj;
-        lua_pushlightuserdata(global_lua_state, ptr);
-        lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+        lua_pushlightuserdata(L, ptr);
+        lua_gettable(L, LUA_REGISTRYINDEX);
         return 1;
     }
-    lua_pushnil(global_lua_state);
+    lua_pushnil(L);
     return 1;
 }
 
-template<class T> int pushToLua(T* obj)
+template<class T> int pushToLua(lua_State* L, T* obj)
 {
     if (obj)
     {
         sp::ScriptBindingObject* ptr = obj;
-        lua_pushlightuserdata(global_lua_state, ptr);
-        lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+        lua_pushlightuserdata(L, ptr);
+        lua_gettable(L, LUA_REGISTRYINDEX);
         return 1;
     }
-    lua_pushnil(global_lua_state);
+    lua_pushnil(L);
     return 1;
 }
 
-template<typename T> int pushToLua(Vector2<T> f)
+template<typename T> int pushToLua(lua_State* L, Vector2<T> f)
 {
-    lua_newtable(global_lua_state);
-    luaL_getmetatable(global_lua_state, "vector2");
-    lua_setmetatable(global_lua_state, -2);
-    lua_pushnumber(global_lua_state, f.x);
-    lua_setfield(global_lua_state, -2, "x");
-    lua_pushnumber(global_lua_state, f.y);
-    lua_setfield(global_lua_state, -2, "y");
+    lua_newtable(L);
+    luaL_getmetatable(L, "vector2");
+    lua_setmetatable(L, -2);
+    lua_pushnumber(L, f.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, f.y);
+    lua_setfield(L, -2, "y");
     return 1;
 }
 
-template<typename T> int pushToLua(Vector3<T> f)
+template<typename T> int pushToLua(lua_State* L, Vector3<T> f)
 {
-    lua_newtable(global_lua_state);
-    luaL_getmetatable(global_lua_state, "vector3");
-    lua_setmetatable(global_lua_state, -2);
-    lua_pushnumber(global_lua_state, f.x);
-    lua_setfield(global_lua_state, -2, "x");
-    lua_pushnumber(global_lua_state, f.y);
-    lua_setfield(global_lua_state, -2, "y");
-    lua_pushnumber(global_lua_state, f.z);
-    lua_setfield(global_lua_state, -2, "z");
+    lua_newtable(L);
+    luaL_getmetatable(L, "vector3");
+    lua_setmetatable(L, -2);
+    lua_pushnumber(L, f.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, f.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, f.z);
+    lua_setfield(L, -2, "z");
     return 1;
 }
 
 template<class TYPE, typename RET> class callClassHelper
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(TYPE* obj, RET(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, RET(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
     {
-        return pushToLua((obj->*(f))(std::get<N>(args)...));
+        return pushToLua(L, (obj->*(f))(std::get<N>(args)...));
     }
 };
 
 template<class TYPE> class callClassHelper<TYPE, void>
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(TYPE* obj, void(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, void(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
     {
         (obj->*(f))(std::get<N>(args)...);
-        return pushToLua(obj);
+        return pushToLua(L, obj);
     }
 };
 
 template<typename RET> class callFunctionHelper
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(RET(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, RET(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
     {
-        return pushToLua((*f)(std::get<N>(args)...));
+        return pushToLua(L, (*f)(std::get<N>(args)...));
     }
 };
 
 template<> class callFunctionHelper<void>
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(void(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, void(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
     {
         (*f)(std::get<N>(args)...);
         return 0;
     }
 };
 
-template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State*)
+template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State* L)
 {
     typedef RET(TYPE::*FT)(ARGS...);
-    FT* f = reinterpret_cast<FT*>(lua_touserdata(global_lua_state, lua_upvalueindex(1)));
-    TYPE* obj = convertFromLua(typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
+    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+    TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
     if (!obj)
         return 0;
-    std::tuple<ARGS...> args = getArgs<ARGS...>();
-    return callClassHelper<TYPE, RET>::doCall(obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    std::tuple<ARGS...> args = getArgs<ARGS...>(L);
+    return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
-template<typename RET, typename... ARGS> int callFunction(lua_State*)
+template<typename RET, typename... ARGS> int callFunction(lua_State* L)
 {
     typedef RET(*FT)(ARGS...);
-    FT* f = reinterpret_cast<FT*>(lua_touserdata(global_lua_state, lua_upvalueindex(1)));
-    std::tuple<ARGS...> args = getArgs<ARGS...>();
-    return callFunctionHelper<RET>::doCall(*f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+    std::tuple<ARGS...> args = getArgs<ARGS...>(L);
+    return callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
-template<typename T> T* convertFromLua(typeIdentifier<T*>, int index)
+template<typename T> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
 {
-    luaL_checktype(global_lua_state, index, LUA_TTABLE);
-    lua_getfield(global_lua_state, index, "__ptr");
-    luaL_checktype(global_lua_state, -1, LUA_TLIGHTUSERDATA);
+    luaL_checktype(L, index, LUA_TTABLE);
+    lua_getfield(L, index, "__ptr");
+    luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
-    T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(global_lua_state, -1)));
-    lua_pop(global_lua_state, 1);
+    T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
+    lua_pop(L, 1);
     return obj;
 }
 
-static inline bool convertFromLua(typeIdentifier<bool>, int index)
+static inline bool convertFromLua(lua_State* L, typeIdentifier<bool>, int index)
 {
-    return lua_toboolean(global_lua_state, index);
+    return lua_toboolean(L, index);
 }
 
-static inline int convertFromLua(typeIdentifier<int>, int index)
+static inline int convertFromLua(lua_State* L, typeIdentifier<int>, int index)
 {
-    return luaL_checkinteger(global_lua_state, index);
+    return luaL_checkinteger(L, index);
 }
 
-static inline float convertFromLua(typeIdentifier<float>, int index)
+static inline float convertFromLua(lua_State* L, typeIdentifier<float>, int index)
 {
-    return luaL_checknumber(global_lua_state, index);
+    return luaL_checknumber(L, index);
 }
 
-static inline double convertFromLua(typeIdentifier<double>, int index)
+static inline double convertFromLua(lua_State* L, typeIdentifier<double>, int index)
 {
-    return luaL_checknumber(global_lua_state, index);
+    return luaL_checknumber(L, index);
 }
 
-static inline string convertFromLua(typeIdentifier<string>, int index)
+static inline string convertFromLua(lua_State* L, typeIdentifier<string>, int index)
 {
-    return luaL_checkstring(global_lua_state, index);
+    return luaL_checkstring(L, index);
 }
 
-template<typename T> Vector2<T> convertFromLua(typeIdentifier<Vector2<T>>, int index)
+template<typename T> Vector2<T> convertFromLua(lua_State* L, typeIdentifier<Vector2<T>>, int index)
 {
-    luaL_checktype(global_lua_state, index, LUA_TTABLE);
-    lua_getfield(global_lua_state, index, "x");
-    if (lua_isnil(global_lua_state, -1))
+    luaL_checktype(L, index, LUA_TTABLE);
+    lua_getfield(L, index, "x");
+    if (lua_isnil(L, -1))
     {
-        lua_pop(global_lua_state, 1);
-        lua_geti(global_lua_state, index, 1);
+        lua_pop(L, 1);
+        lua_geti(L, index, 1);
     }
-    lua_getfield(global_lua_state, index, "y");
-    if (lua_isnil(global_lua_state, -1))
+    lua_getfield(L, index, "y");
+    if (lua_isnil(L, -1))
     {
-        lua_pop(global_lua_state, 1);
-        lua_geti(global_lua_state, index, 2);
+        lua_pop(L, 1);
+        lua_geti(L, index, 2);
     }
-    T x = lua_tonumber(global_lua_state, -2);
-    T y = lua_tonumber(global_lua_state, -1);
-    lua_pop(global_lua_state, 2);
+    T x = lua_tonumber(L, -2);
+    T y = lua_tonumber(L, -1);
+    lua_pop(L, 2);
     return Vector2<T>(x, y);
 }
 
-template<typename T> Vector3<T> convertFromLua(typeIdentifier<Vector3<T>>, int index)
+template<typename T> Vector3<T> convertFromLua(lua_State* L, typeIdentifier<Vector3<T>>, int index)
 {
-    luaL_checktype(global_lua_state, index, LUA_TTABLE);
-    lua_getfield(global_lua_state, index, "x");
-    if (lua_isnil(global_lua_state, -1))
+    luaL_checktype(L, index, LUA_TTABLE);
+    lua_getfield(L, index, "x");
+    if (lua_isnil(L, -1))
     {
-        lua_pop(global_lua_state, 1);
-        lua_geti(global_lua_state, index, 1);
+        lua_pop(L, 1);
+        lua_geti(L, index, 1);
     }
-    lua_getfield(global_lua_state, index, "y");
-    if (lua_isnil(global_lua_state, -1))
+    lua_getfield(L, index, "y");
+    if (lua_isnil(L, -1))
     {
-        lua_pop(global_lua_state, 1);
-        lua_geti(global_lua_state, index, 2);
+        lua_pop(L, 1);
+        lua_geti(L, index, 2);
     }
-    lua_getfield(global_lua_state, index, "z");
-    if (lua_isnil(global_lua_state, -1))
+    lua_getfield(L, index, "z");
+    if (lua_isnil(L, -1))
     {
-        lua_pop(global_lua_state, 1);
-        lua_geti(global_lua_state, index, 3);
+        lua_pop(L, 1);
+        lua_geti(L, index, 3);
     }
-    T x = lua_tonumber(global_lua_state, -3);
-    T y = lua_tonumber(global_lua_state, -2);
-    T z = lua_tonumber(global_lua_state, -1);
-    lua_pop(global_lua_state, 3);
+    T x = lua_tonumber(L, -3);
+    T y = lua_tonumber(L, -2);
+    T z = lua_tonumber(L, -1);
+    lua_pop(L, 3);
     return Vector3<T>(x, y, z);
 }
 
