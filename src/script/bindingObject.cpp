@@ -23,7 +23,7 @@ int lazyLoading(lua_State* L)
     lua_setfield(L, -2, "valid");
     
     //Call the onRegisterScriptBindings which will register functions in the current __index table.
-    ScriptBindingClass script_binding_class;
+    ScriptBindingClass script_binding_class(L);
     sbc->onRegisterScriptBindings(script_binding_class);
     
     //Set the __index table as actual field in the metatable.

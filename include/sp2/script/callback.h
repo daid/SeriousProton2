@@ -17,8 +17,7 @@ public:
     
     template<typename... ARGS> bool call(ARGS... args)
     {
-        lua_pushlightuserdata(global_lua_state, this);
-        lua_gettable(global_lua_state, LUA_REGISTRYINDEX);
+        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
         if (lua_isfunction(global_lua_state, -1))
         {
             int arg_count = pushArgs(args...);

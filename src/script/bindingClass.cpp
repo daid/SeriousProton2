@@ -24,12 +24,12 @@ static int updateCallback(lua_State* L)
 
 void ScriptBindingClass::bind(sp::string name, sp::script::Callback& callback)
 {
-    lua_pushstring(sp::script::global_lua_state, name.c_str());
-    lua_pushlightuserdata(sp::script::global_lua_state, &callback);
-    lua_pushvalue(sp::script::global_lua_state, 1); //push the table of this object
+    lua_pushstring(L, name.c_str());
+    lua_pushlightuserdata(L, &callback);
+    lua_pushvalue(L, 1); //push the table of this object
     
-    lua_pushcclosure(sp::script::global_lua_state, updateCallback, 2);
-    lua_settable(sp::script::global_lua_state, -3);
+    lua_pushcclosure(L, updateCallback, 2);
+    lua_settable(L, -3);
 }
 
 };//namespace sp

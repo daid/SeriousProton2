@@ -18,18 +18,20 @@ public:
     {
         typedef RET(TYPE::*FT)(ARGS...);
         
-        lua_pushstring(sp::script::global_lua_state, name.c_str());
-        FT* f = reinterpret_cast<FT*>(lua_newuserdata(sp::script::global_lua_state, sizeof(FT)));
+        lua_pushstring(L, name.c_str());
+        FT* f = reinterpret_cast<FT*>(lua_newuserdata(L, sizeof(FT)));
         *f = func;
-        lua_pushvalue(sp::script::global_lua_state, 1); //push the table of this object
+        lua_pushvalue(L, 1); //push the table of this object
         
-        lua_pushcclosure(sp::script::global_lua_state, &script::callMember<TYPE, RET, ARGS...>, 2);
-        lua_settable(sp::script::global_lua_state, -3);
+        lua_pushcclosure(L, &script::callMember<TYPE, RET, ARGS...>, 2);
+        lua_settable(L, -3);
     }
 
     void bind(sp::string name, sp::script::Callback& callback);
 private:
-    ScriptBindingClass() {}
+    ScriptBindingClass(lua_State* L) : L(L) {}
+    
+    lua_State* L;
     
     friend int script::lazyLoading(lua_State* L);
 };
