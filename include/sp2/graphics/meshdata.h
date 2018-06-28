@@ -39,6 +39,21 @@ public:
             normal[0] = norm.x; normal[1] = norm.y; normal[2] = norm.z;
             this->uv[0] = uv.x; this->uv[1] = uv.y;
         }
+        
+        void setPosition(Vector3f pos)
+        {
+            position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
+        }
+
+        void setNormal(Vector3f norm)
+        {
+            normal[0] = norm.x; normal[1] = norm.y; normal[2] = norm.z;
+        }
+
+        void setUV(Vector2f uv)
+        {
+            this->uv[0] = uv.x; this->uv[1] = uv.y;
+        }
 
         float position[3];
         float normal[3];
