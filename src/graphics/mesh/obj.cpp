@@ -39,9 +39,9 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
         {
             std::vector<string> parts = line.split();
             if (parts.size() > 3)
-                v_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[2]), stringutil::convert::toFloat(parts[3]));
+                v_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[3]), stringutil::convert::toFloat(parts[2]));
             else if (parts.size() > 2)
-                v_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[2]), 0.0);
+                v_list.emplace_back(stringutil::convert::toFloat(parts[1]), 0.0, stringutil::convert::toFloat(parts[2]));
             else if (parts.size() > 1)
                 v_list.emplace_back(stringutil::convert::toFloat(parts[1]), 0.0, 0.0);
             else
@@ -51,9 +51,9 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
         {
             std::vector<string> parts = line.split();
             if (parts.size() > 3)
-                vn_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[2]), stringutil::convert::toFloat(parts[3]));
+                vn_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[3]), stringutil::convert::toFloat(parts[2]));
             else if (parts.size() > 2)
-                vn_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[2]), 0.0);
+                vn_list.emplace_back(stringutil::convert::toFloat(parts[1]), 0.0, stringutil::convert::toFloat(parts[2]));
             else if (parts.size() > 1)
                 vn_list.emplace_back(stringutil::convert::toFloat(parts[1]), 0.0, 0.0);
             else

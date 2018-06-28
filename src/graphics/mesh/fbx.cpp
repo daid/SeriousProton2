@@ -123,10 +123,10 @@ public:
     }
 };
 
-class FbxReader
+class BinaryFbxReader
 {
 public:
-    FbxReader(string resource_name)
+    BinaryFbxReader(string resource_name)
     {
         stream = io::ResourceProvider::get(resource_name);
         
@@ -202,10 +202,11 @@ std::shared_ptr<MeshData> FbxLoader::load(string resource_name)
     MeshData::Vertices vertices;
     MeshData::Indices indices;
 
-    FbxReader reader(resource_name);
+    BinaryFbxReader reader(resource_name);
+    FbxNode* root = &reader.root;
 
     std::map<int, Matrix4x4d> id_to_matrix;
-    for(FbxNode* model : reader.root.find("Objects")->findAll("Model"))
+    for(FbxNode* model : root->find("Objects")->findAll("Model"))
     {
         int id = int(model->properties[0].numbers[0]);
         sp::Vector3d translation = model->getProperty70asVector3d("Lcl Translation");
@@ -214,14 +215,14 @@ std::shared_ptr<MeshData> FbxLoader::load(string resource_name)
         id_to_matrix[id] = Matrix4x4d::translate(translation) * Matrix4x4d::rotate(rotation.x, 1, 0, 0) * Matrix4x4d::rotate(rotation.y, 0, 1, 0) * Matrix4x4d::rotate(rotation.z, 0, 0, 1);
     }
     std::map<int, int> child_parent_relations;
-    for(FbxNode* connection : reader.root.find("Connections")->findAll("C"))
+    for(FbxNode* connection : root->find("Connections")->findAll("C"))
     {
         if (connection->properties[0].str != "OO")
             continue;
         child_parent_relations[int(connection->properties[1].numbers[0])] = int(connection->properties[2].numbers[0]);
     }
 
-    for(FbxNode* geometry : reader.root.find("Objects")->findAll("Geometry"))
+    for(FbxNode* geometry : root->find("Objects")->findAll("Geometry"))
     {
         int id = geometry->properties[0].numbers[0];
         Matrix4x4d transform = Matrix4x4d::identity();
