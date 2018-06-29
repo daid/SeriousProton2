@@ -5,7 +5,7 @@
 #include <sp2/logging.h>
 #include <sp2/threading/queue.h>
 #include <thread>
-#include <map>
+#include <unordered_map>
 
 namespace sp {
 namespace io {
@@ -23,16 +23,15 @@ private:
 template<class T> class LazyLoader : NonCopyable
 {
 public:
-    T* get(string name)
+    T get(string name)
     {
         auto it = cached_items.find(name);
         if (it != cached_items.end())
         {
-            T* result = it->second;
-            return result;
+            return it->second;
         }
         
-        T* ptr = prepare(name);
+        T ptr = prepare(name);
         cached_items[name] = ptr;
         io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
         if (stream)
@@ -50,10 +49,10 @@ public:
     }
 
 protected:
-    virtual T* prepare(string name) = 0;
-    virtual void backgroundLoader(T* ptr, io::ResourceStreamPtr stream) = 0;
+    virtual T prepare(string name) = 0;
+    virtual void backgroundLoader(T ptr, io::ResourceStreamPtr stream) = 0;
 private:
-    std::map<string, T*> cached_items;
+    std::unordered_map<string, T> cached_items;
 };
 
 };//namespace io

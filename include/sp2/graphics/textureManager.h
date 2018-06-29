@@ -7,7 +7,7 @@
 
 namespace sp {
 
-class TextureManager : public io::LazyLoader<Texture>
+class TextureManager : public io::LazyLoader<Texture*>
 {
 public:
     TextureManager();

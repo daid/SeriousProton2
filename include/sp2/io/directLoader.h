@@ -5,7 +5,7 @@
 #include <sp2/logging.h>
 #include <sp2/threading/queue.h>
 #include <thread>
-#include <map>
+#include <unordered_map>
 
 namespace sp {
 namespace io {
@@ -13,24 +13,23 @@ namespace io {
 template<class T> class DirectLoader : NonCopyable
 {
 public:
-    T* get(string name)
+    T get(string name)
     {
         auto it = cached_items.find(name);
         if (it != cached_items.end())
         {
-            T* result = it->second;
-            return result;
+            return it->second;
         }
         
-        T* result = this->load(name);
+        T result = this->load(name);
         cached_items[name] = result;
         return result;
     }
 
 protected:
-    virtual T* load(string name) = 0;
+    virtual T load(string name) = 0;
 private:
-    std::map<string, T*> cached_items;
+    std::unordered_map<string, T> cached_items;
 };
 
 };//namespace io

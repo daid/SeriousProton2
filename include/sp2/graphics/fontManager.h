@@ -7,7 +7,7 @@
 
 namespace sp {
 
-class FontManager : public io::DirectLoader<Font>
+class FontManager : public io::DirectLoader<Font*>
 {
 protected:
     virtual Font* load(string name);
