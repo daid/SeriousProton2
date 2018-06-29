@@ -116,11 +116,11 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
                 if (vt_index > 0 && vt_index <= int(vt_list.size()))
                     v.setUV(vt_list[vt_index - 1]);
                 if (vn_index > 0 && vn_index <= int(vn_list.size()))
-                    v.setNormal(vn_list[vn_index - 1]);
+                    v.setNormal(vn_list[vn_index - 1].normalized());
                 
                 if (mode == Mode::DiffuseMaterialColorToNormal)
                     v.setNormal(Vector3f(materials[active_material].diffuse.r, materials[active_material].diffuse.g, materials[active_material].diffuse.b));
-                if (mode == Mode::DiffuseMaterialColorToTexture)
+                else if (mode == Mode::DiffuseMaterialColorToTexture)
                     v.setUV(materials[active_material].uv);
                 
                 vertices.push_back(v);
@@ -174,7 +174,7 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
                 }
             }
             
-            if (materials.size())
+            if (materials.size() && mode == Mode::DiffuseMaterialColorToTexture)
             {
                 generated_texture.create(materials.size() * 2, 1);
                 int index = 0;

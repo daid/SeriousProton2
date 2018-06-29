@@ -70,7 +70,7 @@ varying vec3 v_normal;
 void main()
 {
     gl_FragColor = texture2D(texture_map, v_uv) * color;
-    gl_FragColor.rgb = gl_FragColor.rgb * -dot(v_normal, normalize(v_offset));
+    gl_FragColor.rgb = gl_FragColor.rgb * -dot(normalize(v_normal), normalize(v_offset));
     if (gl_FragColor.a == 0.0)
         discard;
 }

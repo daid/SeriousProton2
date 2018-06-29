@@ -66,6 +66,8 @@ const PList<Node>& Node::getChildren()
 void Node::setParent(P<Node> new_parent)
 {
     sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
+    sp2assert(parent, "Tried to switch parent of root node. This is not supported.");
+    sp2assert(new_parent, "When switching parents, you must provide a new parent, not nullptr.");
     sp2assert(!multiplayer.isEnabled(), "Tried to switch parents on a multiplayer enabled node. This is not supported.");
     
     parent->children.remove(P<Node>(this));
