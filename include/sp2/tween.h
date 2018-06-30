@@ -32,16 +32,26 @@ public:
         float t = (time_now - time_start) / (time_end - time_start);
         return tweenApply(-t * (t - 2.0f), value0, value1);
     }
+    static inline T easeInOutQuad(float time_now, float time_start, float time_end, const T& value0, const T& value1)
+    {
+        float t = (time_now - time_start) / (time_end - time_start);
+        return tweenApply(t < 0.5 ? 2*t*t : -1+(4-2*t)*t, value0, value1);
+    }
     static inline T easeInCubic(float time_now, float time_start, float time_end, const T& value0, const T& value1)
     {
         float t = (time_now - time_start) / (time_end - time_start);
         return tweenApply(t * t * t, value0, value1);
     }
     static inline T easeOutCubic(float time_now, float time_start, float time_end, const T& value0, const T& value1)
-    {//BUGGED!
+    {
         float t = (time_now - time_start) / (time_end - time_start);
         t -= 1.0;
-        return tweenApply(-(t * t * t + 1), value0, value1);
+        return tweenApply((t * t * t + 1), value0, value1);
+    }
+    static inline T easeInOutCubic(float time_now, float time_start, float time_end, const T& value0, const T& value1)
+    {
+        float t = (time_now - time_start) / (time_end - time_start);
+        return tweenApply(t < 0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1, value0, value1);
     }
 };
 
