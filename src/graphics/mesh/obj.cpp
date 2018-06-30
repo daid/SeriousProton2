@@ -39,7 +39,10 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
+    {
+        LOG(Warning, "Failed to find", resource_name);
         return nullptr;
+    }
 
     MeshData::Vertices vertices;
     MeshData::Indices indices;

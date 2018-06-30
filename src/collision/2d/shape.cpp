@@ -58,6 +58,7 @@ void Shape2D::createFixtureOnBody(b2Body* body, b2Shape* shape) const
     shapeDef.shape = shape;
     shapeDef.density = density;
     shapeDef.friction = 0.0;
+    shapeDef.restitution = restitution;
     shapeDef.isSensor = (type == Type::Sensor);
     shapeDef.userData = body->GetUserData();
     shapeDef.filter.categoryBits = filter_category;

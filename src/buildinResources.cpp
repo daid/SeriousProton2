@@ -104,6 +104,44 @@ void main()
 }
 )EOS"},
 
+    {"color_shaded.shader", R"EOS(
+[VERTEX]
+#version 110
+
+uniform mat4 projection_matrix;
+uniform mat4 camera_matrix;
+uniform mat4 object_matrix;
+uniform vec3 object_scale;
+
+varying vec2 v_uv;
+varying vec3 v_offset;
+varying vec3 v_normal;
+
+void main()
+{
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
+    v_normal = (camera_matrix * object_matrix * vec4(gl_Normal, 0.0)).xyz;
+    v_offset = (camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0)).xyz;
+}
+
+[FRAGMENT]
+#version 110
+
+uniform sampler2D texture_map;
+uniform vec4 color;
+
+varying vec3 v_offset;
+varying vec3 v_normal;
+
+void main()
+{
+    gl_FragColor = color;
+    gl_FragColor.rgb = gl_FragColor.rgb * -dot(normalize(v_normal), normalize(v_offset));
+    if (gl_FragColor.a == 0.0)
+        discard;
+}
+)EOS"},
+
     {"normal_as_color.shader", R"EOS(
 [VERTEX]
 #version 110
