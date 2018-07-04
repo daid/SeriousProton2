@@ -4,7 +4,7 @@
 
 namespace sp {
 
-TextureManager textureManager;
+TextureManager texture_manager;
 
 class TextureManagerTexture : public Texture
 {
@@ -15,7 +15,7 @@ public:
         LOG(Info, "Loading texture:", resource_name);
         //TODO: Fallback texture
         texture.setRepeated(true);
-        texture.setSmooth(textureManager.default_smooth);
+        texture.setSmooth(texture_manager.default_smooth);
     }
 
     void transferImageFromThread(std::shared_ptr<sf::Image> image)

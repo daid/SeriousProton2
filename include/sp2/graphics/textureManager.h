@@ -25,7 +25,7 @@ private:
     
     friend class TextureManagerTexture;
 };
-extern TextureManager textureManager;
+extern TextureManager texture_manager;
 
 };//namespace sp
 

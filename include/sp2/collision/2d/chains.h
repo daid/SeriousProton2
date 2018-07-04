@@ -12,6 +12,8 @@ namespace collision {
     Specialized chains shape
     This class is designed to be used as static collision in maps.
     It holds one or more chains or loops that can represend a large amount of collision data efficiently, without requiring a lot of Nodes.
+    
+    Chains do not work for dynamic collisions, so they should always be static objects.
 */
 class Chains2D : public Shape2D
 {

@@ -18,7 +18,7 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, int initial_buffer_size, Origin
         render_data.shader = Shader::get("internal:local_particle.shader");
         break;
     }
-    render_data.texture = textureManager.get("particle.png");
+    render_data.texture = texture_manager.get("particle.png");
     render_data.type = RenderData::Type::Transparent;
     
     auto_destroy = false;
@@ -49,7 +49,7 @@ void ParticleEmitter::onUpdate(float delta)
         particle.position += particle.velocity * delta;
         
         float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
-        Vector3f color = Tween<Vector3f>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
+        Color color = Tween<Color>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
         
         indices.emplace_back(vertices.size() + 0);
         indices.emplace_back(vertices.size() + 1);
@@ -58,10 +58,10 @@ void ParticleEmitter::onUpdate(float delta)
         indices.emplace_back(vertices.size() + 1);
         indices.emplace_back(vertices.size() + 3);
         
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size,-size));
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size,-size));
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f(-size, size));
-        vertices.emplace_back(particle.position, sp::Vector3f(color.x, color.y, color.z), sp::Vector2f( size, size));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f(-size,-color.a));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f( size,-color.a));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f(-size, color.a));
+        vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f( size, color.a));
         
         particle.time += delta;
         if (particle.time >= particle.lifetime)
@@ -69,7 +69,8 @@ void ParticleEmitter::onUpdate(float delta)
             if (it + 1 == particles.end())
             {
                 it = particles.erase(it);
-            }else
+            }
+            else
             {
                 *it = particles.back();
                 particles.erase(particles.end() - 1);

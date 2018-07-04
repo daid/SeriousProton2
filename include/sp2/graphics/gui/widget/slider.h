@@ -19,6 +19,9 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    
+    void setValue(float value) { this->value = value; }
+    float getValue() { return value; }
 private:
     float min_value, max_value;
     float value;

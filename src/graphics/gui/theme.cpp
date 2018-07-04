@@ -53,7 +53,7 @@ void Theme::loadTheme(string name, string resource_name)
         if (input["image"] == "")
             global_data.texture = nullptr;
         else
-            global_data.texture = textureManager.get(input["image"]);
+            global_data.texture = texture_manager.get(input["image"]);
         if (input.find("color") != input.end())
             global_data.color = Color::fromString(input["color"]);
         else
@@ -87,7 +87,7 @@ void Theme::loadTheme(string name, string resource_name)
                 if (input["image." + postfix] == "")
                     data.states[n].texture = nullptr;
                 else
-                    data.states[n].texture = textureManager.get(input["image." + postfix]);
+                    data.states[n].texture = texture_manager.get(input["image." + postfix]);
             }
             if (input.find("color." + postfix) != input.end())
                 data.states[n].color = Color::fromString(input["color." + postfix]);

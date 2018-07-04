@@ -131,7 +131,7 @@ void SpriteAnimation::Data::load(string resource_name)
         Data::Animation& animation = animations[it.first];
         std::map<string, string>& data = it.second;
         
-        animation.texture = textureManager.get(data["texture"]);
+        animation.texture = texture_manager.get(data["texture"]);
         animation.loop = stringutil::convert::toBool(data["loop"]);
         
         std::vector<int> frames = stringutil::convert::toIntArray(data["frames"]);

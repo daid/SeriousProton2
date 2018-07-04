@@ -337,7 +337,7 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
         string value = line.substr(seperator + 1).strip();
         if (key == "texture")
         {
-            texture = textureManager.get(value);
+            texture = texture_manager.get(value);
         }
         else if (key == "texture_size")
         {

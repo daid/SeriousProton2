@@ -43,7 +43,7 @@ void Image::updateRenderData()
 
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic);
-    render_data.texture = textureManager.get(texture);
+    render_data.texture = texture_manager.get(texture);
 }
 
 };//namespace gui

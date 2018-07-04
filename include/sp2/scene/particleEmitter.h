@@ -16,8 +16,8 @@ public:
         Vector3f acceleration;
         float start_size;
         float end_size;
-        Vector3f start_color;
-        Vector3f end_color; 
+        Color start_color;
+        Color end_color; 
         float lifetime;
         float time;
 
