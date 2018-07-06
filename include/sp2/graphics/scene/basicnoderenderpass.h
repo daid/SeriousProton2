@@ -3,6 +3,7 @@
 
 #include <sp2/graphics/scene/renderpass.h>
 #include <sp2/graphics/scene/renderqueue.h>
+#include <sp2/math/ray.h>
 #include <list>
 
 namespace sp {
@@ -34,6 +35,7 @@ private:
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(P<Scene> scene, P<Camera> camera, P<GraphicsLayer> layer, float aspect_ratio);
     void recursiveNodeRender(Node* node);
+    Ray3d pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position);
 };
 
 };//namespace sp

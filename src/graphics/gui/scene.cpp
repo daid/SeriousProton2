@@ -68,7 +68,7 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
 
 void Scene::onPointerDrag(Ray3d ray, int id)
 {
-    Vector2d position(ray.start.x, ray.start.y);
+    Vector2d position(ray.end.x, ray.end.y);
     auto it = pointer_widget.find(id);
     if (it != pointer_widget.end() && it->second)
         it->second->onPointerDrag(position - it->second->getGlobalPosition2D(), id);
@@ -76,7 +76,7 @@ void Scene::onPointerDrag(Ray3d ray, int id)
 
 void Scene::onPointerUp(Ray3d ray, int id)
 {
-    Vector2d position(ray.start.x, ray.start.y);
+    Vector2d position(ray.end.x, ray.end.y);
     auto it = pointer_widget.find(id);
     if (it != pointer_widget.end() && it->second)
     {

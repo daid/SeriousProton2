@@ -9,6 +9,7 @@ namespace sp {
 template<typename T> class Ray
 {
 public:
+    Ray() {}
     Ray(T start, T end) : start(start), end(end) {}
     
     T start;

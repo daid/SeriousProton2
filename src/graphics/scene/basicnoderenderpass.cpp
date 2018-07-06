@@ -63,9 +63,7 @@ bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera,
         camera = scene->getCamera();
     if (!camera)
         return false;
-    Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
-    Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
-    if (scene->onPointerDown(button, ray, id))
+    if (scene->onPointerDown(button, pointerPositionToRay(camera, position), id))
     {
         pointer_scene[id] = scene;
         pointer_camera[id] = camera;
@@ -79,10 +77,7 @@ void BasicNodeRenderPass::onPointerDrag(Vector2d position, int id)
     auto it = pointer_scene.find(id);
     if (it != pointer_scene.end() && it->second)
     {
-        P<Camera> camera = pointer_camera[id];
-        Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
-        Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
-        it->second->onPointerDrag(ray, id);
+        it->second->onPointerDrag(pointerPositionToRay(pointer_camera[id], position), id);
     }
 }
 
@@ -91,10 +86,7 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     auto it = pointer_scene.find(id);
     if (it != pointer_scene.end() && it->second)
     {
-        P<Camera> camera = pointer_camera[id];
-        Matrix4x4d matrix = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
-        Ray3d ray(matrix * Vector3d(position.x, position.y, 0), matrix * Vector3d(position.x, position.y, -1));
-        it->second->onPointerUp(ray, id);
+        it->second->onPointerUp(pointerPositionToRay(pointer_camera[id], position), id);
         pointer_scene.erase(it);
     }
 }
@@ -120,6 +112,11 @@ void BasicNodeRenderPass::recursiveNodeRender(Node* node)
     {
         recursiveNodeRender(child);
     }
+}
+
+Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position)
+{
+    return Ray3d(camera->getGlobalTransform() * Vector3d(0, 0, 0), camera->getGlobalTransform() * camera->getProjectionMatrix().inverse() * Vector3d(position.x, position.y, -1));
 }
 
 void BasicNodeRenderPass::addNodeToRenderQueue(Node* node)
