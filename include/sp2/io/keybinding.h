@@ -53,6 +53,7 @@ private:
     
     static PList<Keybinding> keybindings;
     
+    static constexpr int type_mask = (0x0f << 16);
     static constexpr int keyboard_mask = (1 << 16);
     static constexpr int pointer_mask =  (2 << 16);
     static constexpr int joystick_button_mask = (3 << 16);

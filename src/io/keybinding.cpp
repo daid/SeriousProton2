@@ -3,6 +3,7 @@
 #include <sp2/assert.h>
 #include <sp2/attributes.h>
 #include <sp2/engine.h>
+#include <sp2/stringutil/convert.h>
 #include <json11/json11.hpp>
 #include <fstream>
 
@@ -133,19 +134,46 @@ Keybinding::Keybinding(string name, string default_key)
 
 void Keybinding::setKey(string key)
 {
+    key_number = -1;
+    
+    //Format for joystick keys:
+    //joy:[joystick_id]:axis:[axis_id]
+    //joy:[joystick_id]:button:[button_id]
+    if (key.startswith("joy:"))
+    {
+        std::vector<string> parts = key.split(":");
+        if (parts.size() == 4)
+        {
+            int joystick_id = stringutil::convert::toInt(parts[1]);
+            int axis_button_id = stringutil::convert::toInt(parts[3]);
+            if (parts[2] == "axis")
+                key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask;
+            if (parts[3] == "button")
+                key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask;
+        }
+        return;
+    }
+
     auto it = sfml_key_names.find(key);
-    if (it == sfml_key_names.end())
-        this->key_number = -1;
-    else
-        this->key_number = (it->second | keyboard_mask);
+    if (it != sfml_key_names.end())
+        key_number = (it->second | keyboard_mask);
 }
 
 string Keybinding::getKey()
 {
-    for(auto it : sfml_key_names)
+    switch(key_number & type_mask)
     {
-        if (it.second == (key_number | keyboard_mask))
-            return it.first;
+    case keyboard_mask:
+        for(auto it : sfml_key_names)
+        {
+            if (it.second == (key_number & ~type_mask))
+                return it.first;
+        }
+        break;
+    case joystick_axis_mask:
+        return "joy:" + string((key_number >> 8) & 0xff) + ":axis:" + string(key_number & 0xff);
+    case joystick_button_mask:
+        return "joy:" + string((key_number >> 8) & 0xff) + ":button:" + string(key_number & 0xff);
     }
     return "Unknown";
 }
@@ -222,6 +250,8 @@ void Keybinding::saveKeybindings(const string& filename)
 
 void Keybinding::setValue(float value)
 {
+    if (std::abs(value) < 0.01)//Add a tiny dead zone by default. Assists in gamepads that give off "almost zero" in neutral.
+        value = 0.0;
     if (this->value < 0.5 && value >= 0.5)
         down_event = fixed_down_event = true;
     if (this->value >= 0.5 && value < 0.5)
@@ -312,7 +342,7 @@ void Keybinding::handleEvent(const sf::Event& event)
         updateKeys(int(event.joystickButton.button) | int(event.joystickButton.joystickId) << 8 | joystick_button_mask, 0.0);
         break;
     case sf::Event::JoystickMoved:
-        updateKeys(int(event.joystickMove.axis) | int(event.joystickMove.joystickId) << 8 | joystick_axis_mask, event.joystickMove.position);
+        updateKeys(int(event.joystickMove.axis) | int(event.joystickMove.joystickId) << 8 | joystick_axis_mask, event.joystickMove.position / 100.0);
         break;
     case sf::Event::JoystickDisconnected:
         for(int button=0; button<sf::Joystick::ButtonCount; button++)
