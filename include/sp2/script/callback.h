@@ -20,7 +20,7 @@ public:
         lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
         if (lua_isfunction(global_lua_state, -1))
         {
-            int arg_count = pushArgs(args...);
+            int arg_count = pushArgs(global_lua_state, args...);
             if (lua_pcall(global_lua_state, arg_count, 0, 0))
             {
                 LOG(Error, "Callback function error:", lua_tostring(global_lua_state, -1));
