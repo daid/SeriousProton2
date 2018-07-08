@@ -53,6 +53,7 @@ void Engine::run()
     
     sf::Clock frame_time_clock;
     int fps_count = 0;
+    int ups_count = 0;
     sf::Clock fps_counter_clock;
     LOG(Info, "Engine started");
     
@@ -90,6 +91,7 @@ void Engine::run()
         while(fixed_update_accumulator > fixed_update_delta)
         {
             fixed_update_accumulator -= fixed_update_delta;
+            ups_count++;
             for(Scene* scene : Scene::all())
             {
                 if (scene->isEnabled())
@@ -127,9 +129,12 @@ void Engine::run()
         fps_count++;
         if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
         {
-            current_fps = double(fps_count) / fps_counter_clock.restart().asSeconds();
+            double time = fps_counter_clock.restart().asSeconds();
+            current_fps = double(fps_count) / time;
+            current_ups = double(ups_count) / time;
             fps_count = 0;
-            LOG(Debug, "FPS:", current_fps);
+            ups_count = 0;
+            LOG(Debug, "FPS:", current_fps, "UPS:", current_ups);
         }
     }
     LOG(Info, "Engine closing down");
