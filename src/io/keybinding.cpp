@@ -148,8 +148,10 @@ void Keybinding::setKey(string key)
             int axis_button_id = stringutil::convert::toInt(parts[3]);
             if (parts[2] == "axis")
                 key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask;
-            if (parts[3] == "button")
+            else if (parts[2] == "button")
                 key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask;
+            else
+                LOG(Warning, "Unknown joystick binding:", key);
         }
         return;
     }

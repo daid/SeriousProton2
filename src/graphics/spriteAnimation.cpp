@@ -124,6 +124,10 @@ void SpriteAnimation::Data::load(string resource_name)
     KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
     if (!tree)
         return;
+
+    float u_offset = 0.0;
+    float v_offset = 0.0;
+
     animations.clear();
     int total_frames = 0;
     for(auto& it : tree->getFlattenNodesByIds())
@@ -193,6 +197,11 @@ void SpriteAnimation::Data::load(string resource_name)
             u1 /= texture_size.x;
             v0 /= texture_size.y;
             v1 /= texture_size.y;
+            
+            u0 += u_offset;
+            u1 -= u_offset;
+            v0 += v_offset;
+            v1 -= v_offset;
 
             animation.frames.emplace_back();
             Data::Animation::Frame& frame = animation.frames.back();
