@@ -38,6 +38,13 @@ void SpriteAnimation::setFlags(int flags)
     flip = flags & FlipFlag;
 }
 
+int SpriteAnimation::getFlags()
+{
+    if (flip)
+        return FlipFlag;
+    return 0;
+}
+
 void SpriteAnimation::update(float delta, RenderData& render_data)
 {
 #ifdef DEBUG

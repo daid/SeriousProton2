@@ -13,6 +13,7 @@ class SpriteAnimation : public Animation
 public:
     virtual void play(string key, float speed=1.0) override;
     virtual void setFlags(int flags) override;
+    virtual int getFlags() override;
 protected:
     virtual void update(float delta, RenderData& render_data) override;
 
