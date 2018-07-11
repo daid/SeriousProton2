@@ -9,7 +9,7 @@ class Shape
 {
 public:
     Shape()
-    : type(Type::Dynamic), density(1.0), linear_damping(0.0), angular_damping(0.0), restitution(0.0), fixed_rotation(false), filter_category(0x0001), filter_mask(0xFFFF)
+    : type(Type::Dynamic), density(1.0), linear_damping(0.0), angular_damping(0.0), restitution(0.0), friction(0.0), fixed_rotation(false), filter_category(0x0001), filter_mask(0xFFFF)
     {
     }
 
@@ -38,6 +38,7 @@ public:
     float linear_damping;
     float angular_damping;
     float restitution;
+    float friction;
     bool fixed_rotation;
 
     //Collision filtering. Collision is only allowed to happen if (a->filter_category & b->filter_mask) && (b->filter_category & a->filter_mask)
