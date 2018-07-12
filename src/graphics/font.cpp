@@ -43,7 +43,11 @@ public:
         info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.advance = 0;
-        if (FT_Load_Char(face, character, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
+        
+        int glyph_index = FT_Get_Char_Index(face, character);
+        if (glyph_index == 0)
+            return info;
+        if (FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
             return info;
 
         FT_Glyph glyph;
@@ -164,7 +168,7 @@ FreetypeFont::FreetypeFont(string name, io::ResourceStreamPtr stream)
         FT_Done_FreeType(library);
         return;
     }
-    
+
     ft_library = library;
     ft_stream_rec = stream_rec;
     ft_face = face;
