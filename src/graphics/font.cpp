@@ -11,10 +11,10 @@ namespace sp {
 static unsigned long ft_stream_read(FT_Stream rec, unsigned long offset, unsigned char* buffer, unsigned long count)
 {
     io::ResourceStreamPtr& stream = *static_cast<io::ResourceStreamPtr*>(rec->descriptor.pointer);
-    if (static_cast<unsigned long>(stream->seek(offset)) == offset)
+    if (stream->seek(offset) == offset)
     {
         if (count > 0)
-            return static_cast<unsigned long>(stream->read(reinterpret_cast<char*>(buffer), count));
+            return stream->read(reinterpret_cast<char*>(buffer), count);
         else
             return 0;
     }
@@ -233,7 +233,7 @@ std::shared_ptr<MeshData> FreetypeFont::createString(string s, int pixel_size, f
         }
         GlyphInfo& glyph = known_glyphs[character];
 
-        if (character != ' ')
+        if (character != ' ' && glyph.bounds.size.x > 0.0)
         {
             float u0 = glyph.uv_rect.position.x;
             float v0 = glyph.uv_rect.position.y;
