@@ -46,6 +46,11 @@ void Progressbar::setAttribute(const string& key, const string& value)
         fill->setAttribute("alignment", value);
         markRenderDataOutdated();
     }
+    else if (key == "value")
+    {
+        this->value = stringutil::convert::toFloat(value);
+        markRenderDataOutdated();
+    }
     else if (key == "range")
     {
         sp::Vector2f v = stringutil::convert::toVector2f(value);
