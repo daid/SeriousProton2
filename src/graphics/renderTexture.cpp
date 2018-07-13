@@ -33,6 +33,12 @@ const sf::Texture* RenderTexture::get()
     return &render_texture[index].getTexture();
 }
 
+Vector2i RenderTexture::getSize() const
+{
+    sf::Vector2u size = render_texture[0].getSize();
+    return Vector2i(size.x, size.y);
+}
+
 sf::RenderTarget& RenderTexture::activateRenderTarget()
 {
     if (double_buffered)

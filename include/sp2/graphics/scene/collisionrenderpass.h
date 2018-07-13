@@ -16,7 +16,8 @@ public:
     CollisionRenderPass(P<Scene> scene);
     CollisionRenderPass(P<Scene> scene, P<Camera> camera);
     
-    virtual void render(P<GraphicsLayer> layer, float aspect_ratio) override;
+    virtual void renderSetup(float aspect_ratio) override;
+    virtual void renderExecute() override;
 
     void setScene(P<Scene> scene);
     void setCamera(P<Camera> camera);
@@ -26,10 +27,10 @@ private:
     P<Scene> single_scene;
     P<Camera> specific_camera;
     
-    void renderScene(Scene* scene, P<GraphicsLayer> layer, float aspect_ratio);
+    void setupScene(Scene* scene, float aspect_ratio);
 
     std::shared_ptr<MeshData> mesh;
-    RenderQueue queue;
+    std::vector<RenderQueue> queues;
 };
 
 };//namespace sp

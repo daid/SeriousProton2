@@ -24,7 +24,8 @@ public:
     void setTarget(RenderTexture* render_texture);
     RenderTexture* getTarget();
     
-    virtual void render(sf::RenderTarget& window) = 0;
+    virtual void renderSetup(float aspect_ratio) = 0;     //Executed in main thread
+    virtual void renderExecute() = 0;   //Executed in render thread
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;

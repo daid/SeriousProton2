@@ -37,7 +37,8 @@ private:
     virtual ~Window();
     
     void createRenderWindow();
-    void render();
+    void renderSetup();//Execute in main thread
+    void renderExecute();//Execute in render thread
     void handleEvent(const sf::Event& event);
     void pointerDown(io::Pointer::Button button, Vector2d position, int id);
     void pointerDrag(Vector2d position, int id);

@@ -137,7 +137,7 @@ void CollisionRenderPass::setCamera(P<Camera> camera)
     specific_camera = camera;
 }
 
-void CollisionRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
+void CollisionRenderPass::renderSetup(float aspect_ratio)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
     {
@@ -151,20 +151,27 @@ void CollisionRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
     {
         enabled_toggled = false;
     }
+    queues.clear();
     if (!enabled)
         return;
     if (single_scene)
     {
-        renderScene(*single_scene, layer, aspect_ratio);
-    }else{
+        setupScene(*single_scene, aspect_ratio);
+    }
+    else
+    {
         for(Scene* scene : Scene::scenes)
-        {
-            renderScene(scene, layer, aspect_ratio);
-        }
+            setupScene(scene, aspect_ratio);
     }
 }
 
-void CollisionRenderPass::renderScene(Scene* scene, P<GraphicsLayer> layer, float aspect_ratio)
+void CollisionRenderPass::renderExecute()
+{
+    for(RenderQueue& queue : queues)
+        queue.render();
+}
+
+void CollisionRenderPass::setupScene(Scene* scene, float aspect_ratio)
 {    
     P<Camera> camera = scene->getCamera();
     if (specific_camera && specific_camera->getScene() == scene)
@@ -186,7 +193,8 @@ void CollisionRenderPass::renderScene(Scene* scene, P<GraphicsLayer> layer, floa
             else
                 mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
 
-            queue.clear();
+            queues.emplace_back(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
+            RenderQueue& queue = queues.back();
             RenderData render_data;
             render_data.shader = Shader::get("internal:normal_as_color.shader");
             render_data.type = RenderData::Type::Normal;
@@ -194,7 +202,7 @@ void CollisionRenderPass::renderScene(Scene* scene, P<GraphicsLayer> layer, floa
             render_data.color = Color(1, 1, 1, 0.25);
             queue.add(Matrix4x4d::identity(), render_data);
 
-            queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
+            queue.render();
         }
     }
 }

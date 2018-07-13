@@ -10,9 +10,10 @@ namespace sp {
 class RenderQueue
 {
 public:
-    void clear();
+    RenderQueue(const Matrix4x4d& camera_projection, const Matrix4x4d& camera_transform);
+
     void add(const Matrix4x4d& transform, const RenderData& data);
-    void render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform);
+    void render();
 private:
     class Item
     {
@@ -31,6 +32,8 @@ private:
         RenderData data;
     };
 
+    Matrix4x4d camera_projection;
+    Matrix4x4d camera_transform;
     std::vector<Item> render_list;
 };
 

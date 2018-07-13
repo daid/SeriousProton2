@@ -4,6 +4,7 @@
 #include <sp2/graphics/graphicslayer.h>
 #include <sp2/graphics/renderTexture.h>
 #include <sp2/graphics/scene/renderqueue.h>
+#include <sp2/graphics/opengl.h>
 #include <SFML/Window/Event.hpp>
 
 namespace sp {
@@ -105,24 +106,45 @@ void Window::createRenderWindow()
     clear_color = Color(0.1, 0.1, 0.1);
 }
 
-void Window::render()
+void Window::renderSetup()
 {
-    render_window.clear(sf::Color(clear_color.toInt()));
     graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
     });
+
+    for(GraphicsLayer* layer : graphics_layers)
+    {
+        if (layer->isEnabled())
+        {
+            Vector2i size(render_window.getSize().x, render_window.getSize().y);
+            if (layer->getTarget())
+                size = layer->getTarget()->getSize();
+            
+            layer->renderSetup(float(size.x) / float(size.y));
+        }
+    }
+}
+
+void Window::renderExecute()
+{
+    render_window.clear(sf::Color(clear_color.toInt()));
     for(GraphicsLayer* layer : graphics_layers)
     {
         if (layer->isEnabled())
         {
             if (layer->getTarget())
             {
-                layer->render(layer->getTarget()->activateRenderTarget());
+                layer->getTarget()->activateRenderTarget();
+                glViewport(0, 0, layer->getTarget()->getSize().x, layer->getTarget()->getSize().y);
+                layer->renderExecute();
             }
             else
             {
                 render_window.setActive();
-                layer->render(render_window);
+                Vector2d size(render_window.getSize().x, render_window.getSize().y);
+                Rect2d viewport = layer->viewport;
+                glViewport(viewport.position.x * size.x, viewport.position.y * size.y, viewport.size.x * size.x, viewport.size.y * size.y);
+                layer->renderExecute();
             }
         }
     }
@@ -138,14 +160,14 @@ void Window::render()
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
         
-        RenderQueue queue;
+        RenderQueue queue(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
         RenderData rd;
         rd.type = RenderData::Type::Normal;
         rd.shader = Shader::get("internal:basic.shader");
         rd.mesh = cursor_mesh;
         rd.texture = cursor_texture;
         queue.add(Matrix4x4d::translate(position.x, position.y, 0), rd);
-        queue.render(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
+        queue.render();
     }
     
     render_window.display();

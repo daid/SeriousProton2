@@ -117,14 +117,18 @@ void Engine::run()
         {
             updatable->onUpdate(delta);
         }
+        io::Keybinding::allPostUpdate();
         
         for(Window* window : Window::windows)
         {
             if (window->render_window.isOpen())
-                window->render();
+                window->renderSetup();
         }
-
-        io::Keybinding::allPostUpdate();
+        for(Window* window : Window::windows)
+        {
+            if (window->render_window.isOpen())
+                window->renderExecute();
+        }
 
         fps_count++;
         if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)

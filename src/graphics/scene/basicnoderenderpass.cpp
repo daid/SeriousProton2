@@ -20,20 +20,25 @@ void BasicNodeRenderPass::addCamera(P<Camera> camera)
     cameras.add(camera);
 }
 
-void BasicNodeRenderPass::render(P<GraphicsLayer> layer, float aspect_ratio)
+void BasicNodeRenderPass::renderSetup(float aspect_ratio)
 {
+    queues.clear();
     if (!cameras.empty())
     {
         for(Camera* camera : cameras)
-        {
-            renderScene(camera->getScene(), camera, layer, aspect_ratio);
-        }
-    }else{
-        for(Scene* scene : Scene::all())
-        {
-            renderScene(scene, nullptr, layer, aspect_ratio);
-        }
+            setupScene(camera->getScene(), camera, aspect_ratio);
     }
+    else
+    {
+        for(Scene* scene : Scene::all())
+            setupScene(scene, nullptr, aspect_ratio);
+    }
+}
+
+void BasicNodeRenderPass::renderExecute()
+{
+    for(RenderQueue& queue : queues)
+        queue.render();
 }
 
 bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
@@ -91,7 +96,7 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     }
 }
 
-void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, P<GraphicsLayer> layer, float aspect_ratio)
+void BasicNodeRenderPass::setupScene(P<Scene> scene, P<Camera> camera, float aspect_ratio)
 {
     if (!camera)
         camera = scene->getCamera();
@@ -99,18 +104,18 @@ void BasicNodeRenderPass::renderScene(P<Scene> scene, P<Camera> camera, P<Graphi
     if (scene->isEnabled() && camera)
     {
         camera->setAspectRatio(aspect_ratio);
-        queue.clear();
-        recursiveNodeRender(*scene->getRoot());
-        queue.render(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
+        queues.emplace_back(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
+        queue = &queues.back();
+        recursiveNodeSetup(*scene->getRoot());
     }
 }
 
-void BasicNodeRenderPass::recursiveNodeRender(Node* node)
+void BasicNodeRenderPass::recursiveNodeSetup(Node* node)
 {
     addNodeToRenderQueue(node);
     for(Node* child : node->getChildren())
     {
-        recursiveNodeRender(child);
+        recursiveNodeSetup(child);
     }
 }
 
@@ -122,7 +127,7 @@ Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector
 void BasicNodeRenderPass::addNodeToRenderQueue(Node* node)
 {
     if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
-        queue.add(node->getGlobalTransform(), node->render_data);
+        queue->add(node->getGlobalTransform(), node->render_data);
 }
 
 };//namespace sp

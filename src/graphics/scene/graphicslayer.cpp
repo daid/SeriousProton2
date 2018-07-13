@@ -17,11 +17,14 @@ SceneGraphicsLayer::~SceneGraphicsLayer()
         delete pass;
 }
 
-void SceneGraphicsLayer::render(sf::RenderTarget& target)
+void SceneGraphicsLayer::renderSetup(float aspect_ratio)
 {
-    int pixel_width = viewport.size.x * target.getSize().x;
-    int pixel_height = viewport.size.y * target.getSize().y;
-    glViewport(viewport.position.x * target.getSize().x, viewport.position.y * target.getSize().y, pixel_width, pixel_height);
+    for(RenderPass* pass : render_passes)
+        pass->renderSetup(aspect_ratio * (viewport.size.x / viewport.size.y));
+}
+
+void SceneGraphicsLayer::renderExecute()
+{
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -31,13 +34,9 @@ void SceneGraphicsLayer::render(sf::RenderTarget& target)
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LEQUAL);
-    
-    float aspect_ratio = double(pixel_width) / double(pixel_height);
 
     for(RenderPass* pass : render_passes)
-    {
-        pass->render(this, aspect_ratio);
-    }
+        pass->renderExecute();
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);

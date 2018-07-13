@@ -25,6 +25,8 @@ public:
     
     //Get the texture for rendering to other targets.
     virtual const sf::Texture* get() override;
+    
+    Vector2i getSize() const;
 
     //Active rendering towards this texture.
     sf::RenderTarget& activateRenderTarget();

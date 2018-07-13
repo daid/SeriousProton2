@@ -7,7 +7,8 @@
 
 namespace sp {
 
-void RenderQueue::clear()
+RenderQueue::RenderQueue(const Matrix4x4d& camera_projection, const Matrix4x4d& camera_transform)
+: camera_projection(camera_projection), camera_transform(camera_transform)
 {
     render_list.clear();
 }
@@ -19,7 +20,7 @@ void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
     render_list.emplace_back(transform, data);
 }
 
-void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_transform)
+void RenderQueue::render()
 {
     std::sort(render_list.begin(), render_list.end());
     for(Item& item : render_list)
@@ -37,7 +38,7 @@ void RenderQueue::render(const Matrix4x4d& projection, const Matrix4x4d& camera_
         }
         if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
             glDepthMask(false);
-        item.data.shader->setUniform("projection_matrix", projection);
+        item.data.shader->setUniform("projection_matrix", camera_projection);
         item.data.shader->setUniform("camera_matrix", camera_transform);
         item.data.shader->setUniform("object_matrix", item.transform);
         item.data.shader->setUniform("object_scale", sf::Vector3f(item.data.scale.x, item.data.scale.y, item.data.scale.z));
