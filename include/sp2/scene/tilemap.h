@@ -11,7 +11,8 @@ public:
     enum class Collision
     {
         Open,
-        Solid
+        Solid,
+        Platform
     };
 
     Tilemap(P<Node> parent, string texture, float tile_size, int texture_tile_count);

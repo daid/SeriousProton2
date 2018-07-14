@@ -9,11 +9,49 @@
 namespace sp {
 namespace collision {
 
+class ContactListener : public b2ContactListener
+{
+public:
+	virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
+	{
+		b2Fixture* fixture_a = contact->GetFixtureA();
+		b2Fixture* fixture_b = contact->GetFixtureB();
+
+        if (fixture_a->GetType() == b2Shape::Type::e_chain)
+        {
+            b2ChainShape* chain = (b2ChainShape*)fixture_a->GetShape();
+            b2EdgeShape edge;
+            chain->GetChildEdge(&edge, contact->GetChildIndexA());
+            
+            b2WorldManifold world_manifold;
+            contact->GetWorldManifold(&world_manifold);
+            
+            Vector2d edge_normal = toVector<double>(b2Mul(fixture_a->GetBody()->GetTransform().q, b2Vec2(edge.m_vertex2.y - edge.m_vertex1.y, edge.m_vertex1.x - edge.m_vertex2.x))).normalized();
+            if (edge_normal.dot(toVector<double>(world_manifold.normal)) > -0.3)
+                contact->SetEnabled(false);
+        }
+        if (fixture_b->GetType() == b2Shape::Type::e_chain)
+        {
+            b2ChainShape* chain = (b2ChainShape*)fixture_b->GetShape();
+            b2EdgeShape edge;
+            chain->GetChildEdge(&edge, contact->GetChildIndexB());
+            
+            b2WorldManifold world_manifold;
+            contact->GetWorldManifold(&world_manifold);
+            
+            Vector2d edge_normal = toVector<double>(b2Mul(fixture_b->GetBody()->GetTransform().q, b2Vec2(edge.m_vertex2.y - edge.m_vertex1.y, edge.m_vertex1.x - edge.m_vertex2.x))).normalized();
+            if (edge_normal.dot(toVector<double>(world_manifold.normal)) < 0.3)
+                contact->SetEnabled(false);
+        }
+	}
+};
+
 void Shape2D::create(Node* node) const
 {
     if (!node->getScene()->collision_world2d)
     {
         node->getScene()->collision_world2d = new b2World(b2Vec2_zero);
+        node->getScene()->collision_world2d->SetContactListener(new ContactListener());
     }
     b2World* world = node->getScene()->collision_world2d;
 

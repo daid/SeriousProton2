@@ -217,6 +217,24 @@ public:
                 }
             }
         }
+        for(int y=0; y<h; y++)
+        {
+            for(int x=0; x<w; x++)
+            {
+                int x0 = x;
+                while(x<w && tilemap.tiles[y][x].collision == Tilemap::Collision::Platform)
+                {
+                    x++;
+                }
+                if (x0 != x)
+                {
+                    collision::Chains2D::Path path;
+                    path.emplace_back(x0, y+1);
+                    path.emplace_back(x, y+1);
+                    result.chains.emplace_back(std::move(path));
+                }
+            }
+        }
     }
 private:
     class Info
