@@ -96,9 +96,9 @@ void Window::createRenderWindow()
     sf::ContextSettings settings = render_window.getSettings();
     LOG(Info, "OpenGL version:", settings.majorVersion, settings.minorVersion);
 
-    //render_window.setVerticalSyncEnabled(true);
-    render_window.setVerticalSyncEnabled(false);
-    render_window.setFramerateLimit(60);
+    render_window.setVerticalSyncEnabled(true);
+    //render_window.setVerticalSyncEnabled(false);
+    //render_window.setFramerateLimit(60);
 
     render_window.setMouseCursorVisible(true);
     render_window.setKeyRepeatEnabled(false);
