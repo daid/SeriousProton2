@@ -25,9 +25,9 @@ public:
     Type type;
     Shader* shader;
     std::shared_ptr<MeshData> mesh;
-    sp::Color color;
+    Color color;
     Texture* texture;
-    sp::Vector3f scale;
+    Vector3f scale;
     
     RenderData();
     

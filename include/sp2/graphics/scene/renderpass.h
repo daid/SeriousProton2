@@ -8,13 +8,13 @@
 
 namespace sp {
 
+class RenderQueue;
 class RenderPass : public AutoPointerObject
 {
 public:
     RenderPass();
     
-    virtual void renderSetup(float aspect_ratio) = 0;
-    virtual void renderExecute() = 0;
+    virtual void render(RenderQueue& queue) = 0;
 
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);

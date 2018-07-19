@@ -102,57 +102,58 @@ void Window::createRenderWindow()
 
     render_window.setMouseCursorVisible(true);
     render_window.setKeyRepeatEnabled(false);
+    render_window.setActive(false);
     
     clear_color = Color(0.1, 0.1, 0.1);
 }
 
-void Window::renderSetup()
+void Window::render()
 {
     graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
     });
 
+    queue.add([this]()
+    {
+        render_window.clear(sf::Color(clear_color.toInt()));
+    });
     for(GraphicsLayer* layer : graphics_layers)
     {
         if (layer->isEnabled())
         {
             Vector2i size(render_window.getSize().x, render_window.getSize().y);
             if (layer->getTarget())
-                size = layer->getTarget()->getSize();
-            
-            layer->renderSetup(float(size.x) / float(size.y));
-        }
-    }
-}
-
-void Window::renderExecute()
-{
-    render_window.clear(sf::Color(clear_color.toInt()));
-    for(GraphicsLayer* layer : graphics_layers)
-    {
-        if (layer->isEnabled())
-        {
-            if (layer->getTarget())
             {
-                layer->getTarget()->activateRenderTarget();
-                glViewport(0, 0, layer->getTarget()->getSize().x, layer->getTarget()->getSize().y);
-                layer->renderExecute();
+                size = layer->getTarget()->getSize();
+                queue.add([layer]()
+                {
+                    layer->getTarget()->activateRenderTarget();
+                    glViewport(0, 0, layer->getTarget()->getSize().x, layer->getTarget()->getSize().y);
+                });
             }
             else
             {
-                render_window.setActive();
-                Vector2d size(render_window.getSize().x, render_window.getSize().y);
-                Rect2d viewport = layer->viewport;
-                glViewport(viewport.position.x * size.x, viewport.position.y * size.y, viewport.size.x * size.x, viewport.size.y * size.y);
-                layer->renderExecute();
+                queue.add([this, layer]()
+                {
+                    render_window.setActive();
+                    Vector2d size(render_window.getSize().x, render_window.getSize().y);
+                    Rect2d viewport = layer->viewport;
+                    glViewport(viewport.position.x * size.x, viewport.position.y * size.y, viewport.size.x * size.x, viewport.size.y * size.y);
+                });
             }
+            
+            queue.setTargetAspectSize(float(size.x) / float(size.y));
+            layer->render(queue);
         }
     }
-    
+
     if (cursor_mesh && cursor_texture)
     {
-        render_window.setActive();
-
+        queue.add([this]()
+        {
+            render_window.setActive();
+            glViewport(0, 0, render_window.getSize().x, render_window.getSize().y);
+        });
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(render_window);
     
         Vector2d position(mouse_pos.x, mouse_pos.y);
@@ -160,17 +161,20 @@ void Window::renderExecute()
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
         
-        RenderQueue queue(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
+        queue.setCamera(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
         RenderData rd;
         rd.type = RenderData::Type::Normal;
         rd.shader = Shader::get("internal:basic.shader");
         rd.mesh = cursor_mesh;
         rd.texture = cursor_texture;
         queue.add(Matrix4x4d::translate(position.x, position.y, 0), rd);
-        queue.render();
     }
+    queue.add([this]()
+    {
+        render_window.display();
+    });
     
-    render_window.display();
+    queue.render();
 }
 
 void Window::handleEvent(const sf::Event& event)

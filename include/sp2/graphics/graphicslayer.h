@@ -11,6 +11,7 @@ namespace sp {
 
 class Window;
 class RenderTexture;
+class RenderQueue;
 class GraphicsLayer : public AutoPointerObject
 {
 public:
@@ -24,8 +25,7 @@ public:
     void setTarget(RenderTexture* render_texture);
     RenderTexture* getTarget();
     
-    virtual void renderSetup(float aspect_ratio) = 0;     //Executed in main thread
-    virtual void renderExecute() = 0;   //Executed in render thread
+    virtual void render(RenderQueue& queue) = 0;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;

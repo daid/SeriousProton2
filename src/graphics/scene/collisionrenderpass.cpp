@@ -137,7 +137,7 @@ void CollisionRenderPass::setCamera(P<Camera> camera)
     specific_camera = camera;
 }
 
-void CollisionRenderPass::renderSetup(float aspect_ratio)
+void CollisionRenderPass::render(RenderQueue& queue)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
     {
@@ -151,27 +151,20 @@ void CollisionRenderPass::renderSetup(float aspect_ratio)
     {
         enabled_toggled = false;
     }
-    queues.clear();
     if (!enabled)
         return;
     if (single_scene)
     {
-        setupScene(*single_scene, aspect_ratio);
+        renderScene(queue, *single_scene);
     }
     else
     {
         for(Scene* scene : Scene::scenes)
-            setupScene(scene, aspect_ratio);
+            renderScene(queue, scene);
     }
 }
 
-void CollisionRenderPass::renderExecute()
-{
-    for(RenderQueue& queue : queues)
-        queue.render();
-}
-
-void CollisionRenderPass::setupScene(Scene* scene, float aspect_ratio)
+void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
 {    
     P<Camera> camera = scene->getCamera();
     if (specific_camera && specific_camera->getScene() == scene)
@@ -179,7 +172,6 @@ void CollisionRenderPass::setupScene(Scene* scene, float aspect_ratio)
     
     if (scene->isEnabled() && camera)
     {
-        camera->setAspectRatio(aspect_ratio);
         if (scene->collision_world2d)
         {
             Collision2DDebugRender debug_renderer;
@@ -193,16 +185,13 @@ void CollisionRenderPass::setupScene(Scene* scene, float aspect_ratio)
             else
                 mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
 
-            queues.emplace_back(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
-            RenderQueue& queue = queues.back();
+            queue.setCamera(camera);
             RenderData render_data;
             render_data.shader = Shader::get("internal:normal_as_color.shader");
             render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(1, 1, 1, 0.25);
             queue.add(Matrix4x4d::identity(), render_data);
-
-            queue.render();
         }
     }
 }

@@ -8,6 +8,7 @@
 #include <sp2/string.h>
 #include <sp2/io/pointer.h>
 #include <sp2/graphics/color.h>
+#include <sp2/graphics/scene/renderqueue.h>
 #include <map>
 #include <memory>
 
@@ -33,12 +34,12 @@ public:
     void addLayer(P<GraphicsLayer> layer);
 private:
     sf::RenderWindow render_window;
+    RenderQueue queue;
 
     virtual ~Window();
     
     void createRenderWindow();
-    void renderSetup();//Execute in main thread
-    void renderExecute();//Execute in render thread
+    void render();
     void handleEvent(const sf::Event& event);
     void pointerDown(io::Pointer::Button button, Vector2d position, int id);
     void pointerDrag(Vector2d position, int id);

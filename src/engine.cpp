@@ -122,12 +122,7 @@ void Engine::run()
         for(Window* window : Window::windows)
         {
             if (window->render_window.isOpen())
-                window->renderSetup();
-        }
-        for(Window* window : Window::windows)
-        {
-            if (window->render_window.isOpen())
-                window->renderExecute();
+                window->render();
         }
 
         fps_count++;

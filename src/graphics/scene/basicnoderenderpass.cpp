@@ -20,25 +20,18 @@ void BasicNodeRenderPass::addCamera(P<Camera> camera)
     cameras.add(camera);
 }
 
-void BasicNodeRenderPass::renderSetup(float aspect_ratio)
+void BasicNodeRenderPass::render(RenderQueue& queue)
 {
-    queues.clear();
     if (!cameras.empty())
     {
         for(Camera* camera : cameras)
-            setupScene(camera->getScene(), camera, aspect_ratio);
+            renderScene(queue, camera->getScene(), camera);
     }
     else
     {
         for(Scene* scene : Scene::all())
-            setupScene(scene, nullptr, aspect_ratio);
+            renderScene(queue, scene, nullptr);
     }
-}
-
-void BasicNodeRenderPass::renderExecute()
-{
-    for(RenderQueue& queue : queues)
-        queue.render();
 }
 
 bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
@@ -96,26 +89,24 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     }
 }
 
-void BasicNodeRenderPass::setupScene(P<Scene> scene, P<Camera> camera, float aspect_ratio)
+void BasicNodeRenderPass::renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera)
 {
     if (!camera)
         camera = scene->getCamera();
 
     if (scene->isEnabled() && camera)
     {
-        camera->setAspectRatio(aspect_ratio);
-        queues.emplace_back(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
-        queue = &queues.back();
-        recursiveNodeSetup(*scene->getRoot());
+        queue.setCamera(camera);
+        recursiveNodeRender(queue, *scene->getRoot());
     }
 }
 
-void BasicNodeRenderPass::recursiveNodeSetup(Node* node)
+void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, Node* node)
 {
-    addNodeToRenderQueue(node);
+    addNodeToRenderQueue(queue, node);
     for(Node* child : node->getChildren())
     {
-        recursiveNodeSetup(child);
+        recursiveNodeRender(queue, child);
     }
 }
 
@@ -124,10 +115,10 @@ Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector
     return Ray3d(camera->getGlobalTransform() * Vector3d(0, 0, 0), camera->getGlobalTransform() * camera->getProjectionMatrix().inverse() * Vector3d(position.x, position.y, -1));
 }
 
-void BasicNodeRenderPass::addNodeToRenderQueue(Node* node)
+void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, Node* node)
 {
     if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
-        queue->add(node->getGlobalTransform(), node->render_data);
+        queue.add(node->getGlobalTransform(), node->render_data);
 }
 
 };//namespace sp

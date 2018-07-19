@@ -1,5 +1,6 @@
 #include <sp2/graphics/scene/graphicslayer.h>
 #include <sp2/graphics/scene/renderpass.h>
+#include <sp2/graphics/scene/renderqueue.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/graphics/shader.h>
@@ -17,31 +18,32 @@ SceneGraphicsLayer::~SceneGraphicsLayer()
         delete pass;
 }
 
-void SceneGraphicsLayer::renderSetup(float aspect_ratio)
+void SceneGraphicsLayer::render(RenderQueue& queue)
 {
+    queue.setAspectRatio(viewport.size.x / viewport.size.y);
+    queue.add([]()
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthFunc(GL_LEQUAL);
+    });
+    
     for(RenderPass* pass : render_passes)
-        pass->renderSetup(aspect_ratio * (viewport.size.x / viewport.size.y));
-}
+        pass->render(queue);
 
-void SceneGraphicsLayer::renderExecute()
-{
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthFunc(GL_LEQUAL);
-
-    for(RenderPass* pass : render_passes)
-        pass->renderExecute();
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    sf::Shader::bind(nullptr);
+    queue.add([]()
+    {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        sf::Shader::bind(nullptr);
+    });
 }
 
 bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d position, int id)

@@ -17,8 +17,7 @@ public:
     BasicNodeRenderPass();
     BasicNodeRenderPass(P<Camera> camera);
     
-    virtual void renderSetup(float aspect_ratio) override;
-    virtual void renderExecute() override;
+    virtual void render(RenderQueue& queue) override;
 
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
@@ -26,18 +25,16 @@ public:
     
     void addCamera(P<Camera> camera);
 protected:
-    virtual void addNodeToRenderQueue(Node* node);
-    
-    std::vector<RenderQueue> queues;
-    RenderQueue* queue;
+    virtual void addNodeToRenderQueue(RenderQueue& queue, Node* node);
+
 private:
     PList<Camera> cameras;
     std::map<int, P<Scene>> pointer_scene;
     std::map<int, P<Camera>> pointer_camera;
     
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
-    void setupScene(P<Scene> scene, P<Camera> camera, float aspect_ratio);
-    void recursiveNodeSetup(Node* node);
+    void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
+    void recursiveNodeRender(RenderQueue& queue, Node* node);
     Ray3d pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position);
 };
 
