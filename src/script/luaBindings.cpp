@@ -83,5 +83,11 @@ int pushToLua(lua_State* L, double f)
     return 1;
 }
 
+int pushToLua(lua_State* L, const string& str)
+{
+    lua_pushstring(L, str.c_str());
+    return 1;
+}
+
 };//namespace script
 };//namespace sp

@@ -67,6 +67,17 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     lua_pop(global_lua_state, 1);
 }
 
+bool Environment::load(sp::string resource_name)
+{
+    sp::io::ResourceStreamPtr stream = sp::io::ResourceProvider::get(resource_name);
+    if (!stream)
+    {
+        LOG(Warning, "Failed to find script resource:", resource_name);
+        return false;
+    }
+    return load(stream);
+}
+
 bool Environment::load(sp::io::ResourceStreamPtr resource)
 {
     if (!resource)

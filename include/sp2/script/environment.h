@@ -38,6 +38,7 @@ public:
         lua_pop(global_lua_state, 1);
     }
     
+    bool load(sp::string resource_name);
     bool load(sp::io::ResourceStreamPtr resource);
     
     template<typename... ARGS> bool call(string global_function, ARGS... args)

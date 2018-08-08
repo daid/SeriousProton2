@@ -44,7 +44,7 @@ void Label::setAttribute(const string& key, const string& value)
     {
         if (value == "topleft") text_alignment = Alignment::TopLeft;
         else if (value == "top") text_alignment = Alignment::Top;
-        else if (value == "right") text_alignment = Alignment::TopRight;
+        else if (value == "topright") text_alignment = Alignment::TopRight;
         else if (value == "left") text_alignment = Alignment::Left;
         else if (value == "center") text_alignment = Alignment::Center;
         else if (value == "right") text_alignment = Alignment::Right;

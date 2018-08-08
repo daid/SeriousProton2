@@ -35,6 +35,7 @@ int pushToLua(lua_State* L, bool b);
 int pushToLua(lua_State* L, int i);
 int pushToLua(lua_State* L, float f);
 int pushToLua(lua_State* L, double f);
+int pushToLua(lua_State* L, const string& str);
 
 template<class T> int pushToLua(lua_State* L, sp::P<T> obj)
 {
@@ -152,6 +153,17 @@ template<typename T> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int ind
     luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
     T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
+    lua_pop(L, 1);
+    return obj;
+}
+
+template<typename T> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
+{
+    luaL_checktype(L, index, LUA_TTABLE);
+    lua_getfield(L, index, "__ptr");
+    luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
+
+    sp::P<T> obj = sp::P<ScriptBindingObject>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
     lua_pop(L, 1);
     return obj;
 }
