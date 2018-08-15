@@ -2,11 +2,37 @@
 
 namespace sp {
 
+const KeyValueTreeNode* KeyValueTreeNode::findId(string id) const
+{
+    if (id == this->id)
+        return this;
+    for(const KeyValueTreeNode& node : child_nodes)
+    {
+        const KeyValueTreeNode* result = node.findId(id);
+        if (result)
+            return result;
+    }
+    return nullptr;
+}
+
+KeyValueTreeNode* KeyValueTreeNode::findId(string id)
+{
+    if (id == this->id)
+        return this;
+    for(KeyValueTreeNode& node : child_nodes)
+    {
+        KeyValueTreeNode* result = node.findId(id);
+        if (result)
+            return result;
+    }
+    return nullptr;
+}
+
 KeyValueTreeNode* KeyValueTree::findId(string id)
 {
     for(KeyValueTreeNode& node : root_nodes)
     {
-        KeyValueTreeNode* result = findId(node, id);
+        KeyValueTreeNode* result = node.findId(id);
         if (result)
             return result;
     }
@@ -21,19 +47,6 @@ std::map<string, std::map<string, string>> KeyValueTree::getFlattenNodesByIds()
         buildFlattenNodesByIds(results, node, {});
     }
     return results;
-}
-
-KeyValueTreeNode* KeyValueTree::findId(KeyValueTreeNode& node, const string& id)
-{
-    if (node.id == id)
-        return &node;
-    for(KeyValueTreeNode& child_node : node.child_nodes)
-    {
-        KeyValueTreeNode* result = findId(child_node, id);
-        if (result)
-            return result;
-    }
-    return nullptr;
 }
 
 void KeyValueTree::buildFlattenNodesByIds(std::map<string, std::map<string, string>>& results, const KeyValueTreeNode& node, std::map<string, string> key_values)

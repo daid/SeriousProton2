@@ -11,6 +11,12 @@ namespace sp {
 class KeyValueTreeNode
 {
 public:
+    KeyValueTreeNode() {}
+    KeyValueTreeNode(sp::string id) : id(id) {}
+
+    const KeyValueTreeNode* findId(string id) const;
+    KeyValueTreeNode* findId(string id);
+    
     string id;
     std::map<string, string> items;
     
@@ -25,7 +31,6 @@ public:
     KeyValueTreeNode* findId(string id);
     std::map<string, std::map<string, string>> getFlattenNodesByIds();
 private:
-    KeyValueTreeNode* findId(KeyValueTreeNode& node, const string& id);
     void buildFlattenNodesByIds(std::map<string, std::map<string, string>>& results, const KeyValueTreeNode& node, std::map<string, string> key_values);
 };
 typedef std::shared_ptr<KeyValueTree> KeyValueTreePtr;

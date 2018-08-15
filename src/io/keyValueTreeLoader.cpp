@@ -49,8 +49,7 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
         else if (line.startswith("[") && line.find("]") > -1 && line.endswith("{"))
         {
             //New named node.
-            result->root_nodes.emplace_back();
-            result->root_nodes.back().id = line.substr(1, line.find("]"));
+            result->root_nodes.emplace_back(line.substr(1, line.find("]")));
             parseNode(&result->root_nodes.back());
         }
         else if (line == "}")
