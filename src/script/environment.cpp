@@ -67,25 +67,30 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     lua_pop(global_lua_state, 1);
 }
 
-bool Environment::load(sp::string resource_name)
+bool Environment::load(string resource_name)
 {
-    sp::io::ResourceStreamPtr stream = sp::io::ResourceProvider::get(resource_name);
+    io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
     {
         LOG(Warning, "Failed to find script resource:", resource_name);
         return false;
     }
-    return load(stream);
+    return _load(stream, resource_name);
 }
 
-bool Environment::load(sp::io::ResourceStreamPtr resource)
+bool Environment::load(io::ResourceStreamPtr resource)
+{
+    return _load(resource, "?");
+}
+
+bool Environment::_load(io::ResourceStreamPtr resource, string name)
 {
     if (!resource)
         return false;
 
     string filecontents = resource->readAll();
 
-    if (luaL_loadbuffer(global_lua_state, filecontents.c_str(), filecontents.length(), nullptr))
+    if (luaL_loadbuffer(global_lua_state, filecontents.c_str(), filecontents.length(), name.c_str()))
     {
         string error_string = luaL_checkstring(global_lua_state, -1);
         LOG(Error, "LUA: load:", error_string);

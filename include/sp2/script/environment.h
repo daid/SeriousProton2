@@ -103,6 +103,8 @@ public:
     }
 
 private:
+    bool _load(io::ResourceStreamPtr resource, sp::string name);
+
     int pushArgs(lua_State* L)
     {
         return 0;
