@@ -115,7 +115,9 @@ void Window::render()
 
     queue.add([this]()
     {
-        render_window.clear(sf::Color(clear_color.toInt()));
+        glViewport(0, 0, 1, 1);
+        glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     });
     for(GraphicsLayer* layer : graphics_layers)
     {
