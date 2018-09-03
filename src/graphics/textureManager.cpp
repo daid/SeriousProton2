@@ -24,7 +24,7 @@ public:
         if (name.find("#") > 0)
         {
             std::vector<string> keys = name.substr(name.find("#") + 1).lower().split(",");
-            if (keys[0] == "hq2x" || keys[1] == "hq3x" || keys[0] == "hq4x")
+            if (keys[0] == "hq2x" || keys[0] == "hq3x" || keys[0] == "hq4x")
             {
                 sp::image::HQ2xConfig config;
                 sp::Vector2i tile_size(0, 0);
