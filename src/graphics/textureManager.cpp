@@ -1,5 +1,6 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/io/lazyLoader.h>
+#include <sp2/graphics/image/hq2x.h>
 #include <string.h>
 
 namespace sp {
@@ -9,10 +10,10 @@ TextureManager texture_manager;
 class TextureManagerTexture : public Texture
 {
 public:
-    TextureManagerTexture(string resource_name)
-    : Texture(Type::Static, resource_name)
+    TextureManagerTexture(string name)
+    : Texture(Type::Static, name)
     {
-        LOG(Info, "Loading texture:", resource_name);
+        LOG(Info, "Loading texture:", name);
         //TODO: Fallback texture
         texture.setRepeated(true);
         texture.setSmooth(texture_manager.default_smooth);
@@ -20,6 +21,38 @@ public:
 
     void transferImageFromThread(std::shared_ptr<sf::Image> image)
     {
+        if (name.find("#") > 0)
+        {
+            std::vector<string> keys = name.substr(name.find("#") + 1).lower().split(",");
+            if (keys[0] == "hq2x" || keys[1] == "hq3x" || keys[0] == "hq4x")
+            {
+                sp::image::HQ2xConfig config;
+                sp::Vector2i tile_size(0, 0);
+                if (keys[0] == "hq2x")
+                    config.scale = 2;
+                else if (keys[0] == "hq3x")
+                    config.scale = 3;
+                else if (keys[0] == "hq4x")
+                    config.scale = 4;
+                config.out_of_bounds = sp::image::HQ2xConfig::OutOfBounds::Clamp;
+                for(unsigned int n=1; n<keys.size(); n++)
+                {
+                    if (keys[n] == "clamp")
+                        config.out_of_bounds = sp::image::HQ2xConfig::OutOfBounds::Clamp;
+                    else if (keys[n] == "wrap")
+                        config.out_of_bounds = sp::image::HQ2xConfig::OutOfBounds::Wrap;
+                    else if (keys[n] == "transparent")
+                        config.out_of_bounds = sp::image::HQ2xConfig::OutOfBounds::Transparent;
+                    else if (keys[n].startswith("tiles="))
+                        tile_size.x = tile_size.y = stringutil::convert::toInt(keys[n].substr(6));
+                }
+                if (tile_size.x > 0 && tile_size.y > 0)
+                    sp::image::hq2xTiles(*image, tile_size, config);
+                else
+                    sp::image::hq2x(*image, config);
+            }
+        }
+
         std::lock_guard<std::mutex> lock(mutex);
         this->image = image;
     }

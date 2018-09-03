@@ -33,7 +33,11 @@ public:
         
         T ptr = prepare(name);
         cached_items[name] = ptr;
-        io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
+        io::ResourceStreamPtr stream;
+        if (name.find("#") > -1)
+            stream = io::ResourceProvider::get(name.substr(0, name.find("#")));
+        else
+            stream = io::ResourceProvider::get(name);
         if (stream)
         {
             LazyLoaderManager::addWork([this, ptr, stream]()
