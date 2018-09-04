@@ -45,6 +45,19 @@ int SpriteAnimation::getFlags()
     return 0;
 }
 
+void SpriteAnimation::prepare(RenderData& render_data)
+{
+    if (!animation)
+    {
+        render_data.type = RenderData::Type::None;
+        return;
+    }
+    
+    render_data.shader = Shader::get("internal:basic.shader");
+    render_data.texture = animation->texture;
+    render_data.type = RenderData::Type::Normal;
+}
+
 void SpriteAnimation::update(float delta, RenderData& render_data)
 {
 #ifdef DEBUG
@@ -70,10 +83,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
     }
 #endif
     if (!animation)
-    {
-        render_data.type = RenderData::Type::None;
         return;
-    }
     if (playing)
     {
         time_delta += delta * speed;
@@ -97,10 +107,6 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
     }
 
     const Data::Animation::Frame& frame = animation->frames[keyframe];
-
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = animation->texture;
-    render_data.type = RenderData::Type::Normal;
     if (flip)
         render_data.mesh = frame.mirrored_mesh;
     else

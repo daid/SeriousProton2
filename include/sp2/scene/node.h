@@ -84,6 +84,11 @@ public:
     //Test if this is a solid object, so it has a collision shape, which isn't generated as Sensor.
     bool isSolid();
     
+    void setAnimation(std::unique_ptr<Animation> animation);
+    void animationPlay(string key, float speed=1.0);
+    void animationSetFlags(int flags);
+    int animationGetFlags();
+    
     //Event called every frame.
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.
     //Called when the game is paused with delta = 0
@@ -93,7 +98,6 @@ public:
     //Event called when 2 nodes collide. Not called when the game is paused.
     virtual void onCollision(CollisionInfo& info) {}
     
-    std::unique_ptr<Animation> animation;
     RenderData render_data;
 
     class Multiplayer
@@ -134,6 +138,8 @@ private:
     
     Matrix4x4d global_transform;
     Matrix4x4d local_transform;
+
+    std::unique_ptr<Animation> animation;
     
     void updateLocalTransform();
     void updateGlobalTransform();

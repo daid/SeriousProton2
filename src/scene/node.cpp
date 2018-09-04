@@ -264,6 +264,28 @@ bool Node::isSolid()
     return false;
 }
 
+void Node::setAnimation(std::unique_ptr<Animation> animation)
+{
+    this->animation = std::move(animation);
+    if (this->animation)
+        this->animation->prepare(render_data);
+}
+
+void Node::animationPlay(string key, float speed)
+{
+    animation->play(key, speed);
+}
+
+void Node::animationSetFlags(int flags)
+{
+    animation->setFlags(flags);
+}
+
+int Node::animationGetFlags()
+{
+    return animation->getFlags();
+}
+
 void Node::updateLocalTransform()
 {
     local_transform = Matrix4x4d::translate(translation) * Matrix4x4d::fromQuaternion(rotation);
