@@ -328,6 +328,7 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
     Vector2d texture_size, pixel_glyph_size;
     std::vector<string> lines;
     std::vector<string> special_lines;
+    glyph_advance = sp::Vector2d(1, 1);
     while(stream->tell() != stream->getSize())
     {
         string line = stream->readLine();
@@ -358,6 +359,10 @@ BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
         else if (key == "special")
         {
             special_lines.push_back(value);
+        }
+        else if (key == "advance")
+        {
+            glyph_advance = stringutil::convert::toVector2d(value);
         }
         else
         {
@@ -437,7 +442,7 @@ std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, flo
 
                 index += it.first.length() - 1;
                 
-                position.x += text_size * it.second.size.x / glyph_size.x;
+                position.x += text_size * glyph_advance.x * it.second.size.x / glyph_size.x;
                 max_line_width = std::max(max_line_width, position.x);
                 done_special = true;
                 break;
@@ -449,7 +454,7 @@ std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, flo
         if (character == '\n')
         {
             position.x = 0;
-            position.y -= text_size;
+            position.y -= text_size * glyph_advance.y;
             line_count++;
             continue;
         }
@@ -486,7 +491,7 @@ std::shared_ptr<MeshData> BitmapFont::createString(string s, int pixel_size, flo
                 vertices.emplace_back(p3, sp::Vector2f(u1, v1));
             }
         }
-        position.x += text_size;
+        position.x += text_size * glyph_advance.x;
         max_line_width = std::max(max_line_width, position.x);
     }
 

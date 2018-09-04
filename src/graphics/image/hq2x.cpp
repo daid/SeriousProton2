@@ -16,11 +16,16 @@ static uint32_t toYUV(uint32_t rgb)
     return (y << 16) | (u << 8) | (v);
 }
 
-static bool diff(uint32_t color0, uint32_t color1, int32_t trY, int32_t trU, int32_t trV, int32_t trA)
+static constexpr int32_t trY = 48 << 16;
+static constexpr int32_t trU = 7 << 8;
+static constexpr int32_t trV = 6;
+static constexpr int32_t trA = 0;
+
+static bool diff(uint32_t color0, uint32_t color1)
 {
     int32_t yuv0 = toYUV(color0);
     int32_t yuv1 = toYUV(color1);
-    
+
     return (abs((yuv0 & 0xff0000) - (yuv1 & 0xff0000)) > trY)
         || (abs((yuv0 & 0x00ff00) - (yuv1 & 0x00ff00)) > trU)
         || (abs((yuv0 & 0x0000ff) - (yuv1 & 0x0000ff)) > trV)
@@ -96,13 +101,6 @@ static inline uint32_t mix(uint32_t w1, uint32_t w2, uint32_t w3, uint32_t c1, u
 
 static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_size, int src_stride, HQ2xConfig config)
 {
-    uint32_t trY = 48;
-    uint32_t trU = 7;
-    uint32_t trV = 6;
-    uint32_t trA = 0;
-    
-    trY <<= 16;
-    trU <<= 8;
     int dst_stride = src_stride * 2;
 
     int prevline_offset, nextline_offset;
@@ -193,7 +191,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
 
                 if (w[k] != w[4])
                 {
-                    if (diff(w[4], w[k], trY, trU, trV, trA))
+                    if (diff(w[4], w[k]))
                         pattern |= flag;
                 }
                 flag <<= 1;
@@ -360,7 +358,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 50:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -378,7 +376,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -393,7 +391,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -407,7 +405,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 10:
             case 138:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -480,7 +478,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 54:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -498,7 +496,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -513,7 +511,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -527,7 +525,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 11:
             case 139:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -543,7 +541,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 19:
             case 51:
                 {
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = mix(3, 1, w[4], w[2]);
@@ -561,7 +559,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 178:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[7]);
@@ -578,7 +576,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 85:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[1] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
@@ -596,7 +594,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
@@ -613,7 +611,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[5]);
@@ -628,7 +626,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 73:
             case 77:
                 {
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[0] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
@@ -645,7 +643,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 42:
             case 170:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                         dst[dst_stride] = mix(3, 1, w[4], w[7]);
@@ -662,7 +660,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 14:
             case 142:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[5]);
@@ -743,7 +741,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 26:
             case 31:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -751,7 +749,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -767,7 +765,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 214:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -776,7 +774,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -791,7 +789,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -799,7 +797,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -812,7 +810,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 74:
             case 107:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -821,7 +819,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -834,7 +832,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 27:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -850,7 +848,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 86:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -867,7 +865,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
                     dst[dst_stride] = mix(3, 1, w[4], w[6]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -881,7 +879,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -895,7 +893,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 30:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -912,7 +910,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
                     dst[1] = mix(3, 1, w[4], w[2]);
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -926,7 +924,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -939,7 +937,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 75:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1050,7 +1048,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 58:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1058,7 +1056,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1073,7 +1071,9 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 83:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]
+                    
+                    ))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1082,7 +1082,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1096,7 +1096,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1104,7 +1104,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1116,7 +1116,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 202:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1125,7 +1125,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1138,7 +1138,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 78:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1147,7 +1147,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1160,7 +1160,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 154:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1168,7 +1168,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1183,7 +1183,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 114:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1192,7 +1192,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1206,7 +1206,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1214,7 +1214,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1226,7 +1226,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 90:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1234,7 +1234,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1242,7 +1242,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1250,7 +1250,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1263,7 +1263,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 55:
             case 23:
                 {
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
@@ -1281,7 +1281,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 150:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[7]);
@@ -1298,7 +1298,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 212:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[1] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride + 1] = w[4];
@@ -1316,7 +1316,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
@@ -1333,7 +1333,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[5]);
@@ -1348,7 +1348,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 109:
             case 105:
                 {
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[0] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride] = w[4];
@@ -1365,7 +1365,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 171:
             case 43:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                         dst[dst_stride] = mix(3, 1, w[4], w[7]);
@@ -1382,7 +1382,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 143:
             case 15:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                         dst[1] = mix(3, 1, w[4], w[5]);
@@ -1400,7 +1400,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -1413,7 +1413,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 203:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1429,7 +1429,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 62:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -1446,7 +1446,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(3, 1, w[4], w[3]);
                     dst[1] = mix(3, 1, w[4], w[2]);
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -1459,7 +1459,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 118:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -1476,7 +1476,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
                     dst[dst_stride] = mix(3, 1, w[4], w[6]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -1490,7 +1490,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -1503,7 +1503,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 155:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1584,7 +1584,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1592,7 +1592,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -1604,7 +1604,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 158:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1612,7 +1612,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -1626,7 +1626,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 234:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1635,7 +1635,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -1649,7 +1649,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 242:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1658,7 +1658,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -1670,7 +1670,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 59:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1678,7 +1678,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1694,7 +1694,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -1702,7 +1702,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1715,7 +1715,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 87:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -1724,7 +1724,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1736,7 +1736,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 79:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1745,7 +1745,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1758,7 +1758,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 122:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1766,7 +1766,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1774,7 +1774,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -1782,7 +1782,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1794,7 +1794,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 94:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1802,7 +1802,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -1810,7 +1810,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1818,7 +1818,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1830,7 +1830,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 218:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1838,7 +1838,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1846,7 +1846,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1854,7 +1854,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -1866,7 +1866,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 91:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -1874,7 +1874,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1882,7 +1882,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1890,7 +1890,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1934,7 +1934,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 186:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -1942,7 +1942,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1957,7 +1957,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 115:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -1966,7 +1966,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(6, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -1980,7 +1980,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -1988,7 +1988,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(6, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -2000,7 +2000,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 206:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -2009,7 +2009,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(6, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -2025,7 +2025,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[6]);
                     }
@@ -2039,7 +2039,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 174:
             case 46:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                     }
@@ -2056,7 +2056,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 147:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = mix(3, 1, w[4], w[2]);
                     }
@@ -2074,7 +2074,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[8]);
                     }
@@ -2103,7 +2103,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 126:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2111,7 +2111,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2124,7 +2124,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 219:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2134,7 +2134,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                     dst[1] = mix(3, 1, w[4], w[2]);
                     dst[dst_stride] = mix(3, 1, w[4], w[6]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2146,7 +2146,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 125:
                 {
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[0] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride] = w[4];
@@ -2163,7 +2163,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 221:
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[1] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride + 1] = w[4];
@@ -2178,7 +2178,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 207:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                         dst[1] = mix(3, 1, w[4], w[5]);
@@ -2196,7 +2196,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[5]);
@@ -2211,7 +2211,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 190:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                         dst[dst_stride + 1] = mix(3, 1, w[4], w[7]);
@@ -2226,7 +2226,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 187:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                         dst[dst_stride] = mix(3, 1, w[4], w[7]);
@@ -2244,7 +2244,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
                     dst[1] = mix(3, 1, w[4], w[2]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
@@ -2258,7 +2258,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 119:
                 {
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
@@ -2277,7 +2277,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2291,7 +2291,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 175:
             case 47:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2308,7 +2308,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 151:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2326,7 +2326,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2340,7 +2340,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
                     dst[1] = mix(3, 1, w[4], w[2]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2348,7 +2348,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2360,7 +2360,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 123:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2369,7 +2369,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[2]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2382,7 +2382,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 95:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2390,7 +2390,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2405,7 +2405,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 222:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2414,7 +2414,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[6]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2428,7 +2428,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2436,7 +2436,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2450,7 +2450,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2458,7 +2458,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(14, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2470,7 +2470,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 235:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2479,7 +2479,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(2, 1, 1, w[4], w[2], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2492,7 +2492,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 111:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2501,7 +2501,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2514,7 +2514,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 63:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2522,7 +2522,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2536,7 +2536,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 159:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2544,7 +2544,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2559,7 +2559,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 215:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2568,7 +2568,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(14, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(2, 1, 1, w[4], w[6], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2581,7 +2581,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 246:
                 {
                     dst[0] = mix(2, 1, 1, w[4], w[0], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2590,7 +2590,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2603,7 +2603,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 254:
                 {
                     dst[0] = mix(3, 1, w[4], w[0]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2611,7 +2611,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2619,7 +2619,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2633,7 +2633,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 {
                     dst[0] = mix(3, 1, w[4], w[1]);
                     dst[1] = mix(3, 1, w[4], w[1]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2641,7 +2641,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(14, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2653,7 +2653,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 251:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2662,7 +2662,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[2]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2670,7 +2670,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(14, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2682,7 +2682,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 239:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2691,7 +2691,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
                     dst[1] = mix(3, 1, w[4], w[5]);
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2704,7 +2704,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 127:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2712,7 +2712,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2720,7 +2720,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(2, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2733,7 +2733,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 191:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2741,7 +2741,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2755,7 +2755,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 223:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2763,7 +2763,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2772,7 +2772,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(14, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[6]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2785,7 +2785,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
             case 247:
                 {
                     dst[0] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2794,7 +2794,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(14, 1, 1, w[4], w[1], w[5]);
                     }
                     dst[dst_stride] = mix(3, 1, w[4], w[3]);
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2806,7 +2806,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 }
             case 255:
                 {
-                    if (diff(w[3], w[1], trY, trU, trV, trA))
+                    if (diff(w[3], w[1]))
                     {
                         dst[0] = w[4];
                     }
@@ -2814,7 +2814,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(14, 1, 1, w[4], w[3], w[1]);
                     }
-                    if (diff(w[1], w[5], trY, trU, trV, trA))
+                    if (diff(w[1], w[5]))
                     {
                         dst[1] = w[4];
                     }
@@ -2822,7 +2822,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[1] = mix(14, 1, 1, w[4], w[1], w[5]);
                     }
-                    if (diff(w[7], w[3], trY, trU, trV, trA))
+                    if (diff(w[7], w[3]))
                     {
                         dst[dst_stride] = w[4];
                     }
@@ -2830,7 +2830,7 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[dst_stride] = mix(14, 1, 1, w[4], w[7], w[3]);
                     }
-                    if (diff(w[5], w[7], trY, trU, trV, trA))
+                    if (diff(w[5], w[7]))
                     {
                         dst[dst_stride + 1] = w[4];
                     }
@@ -2852,13 +2852,6 @@ static void hq2xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
 
 static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_size, int src_stride, HQ2xConfig config)
 {
-    uint32_t trY = 48;
-    uint32_t trU = 7;
-    uint32_t trV = 6;
-    uint32_t trA = 0;
-    
-    trY <<= 16;
-    trU <<= 8;
     int dst_stride = src_stride * 3;
 
     int prevline_offset, nextline_offset;
@@ -2949,7 +2942,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
 
                 if (w[k] != w[4])
                 {
-                    if (diff(w[4], w[k], trY, trU, trV, trA))
+                    if (diff(w[4], w[k]))
                         pattern |= flag;
                 }
                 flag <<= 1;
@@ -3181,7 +3174,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 50:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = mix(3, 1, w[4], w[2]);
@@ -3209,7 +3202,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -3231,7 +3224,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(2, 1, 1, w[4], w[1], w[5]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
@@ -3249,7 +3242,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 10:
                 case 138:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                             dst[1] = w[4];
@@ -3359,7 +3352,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 54:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -3387,7 +3380,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -3409,7 +3402,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(2, 1, 1, w[4], w[1], w[5]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -3427,7 +3420,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 11:
                 case 139:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -3450,7 +3443,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 19:
                 case 51:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(3, 1, w[4], w[3]);
                             dst[1] = w[4];
@@ -3474,7 +3467,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 146:
                 case 178:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = mix(3, 1, w[4], w[2]);
@@ -3498,7 +3491,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 84:
                 case 85:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[2] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride + 2] = w[4];
@@ -3522,7 +3515,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 112:
                 case 113:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
@@ -3546,7 +3539,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 200:
                 case 204:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
@@ -3570,7 +3563,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 73:
                 case 77:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride] = w[4];
@@ -3594,7 +3587,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 42:
                 case 170:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                             dst[1] = w[4];
@@ -3618,7 +3611,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 14:
                 case 142:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                             dst[1] = w[4];
@@ -3746,7 +3739,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 26:
                 case 31:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[dst_stride] = w[4];
@@ -3757,7 +3750,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[dst_stride + 2] = w[4];
@@ -3777,7 +3770,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 214:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -3791,7 +3784,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 1] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -3810,7 +3803,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = mix(3, 1, w[4], w[1]);
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -3821,7 +3814,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -3836,7 +3829,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 74:
                 case 107:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -3850,7 +3843,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -3865,7 +3858,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 27:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -3888,7 +3881,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 86:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -3915,7 +3908,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -3936,7 +3929,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -3954,7 +3947,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 30:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -3981,7 +3974,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -4002,7 +3995,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -4019,7 +4012,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 75:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -4197,7 +4190,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 58:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4206,7 +4199,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -4226,7 +4219,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -4239,7 +4232,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -4257,7 +4250,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4266,7 +4259,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -4278,7 +4271,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 202:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4291,7 +4284,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4305,7 +4298,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 78:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4318,7 +4311,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4332,7 +4325,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 154:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4341,7 +4334,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -4361,7 +4354,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -4374,7 +4367,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -4392,7 +4385,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4401,7 +4394,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -4413,7 +4406,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 90:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4422,7 +4415,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -4433,7 +4426,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4442,7 +4435,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -4455,7 +4448,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 55:
                 case 23:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(3, 1, w[4], w[3]);
                             dst[1] = w[4];
@@ -4479,7 +4472,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 182:
                 case 150:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -4503,7 +4496,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 213:
                 case 212:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[2] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride + 2] = w[4];
@@ -4527,7 +4520,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 241:
                 case 240:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
@@ -4551,7 +4544,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 236:
                 case 232:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -4575,7 +4568,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 109:
                 case 105:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride] = w[4];
@@ -4599,7 +4592,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 171:
                 case 43:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -4623,7 +4616,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 143:
                 case 15:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -4651,7 +4644,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -4668,7 +4661,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 203:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -4691,7 +4684,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 62:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -4718,7 +4711,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -4735,7 +4728,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 118:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -4762,7 +4755,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -4783,7 +4776,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[5]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -4800,7 +4793,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 155:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -4931,7 +4924,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -4939,7 +4932,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         {
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -4955,7 +4948,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 158:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4963,7 +4956,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         {
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -4984,7 +4977,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 234:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -4996,7 +4989,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5015,7 +5008,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5026,7 +5019,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -5042,7 +5035,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 59:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5054,7 +5047,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(7, 1, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5076,7 +5069,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5088,7 +5081,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                             dst[dst_stride + dst_stride + 1] = mix(7, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5101,7 +5094,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 87:
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -5117,7 +5110,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5129,7 +5122,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 79:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5144,7 +5137,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[5]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5158,7 +5151,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 122:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5167,7 +5160,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5177,7 +5170,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5189,7 +5182,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                             dst[dst_stride + dst_stride + 1] = mix(7, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5201,7 +5194,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 94:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5209,7 +5202,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         {
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -5223,7 +5216,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5232,7 +5225,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5244,7 +5237,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 218:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5253,7 +5246,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5263,7 +5256,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5271,7 +5264,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         {
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -5287,7 +5280,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 91:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5299,7 +5292,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(7, 1, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5309,7 +5302,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5318,7 +5311,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5382,7 +5375,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 186:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5391,7 +5384,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5411,7 +5404,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5424,7 +5417,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5442,7 +5435,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5451,7 +5444,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5463,7 +5456,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 206:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5476,7 +5469,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5497,7 +5490,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
                         }
@@ -5512,7 +5505,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 174:
                 case 46:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(3, 1, w[4], w[0]);
                         }
@@ -5535,7 +5528,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                         }
@@ -5562,7 +5555,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = mix(3, 1, w[4], w[8]);
                         }
@@ -5601,7 +5594,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 126:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -5614,7 +5607,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         }
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5631,7 +5624,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 219:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5646,7 +5639,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -5662,7 +5655,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 125:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride] = w[4];
@@ -5685,7 +5678,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 221:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[2] = mix(3, 1, w[4], w[1]);
                             dst[dst_stride + 2] = w[4];
@@ -5708,7 +5701,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 207:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5731,7 +5724,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 238:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5754,7 +5747,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 190:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -5777,7 +5770,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 187:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5800,7 +5793,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 243:
                     {
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
@@ -5823,7 +5816,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 119:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(3, 1, w[4], w[3]);
                             dst[1] = w[4];
@@ -5853,7 +5846,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -5868,7 +5861,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 175:
                 case 47:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -5891,7 +5884,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -5918,7 +5911,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -5934,7 +5927,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[1] = w[4];
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -5945,7 +5938,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -5959,7 +5952,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 123:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -5973,7 +5966,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -5988,7 +5981,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 95:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[dst_stride] = w[4];
@@ -5999,7 +5992,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[dst_stride + 2] = w[4];
@@ -6018,7 +6011,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 222:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -6032,7 +6025,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 1] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -6051,7 +6044,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[1]);
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -6062,7 +6055,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -6079,7 +6072,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -6088,7 +6081,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -6102,7 +6095,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 235:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -6116,7 +6109,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -6130,7 +6123,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 111:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -6143,7 +6136,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -6158,7 +6151,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 63:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -6167,7 +6160,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[dst_stride + 2] = w[4];
@@ -6186,7 +6179,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 159:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[dst_stride] = w[4];
@@ -6197,7 +6190,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -6216,7 +6209,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -6228,7 +6221,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 1] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -6243,7 +6236,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 246:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -6258,7 +6251,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -6271,7 +6264,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 254:
                     {
                         dst[0] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -6282,7 +6275,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[2] = mix(2, 7, 7, w[4], w[1], w[5]);
                         }
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -6292,7 +6285,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                             dst[dst_stride + dst_stride] = mix(2, 7, 7, w[4], w[7], w[3]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -6314,7 +6307,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -6323,7 +6316,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -6335,7 +6328,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 251:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -6347,7 +6340,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[2] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride] = w[4];
                             dst[dst_stride + dst_stride] = w[4];
@@ -6359,7 +6352,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride + dst_stride + 1] = mix(7, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -6373,7 +6366,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 239:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -6386,7 +6379,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(3, 1, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -6400,7 +6393,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 127:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -6412,7 +6405,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(7, 1, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[dst_stride + 2] = w[4];
@@ -6423,7 +6416,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         }
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                             dst[dst_stride + dst_stride + 1] = w[4];
@@ -6438,7 +6431,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 191:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -6447,7 +6440,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -6465,7 +6458,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 223:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[dst_stride] = w[4];
@@ -6475,7 +6468,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 7, 7, w[4], w[3], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[3]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[1] = w[4];
                             dst[2] = w[4];
@@ -6489,7 +6482,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 1] = w[4];
                             dst[dst_stride + dst_stride + 2] = w[4];
@@ -6505,7 +6498,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(3, 1, w[4], w[3]);
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -6518,7 +6511,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride + dst_stride] = mix(3, 1, w[4], w[3]);
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -6530,7 +6523,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 255:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -6539,7 +6532,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[3], w[1]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                         }
@@ -6550,7 +6543,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride + dst_stride] = w[4];
                         }
@@ -6559,7 +6552,7 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + dst_stride] = mix(2, 1, 1, w[4], w[7], w[3]);
                         }
                         dst[dst_stride + dst_stride + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride + dst_stride + 2] = w[4];
                         }
@@ -6581,13 +6574,6 @@ static void hq3xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
 
 static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_size, int src_stride, HQ2xConfig config)
 {
-    uint32_t trY = 48;
-    uint32_t trU = 7;
-    uint32_t trV = 6;
-    uint32_t trA = 0;
-    
-    trY <<= 16;
-    trU <<= 8;
     int dst_stride = src_stride * 4;
 
     int prevline_offset, nextline_offset;
@@ -6678,7 +6664,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
 
                 if (w[k] != w[4])
                 {
-                    if (diff(w[4], w[k], trY, trU, trV, trA))
+                    if (diff(w[4], w[k]))
                         pattern |= flag;
                 }
                 flag <<= 1;
@@ -7002,7 +6988,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -7041,7 +7027,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -7070,7 +7056,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(6, 1, 1, w[4], w[5], w[1]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -7093,7 +7079,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 10:
                 case 138:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -7254,7 +7240,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -7293,7 +7279,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -7320,7 +7306,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(6, 1, 1, w[4], w[5], w[1]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -7342,7 +7328,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 11:
                 case 139:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -7372,7 +7358,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 19:
                 case 51:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(5, 3, w[4], w[3]);
                             dst[1] = mix(7, 1, w[4], w[3]);
@@ -7407,7 +7393,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -7441,7 +7427,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[1], w[3]);
                         dst[1] = mix(5, 2, 1, w[4], w[1], w[3]);
                         dst[2] = mix(5, 3, w[4], w[1]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[3] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
@@ -7481,7 +7467,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -7512,7 +7498,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(6, 1, 1, w[4], w[5], w[1]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -7537,7 +7523,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 73:
                 case 77:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[1]);
@@ -7570,7 +7556,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 42:
                 case 170:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -7603,7 +7589,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 14:
                 case 142:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -7796,7 +7782,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 26:
                 case 31:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -7808,7 +7794,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(1, 1, w[1], w[4]);
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -7837,7 +7823,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -7855,7 +7841,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -7882,7 +7868,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -7896,7 +7882,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -7913,7 +7899,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 74:
                 case 107:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -7930,7 +7916,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -7951,7 +7937,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 27:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -7982,7 +7968,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -8020,7 +8006,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -8046,7 +8032,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -8069,7 +8055,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -8107,7 +8093,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -8133,7 +8119,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -8154,7 +8140,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 75:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -8423,7 +8409,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 58:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -8437,7 +8423,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -8465,7 +8451,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -8483,7 +8469,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -8511,7 +8497,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -8525,7 +8511,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -8543,7 +8529,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 202:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -8561,7 +8547,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[3] = mix(5, 3, w[4], w[2]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -8583,7 +8569,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 78:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -8601,7 +8587,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[3] = mix(5, 3, w[4], w[5]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -8623,7 +8609,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 154:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -8637,7 +8623,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -8665,7 +8651,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -8683,7 +8669,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -8711,7 +8697,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -8725,7 +8711,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -8743,7 +8729,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 90:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -8757,7 +8743,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -8771,7 +8757,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + 3] = mix(3, 1, w[4], w[5]);
                         }
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -8785,7 +8771,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -8804,7 +8790,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 55:
                 case 23:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(5, 3, w[4], w[3]);
                             dst[1] = mix(7, 1, w[4], w[3]);
@@ -8839,7 +8825,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -8873,7 +8859,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(2, 1, 1, w[4], w[1], w[3]);
                         dst[1] = mix(5, 2, 1, w[4], w[1], w[3]);
                         dst[2] = mix(5, 3, w[4], w[1]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[3] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
@@ -8913,7 +8899,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = w[4];
                             dst[dst_stride * 2 + 3] = w[4];
@@ -8944,7 +8930,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(6, 1, 1, w[4], w[5], w[1]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 2 + 1] = w[4];
@@ -8969,7 +8955,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 109:
                 case 105:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[1]);
@@ -9002,7 +8988,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 171:
                 case 43:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9035,7 +9021,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 143:
                 case 15:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9075,7 +9061,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -9096,7 +9082,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 203:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9127,7 +9113,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -9165,7 +9151,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -9185,7 +9171,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -9223,7 +9209,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -9249,7 +9235,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -9270,7 +9256,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 155:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9467,7 +9453,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -9482,7 +9468,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -9498,7 +9484,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 158:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -9512,7 +9498,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -9537,7 +9523,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 234:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -9555,7 +9541,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[3] = mix(5, 3, w[4], w[2]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -9578,7 +9564,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -9597,7 +9583,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -9615,7 +9601,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 59:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9627,7 +9613,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(1, 1, w[1], w[4]);
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -9662,7 +9648,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -9675,7 +9661,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 1] = mix(1, 1, w[7], w[4]);
                         }
                         dst[dst_stride * 2 + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -9695,7 +9681,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -9712,7 +9698,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 2] = w[4];
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -9732,7 +9718,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 79:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9749,7 +9735,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -9771,7 +9757,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 122:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -9785,7 +9771,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -9799,7 +9785,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + 3] = mix(3, 1, w[4], w[5]);
                         }
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -9812,7 +9798,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 1] = mix(1, 1, w[7], w[4]);
                         }
                         dst[dst_stride * 2 + 1] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -9830,7 +9816,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 94:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -9844,7 +9830,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -9857,7 +9843,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 3] = mix(1, 1, w[5], w[4]);
                         }
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -9871,7 +9857,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -9889,7 +9875,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 218:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -9903,7 +9889,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -9917,7 +9903,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 2] = w[4];
                             dst[dst_stride + 3] = mix(3, 1, w[4], w[5]);
                         }
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -9932,7 +9918,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -9948,7 +9934,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 91:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -9960,7 +9946,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(1, 1, w[1], w[4]);
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -9975,7 +9961,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride + 3] = mix(3, 1, w[4], w[5]);
                         }
                         dst[dst_stride + 1] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -9989,7 +9975,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -10087,7 +10073,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 186:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -10101,7 +10087,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(3, 1, w[4], w[3]);
                             dst[dst_stride + 1] = w[4];
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -10129,7 +10115,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -10147,7 +10133,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -10175,7 +10161,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -10189,7 +10175,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3] = mix(2, 1, 1, w[4], w[7], w[3]);
                             dst[dst_stride * 3 + 1] = mix(3, 1, w[4], w[7]);
                         }
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -10207,7 +10193,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 206:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -10225,7 +10211,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[3] = mix(5, 3, w[4], w[5]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -10256,7 +10242,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 2] = mix(6, 1, 1, w[4], w[5], w[1]);
                         dst[dst_stride + 3] = mix(5, 2, 1, w[4], w[5], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                             dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
@@ -10279,7 +10265,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 174:
                 case 46:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = mix(5, 3, w[4], w[0]);
                             dst[1] = mix(3, 1, w[4], w[0]);
@@ -10312,7 +10298,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = mix(3, 1, w[4], w[2]);
                             dst[3] = mix(5, 3, w[4], w[2]);
@@ -10351,7 +10337,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[8]);
                             dst[dst_stride * 2 + 3] = mix(3, 1, w[4], w[8]);
@@ -10413,7 +10399,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -10428,7 +10414,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[0]);
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -10449,7 +10435,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 219:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -10469,7 +10455,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -10487,7 +10473,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 125:
                     {
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[0] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride] = mix(7, 1, w[4], w[1]);
@@ -10522,7 +10508,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(5, 3, w[4], w[1]);
                         dst[1] = mix(5, 3, w[4], w[1]);
                         dst[2] = mix(5, 3, w[4], w[1]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[3] = mix(5, 3, w[4], w[1]);
                             dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
@@ -10551,7 +10537,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 207:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -10591,7 +10577,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 2 + 1] = w[4];
@@ -10617,7 +10603,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -10647,7 +10633,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 187:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -10689,7 +10675,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
                         dst[dst_stride * 2] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[3]);
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 2] = w[4];
                             dst[dst_stride * 2 + 3] = w[4];
@@ -10711,7 +10697,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 119:
                     {
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[0] = mix(5, 3, w[4], w[3]);
                             dst[1] = mix(7, 1, w[4], w[3]);
@@ -10756,7 +10742,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride * 2 + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -10772,7 +10758,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                 case 175:
                 case 47:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -10803,7 +10789,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -10843,7 +10829,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 3] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 3 + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -10863,7 +10849,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -10877,7 +10863,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -10893,7 +10879,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 123:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -10910,7 +10896,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[2]);
                         dst[dst_stride + 3] = mix(3, 1, w[4], w[2]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -10931,7 +10917,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 95:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -10943,7 +10929,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[1] = mix(1, 1, w[1], w[4]);
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -10971,7 +10957,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -10989,7 +10975,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -11015,7 +11001,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[1]);
                         dst[dst_stride + 3] = mix(7, 1, w[4], w[1]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -11031,7 +11017,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 2] = w[4];
                         dst[dst_stride * 2 + 3] = w[4];
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -11054,7 +11040,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = w[4];
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -11066,7 +11052,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 2] = mix(1, 1, w[7], w[4]);
                             dst[dst_stride * 3 + 3] = mix(1, 1, w[7], w[5]);
                         }
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11079,7 +11065,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 235:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -11100,7 +11086,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride * 2 + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11115,7 +11101,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 111:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11130,7 +11116,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -11151,7 +11137,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 63:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11160,7 +11146,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[1], w[3]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -11187,7 +11173,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 159:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -11200,7 +11186,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11226,7 +11212,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11241,7 +11227,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(5, 2, 1, w[4], w[3], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -11261,7 +11247,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -11283,7 +11269,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 3] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 3 + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -11297,7 +11283,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     {
                         dst[0] = mix(5, 3, w[4], w[0]);
                         dst[1] = mix(3, 1, w[4], w[0]);
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -11312,7 +11298,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = mix(3, 1, w[4], w[0]);
                         dst[dst_stride + 1] = mix(7, 1, w[4], w[0]);
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -11328,7 +11314,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 2] = w[4];
                         dst[dst_stride * 2 + 3] = w[4];
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -11352,7 +11338,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
                         dst[dst_stride * 2 + 3] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11362,7 +11348,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride * 3 + 1] = w[4];
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -11374,7 +11360,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 251:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -11394,7 +11380,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = w[4];
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -11406,7 +11392,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride * 3 + 2] = mix(1, 1, w[7], w[4]);
                             dst[dst_stride * 3 + 3] = mix(1, 1, w[7], w[5]);
                         }
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11419,7 +11405,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 239:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11438,7 +11424,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = mix(7, 1, w[4], w[5]);
                         dst[dst_stride * 2 + 3] = mix(5, 3, w[4], w[5]);
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11453,7 +11439,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 127:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11462,7 +11448,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[0] = mix(2, 1, 1, w[4], w[1], w[3]);
                         }
                         dst[1] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[2] = w[4];
                             dst[3] = w[4];
@@ -11477,7 +11463,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride] = w[4];
                         dst[dst_stride + 1] = w[4];
                         dst[dst_stride + 2] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 2] = w[4];
                             dst[dst_stride * 3] = w[4];
@@ -11498,7 +11484,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 191:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11508,7 +11494,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[1] = w[4];
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11532,7 +11518,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 223:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                             dst[1] = w[4];
@@ -11545,7 +11531,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                             dst[dst_stride] = mix(1, 1, w[3], w[4]);
                         }
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11559,7 +11545,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2] = mix(3, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 1] = mix(7, 1, w[4], w[6]);
                         dst[dst_stride * 2 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 2 + 3] = w[4];
                             dst[dst_stride * 3 + 2] = w[4];
@@ -11580,7 +11566,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[0] = mix(5, 3, w[4], w[3]);
                         dst[1] = mix(7, 1, w[4], w[3]);
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11599,7 +11585,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 3] = mix(5, 3, w[4], w[3]);
                         dst[dst_stride * 3 + 1] = mix(7, 1, w[4], w[3]);
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }
@@ -11611,7 +11597,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                     }
                 case 255:
                     {
-                        if (diff(w[3], w[1], trY, trU, trV, trA))
+                        if (diff(w[3], w[1]))
                         {
                             dst[0] = w[4];
                         }
@@ -11621,7 +11607,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[1] = w[4];
                         dst[2] = w[4];
-                        if (diff(w[1], w[5], trY, trU, trV, trA))
+                        if (diff(w[1], w[5]))
                         {
                             dst[3] = w[4];
                         }
@@ -11637,7 +11623,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         dst[dst_stride * 2 + 1] = w[4];
                         dst[dst_stride * 2 + 2] = w[4];
                         dst[dst_stride * 2 + 3] = w[4];
-                        if (diff(w[7], w[3], trY, trU, trV, trA))
+                        if (diff(w[7], w[3]))
                         {
                             dst[dst_stride * 3] = w[4];
                         }
@@ -11647,7 +11633,7 @@ static void hq4xProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
                         }
                         dst[dst_stride * 3 + 1] = w[4];
                         dst[dst_stride * 3 + 2] = w[4];
-                        if (diff(w[5], w[7], trY, trU, trV, trA))
+                        if (diff(w[5], w[7]))
                         {
                             dst[dst_stride * 3 + 3] = w[4];
                         }

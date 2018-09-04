@@ -14,6 +14,11 @@ public:
     Coroutine(lua_State* L);
     ~Coroutine();
 
+    /** Resume the coroutine.
+     *  Resumes the function that was yielded.
+     *  Returns true if the coroutine was still yielded.
+     *  Returns false if the coroutine has ended.
+     */
     template<typename... ARGS> bool resume(ARGS... args)
     {
         if (!L)
