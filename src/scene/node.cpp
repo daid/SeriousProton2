@@ -273,17 +273,21 @@ void Node::setAnimation(std::unique_ptr<Animation> animation)
 
 void Node::animationPlay(string key, float speed)
 {
-    animation->play(key, speed);
+    if (animation)
+        animation->play(key, speed);
 }
 
 void Node::animationSetFlags(int flags)
 {
-    animation->setFlags(flags);
+    if (animation)
+        animation->setFlags(flags);
 }
 
 int Node::animationGetFlags()
 {
-    return animation->getFlags();
+    if (animation)
+        return animation->getFlags();
+    return 0;
 }
 
 void Node::updateLocalTransform()
