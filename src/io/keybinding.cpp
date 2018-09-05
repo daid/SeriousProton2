@@ -241,7 +241,7 @@ void Keybinding::saveKeybindings(const string& filename)
     {
         json11::Json::object data;
         if (keybinding->key_number != -1)
-            data["key"] = keybinding->getKey();
+            data["key"] = keybinding->getKey().c_str();
         obj[keybinding->name] = data;
     }
     json11::Json json = obj;
