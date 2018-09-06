@@ -8,7 +8,7 @@ SP_REGISTER_LAYOUT("vertical", VerticalLayout);
 
 void VerticalLayout::update(P<Widget> container, Rect2d rect)
 {
-    float y = rect.size.y;
+    float y = rect.position.y + rect.size.y;
     for(Node* n : container->getChildren())
     {
         P<Widget> w = P<Node>(n);

@@ -386,7 +386,7 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
             layout_manager = new Layout();
 
         Vector2d padding_size(layout.padding.left + layout.padding.right, layout.padding.top + layout.padding.bottom);
-        layout_manager->update(this, Rect2d(Vector2d(layout.padding.left, layout.padding.bottom), size - padding_size));
+        layout_manager->update(this, Rect2d(Vector2d(layout.padding.left, layout.padding.top), size - padding_size));
         if (layout.match_content_size)
         {
             Vector2d content_size_min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
