@@ -35,7 +35,7 @@ void KeyValueTreeSaver::saveNode(const KeyValueTreeNode& node, int indent)
     else
         fprintf(f, "%*s[%s] {\n", indent, "", node.id.c_str());
     for(const auto it : node.items)
-        fprintf(f, "%*s%s: %s\n", indent + 4, "", it.first.c_str(), it.second.c_str()); //TODO: Properly handle multiline strings.
+        fprintf(f, "%*s%s: %s\n", indent + 4, "", it.first.c_str(), it.second.replace("\n", "\\\n" + string(" ") * (indent + 8)).c_str());
     for(const auto& it : node.child_nodes)
         saveNode(it, indent + 4);
     fprintf(f, "%*s}\n", indent, "");
