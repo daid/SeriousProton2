@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_GUI_LAYOUT_H
 
 #include <sp2/string.h>
+#include <sp2/math/rect.h>
 #include <sp2/graphics/gui/widget/widget.h>
 
 
@@ -12,10 +13,10 @@ class Layout : NonCopyable
 {
 public:
     virtual ~Layout() {}
-    virtual void update(P<Widget> container, Vector2d size);
+    virtual void update(P<Widget> container, Rect2d rect);
 
 protected:
-    virtual void basicLayout(Vector2d position, Vector2d size, Widget* widget);
+    virtual void basicLayout(Rect2d rect, Widget* widget);
 };
 
 class LayoutClassRegistry : NonCopyable

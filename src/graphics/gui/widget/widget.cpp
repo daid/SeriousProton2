@@ -194,6 +194,14 @@ void Widget::setAttribute(const string& key, const string& value)
     {
         layout.size = stringutil::convert::toVector2d(value);
     }
+    else if (key == "width")
+    {
+        layout.size.x = stringutil::convert::toFloat(value);
+    }
+    else if (key == "height")
+    {
+        layout.size.y = stringutil::convert::toFloat(value);
+    }
     else if (key == "position")
     {
         layout.position = stringutil::convert::toVector2d(value);
@@ -203,25 +211,51 @@ void Widget::setAttribute(const string& key, const string& value)
         auto values = value.split(",", 3);
         if (values.size() == 1)
         {
-            layout.margin_top = layout.margin_bottom = layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
+            layout.margin.top = layout.margin.bottom = layout.margin.left = layout.margin.right = stringutil::convert::toFloat(values[0].strip());
         }
         else if (values.size() == 2)
         {
-            layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
-            layout.margin_top = layout.margin_bottom = stringutil::convert::toFloat(values[1].strip());
+            layout.margin.left = layout.margin.right = stringutil::convert::toFloat(values[0].strip());
+            layout.margin.top = layout.margin.bottom = stringutil::convert::toFloat(values[1].strip());
         }
         else if (values.size() == 3)
         {
-            layout.margin_left = layout.margin_right = stringutil::convert::toFloat(values[0].strip());
-            layout.margin_top = stringutil::convert::toFloat(values[1].strip());
-            layout.margin_bottom = stringutil::convert::toFloat(values[2].strip());
+            layout.margin.left = layout.margin.right = stringutil::convert::toFloat(values[0].strip());
+            layout.margin.top = stringutil::convert::toFloat(values[1].strip());
+            layout.margin.bottom = stringutil::convert::toFloat(values[2].strip());
         }
         else if (values.size() == 4)
         {
-            layout.margin_left = stringutil::convert::toFloat(values[0].strip());
-            layout.margin_right = stringutil::convert::toFloat(values[1].strip());
-            layout.margin_top = stringutil::convert::toFloat(values[2].strip());
-            layout.margin_bottom = stringutil::convert::toFloat(values[3].strip());
+            layout.margin.left = stringutil::convert::toFloat(values[0].strip());
+            layout.margin.right = stringutil::convert::toFloat(values[1].strip());
+            layout.margin.top = stringutil::convert::toFloat(values[2].strip());
+            layout.margin.bottom = stringutil::convert::toFloat(values[3].strip());
+        }
+    }
+    else if (key == "padding")
+    {
+        auto values = value.split(",", 3);
+        if (values.size() == 1)
+        {
+            layout.padding.top = layout.padding.bottom = layout.padding.left = layout.padding.right = stringutil::convert::toFloat(values[0].strip());
+        }
+        else if (values.size() == 2)
+        {
+            layout.padding.left = layout.padding.right = stringutil::convert::toFloat(values[0].strip());
+            layout.padding.top = layout.padding.bottom = stringutil::convert::toFloat(values[1].strip());
+        }
+        else if (values.size() == 3)
+        {
+            layout.padding.left = layout.padding.right = stringutil::convert::toFloat(values[0].strip());
+            layout.padding.top = stringutil::convert::toFloat(values[1].strip());
+            layout.padding.bottom = stringutil::convert::toFloat(values[2].strip());
+        }
+        else if (values.size() == 4)
+        {
+            layout.padding.left = stringutil::convert::toFloat(values[0].strip());
+            layout.padding.right = stringutil::convert::toFloat(values[1].strip());
+            layout.padding.top = stringutil::convert::toFloat(values[2].strip());
+            layout.padding.bottom = stringutil::convert::toFloat(values[3].strip());
         }
     }
     else if (key == "span")
@@ -360,7 +394,8 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
         if (!layout_manager)
             layout_manager = new Layout();
 
-        layout_manager->update(this, size);
+        Vector2d padding_size(layout.padding.left + layout.padding.right, layout.padding.top + layout.padding.bottom);
+        layout_manager->update(this, Rect2d(Vector2d(layout.padding.left, layout.padding.bottom), size - padding_size));
         if (layout.match_content_size)
         {
             Vector2d content_size_min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -372,15 +407,15 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
                 {
                     Vector2d p0 = w->getPosition2D();
                     Vector2d p1 = p0 + w->getRenderSize();
-                    content_size_min.x = std::min(content_size_min.x, p0.x - w->layout.margin_left);
-                    content_size_min.y = std::min(content_size_min.y, p0.y - w->layout.margin_bottom);
-                    content_size_max.x = std::max(content_size_max.x, p1.x + w->layout.margin_right);
-                    content_size_max.y = std::max(content_size_max.y, p1.y + w->layout.margin_top);
+                    content_size_min.x = std::min(content_size_min.x, p0.x - w->layout.margin.left);
+                    content_size_min.y = std::min(content_size_min.y, p0.y - w->layout.margin.bottom);
+                    content_size_max.x = std::max(content_size_max.x, p1.x + w->layout.margin.right);
+                    content_size_max.y = std::max(content_size_max.y, p1.y + w->layout.margin.top);
                 }
             }
             if (content_size_max.x != std::numeric_limits<float>::min())
             {
-                size = content_size_max - content_size_min;
+                size = (content_size_max - content_size_min) + padding_size;
                 layout.size = size;
             }
         }

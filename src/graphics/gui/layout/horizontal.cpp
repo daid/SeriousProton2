@@ -6,16 +6,16 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("horizontal", HorizontalLayout);
 
-void HorizontalLayout::update(P<Widget> container, Vector2d size)
+void HorizontalLayout::update(P<Widget> container, Rect2d rect)
 {
-    float x = 0;
+    float x = rect.position.x;
     for(Node* n : container->getChildren())
     {
         P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
-        float width = w->layout.size.x + w->layout.margin_left + w->layout.margin_right;
-        basicLayout(Vector2d(x, 0), Vector2d(width, size.y), *w);
+        float width = w->layout.size.x + w->layout.margin.left + w->layout.margin.right;
+        basicLayout(Rect2d(x, rect.position.y, width, rect.size.y), *w);
         x += width;
     }
 }

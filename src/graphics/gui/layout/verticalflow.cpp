@@ -6,24 +6,24 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("verticalflow", VerticalFlowLayout);
 
-void VerticalFlowLayout::update(P<Widget> container, Vector2d size)
+void VerticalFlowLayout::update(P<Widget> container, Rect2d rect)
 {
-    float y = size.y;
-    double x0 = 0;
-    double x1 = 0;
+    float y = rect.size.y;
+    double x0 = rect.position.x;
+    double x1 = rect.position.x;
     for(Node* n : container->getChildren())
     {
         P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
-        float height = w->layout.size.y + w->layout.margin_top + w->layout.margin_bottom;
+        float height = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;
         if (y - height < 0)
         {
             x0 = x1;
-            y = size.y;
+            y = rect.size.y;
         }
-        basicLayout(Vector2d(x0, y - height), Vector2d(size.x - x0, height), *w);
-        x1 = std::max(x1, x0 + w->getRenderSize().x + w->layout.margin_right);
+        basicLayout(Rect2d(x0, y - height, rect.size.x - x0, height), *w);
+        x1 = std::max(x1, x0 + w->getRenderSize().x + w->layout.margin.right);
         y -= height;
     }
 }

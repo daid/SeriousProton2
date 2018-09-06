@@ -41,7 +41,7 @@ private:
     friend class Client;
 };
 
-template<class T> Node* __objectCreateFunction(P<Node> parent)
+template<class T, class = typename std::enable_if<std::is_base_of<Node, T>::value>::type> Node* __objectCreateFunction(P<Node> parent)
 {
     return new T(parent);
 }

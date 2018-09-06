@@ -37,7 +37,7 @@ int pushToLua(lua_State* L, float f);
 int pushToLua(lua_State* L, double f);
 int pushToLua(lua_State* L, const string& str);
 
-template<class T> int pushToLua(lua_State* L, sp::P<T> obj)
+template<class T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> int pushToLua(lua_State* L, sp::P<T> obj)
 {
     if (obj)
     {
@@ -50,7 +50,7 @@ template<class T> int pushToLua(lua_State* L, sp::P<T> obj)
     return 1;
 }
 
-template<class T> int pushToLua(lua_State* L, T* obj)
+template<class T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> int pushToLua(lua_State* L, T* obj)
 {
     if (obj)
     {
@@ -146,7 +146,7 @@ template<typename RET, typename... ARGS> int callFunction(lua_State* L)
     return callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
-template<typename T> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
+template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
     lua_getfield(L, index, "__ptr");
@@ -157,7 +157,7 @@ template<typename T> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int ind
     return obj;
 }
 
-template<typename T> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
+template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
     lua_getfield(L, index, "__ptr");
@@ -166,6 +166,11 @@ template<typename T> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<
     sp::P<T> obj = sp::P<ScriptBindingObject>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
     lua_pop(L, 1);
     return obj;
+}
+
+static inline lua_State* convertFromLua(lua_State* L, typeIdentifier<lua_State*>, int index)
+{
+    return L;
 }
 
 static inline bool convertFromLua(lua_State* L, typeIdentifier<bool>, int index)

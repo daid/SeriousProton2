@@ -9,7 +9,7 @@ namespace gui {
 class VerticalFlowLayout : public Layout
 {
 public:
-    virtual void update(P<Widget> container, Vector2d size) override;
+    virtual void update(P<Widget> container, Rect2d rect) override;
 };
 
 };//namespace gui

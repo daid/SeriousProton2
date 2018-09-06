@@ -24,11 +24,21 @@ public:
     class LayoutInfo
     {
     public:
+        class Sides
+        {
+        public:
+            float left = 0;
+            float right = 0;
+            float top = 0;
+            float bottom = 0;
+        };
+        
         Vector2d position;
         Alignment alignment = Alignment::TopLeft;
         Vector2d size{1, 1};
         Vector2i span{1, 1};
-        float margin_left = 0, margin_right = 0, margin_top = 0, margin_bottom = 0;
+        Sides margin;
+        Sides padding;
         Vector2d min_size;
         Vector2d max_size{std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         bool fill_width = false;
@@ -78,7 +88,7 @@ public:
     
     P<Widget> getWidgetWithID(const string& id);
 
-    template<class T> P<T> getWidgetAt(sp::Vector2d position)
+    template<class T, class = typename std::enable_if<std::is_base_of<Widget, T>::value>::type> P<T> getWidgetAt(sp::Vector2d position)
     {
         position -= getPosition2D();
         if (position.x >= 0 && position.x <= render_size.x && position.y >= 0 && position.y <= render_size.y)

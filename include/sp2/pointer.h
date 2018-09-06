@@ -139,7 +139,7 @@ public:
     }
 };
 
-template<typename T> static inline std::ostream& operator<<(std::ostream& os, const P<T>& p)
+template<typename T, class = typename std::enable_if<std::is_base_of<AutoPointerObject, T>::value>::type> static inline std::ostream& operator<<(std::ostream& os, const P<T>& p)
 {
     if (bool(p))
         os << typeid(**p).name() << ':' << *p;

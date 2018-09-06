@@ -6,7 +6,7 @@ namespace gui {
 
 SP_REGISTER_LAYOUT("grid", GridLayout);
 
-void GridLayout::update(P<Widget> container, Vector2d size)
+void GridLayout::update(P<Widget> container, Rect2d rect)
 {
     Vector2i grid_size;
     for(Node* n : container->getChildren())
@@ -37,12 +37,12 @@ void GridLayout::update(P<Widget> container, Vector2d size)
         
         if (span.x == 1)
         {
-            float width = w->layout.size.x + w->layout.margin_left + w->layout.margin_right;
+            float width = w->layout.size.x + w->layout.margin.left + w->layout.margin.right;
             col_width[position.x] = std::max(col_width[position.x], width);
         }
         if (span.y == 1)
         {
-            float height = w->layout.size.y + w->layout.margin_top + w->layout.margin_bottom;
+            float height = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;
             row_height[position.y] = std::max(row_height[position.y], height);
         }
     }
@@ -77,7 +77,7 @@ void GridLayout::update(P<Widget> container, Vector2d size)
             cell_size.x += col_width[position.x + n];
         for(int n=1; n<span.y; n++)
             cell_size.y += row_height[position.y + n];
-        basicLayout(cell_pos, cell_size, *w);
+        basicLayout(Rect2d(cell_pos, cell_size), *w);
     }
 }
 
