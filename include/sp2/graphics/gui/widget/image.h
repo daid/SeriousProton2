@@ -1,6 +1,7 @@
 #ifndef SP2_GRAPHICS_GUI_IMAGE_H
 #define SP2_GRAPHICS_GUI_IMAGE_H
 
+#include <sp2/math/rect.h>
 #include <sp2/graphics/gui/widget/widget.h>
 
 namespace sp {
@@ -16,6 +17,7 @@ public:
     virtual void updateRenderData() override;
 private:
     string texture;
+    Rect2d uv;
 };
 
 };//namespace gui
