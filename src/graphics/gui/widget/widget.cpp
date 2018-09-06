@@ -264,16 +264,7 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else if (key == "alignment")
     {
-        if (value == "topleft") layout.alignment = Alignment::TopLeft;
-        else if (value == "top") layout.alignment = Alignment::Top;
-        else if (value == "topright") layout.alignment = Alignment::TopRight;
-        else if (value == "left") layout.alignment = Alignment::Left;
-        else if (value == "center") layout.alignment = Alignment::Center;
-        else if (value == "right") layout.alignment = Alignment::Right;
-        else if (value == "bottomleft") layout.alignment = Alignment::BottomLeft;
-        else if (value == "bottom") layout.alignment = Alignment::Bottom;
-        else if (value == "bottomright") layout.alignment = Alignment::BottomRight;
-        else LOG(Warning, "Unknown alignment:", value);
+        layout.alignment = stringutil::convert::toAlignment(value);
     }
     else if (key == "layout")
     {

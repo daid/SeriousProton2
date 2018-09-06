@@ -2,6 +2,7 @@
 #define SP2_STRINGUTIL_CONVERT_H
 
 #include <sp2/string.h>
+#include <sp2/alignment.h>
 #include <sp2/math/vector.h>
 
 
@@ -36,6 +37,8 @@ std::vector<float> toFloatArray(const string& s);
 sp::Vector2d toVector2d(const string& s);
 sp::Vector2f toVector2f(const string& s);
 sp::Vector2i toVector2i(const string& s);
+
+Alignment toAlignment(const string& s);
 
 };//namespace convert
 };//namespace stringutil

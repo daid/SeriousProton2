@@ -40,17 +40,9 @@ void Label::setAttribute(const string& key, const string& value)
         text_size = stringutil::convert::toFloat(value);
         markRenderDataOutdated();
     }
-    else if (key == "text_alignment")
+    else if (key == "text_alignment" || key == "text.alignment")
     {
-        if (value == "topleft") text_alignment = Alignment::TopLeft;
-        else if (value == "top") text_alignment = Alignment::Top;
-        else if (value == "topright") text_alignment = Alignment::TopRight;
-        else if (value == "left") text_alignment = Alignment::Left;
-        else if (value == "center") text_alignment = Alignment::Center;
-        else if (value == "right") text_alignment = Alignment::Right;
-        else if (value == "bottomleft") text_alignment = Alignment::BottomLeft;
-        else if (value == "bottom") text_alignment = Alignment::Bottom;
-        else if (value == "bottomright") text_alignment = Alignment::BottomRight;
+        text_alignment = stringutil::convert::toAlignment(value);
         markRenderDataOutdated();
     }
     else if (key == "vertical")
