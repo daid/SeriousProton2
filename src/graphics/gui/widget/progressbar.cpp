@@ -3,6 +3,7 @@
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/engine.h>
 
+
 namespace sp {
 namespace gui {
 
@@ -41,7 +42,7 @@ void Progressbar::setRange(float min_value, float max_value)
 
 void Progressbar::setAttribute(const string& key, const string& value)
 {
-    if (key == "progress_alignment")
+    if (key == "progress_alignment" || key == "progress.alignment")
     {
         fill->setAttribute("alignment", value);
         markRenderDataOutdated();
@@ -86,24 +87,21 @@ void Progressbar::updateRenderData()
     case Alignment::TopRight:
         render_data.mesh = createStretchedV(getRenderSize());
         fill->layout.size.y *= f;
+        fill->setOrientation(ThemeImage::Orientation::Vertical);
         break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
     case Alignment::BottomRight:
         render_data.mesh = createStretchedV(getRenderSize());
         fill->layout.size.y *= f;
+        fill->setOrientation(ThemeImage::Orientation::Vertical);
         break;
     case Alignment::Left:
-        render_data.mesh = createStretchedH(getRenderSize());
-        fill->layout.size.x *= f;
-        break;
     case Alignment::Right:
-        render_data.mesh = createStretchedH(getRenderSize());
-        fill->layout.size.x *= f;
-        break;
     case Alignment::Center:
         render_data.mesh = createStretchedH(getRenderSize());
         fill->layout.size.x *= f;
+        fill->setOrientation(ThemeImage::Orientation::Horizontal);
         break;
     }
 }

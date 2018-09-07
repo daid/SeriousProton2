@@ -441,13 +441,19 @@ std::shared_ptr<MeshData> Widget::createStretchedH(Vector2d size)
     MeshData::Indices indices{0,2,1, 1,2,3, 2,4,3, 3,4,5, 4,6,5, 5,6,7};
     vertices.reserve(8);
     
-    float w = std::min(size.y / 2.0, size.x / 2.0);
+    float w = size.y / 2.0;
+    float u = 0.5;
+    if (w > size.x / 2.0)
+    {
+        u = 0.5 * size.x / size.y;
+        w = size.x / 2.0;
+    }
     vertices.emplace_back(Vector3f(0, 0, 0), Vector2f(0, 1));
     vertices.emplace_back(Vector3f(0, size.y, 0), Vector2f(0, 0));
-    vertices.emplace_back(Vector3f(w, 0, 0), Vector2f(0.5, 1));
-    vertices.emplace_back(Vector3f(w, size.y, 0), Vector2f(0.5, 0));
-    vertices.emplace_back(Vector3f(size.x-w, 0, 0), Vector2f(0.5, 1));
-    vertices.emplace_back(Vector3f(size.x-w, size.y, 0), Vector2f(0.5, 0));
+    vertices.emplace_back(Vector3f(w, 0, 0), Vector2f(u, 1));
+    vertices.emplace_back(Vector3f(w, size.y, 0), Vector2f(u, 0));
+    vertices.emplace_back(Vector3f(size.x-w, 0, 0), Vector2f(1.0 - u, 1));
+    vertices.emplace_back(Vector3f(size.x-w, size.y, 0), Vector2f(1.0 - u, 0));
     vertices.emplace_back(Vector3f(size.x, 0, 0), Vector2f(1, 1));
     vertices.emplace_back(Vector3f(size.x, size.y, 0), Vector2f(1, 0));
     
@@ -460,13 +466,19 @@ std::shared_ptr<MeshData> Widget::createStretchedV(Vector2d size)
     MeshData::Indices indices{0,1,2, 1,3,2, 2,3,4, 3,5,4, 4,5,6, 5,7,6};
     vertices.reserve(8);
     
-    float h = std::min(size.y / 2.0, size.x / 2.0);
+    float h = size.x / 2.0;
+    float v = 0.5;
+    if (h > size.y / 2.0)
+    {
+        v = 0.5 * size.y / size.x;
+        h = size.y / 2.0;
+    }
     vertices.emplace_back(Vector3f(0, 0, 0), Vector2f(0, 1));
     vertices.emplace_back(Vector3f(size.x, 0, 0), Vector2f(1, 1));
-    vertices.emplace_back(Vector3f(0, h, 0), Vector2f(0, 0.5));
-    vertices.emplace_back(Vector3f(size.x, h, 0), Vector2f(1, 0.5));
-    vertices.emplace_back(Vector3f(0, size.y-h, 0), Vector2f(0, 0.5));
-    vertices.emplace_back(Vector3f(size.x, size.y-h, 0), Vector2f(1, 0.5));
+    vertices.emplace_back(Vector3f(0, h, 0), Vector2f(0, 1.0-v));
+    vertices.emplace_back(Vector3f(size.x, h, 0), Vector2f(1, 1.0-v));
+    vertices.emplace_back(Vector3f(0, size.y-h, 0), Vector2f(0, v));
+    vertices.emplace_back(Vector3f(size.x, size.y-h, 0), Vector2f(1, v));
     vertices.emplace_back(Vector3f(0, size.y, 0), Vector2f(0, 0));
     vertices.emplace_back(Vector3f(size.x, size.y, 0), Vector2f(1, 0));
     

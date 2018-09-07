@@ -9,9 +9,21 @@ namespace gui {
 class ThemeImage : public Widget
 {
 public:
+    enum class Orientation
+    {
+        Auto,
+        Horizontal,
+        Vertical
+    };
+
     ThemeImage(P<Widget> parent, string theme_data_name);
     
+    void setOrientation(Orientation orientation);
+    
     virtual void updateRenderData() override;
+
+private:
+    Orientation orientation;
 };
 
 };//namespace gui
