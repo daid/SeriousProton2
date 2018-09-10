@@ -11,10 +11,11 @@ namespace gui {
 P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widget, bool auto_reload)
 {
     Loader loader;
-    loader.tree = io::KeyValueTreeLoader::load(resource_name);
-    if (!loader.tree)
+    loader.subs.emplace(resource_name, SubLoader(loader, resource_name));
+    SubLoader& sub = loader.subs.find(resource_name)->second;
+    if (!sub.tree)
         return nullptr;
-    KeyValueTreeNode* root = loader.tree->findId(root_id);
+    KeyValueTreeNode* root = sub.tree->findId(root_id);
     if (!root_widget)
     {
         sp2assert(Scene::default_gui_scene, "Need to create a <sp::gui::Scene> before Widgets can be created");
@@ -24,7 +25,7 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
     if (root)
     {
         std::map<string, string> parameters;
-        P<Widget> result = loader.createWidget(root_widget, *root, parameters);
+        P<Widget> result = sub.createWidget(root_widget, *root, parameters);
         if (auto_reload)
         {
 #ifdef DEBUG
@@ -38,7 +39,13 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
     return nullptr;
 }
 
-P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters)
+Loader::SubLoader::SubLoader(Loader& loader, string resource_name)
+: loader(loader)
+{
+    tree = io::KeyValueTreeLoader::load(resource_name);
+}
+
+P<Widget> Loader::SubLoader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
     string type = getType(node, parameters);
     WidgetClassRegistry* reg;
@@ -59,7 +66,7 @@ P<Widget> Loader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::ma
     return nullptr;
 }
 
-void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters)
+void Loader::SubLoader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
     if (node.items.find("@ref") != node.items.end())
     {
@@ -75,7 +82,7 @@ void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::m
                 new_parameters[key_value[0]] = key_value[1];
         }
         
-        KeyValueTreeNode* ref = tree->findId("@" + reference_name);
+        KeyValueTreeNode* ref = findRef(reference_name);
         if (ref)
             loadWidgetFromTree(widget, *ref, new_parameters);
         else
@@ -95,7 +102,7 @@ void Loader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::m
     }
 }
 
-string Loader::getType(KeyValueTreeNode& node, std::map<string, string>& parameters)
+string Loader::SubLoader::getType(KeyValueTreeNode& node, std::map<string, string>& parameters)
 {
     if (node.items.find("type") != node.items.end())
         return node.items["type"];
@@ -103,13 +110,33 @@ string Loader::getType(KeyValueTreeNode& node, std::map<string, string>& paramet
     {
         auto values = node.items["@ref"].format(parameters).split();
         string reference_name = values.front();
-        KeyValueTreeNode* ref = tree->findId("@" + reference_name);
+        KeyValueTreeNode* ref = findRef(reference_name);
         if (ref)
             return getType(*ref, parameters);
         else
             LOG(Warning, "Could not find @ref", reference_name);
     }
     return "";
+}
+
+KeyValueTreeNode* Loader::SubLoader::findRef(const string& reference_name)
+{
+    KeyValueTreeNode* ref = nullptr;
+    int ref_split = reference_name.find("#");
+    if (ref_split > -1)
+    {
+        string resource_name = reference_name.substr(0, ref_split);
+        auto it = loader.subs.find(resource_name);
+        if (it != loader.subs.end())
+            return it->second.findRef(reference_name.substr(ref_split + 1));
+        loader.subs.emplace(resource_name, SubLoader(loader, resource_name));
+        return loader.subs.find(resource_name)->second.findRef(reference_name.substr(ref_split + 1));
+    }
+    else if (tree)
+    {
+        ref = tree->findId("@" + reference_name);
+    }
+    return ref;
 }
 
 };//namespace gui
