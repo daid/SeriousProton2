@@ -27,4 +27,3 @@ template<typename T> static inline sp::Quaternion<T> toQuadernion(const btQuater
 }
 
 #endif//SP2_PRIVATE_COLLISION_BULLET_VECTOR_H
-
