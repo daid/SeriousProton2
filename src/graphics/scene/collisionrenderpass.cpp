@@ -120,10 +120,10 @@ public:
 
         Vector3f v0 = toVector<float>(from);
         Vector3f v1 = toVector<float>(to);
-        Vector3f diff = (v1 - v0).normalized() * 0.2f;
+        Vector3f diff = (v1 - v0);
         
-        //This isn't perfect, but it might work good enough.
-        diff = diff.cross(sp::Vector3f(0, 0, 1));
+        //This isn't perfect, but it works good enough.
+        diff = diff.cross(sp::Vector3f(0, 0, 1)).normalized() * 0.2f;
         
         int index = vertices.size();
         vertices.emplace_back(v0, c, Vector2f());
