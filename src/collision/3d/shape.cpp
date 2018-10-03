@@ -2,6 +2,7 @@
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
 #include <sp2/assert.h>
+
 #include <private/collision/bulletVector.h>
 
 #include <btBulletDynamicsCommon.h>

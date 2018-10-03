@@ -5,8 +5,12 @@
 #include <sp2/scene/camera.h>
 #include <sp2/logging.h>
 #include <sp2/io/keybinding.h>
+
 #include <Box2D/Box2D.h>
 #include <private/collision/box2dVector.h>
+
+#include <btBulletDynamicsCommon.h>
+#include <private/collision/bulletVector.h>
 
 namespace sp {
 
@@ -107,6 +111,59 @@ public:
     sp::MeshData::Indices indices;
 };
 
+class Collision3DDebugRender : public btIDebugDraw
+{
+public:
+    virtual void drawLine(const btVector3& from,const btVector3& to,const btVector3& color)
+    {
+        Vector3f c = toVector<float>(color);
+
+        Vector3f v0 = toVector<float>(from);
+        Vector3f v1 = toVector<float>(to);
+        Vector3f diff = (v1 - v0).normalized() * 0.2f;
+        
+        //This isn't perfect, but it might work good enough.
+        diff = diff.cross(sp::Vector3f(0, 0, 1));
+        
+        int index = vertices.size();
+        vertices.emplace_back(v0, c, Vector2f());
+        vertices.emplace_back(v1, c, Vector2f());
+        vertices.emplace_back((v0 + v1) * 0.5f - diff, c, Vector2f());
+        vertices.emplace_back((v0 + v1) * 0.5f + diff, c, Vector2f());
+
+        indices.emplace_back(index);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 2);
+        indices.emplace_back(index);
+        indices.emplace_back(index + 1);
+        indices.emplace_back(index + 3);
+    }
+
+    virtual void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color)
+    {
+    }
+
+	virtual void reportErrorWarning(const char* warningString)
+	{
+	}
+
+	virtual void draw3dText(const btVector3& location,const char* textString)
+	{
+	}
+	
+	virtual void setDebugMode(int debugMode)
+	{
+	}
+	
+	virtual int getDebugMode() const
+	{
+        return DBG_DrawWireframe;
+	}
+
+    sp::MeshData::Vertices vertices;
+    sp::MeshData::Indices indices;
+};
+
 CollisionRenderPass::CollisionRenderPass()
 {
     enabled = true;
@@ -180,6 +237,28 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
             scene->collision_world2d->DrawDebugData();
             scene->collision_world2d->SetDebugDraw(nullptr);
             
+            if (!mesh)
+                mesh = MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic);
+            else
+                mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
+
+            queue.setCamera(camera);
+            RenderData render_data;
+            render_data.shader = Shader::get("internal:normal_as_color.shader");
+            render_data.type = RenderData::Type::Normal;
+            render_data.mesh = mesh;
+            render_data.color = Color(1, 1, 1, 0.25);
+            queue.add(Matrix4x4d::identity(), render_data);
+        }
+
+        if (scene->collision_world3d)
+        {
+            Collision3DDebugRender debug_renderer;
+            
+            scene->collision_world3d->setDebugDrawer(&debug_renderer);
+            scene->collision_world3d->debugDrawWorld();
+            scene->collision_world3d->setDebugDrawer(nullptr);
+
             if (!mesh)
                 mesh = MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic);
             else
