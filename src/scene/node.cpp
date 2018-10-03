@@ -137,7 +137,10 @@ void Node::setLinearVelocity(sp::Vector2d velocity)
     if (collision_body2d)
         collision_body2d->SetLinearVelocity(toVector(velocity));
     if (collision_body3d)
+    {
         collision_body3d->setLinearVelocity(toVector(sp::Vector3d(velocity.x, velocity.y, 0)));
+        collision_body3d->activate();
+    }
 }
 
 void Node::setLinearVelocity(Vector3d velocity)
@@ -156,7 +159,21 @@ void Node::setAngularVelocity(double velocity)
     if (collision_body2d)
         collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
     if (collision_body3d)
-        collision_body3d->setAngularVelocity(btVector3(0, 0, velocity));
+    {
+        collision_body3d->setAngularVelocity(btVector3(0, 0, velocity / 180.0 * pi));
+        collision_body3d->activate();
+    }
+}
+
+void Node::setAngularVelocity(sp::Vector3d velocity)
+{
+    if (collision_body2d)
+        collision_body2d->SetAngularVelocity(velocity.z / 180.0 * pi);
+    if (collision_body3d)
+    {
+        collision_body3d->setAngularVelocity(toVector(velocity / 180.0 * pi));
+        collision_body3d->activate();
+    }
 }
 
 Vector2d Node::getPosition2D()
@@ -226,6 +243,20 @@ Vector3d Node::getGlobalPosition3D()
 Vector3d Node::getGlobalPoint3D(Vector3d v)
 {
     return global_transform * v;
+}
+
+Vector3d Node::getLinearVelocity3D()
+{
+    if (collision_body3d)
+        return toVector<double>(collision_body3d->getLinearVelocity());
+    return Vector3d(0, 0, 0);
+}
+
+Vector3d Node::getAngularVelocity3D()
+{
+    if (collision_body3d)
+        return toVector<double>(collision_body3d->getAngularVelocity());
+    return Vector3d(0, 0, 0);
 }
 
 void Node::setCollisionShape(const collision::Shape& shape)

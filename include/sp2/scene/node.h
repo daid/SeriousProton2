@@ -51,7 +51,7 @@ public:
     void setLinearVelocity(Vector2d velocity);
     void setLinearVelocity(Vector3d velocity);
     void setAngularVelocity(double velocity);
-    void setAngularVelocity(Quaterniond velocity);
+    void setAngularVelocity(Vector3d velocity);
     
     Vector2d getPosition2D();
     double getRotation2D();
@@ -69,6 +69,9 @@ public:
 
     Vector3d getGlobalPosition3D();
     Vector3d getGlobalPoint3D(Vector3d v);
+
+    Vector3d getLinearVelocity3D();
+    Vector3d getAngularVelocity3D();
     
     const Matrix4x4d& getGlobalTransform() const { return global_transform; }
     const Matrix4x4d& getLocalTransform() const { return local_transform; }

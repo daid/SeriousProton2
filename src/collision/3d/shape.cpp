@@ -42,6 +42,9 @@ void Shape3D::create(Node* node) const
 
     construction_info.m_linearDamping = linear_damping;
     construction_info.m_angularDamping = angular_damping;
+    
+    construction_info.m_friction = friction;
+    construction_info.m_restitution = restitution;
 
     btRigidBody* body = new btRigidBody(construction_info);
     body->setUserPointer(node);
