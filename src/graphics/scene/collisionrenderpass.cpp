@@ -170,23 +170,11 @@ CollisionRenderPass::CollisionRenderPass()
     enabled_toggled = false;
 }
 
-CollisionRenderPass::CollisionRenderPass(P<Scene> scene)
-: single_scene(scene)
+CollisionRenderPass::CollisionRenderPass(P<Camera> camera)
+: specific_camera(camera)
 {
     enabled = true;
     enabled_toggled = false;
-}
-
-CollisionRenderPass::CollisionRenderPass(P<Scene> scene, P<Camera> camera)
-: single_scene(scene), specific_camera(camera)
-{
-    enabled = true;
-    enabled_toggled = false;
-}
-
-void CollisionRenderPass::setScene(P<Scene> scene)
-{
-    single_scene = scene;
 }
 
 void CollisionRenderPass::setCamera(P<Camera> camera)
@@ -210,9 +198,9 @@ void CollisionRenderPass::render(RenderQueue& queue)
     }
     if (!enabled)
         return;
-    if (single_scene)
+    if (specific_camera)
     {
-        renderScene(queue, *single_scene);
+        renderScene(queue, *specific_camera->getScene());
     }
     else
     {
@@ -224,7 +212,7 @@ void CollisionRenderPass::render(RenderQueue& queue)
 void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
 {    
     P<Camera> camera = scene->getCamera();
-    if (specific_camera && specific_camera->getScene() == scene)
+    if (specific_camera)
         camera = specific_camera;
     
     if (scene->isEnabled() && camera)

@@ -13,8 +13,7 @@ class CollisionRenderPass : public RenderPass
 {
 public:
     CollisionRenderPass();
-    CollisionRenderPass(P<Scene> scene);
-    CollisionRenderPass(P<Scene> scene, P<Camera> camera);
+    CollisionRenderPass(P<Camera> camera);
 
     virtual void render(RenderQueue& queue) override;
 
@@ -23,7 +22,6 @@ public:
 private:
     bool enabled;
     bool enabled_toggled;
-    P<Scene> single_scene;
     P<Camera> specific_camera;
     
     void renderScene(RenderQueue& queue, Scene* scene);
