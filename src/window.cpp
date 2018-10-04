@@ -7,6 +7,11 @@
 #include <sp2/graphics/opengl.h>
 #include <SFML/Window/Event.hpp>
 
+#ifdef __WIN32__
+#include <Windows.h>
+#endif
+
+
 namespace sp {
 
 PList<Window> Window::windows;
@@ -87,9 +92,23 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
 
 void Window::setPosition(Vector2f position)
 {
-    //TODO: Account for window borders. SFML does not have a method to query this.
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::Vector2u size = render_window.getSize();
+
+#ifdef __WIN32__
+    // Account for window borders. SFML does not have a method to query this.
+    RECT rect = {0, 0, 0, 0};
+    AdjustWindowRectEx(&rect, GetWindowLong((HWND)render_window.getSystemHandle(), GWL_STYLE), false, GetWindowLong((HWND)render_window.getSystemHandle(), GWL_EXSTYLE));
+    size.x += rect.right - rect.left;
+    size.y += rect.bottom - rect.top;
+    
+    // Adjust the desktop size for the taskbar.
+    MONITORINFO monitor_info;
+    monitor_info.cbSize = sizeof(monitor_info);
+    GetMonitorInfoA(MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY), &monitor_info);
+    desktop.width = monitor_info.rcWork.right;
+    desktop.height = monitor_info.rcWork.bottom;
+#endif//__WIN32__
 
     render_window.setPosition(sf::Vector2i((desktop.width - size.x) * position.x, (desktop.height - size.y) * position.y));
 }
