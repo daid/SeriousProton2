@@ -24,12 +24,15 @@ class Window : public AutoPointerObject
 public:
     Window();
     Window(float aspect_ratio);
+    Window(Vector2f size_factor);
+    Window(Vector2f size_factor, float aspect_ratio);
     
     void setFullScreen(bool fullscreen);
     void setClearColor(Color color);
     void hideCursor();
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
+    void setPosition(Vector2f position);
     
     void addLayer(P<GraphicsLayer> layer);
 private:
@@ -51,10 +54,13 @@ private:
     string title;
     int antialiasing;
     bool fullscreen;
-    float aspect_ratio; //Aspect ratio in window mode (ignored in full screen)
     Color clear_color;
     Texture* cursor_texture;
     std::shared_ptr<MeshData> cursor_mesh;
+
+    //Screen size/position information.
+    float window_aspect_ratio; //If != 0 then this is the forced aspect ratio in window mode (ignored in full screen)
+    Vector2f max_window_size_ratio; //If != 0 then this is the maximum size the window may take of screen, in faction (0.0 to 1.0)
     
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer;

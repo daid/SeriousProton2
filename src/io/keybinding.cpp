@@ -346,6 +346,8 @@ void Keybinding::handleEvent(const sf::Event& event)
     case sf::Event::JoystickMoved:
         updateKeys(int(event.joystickMove.axis) | int(event.joystickMove.joystickId) << 8 | joystick_axis_mask, event.joystickMove.position / 100.0);
         break;
+    case sf::Event::JoystickConnected:
+        break;
     case sf::Event::JoystickDisconnected:
         for(int button=0; button<sf::Joystick::ButtonCount; button++)
             updateKeys(int(button) | int(event.joystickConnect.joystickId) << 8 | joystick_button_mask, 0.0);

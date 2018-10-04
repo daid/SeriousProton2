@@ -12,18 +12,40 @@ namespace sp {
 PList<Window> Window::windows;
 
 Window::Window()
-: Window(0.0)
-{
-}
-
-Window::Window(float aspect_ratio)
 {
     windows.add(this);
     antialiasing = 0;
     fullscreen = false;
-    this->aspect_ratio = aspect_ratio;
     mouse_button_down_mask = 0;
+
+    window_aspect_ratio = 0.0;
+    clear_color = Color(0.1, 0.1, 0.1);
     
+    createRenderWindow();
+}
+
+Window::Window(float aspect_ratio)
+: Window()
+{
+    window_aspect_ratio = aspect_ratio;
+    
+    createRenderWindow();
+}
+
+Window::Window(Vector2f size_factor)
+: Window()
+{
+    max_window_size_ratio = size_factor;
+    
+    createRenderWindow();
+}
+
+Window::Window(Vector2f size_factor, float aspect_ratio)
+: Window()
+{
+    window_aspect_ratio = aspect_ratio;
+    max_window_size_ratio = size_factor;
+
     createRenderWindow();
 }
 
@@ -63,6 +85,15 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
     cursor_mesh = mesh;
 }
 
+void Window::setPosition(Vector2f position)
+{
+    //TODO: Account for window borders. SFML does not have a method to query this.
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    sf::Vector2u size = render_window.getSize();
+
+    render_window.setPosition(sf::Vector2i((desktop.width - size.x) * position.x, (desktop.height - size.y) * position.y));
+}
+
 void Window::addLayer(P<GraphicsLayer> layer)
 {
     graphics_layers.add(layer);
@@ -77,14 +108,27 @@ void Window::createRenderWindow()
     float window_height = desktop.height;
     if (!fullscreen)
     {
-        while(window_width >= int(desktop.width) || window_height >= int(desktop.height) - 100)
+        if (max_window_size_ratio.x != 0.0 && max_window_size_ratio.y != 0.0)
         {
-            window_width *= 0.9;
-            window_height *= 0.9;
+            window_width *= max_window_size_ratio.x;
+            window_height *= max_window_size_ratio.y;
         }
-        if (aspect_ratio != 0.0)
+        else
         {
-            window_width = window_height * aspect_ratio;
+            //Make sure the window fits on the screen with some edge around it.
+            while(window_width >= int(desktop.width) || window_height >= int(desktop.height) - 100)
+            {
+                window_width *= 0.9;
+                window_height *= 0.9;
+            }
+        }
+
+        if (window_aspect_ratio != 0.0)
+        {
+            if (window_width > window_height * window_aspect_ratio)
+                window_width = window_height * window_aspect_ratio;
+            else if (window_height > window_width / window_aspect_ratio)
+                window_height = window_width / window_aspect_ratio;
         }
     }
 
@@ -92,7 +136,7 @@ void Window::createRenderWindow()
         render_window.create(sf::VideoMode(window_width, window_height, 32), title, sf::Style::Fullscreen, context_settings);
     else
         render_window.create(sf::VideoMode(window_width, window_height, 32), title, sf::Style::Default, context_settings);
-
+        
     sf::ContextSettings settings = render_window.getSettings();
     LOG(Info, "OpenGL version:", settings.majorVersion, settings.minorVersion);
 
@@ -103,8 +147,6 @@ void Window::createRenderWindow()
     render_window.setMouseCursorVisible(true);
     render_window.setKeyRepeatEnabled(false);
     render_window.setActive(false);
-    
-    clear_color = Color(0.1, 0.1, 0.1);
 }
 
 void Window::render()
