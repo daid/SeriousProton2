@@ -25,6 +25,12 @@ public:
     {
         write(args...);
     }
+    
+    void operator=(std::vector<uint8_t>&& data)
+    {
+         buffer = std::move(data);
+         read_index = 0;
+    }
 
     void clear()
     {
@@ -32,12 +38,12 @@ public:
         read_index = 0;
     }
     
-    const void* getData()
+    const void* getData() const
     {
         return buffer.data();
     }
     
-    unsigned int getDataSize()
+    unsigned int getDataSize() const
     {
         return buffer.size();
     }

@@ -141,12 +141,63 @@ size_t TcpSocket::receive(void* data, size_t size)
 
 void TcpSocket::send(const io::DataBuffer& buffer)
 {
-    
+    io::DataBuffer packet_size(uint32_t(buffer.getDataSize()));
+    send(packet_size.getData(), packet_size.getDataSize());
+    send(buffer.getData(), buffer.getDataSize());
 }
 
 bool TcpSocket::receive(io::DataBuffer& buffer)
 {
+    if (!isConnected())
+        return 0;
     
+    if (receive_buffer.size() == 0)
+    {
+        uint8_t size_buffer[sizeof(uint32_t)];
+        size_t idx = 0;
+        while(idx < sizeof(uint32_t))
+        {
+            //TOFIX: This blocks if we receive less then 4 bytes. Allows denial of service attack.
+            int result = ::recv(handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx, flags);
+            if (result < 0)
+            {
+                result = 0;
+                if (!isLastErrorNonBlocking())
+                {
+                    close();
+                    return false;
+                }
+            }
+            idx += result;
+        }
+        uint32_t size = *(uint32_t*)size_buffer;
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        size = __builtin_bswap32(size);
+#endif
+        receive_buffer.resize(size);
+        received_size = 0;
+    }
+    else
+    {
+        int result = ::recv(handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size, flags);
+        if (result < 0)
+        {
+            result = 0;
+            if (!isLastErrorNonBlocking())
+            {
+                close();
+                return false;
+            }
+        }
+        received_size += result;
+        if (received_size == receive_buffer.size())
+        {
+            buffer = std::move(receive_buffer);
+            received_size = 0;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TcpSocket::sendSendQueue()

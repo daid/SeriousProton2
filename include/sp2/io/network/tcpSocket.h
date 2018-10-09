@@ -33,6 +33,8 @@ private:
     bool sendSendQueue();
 
     std::string send_queue;
+    std::vector<uint8_t> receive_buffer;
+    size_t received_size;
     
     friend class TcpListener;
 };
