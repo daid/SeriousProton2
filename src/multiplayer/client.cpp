@@ -7,16 +7,13 @@
 #include <sp2/scene/node.h>
 #include <private/multiplayer/packetIDs.h>
 
-#include <SFML/Network/IpAddress.hpp>
-#include <SFML/Network/Packet.hpp>
-
 namespace sp {
 namespace multiplayer {
 
 Client::Client(string hostname, int port_nr)
 {
     socket.setBlocking(false);
-    socket.connect(sf::IpAddress(hostname), port_nr);
+    socket.connect(io::network::Address(hostname), port_nr);
     
     state = State::Connecting;
 }
@@ -27,27 +24,24 @@ Client::~Client()
     
 void Client::onUpdate(float delta)
 {
-    sf::Packet packet;
+    io::DataBuffer packet;
     
-    sf::Socket::Status status;
-    while((status = socket.receive(packet)) == sf::Socket::Done)
+    while(socket.receive(packet))
     {
         uint8_t command_id;
-        packet >> command_id;
+        packet.read(command_id);
         switch(command_id)
         {
         case PacketIDs::request_authentication:{
-            sf::Packet reply;
-            reply << PacketIDs::request_authentication << sf::Uint64(PacketIDs::magic_sp2_value);
-            send(reply);
+            send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value));
             }break;
         case PacketIDs::set_client_id:{
-            packet >> client_id;
+            packet.read(client_id);
             }break;
             
         case PacketIDs::change_game_speed:{
             float new_gamespeed;
-            packet >> new_gamespeed;
+            packet.read(new_gamespeed);
             sp::Engine::getInstance()->setGameSpeed(new_gamespeed);
             }break;
     
@@ -55,7 +49,7 @@ void Client::onUpdate(float delta)
             uint64_t id;
             string class_name;
             uint64_t parent;
-            packet >> id >> class_name >> parent;
+            packet.read(id, class_name, parent);
             auto it = multiplayer::ClassEntry::name_to_create_mapping.find(class_name);
             if (it == multiplayer::ClassEntry::name_to_create_mapping.end())
             {
@@ -78,13 +72,14 @@ void Client::onUpdate(float delta)
             }break;
         case PacketIDs::update_object:{
             uint64_t id;
-            packet >> id;
+            packet.read(id);
             P<Node> node = getNode(id);
             if (node)
             {
                 uint16_t idx;
-                while(packet >> idx)
+                while(packet.available() >= sizeof(idx))
                 {
+                    packet.read(idx);
                     if (idx < node->multiplayer.replication_links.size())
                         node->multiplayer.replication_links[idx]->receive(*this, packet);
                 }
@@ -92,7 +87,7 @@ void Client::onUpdate(float delta)
             }break;
         case PacketIDs::delete_object:{
             uint64_t id;
-            packet >> id;
+            packet.read(id);
             P<Node> node = getNode(id);
             node.destroy();
             }break;
@@ -100,7 +95,7 @@ void Client::onUpdate(float delta)
         case PacketIDs::setup_scene:{
             uint64_t id;
             string scene_name;
-            packet >> id >> scene_name;
+            packet.read(id, scene_name);
             sp::P<Scene> scene = Scene::get(scene_name);
             if (scene)
             {
@@ -119,31 +114,15 @@ void Client::onUpdate(float delta)
             LOG(Warning, "Received unknown packet:", command_id);
         }
     }
-    if (status == sf::Socket::Disconnected || status == sf::Socket::Error)
+    if (!socket.isConnected())
         state = State::Disconnected;
 
-    while(send_queue.begin() != send_queue.end())
-    {
-        if (socket.send(send_queue.front()) == sf::Socket::Done)
-            send_queue.pop_front();
-        else
-            break;
-    }
-    
     cleanDeletedNodes();
 }
 
-void Client::send(sf::Packet& packet)
+void Client::send(const io::DataBuffer& packet)
 {
-    if (send_queue.begin() == send_queue.end())
-    {
-        if (socket.send(packet) == sf::Socket::Partial)
-            send_queue.push_back(packet);
-    }
-    else
-    {
-        send_queue.push_back(packet);
-    }
+    socket.send(packet);
 }
 
 

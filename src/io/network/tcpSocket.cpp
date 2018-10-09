@@ -139,8 +139,15 @@ size_t TcpSocket::receive(void* data, size_t size)
     return result;
 }
 
-//void send(const DataBuffer& buffer);
-//bool receive(DataBuffer& buffer);
+void TcpSocket::send(const io::DataBuffer& buffer)
+{
+    
+}
+
+bool TcpSocket::receive(io::DataBuffer& buffer)
+{
+    
+}
 
 bool TcpSocket::sendSendQueue()
 {

@@ -2,10 +2,7 @@
 #define SP2_MULTIPLAYER_REPLICATION_H
 
 #include <sp2/multiplayer/nodeRegistry.h>
-#include <SFML/Network/Packet.hpp>
-
-template<typename=std::enable_if<!std::is_same<uint64_t, sf::Uint64>::value>> static inline sf::Packet& operator<<(sf::Packet& packet, const uint64_t& n) { return packet << sf::Uint64(n); }
-template<typename=std::enable_if<!std::is_same<uint64_t, sf::Uint64>::value>> static inline sf::Packet& operator>>(sf::Packet& packet, uint64_t& n) { sf::Uint64 _n; return packet >> _n; n = _n; }
+#include <sp2/io/dataBuffer.h>
 
 namespace sp {
 namespace multiplayer {
@@ -15,9 +12,9 @@ class ReplicationLinkBase : NonCopyable
 public:
     virtual ~ReplicationLinkBase() {}
     virtual bool isChanged() = 0;
-    virtual void initialSend(NodeRegistry& registry, sf::Packet& packet) { send(registry, packet); }
-    virtual void send(NodeRegistry& registry, sf::Packet& packet) = 0;
-    virtual void receive(NodeRegistry& registry, sf::Packet& packet) = 0;
+    virtual void initialSend(NodeRegistry& registry, io::DataBuffer& packet) { send(registry, packet); }
+    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) = 0;
+    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) = 0;
 };
 
 template<typename T> class ReplicationLink : public ReplicationLinkBase
@@ -36,14 +33,14 @@ public:
         return true;
     }
     
-    virtual void send(sf::Packet& packet) override
+    virtual void send(io::DataBuffer& packet) override
     {
-        packet << value;
+        packet.write(value);
     }
     
-    virtual void receive(sf::Packet& packet) override
+    virtual void receive(io::DataBuffer& packet) override
     {
-        packet >> value;
+        packet.read(value);
     }
 private:
     T& value;
@@ -67,16 +64,16 @@ public:
         return true;
     }
     
-    virtual void send(NodeRegistry& registry, sf::Packet& packet) override
+    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) override
     {
         uint64_t id = object ? object.multiplayer.getId() : 0;
-        packet << sf::Uint64(id);
+        packet.write(id);
     }
     
-    virtual void receive(NodeRegistry& registry, sf::Packet& packet) override
+    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) override
     {
         uint64_t id;
-        packet >> id;
+        packet.read(id);
         object = registry.getNode(id);
     }
 private:

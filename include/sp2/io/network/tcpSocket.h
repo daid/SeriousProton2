@@ -3,6 +3,7 @@
 
 #include <sp2/io/network/address.h>
 #include <sp2/io/network/socketBase.h>
+#include <sp2/io/dataBuffer.h>
 
 
 namespace sp {
@@ -25,8 +26,8 @@ public:
     void send(const void* data, size_t size);
     size_t receive(void* data, size_t size);
 
-    //void send(const DataBuffer& buffer);
-    //bool receive(DataBuffer& buffer);
+    void send(const io::DataBuffer& buffer);
+    bool receive(io::DataBuffer& buffer);
 
 private:
     bool sendSendQueue();

@@ -4,9 +4,9 @@
 #include <sp2/updatable.h>
 #include <sp2/scene/node.h>
 
-#include <SFML/Network/Packet.hpp>
-#include <SFML/Network/TcpSocket.hpp>
-#include <SFML/Network/TcpListener.hpp>
+#include <sp2/io/dataBuffer.h>
+#include <sp2/io/network/tcpListener.h>
+#include <sp2/io/network/tcpSocket.h>
 
 #include <list>
 #include <unordered_map>
@@ -23,7 +23,7 @@ private:
     class ClientInfo
     {
     public:
-        sf::TcpSocket* socket;
+        io::network::TcpSocket* socket;
         uint32_t client_id;
         enum class State
         {
@@ -31,19 +31,10 @@ private:
             CatchingUp,
             Connected
         } state;
-        std::list<sf::Packet> send_queue;
         
-        void send(sf::Packet& packet)
+        void send(const io::DataBuffer& packet)
         {
-            if (send_queue.begin() == send_queue.end())
-            {
-                if (socket->send(packet) == sf::Socket::Partial)
-                    send_queue.push_back(packet);
-            }
-            else
-            {
-                send_queue.push_back(packet);
-            }
+            socket->send(packet);
         }
     };
 
@@ -55,8 +46,8 @@ private:
 
     std::list<ClientInfo> clients;
     
-    sf::TcpListener new_connection_listener;
-    sf::TcpSocket* new_connection_socket;
+    io::network::TcpListener new_connection_listener;
+    io::network::TcpSocket* new_connection_socket;
     
     void recursiveAddNewNodes(Node* node);
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
@@ -65,8 +56,8 @@ private:
     virtual void onUpdate(float delta) override;
     virtual void onDeleted(uint64_t id) override;
     
-    void buildCreatePacket(sf::Packet& packet, Node* node);
-    void sendToAllConnectedClients(sf::Packet& packet);
+    void buildCreatePacket(io::DataBuffer& packet, Node* node);
+    void sendToAllConnectedClients(const io::DataBuffer& packet);
 
     friend class Node::Multiplayer;
 };

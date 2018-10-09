@@ -4,8 +4,9 @@
 #include <sp2/string.h>
 #include <sp2/updatable.h>
 #include <sp2/multiplayer/nodeRegistry.h>
+#include <sp2/io/dataBuffer.h>
+#include <sp2/io/network/tcpSocket.h>
 
-#include <SFML/Network/TcpSocket.hpp>
 
 #include <list>
 
@@ -31,13 +32,13 @@ public:
     State getState() const { return state; }
     
 private:
-    sf::TcpSocket socket;
-    std::list<sf::Packet> send_queue;
+    io::network::TcpSocket socket;
+    std::list<io::DataBuffer> send_queue;
     State state;
     uint32_t client_id;
     
     virtual void onUpdate(float delta) override;
-    void send(sf::Packet& packet);
+    void send(const io::DataBuffer& buffer);
     
     friend class ::sp::Engine;
 };
