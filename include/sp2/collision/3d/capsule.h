@@ -1,5 +1,5 @@
-#ifndef SP2_COLLISION_3D_SPHERE_H
-#define SP2_COLLISION_3D_SPHERE_H
+#ifndef SP2_COLLISION_3D_CAPSULE_H
+#define SP2_COLLISION_3D_CAPSULE_H
 
 #include <sp2/collision/3d/shape.h>
 
@@ -26,4 +26,4 @@ private:
 };//namespace collision
 };//namespace sp
 
-#endif//SP2_COLLISION_3D_SPHERE_H
+#endif//SP2_COLLISION_3D_CAPSULE_H
