@@ -6,7 +6,6 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/assert.h>
-#include <SFML/System/Sleep.hpp>
 #include <limits>
 
 namespace sp {
