@@ -2,6 +2,7 @@
 #define SP2_IO_DATABUFFER_H
 
 #include <sp2/string.h>
+#include <string.h>
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #  define IF_LITTLE_ENDIAN(x) do { x; } while(0)
@@ -116,6 +117,15 @@ public:
         size_t idx = buffer.size();
         buffer.resize(idx + s.length());
         memcpy(&buffer[idx], &s[0], s.length());
+    }
+
+    void write(const char* s)
+    {
+        uint32_t len = strlen(s);
+        write(len);
+        size_t idx = buffer.size();
+        buffer.resize(idx + len);
+        memcpy(&buffer[idx], s, len);
     }
     
     template<typename T, typename... ARGS> void read(T& value, ARGS&... args)
