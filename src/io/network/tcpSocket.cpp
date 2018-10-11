@@ -1,4 +1,5 @@
 #include <sp2/io/network/tcpSocket.h>
+#include <sp2/logging.h>
 
 #ifdef __WIN32
 #include <winsock2.h>
@@ -29,9 +30,12 @@ TcpSocket::TcpSocket(TcpSocket&& socket)
     handle = socket.handle;
     send_queue = std::move(socket.send_queue);
     blocking = socket.blocking;
+    receive_buffer = std::move(socket.receive_buffer);
+    received_size = socket.received_size;
 
     socket.handle = -1;
     socket.send_queue.clear();
+    socket.receive_buffer.clear();
 }
 
 TcpSocket::~TcpSocket()
@@ -168,6 +172,8 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
                     return false;
                 }
             }
+            if (result == 0 && idx == 0)
+                return false;
             idx += result;
         }
         uint32_t size = *(uint32_t*)size_buffer;
@@ -177,7 +183,8 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
         receive_buffer.resize(size);
         received_size = 0;
     }
-    else
+
+    while(true)
     {
         int result = ::recv(handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size, flags);
         if (result < 0)
@@ -196,7 +203,10 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
             received_size = 0;
             return true;
         }
+        if (result < 1)
+            break;
     }
+    
     return false;
 }
 

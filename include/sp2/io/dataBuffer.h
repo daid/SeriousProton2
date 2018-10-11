@@ -144,62 +144,62 @@ public:
 
     void read(int16_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap16(i));
     }
     void read(int32_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap32(i));
     }
     
     void read(int64_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap64(i));
     }
     
     void read(uint16_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap16(i));
     }
     
     void read(uint32_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap32(i));
     }
 
     void read(uint64_t& i)
     {
-        if (read_index > buffer.size() - sizeof(i)) return;
-        memcpy(&buffer[read_index], &i, sizeof(i));
+        if (read_index + sizeof(i) > buffer.size()) return;
+        memcpy(&i, &buffer[read_index], sizeof(i));
         read_index += sizeof(i);
         IF_LITTLE_ENDIAN(i = __builtin_bswap64(i));
     }
 
     void read(float& f)
     {
-        if (read_index > buffer.size() - sizeof(f)) return;
-        memcpy(&buffer[read_index], &f, sizeof(f));
+        if (read_index + sizeof(f) > buffer.size()) return;
+        memcpy(&f, &buffer[read_index], sizeof(f));
         read_index += sizeof(f);
     }
 
     void read(double& f)
     {
-        if (read_index > buffer.size() - sizeof(f)) return;
-        memcpy(&buffer[read_index], &f, sizeof(f));
+        if (read_index + sizeof(f) > buffer.size()) return;
+        memcpy(&f, &buffer[read_index], sizeof(f));
         read_index += sizeof(f);
     }
     
@@ -207,7 +207,7 @@ public:
     {
         uint32_t len = 0;
         read(len);
-        if (read_index > buffer.size() - len) return;
+        if (read_index + len > buffer.size()) return;
         s.assign((char*)&buffer[read_index], len);
         read_index += len;
     }

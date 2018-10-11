@@ -31,9 +31,7 @@ public:
     FreetypeFontTexture(string name, int pixel_size)
     : Texture(Type::Dynamic, name)
     {
-        sf::Image image;
-        image.create(pixel_size * 16, pixel_size * 16, sf::Color(255, 255, 255, 0));
-        texture.loadFromImage(image);
+        texture.create(pixel_size * 16, pixel_size * 16);
         texture.setSmooth(true);
     }
 

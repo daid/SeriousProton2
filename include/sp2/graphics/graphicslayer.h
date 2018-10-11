@@ -5,7 +5,6 @@
 #include <sp2/io/pointer.h>
 #include <sp2/math/vector.h>
 #include <sp2/math/rect.h>
-#include <SFML/Graphics/RenderTarget.hpp>
 
 namespace sp {
 

@@ -5,7 +5,6 @@
 #include <sp2/engine.h>
 #include <sp2/assert.h>
 
-#include <SFML/Network/TcpSocket.hpp>
 
 namespace sp {
 namespace multiplayer {
@@ -24,7 +23,7 @@ constexpr uint64_t PacketIDs::magic_sp2_value;
 
 Server::Server(int port_nr)
 {
-    if (new_connection_listener.listen(port_nr) != sf::Socket::Done)
+    if (new_connection_listener.listen(port_nr))
         LOG(Error, "Failed to listen on port: ", port_nr);
     new_connection_listener.setBlocking(false);
     new_connection_socket = new io::network::TcpSocket();
@@ -102,7 +101,7 @@ void Server::onUpdate(float delta)
     }
     
     //Check for new connections.
-    if (new_connection_listener.accept(*new_connection_socket) == sf::Socket::Done)
+    if (new_connection_listener.accept(*new_connection_socket))
     {
         LOG(Info, "Accepted new connection on server");
         new_connection_socket->setBlocking(false);
