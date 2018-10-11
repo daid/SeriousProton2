@@ -63,7 +63,10 @@ void Label::updateRenderData()
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
     {
-        render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
+        if (vertical)
+            render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
+        else
+            render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
     }

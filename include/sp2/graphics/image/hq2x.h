@@ -1,7 +1,7 @@
 #ifndef SP2_GRAPHICS_IMAGE_HQ2X_H
 #define SP2_GRAPHICS_IMAGE_HQ2X_H
 
-#include <SFML/Graphics/Image.hpp>
+#include <sp2/graphics/image.h>
 #include <sp2/math/vector2.h>
 
 namespace sp {
@@ -18,8 +18,8 @@ struct HQ2xConfig
     int scale = 2;
 };
 
-void hq2x(sf::Image& image, HQ2xConfig flags);
-void hq2xTiles(sf::Image& image, sp::Vector2i tile_size, HQ2xConfig flags);
+void hq2x(sp::Image& image, HQ2xConfig flags);
+void hq2xTiles(sp::Image& image, sp::Vector2i tile_size, HQ2xConfig flags);
 
 };//namespace image
 };//namespace sp

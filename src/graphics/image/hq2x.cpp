@@ -29,7 +29,7 @@ static bool diff(uint32_t color0, uint32_t color1)
     return (abs((yuv0 & 0xff0000) - (yuv1 & 0xff0000)) > trY)
         || (abs((yuv0 & 0x00ff00) - (yuv1 & 0x00ff00)) > trU)
         || (abs((yuv0 & 0x0000ff) - (yuv1 & 0x0000ff)) > trV)
-        || (abs((color0 >> 24) - (color1 >> 24)) > trA);
+        || (std::abs((color0 >> 24) - (color1 >> 24)) > trA);
 }
 
 static inline uint32_t mix(uint32_t w1, uint32_t w2, uint32_t c1, uint32_t c2)
@@ -11663,7 +11663,7 @@ static void hqxxProcess(const uint32_t* src, uint32_t* dst, sp::Vector2i src_siz
     }
 }
 
-void hq2x(sf::Image& image, HQ2xConfig config)
+void hq2x(sp::Image& image, HQ2xConfig config)
 {
     if (config.scale < 2)
         return;
@@ -11672,16 +11672,16 @@ void hq2x(sf::Image& image, HQ2xConfig config)
     sp::Vector2i size(image.getSize().x, image.getSize().y);
     uint32_t* target_buffer = new uint32_t[size.x * size.y * config.scale * config.scale];
     
-    const uint32_t* src = (const uint32_t*)image.getPixelsPtr();
+    const uint32_t* src = image.getPtr();
     uint32_t* dst = target_buffer;
 
     hqxxProcess(src, dst, size, size.x, config);
 
-    image.create(size.x * config.scale, size.y * config.scale, (uint8_t*)target_buffer);
+    image.update(size * config.scale, target_buffer);
     delete[] target_buffer;
 }
 
-void hq2xTiles(sf::Image& image, sp::Vector2i tile_size, HQ2xConfig config)
+void hq2xTiles(sp::Image& image, sp::Vector2i tile_size, HQ2xConfig config)
 {
     if (config.scale < 2)
         return;
@@ -11690,7 +11690,7 @@ void hq2xTiles(sf::Image& image, sp::Vector2i tile_size, HQ2xConfig config)
     sp::Vector2i size(image.getSize().x, image.getSize().y);
     uint32_t* target_buffer = new uint32_t[size.x * size.y * config.scale * config.scale];
     
-    const uint32_t* src = (const uint32_t*)image.getPixelsPtr();
+    const uint32_t* src = image.getPtr();
     uint32_t* dst = target_buffer;
 
     //hqxxProcess(src, dst, size, size.x, config);
@@ -11702,7 +11702,7 @@ void hq2xTiles(sf::Image& image, sp::Vector2i tile_size, HQ2xConfig config)
         }
     }
 
-    image.create(size.x * config.scale, size.y * config.scale, (uint8_t*)target_buffer);
+    image.update(size * config.scale, target_buffer);
     delete[] target_buffer;
 }
 

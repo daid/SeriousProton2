@@ -19,7 +19,7 @@ public:
         texture.setSmooth(texture_manager.default_smooth);
     }
 
-    void transferImageFromThread(std::shared_ptr<sf::Image> image)
+    void transferImageFromThread(std::shared_ptr<sp::Image> image)
     {
         if (name.find("#") > 0)
         {
@@ -63,7 +63,9 @@ public:
         if (image)
         {
             LOG(Info, "Loaded image", name, image->getSize().x, "x", image->getSize().y);
-            if (!texture.loadFromImage(*image))
+            sf::Image tmp_image;
+            tmp_image.create(image->getSize().x, image->getSize().y, (const uint8_t*)image->getPtr());
+            if (!texture.loadFromImage(tmp_image))
             {
                 LOG(Warning, "loadFromImage failed for", name);
             }
@@ -76,7 +78,7 @@ private:
     std::mutex mutex;
 
     sf::Texture texture;
-    std::shared_ptr<sf::Image> image;
+    std::shared_ptr<sp::Image> image;
 };
 
 TextureManager::TextureManager()
@@ -101,8 +103,8 @@ void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr st
 {
     if (stream)
     {
-        std::shared_ptr<sf::Image> image = std::make_shared<sf::Image>();
-        image->loadFromStream(*stream);
+        std::shared_ptr<sp::Image> image = std::make_shared<sp::Image>();
+        image->loadFromStream(stream);
         (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(image);
     }
 }
