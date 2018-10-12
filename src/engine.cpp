@@ -20,6 +20,7 @@ P<Engine> Engine::engine;
 #ifdef DEBUG
 static io::Keybinding single_step_enable("single_step_enable", "Tilde");
 static io::Keybinding single_step_step("single_step_step", "Tab");
+static bool single_step_enabled = false;
 #endif
 
 Engine::Engine()

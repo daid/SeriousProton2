@@ -3,20 +3,45 @@
 
 #include <sp2/string.h>
 #include <sp2/math/vector.h>
-#include <SFML/Graphics/Shader.hpp>
+#include <sp2/math/matrix4x4.h>
+#include <sp2/graphics/color.h>
+#include <sp2/nonCopyable.h>
 
 namespace sp {
 
-class Shader : public sf::Shader
+class Texture;
+
+class Shader : public NonCopyable
 {
+public:    
+    void bind();
+    void setUniform(const string& s, const Matrix4x4f& matrix);
+    void setUniform(const string& s, const Matrix4x4d& matrix);
+    void setUniform(const string& s, const Vector3f& v);
+    void setUniform(const string& s, const Color& v);
+    void setUniform(const string& s, Texture* v);
+
+private:
+    Shader(string name);
+    Shader(string name, string&& vertex_shader, string&& fragment_shader);
+    ~Shader();
+    
+    unsigned int compileShader(const char* code, int type);
+    int getUniformLocation(const string& s);
+
+    unsigned int program;
+    std::map<string, int> uniform_mapping;
+
+    string name;
+    string vertex_shader;
+    string fragment_shader;
 public:
     static Shader* get(string name);
+    static void unbind();
     
-    void setUniformTmp(const string& name, const Vector2f v) { setUniform(name, sf::Vector2f(v.x, v.y)); }
 private:
     static std::map<string, Shader*> cached_shaders;
-
-    Shader();
+    static Shader* bound_shader;
 };
 
 };//namespace sp

@@ -126,14 +126,13 @@ void RenderQueue::render(std::vector<Item>& list)
             }
             if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
                 glDepthMask(false);
+            item.data.shader->bind();
             item.data.shader->setUniform("projection_matrix", camera_projection);
             item.data.shader->setUniform("camera_matrix", camera_transform);
             item.data.shader->setUniform("object_matrix", item.transform);
-            item.data.shader->setUniform("object_scale", sf::Vector3f(item.data.scale.x, item.data.scale.y, item.data.scale.z));
-            item.data.shader->setUniform("color", sf::Glsl::Vec4(item.data.color.r, item.data.color.g, item.data.color.b, item.data.color.a));
-            if (item.data.texture)
-                item.data.shader->setUniform("texture_map", *item.data.texture->get());
-            sf::Shader::bind(item.data.shader);
+            item.data.shader->setUniform("object_scale", item.data.scale);
+            item.data.shader->setUniform("color", item.data.color);
+            item.data.shader->setUniform("texture_map", item.data.texture);
             item.data.mesh->render();
             if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
                 glDepthMask(true);

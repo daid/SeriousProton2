@@ -46,9 +46,6 @@ private:
 
     float current_fps = 0.0;
     float current_ups = 0.0;
-#ifdef DEBUG
-    bool single_step_enabled = false;
-#endif
     bool initialized = false;
 };
 
