@@ -203,6 +203,8 @@ std::shared_ptr<MeshData> FreetypeFont::createString(string s, int pixel_size, f
     int previous_character = 0;
     int line_count = 1;
     float max_line_width = 0;
+    float current_line_width = 0;
+    unsigned int line_start_vertex_index = 0;
     for(auto character : s)
     {
         // Apply the kerning offset
@@ -222,6 +224,48 @@ std::shared_ptr<MeshData> FreetypeFont::createString(string s, int pixel_size, f
             position.x = 0;
             position.y -= line_spacing;
             line_count++;
+            switch(alignment)
+            {
+            case Alignment::TopLeft:
+            case Alignment::BottomLeft:
+            case Alignment::Left:
+                break;
+            case Alignment::Center:
+            case Alignment::Top:
+            case Alignment::Bottom:
+                if (current_line_width < max_line_width)
+                {
+                    float offset = (max_line_width - current_line_width) / 2.0;
+                    for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
+                        vertices[n].position[0] += offset;
+                }
+                else
+                {
+                    float offset = (current_line_width - max_line_width) / 2.0;
+                    for(unsigned int n=0; n<line_start_vertex_index; n++)
+                        vertices[n].position[0] += offset;
+                }
+                break;
+            case Alignment::TopRight:
+            case Alignment::Right:
+            case Alignment::BottomRight:
+                if (current_line_width < max_line_width)
+                {
+                    float offset = max_line_width - current_line_width;
+                    for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
+                        vertices[n].position[0] += offset;
+                }
+                else
+                {
+                    float offset = current_line_width - max_line_width;
+                    for(unsigned int n=0; n<line_start_vertex_index; n++)
+                        vertices[n].position[0] += offset;
+                }
+                break;
+            }
+            max_line_width = std::max(max_line_width, current_line_width);
+            current_line_width = 0;
+            line_start_vertex_index = vertices.size();
             continue;
         }
         
@@ -261,8 +305,50 @@ std::shared_ptr<MeshData> FreetypeFont::createString(string s, int pixel_size, f
             vertices.emplace_back(p3, sp::Vector2f(u1, v1));
         }
         position.x += glyph.advance * size_scale;
-        max_line_width = std::max(max_line_width, position.x);
+        current_line_width = std::max(current_line_width, position.x);
     }
+
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        break;
+    case Alignment::Center:
+    case Alignment::Top:
+    case Alignment::Bottom:
+        if (current_line_width < max_line_width)
+        {
+            float offset = (max_line_width - current_line_width) / 2.0;
+            for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
+                vertices[n].position[0] += offset;
+        }
+        else
+        {
+            float offset = (current_line_width - max_line_width) / 2.0;
+            for(unsigned int n=0; n<line_start_vertex_index; n++)
+                vertices[n].position[0] += offset;
+        }
+        break;
+    case Alignment::TopRight:
+    case Alignment::Right:
+    case Alignment::BottomRight:
+        if (current_line_width < max_line_width)
+        {
+            float offset = max_line_width - current_line_width;
+            for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
+                vertices[n].position[0] += offset;
+        }
+        else
+        {
+            float offset = current_line_width - max_line_width;
+            for(unsigned int n=0; n<line_start_vertex_index; n++)
+                vertices[n].position[0] += offset;
+        }
+        break;
+    }
+
+    max_line_width = std::max(max_line_width, current_line_width);
 
     float x_offset = 0;
     float y_offset = 0;
