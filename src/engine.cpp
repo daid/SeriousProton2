@@ -18,8 +18,8 @@ namespace sp {
 P<Engine> Engine::engine;
 
 #ifdef DEBUG
-io::Keybinding single_step_enable("single_step_enable", "Tilde");
-io::Keybinding single_step_step("single_step_step", "Tab");
+static io::Keybinding single_step_enable("single_step_enable", "Tilde");
+static io::Keybinding single_step_step("single_step_step", "Tab");
 #endif
 
 Engine::Engine()
@@ -35,25 +35,34 @@ Engine::Engine()
     fixed_update_accumulator = 0.0;
     
     in_fixed_update = false;
-    
-    // By creating a SoundBuffer we force SFML to load the sound subsystem.
-    // Else this is done when the first sound is loaded, causing a delay at that point, which causes a hickup on windows.
-    sf::SoundBuffer forceLoadBuffer;
-    
-    sp::multiplayer::ClassEntry::fillMappings();
 }
 
 Engine::~Engine()
 {
 }
 
+void Engine::initialize()
+{
+    if (initialized)
+        return;
+
+    glewInit();
+
+    // By creating a SoundBuffer we force SFML to load the sound subsystem.
+    // Else this is done when the first sound is loaded, causing a delay at that point, which causes a hickup on windows.
+    sf::SoundBuffer forceLoadBuffer;
+    
+    sp::multiplayer::ClassEntry::fillMappings();
+    
+    initialized = true;
+}
+
 void Engine::run()
 {
-    glewInit();
-    
+    initialize();
+
     sf::Clock frame_time_clock;
     int fps_count = 0;
-    int ups_count = 0;
     sf::Clock fps_counter_clock;
     LOG(Info, "Engine started");
     
@@ -73,70 +82,72 @@ void Engine::run()
         float delta = frame_time_clock.restart().asSeconds();
         delta = std::min(maximum_frame_time, delta);
         delta = std::max(minimum_frame_time, delta);
-        delta *= game_speed;
-        if (paused)
-            delta = 0;
-#ifdef DEBUG
-        if (single_step_enable.getDown())
-            single_step_enabled = !single_step_enabled;
-        if (single_step_enabled)
-        {
-            delta = 0;
-            if (single_step_step.getDown())
-                delta = fixed_update_delta;
-        }
-#endif
-        fixed_update_accumulator += delta;
-        in_fixed_update = true;
-        while(fixed_update_accumulator > fixed_update_delta)
-        {
-            fixed_update_accumulator -= fixed_update_delta;
-            ups_count++;
-            for(Scene* scene : Scene::all())
-            {
-                if (scene->isEnabled())
-                {
-                    scene->fixedUpdate();
-                    scene->postFixedUpdate(fixed_update_accumulator);
-                }
-            }
-            io::Keybinding::allPostFixedUpdate();
-        }
-        in_fixed_update = false;
-        for(Scene* scene : Scene::all())
-        {
-            if (scene->isEnabled())
-                scene->postFixedUpdate(fixed_update_accumulator);
-        }
-        for(Scene* scene : Scene::all())
-        {
-            if (scene->isEnabled())
-                scene->update(delta);
-        }
-        for(Updatable* updatable : Updatable::updatables)
-        {
-            updatable->onUpdate(delta);
-        }
-        io::Keybinding::allPostUpdate();
-        
-        for(Window* window : Window::windows)
-        {
-            if (window->render_window.isOpen())
-                window->render();
-        }
+        update(delta);
 
         fps_count++;
         if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
         {
             double time = fps_counter_clock.restart().asSeconds();
             current_fps = double(fps_count) / time;
-            current_ups = double(ups_count) / time;
             fps_count = 0;
-            ups_count = 0;
-            LOG(Debug, "FPS:", current_fps, "UPS:", current_ups);
+            LOG(Debug, "FPS:", current_fps);
         }
     }
     LOG(Info, "Engine closing down");
+}
+
+void Engine::update(float time_delta)
+{
+    time_delta *= game_speed;
+    if (paused)
+        time_delta = 0;
+#ifdef DEBUG
+    if (single_step_enable.getDown())
+        single_step_enabled = !single_step_enabled;
+    if (single_step_enabled)
+    {
+        time_delta = 0;
+        if (single_step_step.getDown())
+            time_delta = fixed_update_delta;
+    }
+#endif
+    fixed_update_accumulator += time_delta;
+    in_fixed_update = true;
+    while(fixed_update_accumulator > fixed_update_delta)
+    {
+        fixed_update_accumulator -= fixed_update_delta;
+        for(Scene* scene : Scene::all())
+        {
+            if (scene->isEnabled())
+            {
+                scene->fixedUpdate();
+                scene->postFixedUpdate(fixed_update_accumulator);
+            }
+        }
+        io::Keybinding::allPostFixedUpdate();
+    }
+    in_fixed_update = false;
+    for(Scene* scene : Scene::all())
+    {
+        if (scene->isEnabled())
+            scene->postFixedUpdate(fixed_update_accumulator);
+    }
+    for(Scene* scene : Scene::all())
+    {
+        if (scene->isEnabled())
+            scene->update(time_delta);
+    }
+    for(Updatable* updatable : Updatable::updatables)
+    {
+        updatable->onUpdate(time_delta);
+    }
+    io::Keybinding::allPostUpdate();
+    
+    for(Window* window : Window::windows)
+    {
+        if (window->render_window.isOpen())
+            window->render();
+    }
 }
 
 void Engine::setGameSpeed(float speed)

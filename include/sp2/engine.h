@@ -16,6 +16,9 @@ public:
     virtual ~Engine();
 
     void run();
+
+    void initialize();
+    void update(float time_delta);
     
     void setGameSpeed(float speed);
     float getGameSpeed();
@@ -46,6 +49,7 @@ private:
 #ifdef DEBUG
     bool single_step_enabled = false;
 #endif
+    bool initialized = false;
 };
 
 };//namespace sp
