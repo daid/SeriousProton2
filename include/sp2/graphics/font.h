@@ -33,6 +33,7 @@ protected:
     };
     virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info) = 0;
     virtual float getLineSpacing(int pixel_size) = 0;
+    virtual float getBaseline(int pixel_size) = 0;
     virtual float getKerning(const char* previous, const char* current) = 0;
 };
 
@@ -48,6 +49,7 @@ public:
 protected:
     virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info);
     virtual float getLineSpacing(int pixel_size);
+    virtual float getBaseline(int pixel_size);
     virtual float getKerning(const char* previous, const char* current);
 
 private:
@@ -80,6 +82,7 @@ public:
 protected:
     virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info);
     virtual float getLineSpacing(int pixel_size);
+    virtual float getBaseline(int pixel_size);
     virtual float getKerning(const char* previous, const char* current);
 
 private:

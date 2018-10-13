@@ -198,7 +198,7 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
     case Alignment::Center:
     case Alignment::Right:
         y_offset = (area_size.y - line_spacing * (line_count - 1)) / 2;
-        y_offset -= line_spacing * 0.3;
+        y_offset -= getBaseline(pixel_size) * size_scale * 0.5;
         break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
@@ -420,6 +420,11 @@ float FreetypeFont::getLineSpacing(int pixel_size)
     return float(((FT_Face)ft_face)->size->metrics.height) / float(1 << 6);
 }
 
+float FreetypeFont::getBaseline(int pixel_size)
+{
+    return getLineSpacing(pixel_size) * 0.6;
+}
+
 float FreetypeFont::getKerning(const char* previous, const char* current)
 {
     // Apply the kerning offset
@@ -544,6 +549,11 @@ bool BitmapFont::getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info)
 float BitmapFont::getLineSpacing(int pixel_size)
 {
     return glyph_advance.y * pixel_size;
+}
+
+float BitmapFont::getBaseline(int pixel_size)
+{
+    return getLineSpacing(pixel_size);
 }
 
 float BitmapFont::getKerning(const char* previous, const char* current)
