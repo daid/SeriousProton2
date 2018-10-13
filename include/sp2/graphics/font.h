@@ -19,29 +19,38 @@ public:
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.
         Compare the texture revision to the revision that it initially had to check if the data is still valid or needs to be re-generated.
      */
-    virtual std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment) = 0;
+    std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
     virtual Texture* getTexture(int pixel_size) = 0;
-};
 
-class FreetypeFontTexture;
-class FreetypeFont : public Font
-{
-public:
-    virtual std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
-    virtual Texture* getTexture(int pixel_size);
-
-private:
+protected:
     class GlyphInfo
     {
     public:
         Rect2f uv_rect;
         Rect2f bounds;
         float advance;
+        int consumed_characters;
     };
+    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info) = 0;
+    virtual float getLineSpacing(int pixel_size) = 0;
+    virtual float getKerning(const char* previous, const char* current) = 0;
+};
 
+
+class FreetypeFontTexture;
+class FreetypeFont : public Font
+{
+public:
     FreetypeFont(string name, io::ResourceStreamPtr stream);
     ~FreetypeFont();
 
+    virtual Texture* getTexture(int pixel_size);
+protected:
+    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info);
+    virtual float getLineSpacing(int pixel_size);
+    virtual float getKerning(const char* previous, const char* current);
+
+private:
     string name;
     
     void* ft_library;
@@ -58,29 +67,31 @@ private:
     //As soon as we load a new glyph, the texture becomes invalid and needs to be updated.
     std::unordered_map<int, std::unordered_map<int, GlyphInfo>> loaded_glyphs;
     
-    friend class FontManager;
     friend class FreetypeFontTexture;
 };
 
 class BitmapFont : public Font
 {
 public:
-    virtual std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
-    virtual Texture* getTexture(int pixel_size);
-
-private:
     BitmapFont(string name, io::ResourceStreamPtr stream);
 
+    virtual Texture* getTexture(int pixel_size);
+
+protected:
+    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info);
+    virtual float getLineSpacing(int pixel_size);
+    virtual float getKerning(const char* previous, const char* current);
+
+private:
     string name;
     
     Texture* texture = nullptr;
-    Vector2d glyph_size;
-    Vector2d glyph_advance;
-    std::unordered_map<int, Vector2d> glyphs;
-    std::unordered_map<string, Rect2d> specials;
-    
-    friend class FontManager;
+    Vector2f glyph_size;
+    Vector2f glyph_advance;
+    std::unordered_map<int, Vector2f> glyphs;
+    std::unordered_map<string, Rect2f> specials;
 };
+
 
 };//namespace sp
 
