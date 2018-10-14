@@ -1,6 +1,7 @@
 #include <sp2/graphics/mesh/obj.h>
 #include <sp2/graphics/color.h>
 #include <sp2/graphics/texture.h>
+#include <sp2/graphics/opengl.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/math/matrix4x4.h>
@@ -28,9 +29,9 @@ public:
         texture.loadFromImage(image);
     }
 
-    virtual const sf::Texture* get() override
+    virtual void bind() override
     {
-        return &texture;
+        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
     }
 private:
     sf::Texture texture;

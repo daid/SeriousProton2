@@ -27,6 +27,7 @@ void SceneGraphicsLayer::render(RenderQueue& queue)
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
+        //TOFIX[OpenGL ES 2.0]: glEnableClientState does not exist in OpenGL ES 2.0 (closely linked to MeshData::render)
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);

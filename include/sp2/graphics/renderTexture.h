@@ -24,7 +24,7 @@ public:
     RenderTexture(sp::string name, Vector2i size, bool double_buffered);
     
     //Get the texture for rendering to other targets.
-    virtual const sf::Texture* get() override;
+    virtual void bind() override;
     
     Vector2i getSize() const;
 

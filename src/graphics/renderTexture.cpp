@@ -1,4 +1,6 @@
 #include <sp2/graphics/renderTexture.h>
+#include <sp2/graphics/opengl.h>
+
 
 namespace sp {
 
@@ -18,7 +20,7 @@ RenderTexture::RenderTexture(sp::string name, Vector2i size, bool double_buffere
     flipped = false;
 }
 
-const sf::Texture* RenderTexture::get()
+void RenderTexture::bind()
 {
     int index = 0;
     
@@ -30,7 +32,7 @@ const sf::Texture* RenderTexture::get()
         render_texture[index].display();
         dirty[index] = false;
     }
-    return &render_texture[index].getTexture();
+    glBindTexture(GL_TEXTURE_2D, render_texture[index].getTexture().getNativeHandle());
 }
 
 Vector2i RenderTexture::getSize() const

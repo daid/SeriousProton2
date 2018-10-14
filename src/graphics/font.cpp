@@ -1,5 +1,6 @@
 #include <sp2/graphics/font.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/graphics/opengl.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/assert.h>
 #include <ft2build.h>
@@ -286,9 +287,9 @@ public:
         return info;
     }
 
-    virtual const sf::Texture* get() override
+    virtual void bind() override
     {
-        return &texture;
+        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
     }
 private:
     int findRowFor(Vector2i size)

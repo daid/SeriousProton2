@@ -21,7 +21,7 @@ public:
         Static,
         Dynamic
     };
-    virtual const sf::Texture* get() = 0;
+    virtual void bind() = 0;
     int getRevision() { return revision; }
 protected:
     Texture(Type type, string name)

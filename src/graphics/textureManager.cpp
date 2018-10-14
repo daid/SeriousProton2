@@ -1,6 +1,7 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/io/lazyLoader.h>
 #include <sp2/graphics/image/hq2x.h>
+#include <sp2/graphics/opengl.h>
 #include <string.h>
 
 #include <SFML/Graphics/Texture.hpp>
@@ -59,7 +60,7 @@ public:
         this->image = image;
     }
     
-    virtual const sf::Texture* get() override
+    virtual void bind() override
     {
         std::lock_guard<std::mutex> lock(mutex);
         if (image)
@@ -74,7 +75,7 @@ public:
             image = nullptr;
             revision++;
         }
-        return &texture;
+        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
     }
 private:
     std::mutex mutex;

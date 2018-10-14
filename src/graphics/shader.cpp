@@ -188,7 +188,7 @@ void Shader::setUniform(const string& s, Texture* texture)
     //TODO: This assumes we bind only 1 texture.
     glUniform1i(location, 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture->get()->getNativeHandle());
+    texture->bind();
 }
 
 int Shader::getUniformLocation(const string& s)
