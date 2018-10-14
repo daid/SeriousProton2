@@ -3,9 +3,13 @@
 
 #include <sp2/string.h>
 #include <sp2/nonCopyable.h>
-#include <SFML/Graphics/Texture.hpp>
 #include <thread>
 #include <mutex>
+
+//Forward declare the SFML Texture, so we can pass it by reference to the keybindings, without exposing all SFML stuff.
+namespace sf {
+class Texture;
+};
 
 namespace sp {
 

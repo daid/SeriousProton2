@@ -7,6 +7,8 @@
 #include <json11/json11.hpp>
 #include <fstream>
 
+#include <SFML/Window/Event.hpp>
+
 namespace sp {
 namespace io {
 

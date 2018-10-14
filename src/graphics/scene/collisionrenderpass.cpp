@@ -12,6 +12,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <private/collision/bulletVector.h>
 
+#include <SFML/Window/Keyboard.hpp>
+
 namespace sp {
 
 class Collision2DDebugRender : public b2Draw

@@ -7,7 +7,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <SFML/Graphics/Glsl.hpp>
 
 namespace sp {
 
@@ -359,14 +358,6 @@ public:
             inv[11] * det,
             inv[15] * det
         );
-    }
-    
-    operator sf::Glsl::Mat4() const
-    {
-        float data[16];
-        for(int n=0; n<16; n++)
-            data[n] = this->data[n];
-        return sf::Glsl::Mat4(data);
     }
 };
 

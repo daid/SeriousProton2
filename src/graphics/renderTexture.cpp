@@ -39,7 +39,7 @@ Vector2i RenderTexture::getSize() const
     return Vector2i(size.x, size.y);
 }
 
-sf::RenderTarget& RenderTexture::activateRenderTarget()
+void RenderTexture::activateRenderTarget()
 {
     if (double_buffered)
         flipped = !flipped;
@@ -48,7 +48,6 @@ sf::RenderTarget& RenderTexture::activateRenderTarget()
 
     dirty[index] = true;
     render_texture[index].setActive();
-    return render_texture[index];
 }
 
 };//namespace sp

@@ -3,6 +3,8 @@
 #include <sp2/graphics/image/hq2x.h>
 #include <string.h>
 
+#include <SFML/Graphics/Texture.hpp>
+
 namespace sp {
 
 TextureManager texture_manager;

@@ -29,7 +29,7 @@ public:
     Vector2i getSize() const;
 
     //Active rendering towards this texture.
-    sf::RenderTarget& activateRenderTarget();
+    void activateRenderTarget();
 private:
     bool double_buffered;
     

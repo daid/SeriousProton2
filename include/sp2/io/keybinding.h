@@ -4,7 +4,11 @@
 #include <sp2/string.h>
 #include <sp2/pointerList.h>
 #include <sp2/io/pointer.h>
-#include <SFML/Window/Event.hpp>
+
+//Forward declare the SFML event, so we can pass it by reference to the keybindings, without exposing all SFML stuff.
+namespace sf {
+struct Event;
+};
 
 namespace sp {
 class Engine;

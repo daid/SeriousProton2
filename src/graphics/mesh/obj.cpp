@@ -6,6 +6,7 @@
 #include <sp2/math/matrix4x4.h>
 
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 namespace sp {
 

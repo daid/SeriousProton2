@@ -6,6 +6,8 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
+#include <SFML/Graphics/Texture.hpp>
+
 namespace sp {
 
 std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
