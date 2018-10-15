@@ -4,11 +4,10 @@
 #include <sp2/graphics/texture.h>
 #include <sp2/math/vector.h>
 
-#include <SFML/Graphics/RenderTexture.hpp>
-
 
 namespace sp {
 
+//NOTE: Untested
 class RenderTexture : public Texture
 {
 public:
@@ -22,20 +21,27 @@ public:
             This will effectively create 2 textures, one for reading and writting, and flips the goals around each frame.
      */
     RenderTexture(sp::string name, Vector2i size, bool double_buffered);
+    virtual ~RenderTexture();
     
     //Get the texture for rendering to other targets.
     virtual void bind() override;
     
     Vector2i getSize() const;
 
-    //Active rendering towards this texture.
+    //Active rendering towards this texture, if we are double buffered, this flips the buffers.
     void activateRenderTarget();
 private:
+    void create();
+
     bool double_buffered;
+    Vector2i size;
     
     bool dirty[2];
     bool flipped;
-    sf::RenderTexture render_texture[2];
+    
+    unsigned int frame_buffer[2];
+    unsigned int color_buffer[2];
+    unsigned int depth_buffer[2];
 };
 
 };//namespace sp

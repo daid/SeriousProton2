@@ -9,6 +9,7 @@
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+
 namespace sp {
 
 ObjLoader obj_loader;

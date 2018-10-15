@@ -3,9 +3,7 @@
 #include <sp2/io/resourceProvider.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
-
 #include <sp2/graphics/texture.h>
-#include <SFML/Graphics/Texture.hpp>
 
 
 namespace sp {
