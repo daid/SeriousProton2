@@ -4,8 +4,6 @@
 #include <sp2/graphics/opengl.h>
 #include <string.h>
 
-#include <SFML/Graphics/Texture.hpp>
-
 namespace sp {
 
 TextureManager texture_manager;
@@ -17,9 +15,13 @@ public:
     : Texture(Type::Static, name)
     {
         LOG(Info, "Loading texture:", name);
-        //TODO: Fallback texture
-        texture.setRepeated(true);
-        texture.setSmooth(texture_manager.default_smooth);
+        handle = 0;
+    }
+    
+    virtual ~TextureManagerTexture()
+    {
+        if (handle)
+            glDeleteTextures(1, &handle);
     }
 
     void transferImageFromThread(std::shared_ptr<sp::Image> image)
@@ -66,21 +68,36 @@ public:
         if (image)
         {
             LOG(Info, "Loaded image", name, image->getSize().x, "x", image->getSize().y);
-            sf::Image tmp_image;
-            tmp_image.create(image->getSize().x, image->getSize().y, (const uint8_t*)image->getPtr());
-            if (!texture.loadFromImage(tmp_image))
+
+            if (handle == 0)
             {
-                LOG(Warning, "loadFromImage failed for", name);
+                glGenTextures(1, &handle);
+                glBindTexture(GL_TEXTURE_2D, handle);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_manager.default_smooth ? GL_LINEAR : GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_manager.default_smooth ? GL_LINEAR : GL_NEAREST);
             }
+            else
+            {
+                glBindTexture(GL_TEXTURE_2D, handle);
+            }
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->getSize().x, image->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->getPtr());
+
             image = nullptr;
             revision++;
+            return;
         }
-        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
+        
+        if (handle)
+            glBindTexture(GL_TEXTURE_2D, handle);
+        else
+            glBindTexture(GL_TEXTURE_2D, 0); //TODO: Fallback texture
     }
 private:
     std::mutex mutex;
 
-    sf::Texture texture;
+    unsigned int handle;
     std::shared_ptr<sp::Image> image;
 };
 

@@ -7,7 +7,6 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include <SFML/Graphics/Texture.hpp>
 
 namespace sp {
 
@@ -224,8 +223,14 @@ public:
     FreetypeFontTexture(string name, int pixel_size)
     : Texture(Type::Dynamic, name)
     {
-        texture.create(pixel_size * 16, pixel_size * 16);
-        texture.setSmooth(true);
+        glGenTextures(1, &handle);
+        glBindTexture(GL_TEXTURE_2D, handle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        texture_size = Vector2i(pixel_size * 16, pixel_size * 16);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size.x, texture_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
 
     FreetypeFont::GlyphInfo loadGlyph(FT_Face face, int character)
@@ -273,13 +278,14 @@ public:
                 src_pixels += bitmap.pitch - bitmap.width;
             }
         }
-        texture.update(dst_pixels.data(), bitmap.width, bitmap.rows, rows[row_index].x + 1, rows[row_index].y - 1 - bitmap.rows);
+        
+        glTexSubImage2D(GL_TEXTURE_2D, 0, rows[row_index].x + 1, rows[row_index].y - 1 - bitmap.rows, bitmap.width, bitmap.rows, GL_RGBA, GL_UNSIGNED_BYTE, dst_pixels.data());
         revision++;
         
-        info.uv_rect.position.x = float(rows[row_index].x + 1) / float(texture.getSize().x);
-        info.uv_rect.position.y = float(rows[row_index].y - 1 - bitmap.rows) / float(texture.getSize().y);
-        info.uv_rect.size.x = float(bitmap.width) / float(texture.getSize().x);
-        info.uv_rect.size.y = float(bitmap.rows) / float(texture.getSize().y);
+        info.uv_rect.position.x = float(rows[row_index].x + 1) / float(texture_size.x);
+        info.uv_rect.position.y = float(rows[row_index].y - 1 - bitmap.rows) / float(texture_size.y);
+        info.uv_rect.size.x = float(bitmap.width) / float(texture_size.x);
+        info.uv_rect.size.y = float(bitmap.rows) / float(texture_size.y);
         
         rows[row_index].x += bitmap.width + 2;
         FT_Done_Glyph(glyph);
@@ -289,7 +295,7 @@ public:
 
     virtual void bind() override
     {
-        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
+        glBindTexture(GL_TEXTURE_2D, handle);
     }
 private:
     int findRowFor(Vector2i size)
@@ -300,7 +306,7 @@ private:
             int row_height = rows[index].y - y;
             if (size.y <= row_height && size.y >= row_height / 2)
             {
-                if (rows[index].x + size.x < int(texture.getSize().x))
+                if (rows[index].x + size.x < int(texture_size.x))
                     return index;
             }
             y = rows[index].y;
@@ -309,7 +315,8 @@ private:
         return rows.size() - 1;
     }
 
-    sf::Texture texture;
+    unsigned int handle;
+    Vector2i texture_size;
     std::vector<Vector2i> rows; //Keep track of the bottom and right most pixel of each glyph row.
 };
 
