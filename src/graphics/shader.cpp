@@ -153,6 +153,16 @@ void Shader::setUniform(const string& s, const Matrix4x4d& matrix)
     }
 }
 
+void Shader::setUniform(const string& s, const Vector2f& v)
+{
+    sp2assert(bound_shader == this, "Shader needs to be bound before uniforms can be set");
+
+    int location = getUniformLocation(s);
+    if (location == -1)
+        return;
+    glUniform2fv(location, 1, &v.x);
+}
+
 void Shader::setUniform(const string& s, const Vector3f& v)
 {
     sp2assert(bound_shader == this, "Shader needs to be bound before uniforms can be set");
