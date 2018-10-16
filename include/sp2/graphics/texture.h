@@ -3,13 +3,10 @@
 
 #include <sp2/string.h>
 #include <sp2/nonCopyable.h>
+#include <sp2/graphics/image.h>
 #include <thread>
 #include <mutex>
 
-//Forward declare the SFML Texture, so we can pass it by reference to the keybindings, without exposing all SFML stuff.
-namespace sf {
-class Texture;
-};
 
 namespace sp {
 
@@ -26,10 +23,30 @@ public:
 protected:
     Texture(Type type, string name)
     : type(type), name(name), revision(0) {}
+    virtual ~Texture() {}
 
     Type type;
     string name;
     int revision;
+};
+
+class OpenGLTexture : public Texture
+{
+public:
+    OpenGLTexture(Type type, string name);
+    
+    virtual ~OpenGLTexture();
+    
+    virtual void bind() override;
+
+protected:
+    void setImage(Image&& image);
+    
+private:
+    std::mutex mutex;
+    sp::Image image;
+
+    unsigned int handle;
 };
 
 };//namespace sp

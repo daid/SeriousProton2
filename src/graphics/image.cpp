@@ -28,11 +28,24 @@ Image::Image(Vector2i size)
     pixels.resize(size.x * size.y);
 }
 
+void Image::operator=(Image&& other)
+{
+    pixels = std::move(other.pixels);
+    size = other.size;
+    other.size = Vector2i(0, 0);
+}
+
 void Image::update(Vector2i size, const uint32_t* ptr)
 {
     this->size = size;
     pixels.resize(size.x * size.y);
     memcpy(pixels.data(), ptr, size.x * size.y * sizeof(uint32_t));
+}
+
+void Image::clear()
+{
+    pixels.clear();
+    size = Vector2i(0, 0);
 }
 
 static int stream_read(void *user, char *data, int size)

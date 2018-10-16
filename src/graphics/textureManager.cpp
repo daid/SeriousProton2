@@ -8,23 +8,16 @@ namespace sp {
 
 TextureManager texture_manager;
 
-class TextureManagerTexture : public Texture
+class TextureManagerTexture : public OpenGLTexture
 {
 public:
     TextureManagerTexture(string name)
-    : Texture(Type::Static, name)
+    : OpenGLTexture(Type::Static, name)
     {
         LOG(Info, "Loading texture:", name);
-        handle = 0;
-    }
-    
-    virtual ~TextureManagerTexture()
-    {
-        if (handle)
-            glDeleteTextures(1, &handle);
     }
 
-    void transferImageFromThread(std::shared_ptr<sp::Image> image)
+    void transferImageFromThread(sp::Image&& image)
     {
         if (name.find("#") > 0)
         {
@@ -52,53 +45,14 @@ public:
                         tile_size.x = tile_size.y = stringutil::convert::toInt(keys[n].substr(6));
                 }
                 if (tile_size.x > 0 && tile_size.y > 0)
-                    sp::image::hq2xTiles(*image, tile_size, config);
+                    sp::image::hq2xTiles(image, tile_size, config);
                 else
-                    sp::image::hq2x(*image, config);
+                    sp::image::hq2x(image, config);
             }
         }
 
-        std::lock_guard<std::mutex> lock(mutex);
-        this->image = image;
+        setImage(std::move(image));
     }
-    
-    virtual void bind() override
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        if (image)
-        {
-            LOG(Info, "Loaded image", name, image->getSize().x, "x", image->getSize().y);
-
-            if (handle == 0)
-            {
-                glGenTextures(1, &handle);
-                glBindTexture(GL_TEXTURE_2D, handle);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_manager.default_smooth ? GL_LINEAR : GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_manager.default_smooth ? GL_LINEAR : GL_NEAREST);
-            }
-            else
-            {
-                glBindTexture(GL_TEXTURE_2D, handle);
-            }
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->getSize().x, image->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->getPtr());
-
-            image = nullptr;
-            revision++;
-            return;
-        }
-        
-        if (handle)
-            glBindTexture(GL_TEXTURE_2D, handle);
-        else
-            glBindTexture(GL_TEXTURE_2D, 0); //TODO: Fallback texture
-    }
-private:
-    std::mutex mutex;
-
-    unsigned int handle;
-    std::shared_ptr<sp::Image> image;
 };
 
 TextureManager::TextureManager()
@@ -123,9 +77,9 @@ void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr st
 {
     if (stream)
     {
-        std::shared_ptr<sp::Image> image = std::make_shared<sp::Image>();
-        image->loadFromStream(stream);
-        (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(image);
+        sp::Image image;
+        image.loadFromStream(stream);
+        (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(std::move(image));
     }
 }
 

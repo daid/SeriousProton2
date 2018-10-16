@@ -23,7 +23,7 @@ private:
     
     bool default_smooth;
     
-    friend class TextureManagerTexture;
+    friend class OpenGLTexture;
 };
 extern TextureManager texture_manager;
 

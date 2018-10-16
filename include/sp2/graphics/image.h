@@ -15,8 +15,12 @@ public:
     Image(Image&& other);
     Image(Vector2i size);
     
+    void operator=(Image&& other);
+    
     void update(Vector2i size, const uint32_t* ptr);
     bool loadFromStream(io::ResourceStreamPtr stream);
+    
+    void clear();
     
     Vector2i getSize() const { return size; }
     const uint32_t* getPtr() const { return pixels.data(); }

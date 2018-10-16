@@ -1,13 +1,11 @@
 #include <sp2/graphics/mesh/obj.h>
 #include <sp2/graphics/color.h>
+#include <sp2/graphics/image.h>
 #include <sp2/graphics/texture.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/math/matrix4x4.h>
-
-#include <SFML/Graphics/Image.hpp>
-#include <SFML/Graphics/Texture.hpp>
 
 
 namespace sp {
@@ -21,21 +19,14 @@ public:
     Vector2f uv;
 };
 
-class ObjTexture : public Texture
+class ObjTexture : public OpenGLTexture
 {
 public:
-    ObjTexture(string name, sf::Image& image)
-    : Texture(Type::Static, name)
+    ObjTexture(string name, sp::Image&& image)
+    : OpenGLTexture(Type::Static, name)
     {
-        texture.loadFromImage(image);
+        setImage(std::move(image));
     }
-
-    virtual void bind() override
-    {
-        glBindTexture(GL_TEXTURE_2D, texture.getNativeHandle());
-    }
-private:
-    sf::Texture texture;
 };
 
 std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
@@ -56,7 +47,7 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
     
     std::map<string, MtlData> materials;
     string active_material = "unknown";
-    sf::Image generated_texture;
+    sp::Image generated_texture;
     
     while(stream->tell() < stream->getSize())
     {
@@ -182,15 +173,17 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
             
             if (materials.size() && mode == Mode::DiffuseMaterialColorToTexture)
             {
-                generated_texture.create(materials.size() * 2, 1);
+                uint32_t pixels[materials.size() * 2];
+                
                 int index = 0;
                 for(auto& it : materials)
                 {
-                    generated_texture.setPixel(index * 2, 0, sf::Color(it.second.diffuse.r * 255, it.second.diffuse.g * 255, it.second.diffuse.b * 255));
-                    generated_texture.setPixel(index * 2 + 1, 0, sf::Color(it.second.diffuse.r * 255, it.second.diffuse.g * 255, it.second.diffuse.b * 255));
-                    it.second.uv = Vector2f(float(index * 2 + 1) / float(generated_texture.getSize().x), 0);
+                    pixels[index * 2 + 1] = pixels[index * 2] = uint32_t(it.second.diffuse.r * 255) | (uint32_t(it.second.diffuse.g * 255) << 8) | (uint32_t(it.second.diffuse.b * 255) << 16) | (255 << 24);
+                    it.second.uv = Vector2f(float(index * 2 + 1) / float(materials.size() * 2), 0);
                     index++;
                 }
+                
+                generated_texture.update(Vector2i(materials.size() * 2, 1), pixels);
             }
         }
         else if (line.startswith("usemtl "))
@@ -209,7 +202,7 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
     
     if (mode == Mode::DiffuseMaterialColorToTexture)
     {
-        texture_cache[resource_name] = new ObjTexture(resource_name + ".texture", generated_texture);
+        texture_cache[resource_name] = new ObjTexture(resource_name + ".texture", std::move(generated_texture));
     }
     
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
