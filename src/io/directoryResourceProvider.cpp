@@ -32,7 +32,8 @@ public:
     }
     virtual int64_t seek(int64_t position) override
     {
-        return fseek(f, position, SEEK_SET);
+        fseek(f, position, SEEK_SET);
+        return tell();
     }
     virtual int64_t tell() override
     {
