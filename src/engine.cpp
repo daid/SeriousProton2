@@ -4,21 +4,22 @@
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/opengl.h>
+#include <sp2/audio/audioSource.h>
 #include <sp2/scene/scene.h>
 #include <sp2/multiplayer/server.h>
 #include <sp2/multiplayer/client.h>
 #include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
 
-#include <SFML/Window/Event.hpp>
-#include <SFML/Audio.hpp>
+#include <SDL2/SDL.h>
+
 
 namespace sp {
 
 P<Engine> Engine::engine;
 
 #ifdef DEBUG
-static io::Keybinding single_step_enable("single_step_enable", "Tilde");
+static io::Keybinding single_step_enable("single_step_enable", "`");
 static io::Keybinding single_step_step("single_step_step", "Tab");
 static bool single_step_enabled = false;
 #endif
@@ -36,6 +37,9 @@ Engine::Engine()
     fixed_update_accumulator = 0.0;
     
     in_fixed_update = false;
+    
+    SDL_Init(SDL_INIT_EVERYTHING);
+    atexit(SDL_Quit);
 }
 
 Engine::~Engine()
@@ -49,46 +53,99 @@ void Engine::initialize()
 
     glewInit();
 
-    // By creating a SoundBuffer we force SFML to load the sound subsystem.
-    // Else this is done when the first sound is loaded, causing a delay at that point, which causes a hickup on windows.
-    sf::SoundBuffer forceLoadBuffer;
-    
     sp::multiplayer::ClassEntry::fillMappings();
     
     initialized = true;
+    
+    audio::AudioSource::startAudioSystem();
 }
+
+class Clock
+{
+public:
+    Clock()
+    {
+        start_time = std::chrono::steady_clock::now();
+    }
+    
+    float restart()
+    {
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = now - start_time;
+        start_time = now;
+        return diff.count();
+    }
+    
+    float getElapsedTime()
+    {
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = now - start_time;
+        return diff.count();
+    }
+
+private:
+    std::chrono::steady_clock::time_point start_time;
+};
 
 void Engine::run()
 {
     initialize();
 
-    sf::Clock frame_time_clock;
+    Clock frame_time_clock;
     int fps_count = 0;
-    sf::Clock fps_counter_clock;
+    Clock fps_counter_clock;
     LOG(Info, "Engine started");
     
     while(Window::anyWindowOpen())
     {
-        sf::Event event;
-        for(Window* window : Window::windows)
+        SDL_Event event;
+    
+        while (SDL_PollEvent(&event))
         {
-            while (window->render_window.pollEvent(event))
+            unsigned int window_id = 0;
+            switch(event.type)
             {
-                if (event.type == sf::Event::Closed)
-                    window->render_window.close();
-                window->handleEvent(event);
-                io::Keybinding::handleEvent(event);
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                window_id = event.key.windowID;
+                break;
+            case SDL_MOUSEMOTION:
+                window_id = event.motion.windowID;
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                window_id = event.button.windowID;
+                break;
+            case SDL_MOUSEWHEEL:
+                window_id = event.wheel.windowID;
+                break;
+            case SDL_WINDOWEVENT:
+                window_id = event.window.windowID;
+                break;
+            case SDL_FINGERDOWN:
+            case SDL_FINGERUP:
+            case SDL_FINGERMOTION:
+                window_id = 1;//TODO:SDL, we need to map this to the window with focus.
+                break;
             }
+            if (window_id != 0)
+            {
+                for(auto window : Window::windows)
+                    if (window->render_window && SDL_GetWindowID(window->render_window) == window_id)
+                        window->handleEvent(event);
+            }
+            io::Keybinding::handleEvent(event);
         }
-        float delta = frame_time_clock.restart().asSeconds();
+        
+        float delta = frame_time_clock.restart();
         delta = std::min(maximum_frame_time, delta);
         delta = std::max(minimum_frame_time, delta);
         update(delta);
 
         fps_count++;
-        if (fps_counter_clock.getElapsedTime().asSeconds() > 5.0)
+        if (fps_counter_clock.getElapsedTime() > 5.0)
         {
-            double time = fps_counter_clock.restart().asSeconds();
+            double time = fps_counter_clock.restart();
             current_fps = double(fps_count) / time;
             fps_count = 0;
             LOG(Debug, "FPS:", current_fps);
@@ -146,7 +203,7 @@ void Engine::update(float time_delta)
     
     for(Window* window : Window::windows)
     {
-        if (window->render_window.isOpen())
+        if (window->render_window)
             window->render();
     }
 }
@@ -174,7 +231,7 @@ bool Engine::getPause()
 void Engine::shutdown()
 {
     for(Window* window : Window::windows)
-        window->render_window.close();
+        window->close();
 }
 
 };//namespace sp

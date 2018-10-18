@@ -1,11 +1,13 @@
 #include <sp2/window.h>
+#include <sp2/engine.h>
 #include <sp2/assert.h>
 #include <sp2/logging.h>
 #include <sp2/graphics/graphicslayer.h>
 #include <sp2/graphics/renderTexture.h>
 #include <sp2/graphics/scene/renderqueue.h>
 #include <sp2/graphics/opengl.h>
-#include <SFML/Window/Event.hpp>
+
+#include <SDL2/SDL.h>
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -18,6 +20,8 @@ PList<Window> Window::windows;
 
 Window::Window()
 {
+    sp2assert(Engine::getInstance(), "The sp::Engine needs to be created before the sp::Window is created");
+
     windows.add(this);
     antialiasing = 0;
     fullscreen = false;
@@ -25,6 +29,9 @@ Window::Window()
 
     window_aspect_ratio = 0.0;
     clear_color = Color(0.1, 0.1, 0.1);
+
+    render_window = nullptr;
+    render_context = nullptr;
     
     createRenderWindow();
 }
@@ -56,6 +63,7 @@ Window::Window(Vector2f size_factor, float aspect_ratio)
 
 Window::~Window()
 {
+    close();
 }
 
 void Window::setFullScreen(bool fullscreen)
@@ -71,46 +79,41 @@ void Window::setClearColor(sp::Color color)
 
 void Window::hideCursor()
 {
-    render_window.setMouseCursorVisible(false);
+    SDL_ShowCursor(false); //TODO: This is global and not per window...
     cursor_texture = nullptr;
     cursor_mesh = nullptr;
 }
 
 void Window::setDefaultCursor()
 {
-    render_window.setMouseCursorVisible(true);
+    SDL_ShowCursor(false); //TODO: This is global and not per window...
     cursor_texture = nullptr;
     cursor_mesh = nullptr;
 }
 
 void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
 {
-    render_window.setMouseCursorVisible(false);
+    SDL_ShowCursor(false); //TODO: This is global and not per window...
     cursor_texture = texture;
     cursor_mesh = mesh;
 }
 
 void Window::setPosition(Vector2f position)
 {
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::Vector2u size = render_window.getSize();
+    SDL_Rect rect;
+    SDL_GetDisplayUsableBounds(0, &rect);
 
-#ifdef __WIN32__
-    // Account for window borders. SFML does not have a method to query this.
-    RECT rect = {0, 0, 0, 0};
-    AdjustWindowRectEx(&rect, GetWindowLong((HWND)render_window.getSystemHandle(), GWL_STYLE), false, GetWindowLong((HWND)render_window.getSystemHandle(), GWL_EXSTYLE));
-    size.x += rect.right - rect.left;
-    size.y += rect.bottom - rect.top;
+    Vector2i size;
+    SDL_GetWindowSize(render_window, &size.x, &size.y);
+
+    //GetWindowSize and SetWindowPosition work on the client area, so we need to adjust for borders to ensure borders are on screen.
+    int top, left, bottom, right;
+    SDL_GetWindowBordersSize(render_window, &top, &left, &bottom, &right);
+    LOG(Debug, top, left, bottom, right);
+    size.x += left + right;
+    size.y += top + bottom;
     
-    // Adjust the desktop size for the taskbar.
-    MONITORINFO monitor_info;
-    monitor_info.cbSize = sizeof(monitor_info);
-    GetMonitorInfoA(MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY), &monitor_info);
-    desktop.width = monitor_info.rcWork.right;
-    desktop.height = monitor_info.rcWork.bottom;
-#endif//__WIN32__
-
-    render_window.setPosition(sf::Vector2i((desktop.width - size.x) * position.x, (desktop.height - size.y) * position.y));
+    SDL_SetWindowPosition(render_window, rect.x + left + (rect.w - size.x) * position.x, rect.y + top + (rect.h - size.y) * position.y);
 }
 
 void Window::addLayer(P<GraphicsLayer> layer)
@@ -118,13 +121,24 @@ void Window::addLayer(P<GraphicsLayer> layer)
     graphics_layers.add(layer);
 }
 
+void Window::close()
+{
+    if (render_window)
+    {
+        SDL_DestroyWindow(render_window);
+        SDL_GL_DeleteContext(render_context);
+        render_window = nullptr;
+        render_context = nullptr;
+    }
+}
+
 void Window::createRenderWindow()
 {
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::ContextSettings context_settings(24, 8, antialiasing, 2, 0);
-
-    float window_width = desktop.width;
-    float window_height = desktop.height;
+    SDL_DisplayMode display_mode;
+    SDL_GetDesktopDisplayMode(0, &display_mode);
+    
+    float window_width = display_mode.w;
+    float window_height = display_mode.h;
     if (!fullscreen)
     {
         if (max_window_size_ratio.x != 0.0 && max_window_size_ratio.y != 0.0)
@@ -135,7 +149,7 @@ void Window::createRenderWindow()
         else
         {
             //Make sure the window fits on the screen with some edge around it.
-            while(window_width >= int(desktop.width) || window_height >= int(desktop.height) - 100)
+            while(window_width >= int(display_mode.w) || window_height >= int(display_mode.h) - 100)
             {
                 window_width *= 0.9;
                 window_height *= 0.9;
@@ -150,26 +164,50 @@ void Window::createRenderWindow()
                 window_height = window_width / window_aspect_ratio;
         }
     }
+    
+    close();
 
-    if (fullscreen)
-        render_window.create(sf::VideoMode(window_width, window_height, 32), title, sf::Style::Fullscreen, context_settings);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    
+    if (antialiasing > 1)
+    {
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing);
+    }
     else
-        render_window.create(sf::VideoMode(window_width, window_height, 32), title, sf::Style::Default, context_settings);
-        
-    sf::ContextSettings settings = render_window.getSettings();
-    LOG(Info, "OpenGL version:", settings.majorVersion, settings.minorVersion);
+    {
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+    }
+    
+    int flags = SDL_WINDOW_OPENGL;
+    if (fullscreen)
+        flags |= SDL_WINDOW_FULLSCREEN;
+    render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+    render_context = SDL_GL_CreateContext(render_window);
+    
+    int major_version, minor_version;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
+    LOG(Info, "OpenGL version:", major_version, minor_version);
 
-    render_window.setVerticalSyncEnabled(true);
-    //render_window.setVerticalSyncEnabled(false);
-    //render_window.setFramerateLimit(60);
+    SDL_GL_SetSwapInterval(1);
 
-    render_window.setMouseCursorVisible(true);
-    render_window.setKeyRepeatEnabled(false);
-    render_window.setActive(false);
+    //TODO:SDL? render_window.setMouseCursorVisible(true);
+    //TODO:SDL? render_window.setKeyRepeatEnabled(false);
+    //TODO:SDL? render_window.setActive(false);
 }
 
 void Window::render()
 {
+    Vector2i window_size;
+    SDL_GetWindowSize(render_window, &window_size.x, &window_size.y);
+    
     graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
     });
@@ -184,10 +222,9 @@ void Window::render()
     {
         if (layer->isEnabled())
         {
-            Vector2i size(render_window.getSize().x, render_window.getSize().y);
             if (layer->getTarget())
             {
-                size = layer->getTarget()->getSize();
+                window_size = layer->getTarget()->getSize();
                 queue.add([layer]()
                 {
                     layer->getTarget()->activateRenderTarget();
@@ -196,31 +233,32 @@ void Window::render()
             }
             else
             {
-                queue.add([this, layer]()
+                queue.add([this, layer, window_size]()
                 {
-                    render_window.setActive();
-                    Vector2d size(render_window.getSize().x, render_window.getSize().y);
+                    SDL_GL_MakeCurrent(render_window, render_context);
                     Rect2d viewport = layer->viewport;
-                    glViewport(viewport.position.x * size.x, viewport.position.y * size.y, viewport.size.x * size.x, viewport.size.y * size.y);
+                    glViewport(viewport.position.x * window_size.x, viewport.position.y * window_size.y, viewport.size.x * window_size.x, viewport.size.y * window_size.y);
                 });
             }
             
-            queue.setTargetAspectSize(float(size.x) / float(size.y));
+            queue.setTargetAspectSize(float(window_size.x) / float(window_size.y));
             layer->render(queue);
         }
     }
 
-    if (cursor_mesh && cursor_texture)
+    if (cursor_mesh && cursor_texture && (SDL_GetWindowFlags(render_window) & SDL_WINDOW_MOUSE_FOCUS))
     {
-        queue.add([this]()
+        queue.add([this, window_size]()
         {
-            render_window.setActive();
-            glViewport(0, 0, render_window.getSize().x, render_window.getSize().y);
+            SDL_GL_MakeCurrent(render_window, render_context);
+            glViewport(0, 0, window_size.x, window_size.y);
         });
-        sf::Vector2i mouse_pos = sf::Mouse::getPosition(render_window);
+        
+        Vector2i mouse_pos;
+        SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
     
         Vector2d position(mouse_pos.x, mouse_pos.y);
-        Vector2d window_size(render_window.getSize().x, render_window.getSize().y);
+        Vector2d window_size(window_size.x, window_size.y);
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
         
@@ -234,47 +272,55 @@ void Window::render()
     }
     queue.add([this]()
     {
-        render_window.display();
+        SDL_GL_SwapWindow(render_window);
     });
     
     queue.render();
 }
 
-void Window::handleEvent(const sf::Event& event)
+void Window::handleEvent(const SDL_Event& event)
 {
     switch(event.type)
     {
-    case sf::Event::MouseButtonPressed:
+    case SDL_MOUSEBUTTONDOWN:
         {
             io::Pointer::Button button = io::Pointer::Button::Unknown;
-            switch(event.mouseButton.button)
+            switch(event.button.button)
             {
-            case sf::Mouse::Left: button = io::Pointer::Button::Left; break;
-            case sf::Mouse::Middle: button = io::Pointer::Button::Middle; break;
-            case sf::Mouse::Right: button = io::Pointer::Button::Right; break;
+            case SDL_BUTTON_LEFT: button = io::Pointer::Button::Left; break;
+            case SDL_BUTTON_MIDDLE: button = io::Pointer::Button::Middle; break;
+            case SDL_BUTTON_RIGHT: button = io::Pointer::Button::Right; break;
             default: break;
             }
-            mouse_button_down_mask |= 1 << int(event.mouseButton.button);
-            pointerDown(button, screenToGLPosition(event.mouseButton.x, event.mouseButton.y), -1);
+            mouse_button_down_mask |= 1 << int(event.button.button);
+            pointerDown(button, screenToGLPosition(event.button.x, event.button.y), -1);
         }
         break;
-    case sf::Event::MouseMoved:
+    case SDL_MOUSEMOTION:
         if (mouse_button_down_mask)
-            pointerDrag(screenToGLPosition(event.mouseMove.x, event.mouseMove.y), -1);
+            pointerDrag(screenToGLPosition(event.motion.x, event.motion.y), -1);
         break;
-    case sf::Event::MouseButtonReleased:
-        mouse_button_down_mask &=~(1 << int(event.mouseButton.button));
+    case SDL_MOUSEBUTTONUP:
+        mouse_button_down_mask &=~(1 << int(event.button.button));
         if (!mouse_button_down_mask)
-            pointerUp(screenToGLPosition(event.mouseButton.x, event.mouseButton.y), -1);
+            pointerUp(screenToGLPosition(event.button.x, event.button.y), -1);
         break;
-    case sf::Event::TouchBegan:
-        pointerDown(io::Pointer::Button::Touch, screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
+    case SDL_FINGERDOWN:
+        pointerDown(io::Pointer::Button::Touch, Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
         break;
-    case sf::Event::TouchMoved:
-        pointerDrag(screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
+    case SDL_FINGERMOTION:
+        pointerDrag(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
         break;
-    case sf::Event::TouchEnded:
-        pointerUp(screenToGLPosition(event.touch.x, event.touch.y), event.touch.finger);
+    case SDL_FINGERUP:
+        pointerUp(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
+        break;
+    case SDL_WINDOWEVENT:
+        switch(event.window.event)
+        {
+        case SDL_WINDOWEVENT_CLOSE:
+            close();
+            break;
+        }
         break;
     default:
         break;
@@ -312,7 +358,8 @@ void Window::pointerUp(Vector2d position, int id)
 
 Vector2d Window::screenToGLPosition(int x, int y)
 {
-    sf::Vector2u size = render_window.getSize();
+    Vector2i size;
+    SDL_GetWindowSize(render_window, &size.x, &size.y);
     return Vector2d((double(x) / double(size.x) - 0.5) * 2.0, (0.5 - double(y) / double(size.y)) * 2.0);
 }
 
@@ -320,7 +367,7 @@ bool Window::anyWindowOpen()
 {
     for(Window* window : windows)
     {
-        if (window->render_window.isOpen())
+        if (window->render_window)
         {
             return true;
         }

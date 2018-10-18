@@ -12,7 +12,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <private/collision/bulletVector.h>
 
-#include <SFML/Window/Keyboard.hpp>
+#include <SDL2/SDL_keyboard.h>
+
 
 namespace sp {
 
@@ -186,7 +187,7 @@ void CollisionRenderPass::setCamera(P<Camera> camera)
 
 void CollisionRenderPass::render(RenderQueue& queue)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2))
+    if (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_F2])
     {
         if (!enabled_toggled)
         {

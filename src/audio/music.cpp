@@ -1,7 +1,8 @@
 #include <sp2/audio/music.h>
+#include <sp2/audio/audioSource.h>
 #include <sp2/io/resourceProvider.h>
 
-#include <SFML/Audio.hpp>
+#include <SDL2/SDL_audio.h>
 
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PUSHDATA_API
@@ -11,13 +12,16 @@
 namespace sp {
 namespace audio {
 
-class VorbisSoundStream : public sf::SoundStream
+static int mix_volume = SDL_MIX_MAXVOLUME;
+
+class MusicSource : public AudioSource
 {
 public:
     bool open(io::ResourceStreamPtr stream)
     {
         if (!stream)
             return false;
+        stop();
         if (vorbis)
             stb_vorbis_close(vorbis);
         
@@ -25,33 +29,29 @@ public:
         stream->read(file_data.data(), file_data.size());
         vorbis = stb_vorbis_open_memory(file_data.data(), file_data.size(), nullptr, nullptr);
         if (!vorbis)
+        {
             return false;
-        stb_vorbis_info info = stb_vorbis_get_info(vorbis);
-        sample_buffer.resize(info.sample_rate);
-        initialize(2, info.sample_rate);
+        }
+        //stb_vorbis_info info = stb_vorbis_get_info(vorbis);
+        //TODO, if the vorbis file is not 44100Hz we need to convert the output.
+        start();
         return true;
-    }
-protected:
-    virtual bool onGetData(sf::SoundStream::Chunk& data)
-    {
-        data.samples = &sample_buffer[0];
-        data.sampleCount = stb_vorbis_get_samples_short_interleaved(vorbis, 2, &sample_buffer[0], sample_buffer.size()) * 2;
-        return true;
-    }
-    
-    virtual void onSeek(sf::Time timeOffset)
-    {
-        if (timeOffset.asMicroseconds() == 0)
-            stb_vorbis_seek_start(vorbis);
     }
 
+protected:
+    virtual void onMixSamples(float* stream, int sample_count)
+    {
+        float buffer[sample_count];
+        int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
+        SDL_MixAudio((uint8_t*)stream, (const uint8_t*)&buffer, vorbis_samples * 2 * sizeof(float), mix_volume);
+    }
+    
 private:
     std::vector<uint8_t> file_data;
-    std::vector<int16_t> sample_buffer;
     stb_vorbis* vorbis = nullptr;
 };
 
-static VorbisSoundStream music;
+static MusicSource music_source;
 
 bool Music::play(string resource_name)
 {
@@ -61,23 +61,20 @@ bool Music::play(string resource_name)
         LOG(Error, "Failed to open", resource_name, "to play as music");
         return false;
     }
-    LOG(Info, "Playing music", resource_name);
-    music.stop();
-    if (!music.open(stream))
+    if (!music_source.open(stream))
         return false;
-    music.setLoop(true);
-    music.play();
+    LOG(Info, "Playing music", resource_name);
     return true;
 }
 
 void Music::stop()
 {
-    music.stop();
+    music_source.stop();
 }
     
 void Music::setVolume(float volume)
 {
-    music.setVolume(volume);
+    mix_volume = volume * SDL_MIX_MAXVOLUME / 100;
 }
 
 };//namespace audio

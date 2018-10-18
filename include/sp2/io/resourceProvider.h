@@ -4,7 +4,6 @@
 #include <sp2/string.h>
 #include <sp2/pointer.h>
 #include <sp2/pointerList.h>
-#include <SFML/System/InputStream.hpp>
 #include <memory>
 #include <chrono>
 
@@ -12,10 +11,15 @@
 namespace sp {
 namespace io {
 
-class ResourceStream : public sf::InputStream
+class ResourceStream : public sp::NonCopyable
 {
 public:
     virtual ~ResourceStream() {}
+
+    virtual int64_t read(void* data, int64_t size) = 0;
+    virtual int64_t seek(int64_t position) = 0;
+    virtual int64_t tell() = 0;
+    virtual int64_t getSize() = 0;
     
     string readLine();
     string readAll();

@@ -20,7 +20,7 @@ public:
     {
     }
     
-    virtual sf::Int64 read(void* data, sf::Int64 size)
+    virtual int64_t read(void* data, int64_t size)
     {
         size = std::min(int(resource.size() - offset), int(size));
         memcpy(data, resource.data() + offset, size);
@@ -28,18 +28,18 @@ public:
         return size;
     }
     
-    virtual sf::Int64 seek(sf::Int64 position)
+    virtual int64_t seek(int64_t position)
     {
         offset = std::max(0, std::min(int(resource.size()), int(position)));
         return offset;
     }
     
-    virtual sf::Int64 tell()
+    virtual int64_t tell()
     {
         return offset;
     }
     
-    virtual sf::Int64 getSize()
+    virtual int64_t getSize()
     {
         return resource.size();
     }

@@ -1,5 +1,4 @@
 #include <sp2/io/directoryResourceProvider.h>
-#include <SFML/System/FileInputStream.hpp>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -9,12 +8,14 @@ namespace io {
 
 class FileResourceStream : public ResourceStream
 {
-    sf::FileInputStream stream;
-    bool open_success;
+private:
+    FILE* f;
+    int64_t size;
 public:
     FileResourceStream(string filename)
     {
-        open_success = stream.open(filename);
+        f = fopen(filename.c_str(), "rb");
+        size = -1;
     }
     virtual ~FileResourceStream()
     {
@@ -22,24 +23,31 @@ public:
     
     bool isOpen()
     {
-        return open_success;
+        return f != nullptr;
     }
     
-    virtual sf::Int64 read(void* data, sf::Int64 size)
+    virtual int64_t read(void* data, int64_t size) override
     {
-        return stream.read(data, size);
+        return fread(data, 1, size, f);
     }
-    virtual sf::Int64 seek(sf::Int64 position)
+    virtual int64_t seek(int64_t position) override
     {
-        return stream.seek(position);
+        return fseek(f, position, SEEK_SET);
     }
-    virtual sf::Int64 tell()
+    virtual int64_t tell() override
     {
-        return stream.tell();
+        return ftell(f);
     }
-    virtual sf::Int64 getSize()
+    virtual int64_t getSize() override
     {
-        return stream.getSize();
+        if (size == -1)
+        {
+            int64_t pos = tell();
+            fseek(f, 0, SEEK_END);
+            size = tell();
+            seek(pos);
+        }
+        return size;
     }
 };
 

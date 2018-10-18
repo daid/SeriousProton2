@@ -5,10 +5,8 @@
 #include <sp2/pointerList.h>
 #include <sp2/io/pointer.h>
 
-//Forward declare the SFML event, so we can pass it by reference to the keybindings, without exposing all SFML stuff.
-namespace sf {
-struct Event;
-};
+//Forward declare the event structure, so we can pass it by reference to the keybindings, without exposing all SDL stuff.
+union SDL_Event;
 
 namespace sp {
 class Engine;
@@ -52,16 +50,16 @@ private:
     static void allPostUpdate();
     static void allPostFixedUpdate();
     
-    static void handleEvent(const sf::Event& event);
+    static void handleEvent(const SDL_Event& event);
     static void updateKeys(int key_number, float value);
     
     static PList<Keybinding> keybindings;
     
     static constexpr int type_mask = (0x0f << 16);
-    static constexpr int keyboard_mask = (1 << 16);
-    static constexpr int pointer_mask =  (2 << 16);
-    static constexpr int joystick_button_mask = (3 << 16);
-    static constexpr int joystick_axis_mask = (4 << 16);
+    static constexpr int keyboard_mask = (0x01 << 16);
+    static constexpr int pointer_mask =  (0x02 << 16);
+    static constexpr int joystick_button_mask = (0x03 << 16);
+    static constexpr int joystick_axis_mask = (0x04 << 16);
     
     friend class sp::Engine;
 };

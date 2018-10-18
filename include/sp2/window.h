@@ -1,7 +1,6 @@
 #ifndef SP2_WINDOW_H
 #define SP2_WINDOW_H
 
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <sp2/math/vector.h>
 #include <sp2/pointer.h>
 #include <sp2/pointerList.h>
@@ -12,6 +11,8 @@
 #include <map>
 #include <memory>
 
+struct SDL_Window;
+union SDL_Event;
 
 namespace sp {
 namespace io { class Clipboard; }
@@ -35,15 +36,18 @@ public:
     void setPosition(Vector2f position);
     
     void addLayer(P<GraphicsLayer> layer);
+    
+    void close();
 private:
-    sf::RenderWindow render_window;
+    SDL_Window* render_window;
+    void* render_context;
     RenderQueue queue;
 
     virtual ~Window();
     
     void createRenderWindow();
     void render();
-    void handleEvent(const sf::Event& event);
+    void handleEvent(const SDL_Event& event);
     void pointerDown(io::Pointer::Button button, Vector2d position, int id);
     void pointerDrag(Vector2d position, int id);
     void pointerUp(Vector2d position, int id);
