@@ -19,9 +19,9 @@ public:
 
     void* address;
     string module;
-    int module_offset;
+    int64_t module_offset;
     string symbol;
-    int symbol_offset;
+    int64_t symbol_offset;
 
     string source_file;
     int source_line;

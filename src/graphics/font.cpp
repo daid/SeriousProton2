@@ -323,7 +323,7 @@ private:
 static unsigned long ft_stream_read(FT_Stream rec, unsigned long offset, unsigned char* buffer, unsigned long count)
 {
     io::ResourceStreamPtr& stream = *static_cast<io::ResourceStreamPtr*>(rec->descriptor.pointer);
-    if (stream->seek(offset) == offset)
+    if (stream->seek(offset) == int64_t(offset))
     {
         if (count > 0)
             return stream->read(reinterpret_cast<char*>(buffer), count);
