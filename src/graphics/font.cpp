@@ -279,6 +279,7 @@ public:
             }
         }
         
+        glBindTexture(GL_TEXTURE_2D, handle);
         glTexSubImage2D(GL_TEXTURE_2D, 0, rows[row_index].x + 1, rows[row_index].y - 1 - bitmap.rows, bitmap.width, bitmap.rows, GL_RGBA, GL_UNSIGNED_BYTE, dst_pixels.data());
         revision++;
         
