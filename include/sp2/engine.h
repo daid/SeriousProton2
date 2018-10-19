@@ -18,7 +18,7 @@ public:
         float fixed_update;
         float dynamic_update;
         float render;
-    };
+    } last_update_timing;
 
     Engine();
     virtual ~Engine();

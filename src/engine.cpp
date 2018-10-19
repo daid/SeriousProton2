@@ -156,6 +156,9 @@ void Engine::run()
 
 void Engine::update(float time_delta)
 {
+    UpdateTiming timing;
+    Clock timing_clock;
+    
     time_delta *= game_speed;
     if (paused)
         time_delta = 0;
@@ -190,6 +193,7 @@ void Engine::update(float time_delta)
         if (scene->isEnabled())
             scene->postFixedUpdate(fixed_update_accumulator);
     }
+    timing.fixed_update = timing_clock.restart();
     for(Scene* scene : Scene::all())
     {
         if (scene->isEnabled())
@@ -200,12 +204,15 @@ void Engine::update(float time_delta)
         updatable->onUpdate(time_delta);
     }
     io::Keybinding::allPostUpdate();
+    timing.dynamic_update = timing_clock.restart();
 
     for(Window* window : Window::windows)
     {
         if (window->render_window)
             window->render();
     }
+    timing.render = timing_clock.restart();
+    last_update_timing = timing;
 }
 
 void Engine::setGameSpeed(float speed)
