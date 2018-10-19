@@ -14,11 +14,9 @@ namespace io {
 
 PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 
-Keybinding::Keybinding(string name, string default_key)
+Keybinding::Keybinding(string name)
 : name(name), label(name)
 {
-    setKey(default_key);
-    
     value = 0.0;
     down_event = false;
     up_event = false;
@@ -30,10 +28,27 @@ Keybinding::Keybinding(string name, string default_key)
     keybindings.add(this);
 }
 
+Keybinding::Keybinding(string name, string default_key)
+: Keybinding(name)
+{
+    addKey(default_key);
+}
+
+Keybinding::Keybinding(string name, string default_key, string alternative_default_key)
+: Keybinding(name)
+{
+    addKey(default_key);
+    addKey(alternative_default_key);
+}
+
 void Keybinding::setKey(string key)
 {
-    key_number = -1;
-    
+    key_number.clear();
+    addKey(key);
+}
+
+void Keybinding::addKey(string key)
+{
     //Format for joystick keys:
     //joy:[joystick_id]:axis:[axis_id]
     //joy:[joystick_id]:button:[button_id]
@@ -45,31 +60,41 @@ void Keybinding::setKey(string key)
             int joystick_id = stringutil::convert::toInt(parts[1]);
             int axis_button_id = stringutil::convert::toInt(parts[3]);
             if (parts[2] == "axis")
-                key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask;
+                key_number.push_back(int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask);
             else if (parts[2] == "button")
-                key_number = int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask;
+                key_number.push_back(int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask);
             else
                 LOG(Warning, "Unknown joystick binding:", key);
         }
         return;
     }
 
-    
     SDL_Keycode code = SDL_GetKeyFromName(key.c_str());
     if (code != SDLK_UNKNOWN)
-        key_number = (code | keyboard_mask);
+        key_number.push_back(code | keyboard_mask);
+    else
+        LOG(Warning, "Unknown key binding:", key);
 }
 
-string Keybinding::getKey()
+void Keybinding::clearKeys()
 {
-    switch(key_number & type_mask)
+    key_number.clear();
+}
+
+string Keybinding::getKey(int index)
+{
+    if (index >= 0 && index < int(key_number.size()))
     {
-    case keyboard_mask:
-        return SDL_GetKeyName(key_number & ~type_mask);
-    case joystick_axis_mask:
-        return "joy:" + string((key_number >> 8) & 0xff) + ":axis:" + string(key_number & 0xff);
-    case joystick_button_mask:
-        return "joy:" + string((key_number >> 8) & 0xff) + ":button:" + string(key_number & 0xff);
+        int key = key_number[index];
+        switch(key & type_mask)
+        {
+        case keyboard_mask:
+            return SDL_GetKeyName(key & ~type_mask);
+        case joystick_axis_mask:
+            return "joy:" + string((key >> 8) & 0xff) + ":axis:" + string(key & 0xff);
+        case joystick_button_mask:
+            return "joy:" + string((key >> 8) & 0xff) + ":button:" + string(key & 0xff);
+        }
     }
     return "Unknown";
 }
@@ -122,9 +147,22 @@ void Keybinding::loadKeybindings(const string& filename)
         if (!entry.is_object())
             continue;
         if (entry["key"].is_string())
+        {
             keybinding->setKey(entry["key"].string_value());
+        }
+        else if (entry["key"].is_array())
+        {
+            keybinding->clearKeys();
+            for(auto key_entry : entry["key"].array_items())
+            {
+                if (key_entry.is_string())
+                    keybinding->addKey(key_entry.string_value());
+            }
+        }
         else
-            keybinding->key_number = -1;
+        {
+            keybinding->key_number.clear();
+        }
     }
 }
 
@@ -134,8 +172,10 @@ void Keybinding::saveKeybindings(const string& filename)
     for(Keybinding* keybinding : keybindings)
     {
         json11::Json::object data;
-        if (keybinding->key_number != -1)
-            data["key"] = keybinding->getKey().c_str();
+        json11::Json::array keys;
+        for(unsigned int index=0; index<keybinding->key_number.size(); index++)
+            keys.push_back(keybinding->getKey(index).c_str());
+        data["key"] = keys;
         obj[keybinding->name] = data;
     }
     json11::Json json = obj;
@@ -253,7 +293,7 @@ void Keybinding::handleEvent(const SDL_Event& event)
         {
             //Focus lost, release all keys.
             for(Keybinding* key : keybindings)
-                if (key->key_number != -1)
+                if (key->key_number.size() > 0)
                     key->setValue(0.0);
         }
         break;
@@ -265,8 +305,9 @@ void Keybinding::handleEvent(const SDL_Event& event)
 void Keybinding::updateKeys(int key_number, float value)
 {
     for(Keybinding* key : keybindings)
-        if (key->key_number == key_number)
-            key->setValue(value);
+        for(int key_nr : key->key_number)
+            if (key_nr == key_number)
+                key->setValue(value);
 }
 
 };//namespace io

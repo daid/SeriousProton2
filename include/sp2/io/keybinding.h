@@ -16,13 +16,17 @@ namespace io {
 class Keybinding : public AutoPointerObject
 {
 public:
-    Keybinding(string name, string default_key = "");
+    Keybinding(string name);
+    Keybinding(string name, string default_key);
+    Keybinding(string name, string default_key, string alternative_default_key);
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
     
     void setKey(string key);
-    string getKey();
+    string getKey(int index);
+    void addKey(string key);
+    void clearKeys();
     
     bool get() const; //True when this key is currently being pressed.
     bool getDown() const; //True for 1 update cycle when the key is pressed.
@@ -34,8 +38,8 @@ public:
 private:
     string name;
     string label;
-    
-    int key_number;
+
+    std::vector<int> key_number;
 
     float value;
     bool down_event;
