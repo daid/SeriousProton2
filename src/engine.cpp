@@ -200,7 +200,7 @@ void Engine::update(float time_delta)
         updatable->onUpdate(time_delta);
     }
     io::Keybinding::allPostUpdate();
-    
+
     for(Window* window : Window::windows)
     {
         if (window->render_window)

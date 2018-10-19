@@ -81,6 +81,11 @@ void Keybinding::clearKeys()
     key_number.clear();
 }
 
+bool Keybinding::isBound()
+{
+    return key_number.size() > 0;
+}
+
 string Keybinding::getKey(int index)
 {
     if (index >= 0 && index < int(key_number.size()))

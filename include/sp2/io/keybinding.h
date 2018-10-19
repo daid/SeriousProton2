@@ -28,10 +28,12 @@ public:
     void addKey(string key);
     void clearKeys();
     
+    bool isBound();
+    
     bool get() const; //True when this key is currently being pressed.
     bool getDown() const; //True for 1 update cycle when the key is pressed.
     bool getUp() const; //True for 1 update cycle when the key is released.
-    float getValue() const;
+    float getValue() const; //Returns a value in the range -1 to 1 for this keybinding. On keyboard keys this is always 0 or 1, but for joysticks this can be anywhere in the range -1.0 to 1.0
     
     static void loadKeybindings(const string& filename);
     static void saveKeybindings(const string& filename);
