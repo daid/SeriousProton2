@@ -109,7 +109,6 @@ void Window::setPosition(Vector2f position)
     //GetWindowSize and SetWindowPosition work on the client area, so we need to adjust for borders to ensure borders are on screen.
     int top, left, bottom, right;
     SDL_GetWindowBordersSize(render_window, &top, &left, &bottom, &right);
-    LOG(Debug, top, left, bottom, right);
     size.x += left + right;
     size.y += top + bottom;
     

@@ -19,6 +19,8 @@ public:
     }
     virtual ~FileResourceStream()
     {
+        if (f)
+            fclose(f);
     }
     
     bool isOpen()

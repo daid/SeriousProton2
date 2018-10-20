@@ -91,7 +91,6 @@ void Sound::play(string resource_name)
         uint32_t buffer_size = 0;
         if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
         {
-            LOG(Debug, buffer_size, int(spec.channels), spec.freq);
             SDL_AudioCVT cvt;
             SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 44100);
             if (cvt.needed)

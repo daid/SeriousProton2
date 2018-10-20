@@ -31,9 +31,6 @@ Scene::Scene(Vector2d size, Direction fixed_direction, string scene_name, int pr
 
 bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
 {
-    Plane3d plane(Vector3d(0, 0, 1), 1.0);
-    Vector3d tmp = plane.intersect(ray);
-    LOG(Debug, tmp, ray);
     Vector2d position(ray.end.x, ray.end.y);
     P<Widget> w = root_widget->getWidgetAt<Widget>(position);
     while(w)
