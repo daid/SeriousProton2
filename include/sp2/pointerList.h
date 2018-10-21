@@ -71,12 +71,14 @@ public:
         else
         {
             this->list = nullptr;
+            this->entry = nullptr;
         }
     }
     
     _PListIteratorBase()
     {
         this->list = nullptr;
+        this->entry = nullptr;
     }
     
     _PListIteratorBase(const _PListIteratorBase& other)
@@ -100,9 +102,14 @@ public:
         removeFromList();
     }
 
+    bool operator==(const _PListIteratorBase& i) const
+    {
+        return list == i.list && entry == i.entry;
+    }
+
     bool operator!=(const _PListIteratorBase& i) const
     {
-        return list != i.list;
+        return list != i.list || entry != i.entry;
     }
     
     void operator++()
@@ -156,12 +163,14 @@ public:
         else
         {
             this->list = nullptr;
+            this->entry = nullptr;
         }
     }
     
     _PListReverseIteratorBase()
     {
         this->list = nullptr;
+        this->entry = nullptr;
     }
     
     _PListReverseIteratorBase(const _PListReverseIteratorBase& other)
@@ -185,9 +194,14 @@ public:
         removeFromList();
     }
 
+    bool operator==(const _PListReverseIteratorBase& i) const
+    {
+        return list == i.list && entry == i.entry;
+    }
+
     bool operator!=(const _PListReverseIteratorBase& i) const
     {
-        return list != i.list;
+        return list != i.list || entry != i.entry;
     }
     
     void operator++()

@@ -24,6 +24,7 @@ public:
     const string& getLabel() const { return label; }
     
     void setKey(string key);
+    void setKeys(string key1, string key2);
     string getKey(int index);
     void addKey(string key);
     void clearKeys();

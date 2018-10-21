@@ -47,6 +47,12 @@ void Keybinding::setKey(string key)
     addKey(key);
 }
 
+void Keybinding::setKeys(string key1, string key2)
+{
+    setKey(key1);
+    addKey(key2);
+}
+
 void Keybinding::addKey(string key)
 {
     //Format for joystick keys:
