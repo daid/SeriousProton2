@@ -83,7 +83,7 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
         {
             std::vector<string> parts = line.split();
             if (parts.size() > 2)
-                vt_list.emplace_back(stringutil::convert::toFloat(parts[1]), stringutil::convert::toFloat(parts[2]));
+                vt_list.emplace_back(stringutil::convert::toFloat(parts[1]), -stringutil::convert::toFloat(parts[2]));
             else if (parts.size() > 1)
                 vt_list.emplace_back(stringutil::convert::toFloat(parts[1]), 0.0);
             else
@@ -204,7 +204,6 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
     {
         texture_cache[resource_name] = new ObjTexture(resource_name + ".texture", std::move(generated_texture));
     }
-    
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
