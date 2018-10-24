@@ -261,13 +261,13 @@ void Window::render()
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
         
-        queue.setCamera(Matrix4x4d::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4d::identity());
+        queue.setCamera(Matrix4x4f::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4f::identity());
         RenderData rd;
         rd.type = RenderData::Type::Normal;
         rd.shader = Shader::get("internal:basic.shader");
         rd.mesh = cursor_mesh;
         rd.texture = cursor_texture;
-        queue.add(Matrix4x4d::translate(position.x, position.y, 0), rd);
+        queue.add(Matrix4x4f::translate(position.x, position.y, 0), rd);
     }
     queue.add([this]()
     {

@@ -73,8 +73,8 @@ public:
     Vector3d getLinearVelocity3D();
     Vector3d getAngularVelocity3D();
     
-    const Matrix4x4d& getGlobalTransform() const { return global_transform; }
-    const Matrix4x4d& getLocalTransform() const { return local_transform; }
+    const Matrix4x4f& getGlobalTransform() const { return global_transform; }
+    const Matrix4x4f& getLocalTransform() const { return local_transform; }
 
     //Set or replace the current collision shape on this body.
     //If you want to shape change, you do not need to call removeCollisionShape() before calling setCollisionShape (doing so will reset the velocity)
@@ -139,8 +139,8 @@ private:
     Vector3d translation;
     Quaterniond rotation;
     
-    Matrix4x4d global_transform;
-    Matrix4x4d local_transform;
+    Matrix4x4f global_transform;
+    Matrix4x4f local_transform;
 
     std::unique_ptr<Animation> animation;
     

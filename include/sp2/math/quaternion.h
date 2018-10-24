@@ -18,6 +18,11 @@ public:
     Quaternion(T x, T y, T z, T w)
     : x(x), y(y), z(z), w(w)
     {}
+
+    template <typename T2> explicit inline Quaternion(const Quaternion<T2>& q)
+    : x(q.x), y(q.y), z(q.z), w(q.w)
+    {
+    }
     
     Quaternion operator*(const Quaternion& q) const
     {

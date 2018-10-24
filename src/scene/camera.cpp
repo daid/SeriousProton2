@@ -32,34 +32,34 @@ void Camera::setAspectRatio(double ratio)
     switch(type)
     {
     case Type::OrtographicVertical:
-        setProjectionMatrix(Matrix4x4d::ortho(-ratio * view_distance, ratio * view_distance, -view_distance, view_distance, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-ratio * view_distance, ratio * view_distance, -view_distance, view_distance, -view_distance, view_distance));
         break;
     case Type::OrtographicHorizontal:
-        setProjectionMatrix(Matrix4x4d::ortho(-view_distance, view_distance, -view_distance / ratio, view_distance / ratio, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-view_distance, view_distance, -view_distance / ratio, view_distance / ratio, -view_distance, view_distance));
         break;
     case Type::Perspective:
-        setProjectionMatrix(Matrix4x4d::perspective(field_of_view, ratio, 1.0f, view_distance));
+        setProjectionMatrix(Matrix4x4f::perspective(field_of_view, ratio, 1.0f, view_distance));
         break;
     }
 }
 
-sp::Vector2d Camera::screenToWorld(sp::Vector2f position)
+Vector2d Camera::screenToWorld(Vector2f position)
 {
     //First transform the screen pixel coordinates into -1 to 1 coordinates to match OpenGL screen space.
-    sp::Vector2d screen_position_normalized = sp::Vector2d(position) * 2.0 - sp::Vector2d(1, 1);
+    Vector2f screen_position_normalized = position * 2.0f - Vector2f(1, 1);
     screen_position_normalized.y = -screen_position_normalized.y;
     //Then apply our inversed projection matrix to go from screen coordinates to world coordinates relative to the camera
-    sp::Vector2d world_position = projection_matrix.inverse() * screen_position_normalized;
+    Vector2f world_position = projection_matrix.inverse() * screen_position_normalized;
     //Finally apply our own matrix to transform this into global space.
-    return getLocalPoint2D(world_position);
+    return getLocalPoint2D(Vector2d(world_position));
 }
 
-sp::Vector2f Camera::worldToScreen(sp::Vector2d position)
+Vector2f Camera::worldToScreen(Vector2d position)
 {
-    sp::Vector2d world_position = getLocalTransform().inverse() * position;
-    sp::Vector2d screen_position_normalized = projection_matrix * world_position;
+    Vector2f world_position = getLocalTransform().inverse() * Vector2f(position);
+    Vector2f screen_position_normalized = projection_matrix * world_position;
     screen_position_normalized.y = -screen_position_normalized.y;
-    return (sp::Vector2f(screen_position_normalized) + sp::Vector2f(1, 1)) / 2.0f;
+    return (screen_position_normalized + Vector2f(1, 1)) / 2.0f;
 }
 
 };//namespace sp

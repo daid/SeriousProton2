@@ -239,7 +239,7 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
             render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(1, 1, 1, 0.25);
-            queue.add(Matrix4x4d::identity(), render_data);
+            queue.add(Matrix4x4f::identity(), render_data);
         }
 
         if (scene->collision_world3d)
@@ -261,7 +261,7 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
             render_data.type = RenderData::Type::Normal;
             render_data.mesh = mesh;
             render_data.color = Color(1, 1, 1, 0.25);
-            queue.add(Matrix4x4d::identity(), render_data);
+            queue.add(Matrix4x4f::identity(), render_data);
         }
     }
 }

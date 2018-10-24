@@ -113,7 +113,7 @@ void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, Node* node)
 Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position)
 {
     const auto mat = camera->getGlobalTransform() * camera->getProjectionMatrix().inverse();
-    return Ray3d(mat * Vector3d(position.x, position.y, 0), mat * Vector3d(position.x, position.y, -1));
+    return Ray3d(Vector3d(mat * Vector3f(position.x, position.y, 0)), Vector3d(mat * Vector3f(position.x, position.y, -1)));
 }
 
 void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, Node* node)

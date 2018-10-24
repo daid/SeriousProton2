@@ -20,12 +20,12 @@ public:
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
     
     void setAspectRatio(double ratio);
-    const sp::Matrix4x4d& getProjectionMatrix() { return projection_matrix; }
+    const sp::Matrix4x4f& getProjectionMatrix() { return projection_matrix; }
 
     sp::Vector2f worldToScreen(sp::Vector2d position);
     sp::Vector2d screenToWorld(sp::Vector2f position);
 protected:
-    void setProjectionMatrix(const sp::Matrix4x4d& matrix) { projection_matrix = matrix; }
+    void setProjectionMatrix(const sp::Matrix4x4f& matrix) { projection_matrix = matrix; }
 
     enum class Type
     {
@@ -37,7 +37,7 @@ private:
     Type type;
     double field_of_view;
     double view_distance;
-    sp::Matrix4x4d projection_matrix;
+    sp::Matrix4x4f projection_matrix;
 };
 
 };//namespace sp

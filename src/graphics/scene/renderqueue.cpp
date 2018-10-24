@@ -37,7 +37,7 @@ void RenderQueue::setCamera(P<Camera> camera)
     setCamera(camera->getProjectionMatrix(), camera->getGlobalTransform().inverse());
 }
 
-void RenderQueue::setCamera(const Matrix4x4d& camera_projection, const Matrix4x4d& camera_transform)
+void RenderQueue::setCamera(const Matrix4x4f& camera_projection, const Matrix4x4f& camera_transform)
 {
     std::sort(render_list.begin() + render_list_sort_start, render_list.end());
     render_list.emplace_back(Item::Type::CameraProjection, camera_projection);
@@ -52,7 +52,7 @@ void RenderQueue::add(std::function<void()> function)
     render_list_sort_start = render_list.size();
 }
 
-void RenderQueue::add(const Matrix4x4d& transform, const RenderData& data)
+void RenderQueue::add(const Matrix4x4f& transform, const RenderData& data)
 {
     if (!data.shader)
         return;

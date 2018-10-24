@@ -24,7 +24,7 @@ Node::Node(P<Node> parent)
     scene = parent->scene;
     parent->children.add(this);
     
-    local_transform = Matrix4x4d::identity();
+    local_transform = Matrix4x4f::identity();
     updateGlobalTransform();
 }
 
@@ -34,8 +34,8 @@ Node::Node(Scene* scene)
     collision_body2d = nullptr;
     parent = nullptr;
     
-    global_transform = Matrix4x4d::identity();
-    local_transform = Matrix4x4d::identity();
+    global_transform = Matrix4x4f::identity();
+    local_transform = Matrix4x4f::identity();
 }
 
 Node::~Node()
@@ -188,22 +188,22 @@ double Node::getRotation2D()
 
 Vector2d Node::getGlobalPosition2D()
 {
-    return global_transform * Vector2d(0, 0);
+    return Vector2d(global_transform * Vector2f(0, 0));
 }
 
 double Node::getGlobalRotation2D()
 {
-    return global_transform.applyDirection(Vector2d(1, 0)).angle();
+    return global_transform.applyDirection(Vector2f(1, 0)).angle();
 }
 
 Vector2d Node::getLocalPoint2D(Vector2d v)
 {
-    return local_transform * v;
+    return Vector2d(local_transform * Vector2f(v));
 }
 
-sp::Vector2d Node::getGlobalPoint2D(sp::Vector2d v)
+Vector2d Node::getGlobalPoint2D(Vector2d v)
 {
-    return global_transform * v;
+    return Vector2d(global_transform * Vector2f(v));
 }
 
 sp::Vector2d Node::getLinearVelocity2D()
@@ -237,12 +237,12 @@ Quaterniond Node::getRotation3D()
 
 Vector3d Node::getGlobalPosition3D()
 {
-    return global_transform * Vector3d(0, 0, 0);
+    return Vector3d(global_transform * Vector3f(0, 0, 0));
 }
 
 Vector3d Node::getGlobalPoint3D(Vector3d v)
 {
-    return global_transform * v;
+    return Vector3d(global_transform * Vector3f(v));
 }
 
 Vector3d Node::getLinearVelocity3D()
@@ -323,13 +323,13 @@ int Node::animationGetFlags()
 
 void Node::updateLocalTransform()
 {
-    local_transform = Matrix4x4d::translate(translation) * Matrix4x4d::fromQuaternion(rotation);
+    local_transform = Matrix4x4f::translate(Vector3f(translation)) * Matrix4x4f::fromQuaternion(Quaternionf(rotation));
     updateGlobalTransform();
 }
 
 void Node::updateGlobalTransform()
 {
-    if (parent)
+    if (parent && parent != scene->getRoot())
         global_transform = parent->global_transform * local_transform;
     else
         global_transform = local_transform;

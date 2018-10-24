@@ -109,7 +109,7 @@ public:
         );
     }
 
-    static Matrix4x4 translate(Vector3<T>& v)
+    static Matrix4x4 translate(const Vector3<T>& v)
     {
         return Matrix4x4(
             1, 0, 0, v.x,

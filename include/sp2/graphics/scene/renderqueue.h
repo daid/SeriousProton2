@@ -22,9 +22,9 @@ public:
     void setTargetAspectSize(float aspect_ratio);
     void setAspectRatio(float aspect_ratio);
     void setCamera(P<Camera> camera);
-    void setCamera(const Matrix4x4d& camera_projection, const Matrix4x4d& camera_transform);
+    void setCamera(const Matrix4x4f& camera_projection, const Matrix4x4f& camera_transform);
     void add(std::function<void()> function);
-    void add(const Matrix4x4d& transform, const RenderData& data);
+    void add(const Matrix4x4f& transform, const RenderData& data);
     void render();
 private:
     class Item
@@ -38,12 +38,12 @@ private:
             FunctionCall,
         };
     
-        Item(Type type, const Matrix4x4d& transform)
+        Item(Type type, const Matrix4x4f& transform)
         : type(type), transform(transform)
         {
         }
 
-        Item(const Matrix4x4d& transform, const RenderData& data)
+        Item(const Matrix4x4f& transform, const RenderData& data)
         : type(Type::RenderItem), transform(transform), data(data)
         {
         }
@@ -59,15 +59,15 @@ private:
         }
 
         Type type;
-        Matrix4x4d transform;
+        Matrix4x4f transform;
         RenderData data;
         std::function<void()> function;
     };
 
     void render(std::vector<Item>& list);
 
-    Matrix4x4d camera_projection;
-    Matrix4x4d camera_transform;
+    Matrix4x4f camera_projection;
+    Matrix4x4f camera_transform;
     std::vector<Item> render_list;
     int render_list_sort_start;
     
