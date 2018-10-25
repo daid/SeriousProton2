@@ -195,6 +195,7 @@ void Window::createRenderWindow()
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
     LOG(Info, "OpenGL version:", major_version, minor_version);
 
+    //Enable VSync.
     SDL_GL_SetSwapInterval(1);
 
     //TODO:SDL? render_window.setMouseCursorVisible(true);

@@ -75,12 +75,12 @@ bool Shader::bind()
 
         unsigned int vertex_shader_handle = compileShader(&vertex_shader[0], GL_VERTEX_SHADER);
         if (!vertex_shader_handle)
-            return;
+            return false;
         unsigned int fragment_shader_handle = compileShader(&fragment_shader[0], GL_FRAGMENT_SHADER);
         if (!fragment_shader_handle)
         {
             glDeleteShader(vertex_shader_handle);
-            return;
+            return false;
         }
         glLinkProgram(program);
         int success;
@@ -94,7 +94,7 @@ bool Shader::bind()
             glDeleteShader(vertex_shader_handle);
             glDeleteShader(fragment_shader_handle);
             program = 0;
-            return;
+            return false;
         }
         glDetachShader(program, vertex_shader_handle);
         glDetachShader(program, fragment_shader_handle);
