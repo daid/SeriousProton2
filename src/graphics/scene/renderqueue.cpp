@@ -99,15 +99,18 @@ void RenderQueue::renderThread()
 
 void RenderQueue::render(std::vector<Item>& list)
 {
+    bool force_camera_matrix_update = false;
     for(Item& item : list)
     {
         switch(item.type)
         {
         case Item::Type::CameraProjection:
             camera_projection = item.transform;
+            force_camera_matrix_update = true;
             break;
         case Item::Type::CameraTransform:
             camera_transform = item.transform;
+            force_camera_matrix_update = true;
             break;
         case Item::Type::FunctionCall:
             item.function();
@@ -126,9 +129,12 @@ void RenderQueue::render(std::vector<Item>& list)
             }
             if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
                 glDepthMask(false);
-            item.data.shader->bind();
-            item.data.shader->setUniform("projection_matrix", camera_projection);
-            item.data.shader->setUniform("camera_matrix", camera_transform);
+            if (item.data.shader->bind() || force_camera_matrix_update)
+            {
+                item.data.shader->setUniform("projection_matrix", camera_projection);
+                item.data.shader->setUniform("camera_matrix", camera_transform);
+                force_camera_matrix_update = false;
+            }
             item.data.shader->setUniform("object_matrix", item.transform);
             item.data.shader->setUniform("object_scale", item.data.scale);
             item.data.shader->setUniform("color", item.data.color);

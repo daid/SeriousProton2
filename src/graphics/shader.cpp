@@ -62,8 +62,11 @@ Shader::Shader(string name, string&& vertex_shader, string&& fragment_shader)
     program = 0xffffffff;
 }
 
-void Shader::bind()
+bool Shader::bind()
 {
+    if (bound_shader == this)
+        return false;
+
     bound_shader = this;
 
     if (program == 0xffffffff)
@@ -100,6 +103,7 @@ void Shader::bind()
     }
 
     glUseProgram(program);
+    return true;
 }
 
 unsigned int Shader::compileShader(const char* code, int type)
