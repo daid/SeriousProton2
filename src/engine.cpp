@@ -125,7 +125,7 @@ void Engine::run()
             case SDL_FINGERDOWN:
             case SDL_FINGERUP:
             case SDL_FINGERMOTION:
-                window_id = 1;//TODO:SDL, we need to map this to the window with focus.
+                window_id = SDL_GetWindowID(SDL_GetMouseFocus());
                 break;
             }
             if (window_id != 0)
