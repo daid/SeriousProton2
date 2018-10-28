@@ -10,7 +10,7 @@
 
 namespace sp {
 
-template<typename T> class Matrix4x4 : public Matrix<T, 4>
+template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type> class Matrix4x4 : public Matrix<T, 4>
 {
 protected:
     template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Matrix4x4(Matrix<U, 4> m)
