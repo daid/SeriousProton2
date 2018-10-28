@@ -13,12 +13,12 @@ namespace sp {
 template<typename T> class Matrix4x4 : public Matrix<T, 4>
 {
 protected:
-    Matrix4x4(Matrix<T, 4> m)
-    : Matrix<T, 4>(m)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Matrix4x4(Matrix<U, 4> m)
+    : Matrix<U, 4>(m)
     {
     }
 
-    Matrix4x4(T d00, T d01, T d02, T d03, T d10, T d11, T d12, T d13, T d20, T d21, T d22, T d23, T d30, T d31, T d32, T d33)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Matrix4x4(U d00, U d01, U d02, U d03, U d10, U d11, U d12, U d13, U d20, U d21, U d22, U d23, U d30, U d31, U d32, U d33)
     {
         this->data[0] = d00;
         this->data[1] = d10;
@@ -46,7 +46,7 @@ public:
     : Matrix<T, 4>()
     {}
 
-    static Matrix4x4 fromQuaternion(const Quaternion<T>& q)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 fromQuaternion(const Quaternion<U>& q)
     {
         T s = 2.0 / (q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
 
@@ -99,7 +99,7 @@ public:
         );
     }
 
-    static Matrix4x4 translate(T x, T y, T z)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 translate(U x, U y, U z)
     {
         return Matrix4x4(
             1, 0, 0, x,
@@ -109,7 +109,7 @@ public:
         );
     }
 
-    static Matrix4x4 translate(const Vector3<T>& v)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 translate(const Vector3<U>& v)
     {
         return Matrix4x4(
             1, 0, 0, v.x,
@@ -118,8 +118,8 @@ public:
             0, 0, 0, 1
         );
     }
-    
-    static Matrix4x4 rotate(T angle, T x, T y, T z)
+
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 rotate(U angle, U x, U y, U z)
     {
         T c = std::cos(angle / 180.0 * 3.14159265358979323846);
         T s = std::sin(angle / 180.0 * 3.14159265358979323846);
@@ -137,8 +137,8 @@ public:
             0, 0, 0, 1
         );
     }
-    
-    static Matrix4x4 scale(T x, T y, T z)
+
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 scale(U x, U y, U z)
     {
         return Matrix4x4(
             x, 0, 0, 0,
@@ -147,8 +147,8 @@ public:
             0, 0, 0, 1
         );
     }
-    
-    static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far)
+
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 frustum(U left, U right, U bottom, U top, U near, U far)
     {
         return Matrix4x4(
             (2 * near) / (right - left), 0, (right + left) / (right - left), 0,
@@ -158,7 +158,7 @@ public:
         );
     }
 
-    static Matrix4x4 ortho(T left, T right, T bottom, T top, T near, T far)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 ortho(U left, U right, U bottom, U top, U near, U far)
     {
         return Matrix4x4(
             2 / (right - left), 0, 0, (right + left) / (right - left),
@@ -168,7 +168,7 @@ public:
         );
     }
 
-    static Matrix4x4 perspective(T fov_y, T aspect, T near, T far)
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> static Matrix4x4 perspective(U fov_y, U aspect, U near, U far)
     {
         T fW, fH;
 
@@ -183,15 +183,15 @@ public:
         return Matrix4x4(Matrix<T, 4>::operator*(m));
     }
 
-    Vector2<T> operator*(const Vector2<T>& v) const
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Vector2<T> operator*(const Vector2<U>& v) const
     {
         return Vector2<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[12],
             this->data[1] * v.x + this->data[5] * v.y + this->data[13]
         );
     }
-    
-    Vector3<T> operator*(const Vector3<T>& v) const
+
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Vector3<T> operator*(const Vector3<U>& v) const
     {
         return Vector3<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z + this->data[12],
@@ -200,15 +200,15 @@ public:
         );
     }
 
-    Vector2<T> applyDirection(const Vector2<T>& v) const
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Vector2<T> applyDirection(const Vector2<U>& v) const
     {
         return Vector2<T>(
             this->data[0] * v.x + this->data[4] * v.y,
             this->data[1] * v.x + this->data[5] * v.y
         );
     }
-    
-    Vector3<T> applyDirection(const Vector3<T>& v) const
+
+    template<typename U, typename = typename std::enable_if<std::is_arithmetic<U>::value, U>::type> Vector3<T> applyDirection(const Vector3<U>& v) const
     {
         return Vector3<T>(
             this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z,
