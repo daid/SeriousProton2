@@ -28,14 +28,14 @@ public:
 	virtual void DrawPolygon(const b2Vec2* bvertices, int32 vertexCount, const b2Color& color) override
 	{
         Vector3f c(color.r, color.g, color.b);
-        for(int n=0; n<vertexCount - 1; n+=2)
-        {
-            indices.emplace_back(vertices.size());
+        int idx0 = vertices.size();
+        for(int n=0; n<vertexCount; n++)
             vertices.emplace_back(Vector3f(bvertices[n].x, bvertices[n].y, 0.0f), c, Vector2f());
-            indices.emplace_back(vertices.size());
-            vertices.emplace_back(Vector3f(bvertices[(n + 1) % vertexCount].x, bvertices[(n + 1) % vertexCount].y, 0.0f), c, Vector2f());
-            indices.emplace_back(vertices.size());
-            vertices.emplace_back(Vector3f(bvertices[(n + 2) % vertexCount].x, bvertices[(n + 2) % vertexCount].y, 0.0f), c, Vector2f());
+        for(int n=2; n<vertexCount; n++)
+        {
+            indices.emplace_back(idx0);
+            indices.emplace_back(idx0 + n - 1);
+            indices.emplace_back(idx0 + n);
         }
 	}
 
