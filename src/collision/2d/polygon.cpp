@@ -77,7 +77,6 @@ void Polygon2D::createFixture(b2Body* body) const
         return;
     }
 
-    LOG(Debug, points.size());
     while(points.size() > b2_maxPolygonVertices)
     {
         //To many points, delete a point to create a simpler polygon.
