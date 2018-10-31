@@ -42,7 +42,7 @@ public:
     bool fixed_rotation;
 
     //Collision filtering. Collision is only allowed to happen if (a->filter_category & b->filter_mask) && (b->filter_category & a->filter_mask)
-    //Normally you set 1 bit on the filter_category
+    //Normally you set 1 bit on the filter_category, and set the bits in the filter_mask where you want to collide with.
     int filter_category;
 	int filter_mask;
 private:

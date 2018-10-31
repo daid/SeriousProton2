@@ -31,6 +31,8 @@ std::vector<Vector2f> Polygon2D::buildConvex() const
     
     std::sort(input.begin(), input.end(), [](const Vector2f& a, const Vector2f& b) -> bool
     {
+        if (a.x == b.x)
+            return a.y < b.y;
         return a.x < b.x;
     });
     
