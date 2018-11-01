@@ -1,4 +1,5 @@
 #include <sp2/collision/2d/shape.h>
+#include <sp2/collision/2d/joint.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
 #include <sp2/assert.h>
@@ -46,12 +47,30 @@ public:
 	}
 };
 
+class DestructionListener : public b2DestructionListener
+{
+	virtual void SayGoodbye(b2Joint* joint)
+	{
+        Joint2D* my_joint = (Joint2D*)joint->GetUserData();
+        if (my_joint)
+        {
+            my_joint->joint = nullptr;
+            delete my_joint;
+        }
+	}
+	
+	virtual void SayGoodbye(b2Fixture* fixture)
+	{
+	}
+};
+
 void Shape2D::create(Node* node) const
 {
     if (!node->getScene()->collision_world2d)
     {
         node->getScene()->collision_world2d = new b2World(b2Vec2_zero);
         node->getScene()->collision_world2d->SetContactListener(new ContactListener());
+        node->getScene()->collision_world2d->SetDestructionListener(new DestructionListener());
     }
     b2World* world = node->getScene()->collision_world2d;
 

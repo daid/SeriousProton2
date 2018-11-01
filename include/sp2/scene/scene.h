@@ -24,6 +24,7 @@ class btRigidBody;
 namespace sp {
 namespace collision {
 class Shape2D;
+class Joint2D;
 class Shape3D;
 }
 
@@ -74,6 +75,7 @@ public:
     string getName() const { return scene_name; }
     
     friend class collision::Shape2D;
+    friend class collision::Joint2D;
     friend class collision::Shape3D;
     friend class CollisionRenderPass;
 private:

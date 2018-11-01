@@ -20,6 +20,7 @@ class Client;
 namespace collision {
 class Shape;
 class Shape2D;
+class Joint2D;
 class Shape3D;
 }
 class Node;
@@ -152,6 +153,7 @@ private:
 
     friend class Scene;
     friend class collision::Shape2D;
+    friend class collision::Joint2D;
     friend class collision::Shape3D;
 };
 
