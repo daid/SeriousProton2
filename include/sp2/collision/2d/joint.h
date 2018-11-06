@@ -13,9 +13,10 @@ namespace collision {
 class Joint2D : public AutoPointerObject
 {
 public:
-    Joint2D();
     virtual ~Joint2D();
 protected:
+    Joint2D();
+
     void create(b2JointDef* joint_def, sp::P<sp::Node> node_a, sp::P<sp::Node> node_b);
 
     sp::P<sp::Scene> scene;
