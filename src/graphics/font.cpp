@@ -122,8 +122,8 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
             vertices.emplace_back(p2, sp::Vector2f(u0, v1));
             vertices.emplace_back(p3, sp::Vector2f(u1, v1));
         }
+        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
         position.x += glyph.advance * size_scale;
-        current_line_width = std::max(current_line_width, position.x);
         index += glyph.consumed_characters;
     }
 
