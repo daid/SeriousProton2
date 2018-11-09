@@ -23,7 +23,8 @@ void OpenGLTexture::bind()
     std::lock_guard<std::mutex> lock(mutex);
     if (image.getSize().x > 0)
     {
-        LOG(Info, "Loaded image:", name, image.getSize().x, "x", image.getSize().y);
+        if (type == Type::Static)
+            LOG(Info, "Loaded image:", name, image.getSize().x, "x", image.getSize().y);
 
         if (handle == 0)
         {
