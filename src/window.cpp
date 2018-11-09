@@ -100,6 +100,9 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
 
 void Window::setPosition(Vector2f position)
 {
+    if (!render_window)
+        return;
+
     SDL_Rect rect;
     SDL_GetDisplayUsableBounds(0, &rect);
 
@@ -188,6 +191,11 @@ void Window::createRenderWindow()
     if (fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
     render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+    if (!render_window)
+    {
+        LOG(Warning, "Failed to create SDL window.");
+        return;
+    }
     render_context = SDL_GL_CreateContext(render_window);
     
     int major_version, minor_version;
