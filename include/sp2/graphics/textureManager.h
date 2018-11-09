@@ -14,6 +14,10 @@ public:
 
     void setFallbackColors(sp::Color primary_color, sp::Color secondary_color);
     void setDefaultSmoothFiltering(bool enabled);
+    
+    //In case a texture is changed on disk, you can call this function to forcefully reload the texture.
+    //Note that the loading still happens in the background, and the old texture will be shown till load is done.
+    void forceRefresh(string name);
 protected:
     virtual Texture* prepare(string name);
     virtual void backgroundLoader(Texture* texture, io::ResourceStreamPtr stream);

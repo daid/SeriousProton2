@@ -33,6 +33,13 @@ public:
         
         T ptr = prepare(name);
         cached_items[name] = ptr;
+        addToWorkqueue(ptr, name);
+        return ptr;
+    }
+
+protected:
+    void addToWorkqueue(T ptr, const string& name)
+    {
         io::ResourceStreamPtr stream;
         if (name.find("#") > -1)
             stream = io::ResourceProvider::get(name.substr(0, name.find("#")));
@@ -49,10 +56,8 @@ public:
         {
             LOG(Warning, "Failed to load", name);
         }
-        return ptr;
     }
 
-protected:
     virtual T prepare(string name) = 0;
     virtual void backgroundLoader(T ptr, io::ResourceStreamPtr stream) = 0;
 private:
