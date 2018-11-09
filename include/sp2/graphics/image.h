@@ -20,6 +20,10 @@ public:
     void update(Vector2i size, const uint32_t* ptr);
     bool loadFromStream(io::ResourceStreamPtr stream);
     
+    //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
+    //Returns true on success.
+    bool saveToFile(sp::string filename);
+    
     void clear();
     
     Vector2i getSize() const { return size; }

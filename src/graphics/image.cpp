@@ -8,6 +8,10 @@
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
 #include "stb/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC
+#define STBIWDEF static inline
+#include "stb/stb_image_write.h"
 
 namespace sp {
 
@@ -82,6 +86,22 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
         stbi_image_free(buffer);
         return true;
     }
+    return false;
+}
+
+bool Image::saveToFile(sp::string filename)
+{
+    sp::string ext = filename.substr(filename.rfind(".") + 1).lower();
+    
+    if (ext == "png")
+        return stbi_write_png(filename.c_str(), size.x, size.y, 4, pixels.data(), size.x * 4) != 0;
+    if (ext == "bmp")
+        return stbi_write_bmp(filename.c_str(), size.x, size.y, 4, pixels.data()) != 0;
+    if (ext == "tga")
+        return stbi_write_tga(filename.c_str(), size.x, size.y, 4, pixels.data()) != 0;
+    if (ext == "jpg" || ext == "jpeg")
+        return stbi_write_jpg(filename.c_str(), size.x, size.y, 4, pixels.data(), 90) != 0;
+
     return false;
 }
 
