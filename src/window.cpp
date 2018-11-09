@@ -137,7 +137,12 @@ void Window::close()
 void Window::createRenderWindow()
 {
     SDL_DisplayMode display_mode;
-    SDL_GetDesktopDisplayMode(0, &display_mode);
+    if (SDL_GetDesktopDisplayMode(0, &display_mode))
+    {
+        LOG(Warning, "Failed to get desktop size.");
+        display_mode.w = 640;
+        display_mode.h = 480;
+    }
     
     float window_width = display_mode.w;
     float window_height = display_mode.h;
