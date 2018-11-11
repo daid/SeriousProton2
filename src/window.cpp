@@ -10,7 +10,7 @@
 #include <SDL2/SDL.h>
 
 #ifdef __WIN32__
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 

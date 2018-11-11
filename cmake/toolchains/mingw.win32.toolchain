@@ -1,0 +1,31 @@
+# This toolchain file is used to cross compile SP2 applications for windows on a linux host.
+# Most useful of this is that you can have a single linux build server which can build windows and linux releases at the same time.
+
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_CROSSCOMPILING_EMULATOR wine)
+
+set(CROSS_COMPILE_TOOLCHAIN_PREFIX "i686-w64-mingw32")
+set(CMAKE_SYSROOT ${CMAKE_CURRENT_LIST_DIR}/mingw.win32.sysroot/)
+
+
+## TODO: Below this line is quite generic for different cross compiler, so no need to copy/paste when other toolchain files are made
+find_program(CMAKE_C_COMPILER "${CROSS_COMPILE_TOOLCHAIN_PREFIX}-gcc")
+if(NOT CMAKE_C_COMPILER)
+  message(FATAL_ERROR "Compiler not found, install proper environment for cross compiling")
+endif()
+get_filename_component(CROSS_COMPILE_TOOLCHAIN_PATH "${CMAKE_C_COMPILER}" DIRECTORY)
+set(TOOLCHAIN_PATH_AND_PREFIX ${CROSS_COMPILE_TOOLCHAIN_PATH}/${CROSS_COMPILE_TOOLCHAIN_PREFIX})
+
+set(CMAKE_C_COMPILER       "${TOOLCHAIN_PATH_AND_PREFIX}-gcc-posix"      CACHE PATH "C compiler" )
+set(CMAKE_CXX_COMPILER     "${TOOLCHAIN_PATH_AND_PREFIX}-g++-posix"      CACHE PATH "C++ compiler" )
+set(CMAKE_ASM_COMPILER     "${TOOLCHAIN_PATH_AND_PREFIX}-as"             CACHE PATH "Assembler" )
+set(CMAKE_C_PREPROCESSOR   "${TOOLCHAIN_PATH_AND_PREFIX}-cpp-posix"      CACHE PATH "Preprocessor" )
+set(CMAKE_STRIP            "${TOOLCHAIN_PATH_AND_PREFIX}-strip"          CACHE PATH "strip" )
+set(CMAKE_AR               "${TOOLCHAIN_PATH_AND_PREFIX}-gcc-ar-posix"   CACHE PATH "Archiver" )
+set(CMAKE_LINKER           "${TOOLCHAIN_PATH_AND_PREFIX}-ld"             CACHE PATH "Linker" )
+set(CMAKE_NM               "${TOOLCHAIN_PATH_AND_PREFIX}-nm"             CACHE PATH "nm" )
+set(CMAKE_OBJCOPY          "${TOOLCHAIN_PATH_AND_PREFIX}-objcopy"        CACHE PATH "objcopy" )
+set(CMAKE_OBJDUMP          "${TOOLCHAIN_PATH_AND_PREFIX}-objdump"        CACHE PATH "objdump" )
+set(CMAKE_RANLIB           "${TOOLCHAIN_PATH_AND_PREFIX}-ranlib"         CACHE PATH "ranlib" )
+set(CMAKE_RC_COMPILER      "${TOOLCHAIN_PATH_AND_PREFIX}-windres"        CACHE PATH "WindowsRC" )
+set(CMAKE_Fortran_COMPILER "${TOOLCHAIN_PATH_AND_PREFIX}-gfortran-posix" CACHE PATH "gfortran" )
