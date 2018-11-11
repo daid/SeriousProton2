@@ -319,6 +319,20 @@ bool CameraCapture::init(int index)
 
     data->media_control->Run();//For some reason, this reports failure, but the stream works...
 
+    long buffer_size = -1;
+    for(int n=0; n<10 && buffer_size == -1; n++)
+    {
+        if (data->sample_grabber->GetCurrentBuffer(&buffer_size, nullptr))
+        {
+            buffer_size = -1;
+            Sleep(100);
+        }
+    }
+    if (buffer_size == -1)
+    {
+        LOG(Warning, "Could open camera, but no images are captured after 1 second.");
+        return false;
+    }
     return true;
 }
 
