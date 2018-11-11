@@ -77,4 +77,20 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         find_package(Threads)
         target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     endif()
+
+    if(WIN32)
+        install(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION .)
+
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libstdc++-6.dll OUTPUT_VARIABLE MINGW_STDCPP_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libgcc_s_sjlj-1.dll OUTPUT_VARIABLE MINGW_LIBGCC_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread-1.dll OUTPUT_VARIABLE MINGW_PTHREAD_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
+        install(FILES ${MINGW_STDCPP_DLL} ${MINGW_LIBGCC_DLL} ${MINGW_PTHREAD_DLL} DESTINATION .)
+        install(FILES ${SDL2_PREFIX}/bin/SDL2.dll DESTINATION .)
+        install(FILES ${SDL2_PREFIX}/bin/zlib1.dll DESTINATION .) #TODO This abuses the fact that the zlib dll is at the same location as the SDL2 dll in our sysroot
+    endif()
 endmacro()
+
+if(WIN32)
+    set(CPACK_GENERATOR NSIS ZIP)
+    include(CPack)
+endif()

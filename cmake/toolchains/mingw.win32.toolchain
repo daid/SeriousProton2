@@ -1,6 +1,8 @@
 # This toolchain file is used to cross compile SP2 applications for windows on a linux host.
 # Most useful of this is that you can have a single linux build server which can build windows and linux releases at the same time.
 
+# Needed tools on debian: apt-get install build-essential mingw-w64 nsis
+
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_CROSSCOMPILING_EMULATOR wine)
 
