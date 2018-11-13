@@ -31,3 +31,7 @@ set(CMAKE_OBJDUMP          "${TOOLCHAIN_PATH_AND_PREFIX}-objdump"        CACHE P
 set(CMAKE_RANLIB           "${TOOLCHAIN_PATH_AND_PREFIX}-ranlib"         CACHE PATH "ranlib" )
 set(CMAKE_RC_COMPILER      "${TOOLCHAIN_PATH_AND_PREFIX}-windres"        CACHE PATH "WindowsRC" )
 set(CMAKE_Fortran_COMPILER "${TOOLCHAIN_PATH_AND_PREFIX}-gfortran-posix" CACHE PATH "gfortran" )
+
+# Remove the need for the libgcc and libstdc++ dlls.
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+

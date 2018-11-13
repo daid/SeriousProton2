@@ -25,6 +25,5 @@ find_path(SP2_DIR SeriousProton2.include.cmake
 if(NOT SP2_DIR)
     message(FATAL_ERROR "Failed to find SeriousProton2, set SP2_ROOT to root directory of SeriousProton2")
 endif()
-message(${SP2_DIR})
 
 include("${SP2_DIR}/SeriousProton2.include.cmake")
