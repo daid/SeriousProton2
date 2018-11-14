@@ -27,13 +27,13 @@ Win32StackWalkContext::Win32StackWalkContext(Win32ExceptionContext& exception_co
 
 #ifdef _WIN64
     BOOL wow64 = FALSE;
-    IsWow64Process(hProcess, &wow64);
+    IsWow64Process(exception_context.process, &wow64);
     if (wow64)
     {
         machine_type = IMAGE_FILE_MACHINE_I386;
         ZeroMemory(&wow64context, sizeof(wow64context));
         wow64context.ContextFlags = WOW64_CONTEXT_FULL;
-        if (!Wow64GetThreadContext(thread, &wow64context))
+        if (!Wow64GetThreadContext(exception_context.thread, &wow64context))
             return;
         context_ptr = (PCONTEXT)&wow64context;
         stack_frame.AddrPC.Offset = wow64context.Eip;
