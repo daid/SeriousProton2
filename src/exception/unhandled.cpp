@@ -21,9 +21,9 @@ void unhandledExceptionHandler(const UnhandledExceptionInfo& info)
         LOG(Error, "Exception during application specific exception handling!");
     LOG(Error, info.base_report);
 
-    for(const AddressInfo& info : info.stack)
+    for(const AddressInfo& address_info : info.stack)
     {
-        LOG(Error, info.address, info.module.substr(info.module.replace("\\", "/").rfind("/") + 1), "@", (void*)info.module_offset, "=", info.symbol, "+", info.symbol_offset);
+        LOG(Error, address_info.address, address_info.module.substr(address_info.module.replace("\\", "/").rfind("/") + 1), "@", (void*)address_info.module_offset, "=", address_info.symbol, "+", address_info.symbol_offset);
     }
     LOG(Error, "--------------------------------------------------");
 
