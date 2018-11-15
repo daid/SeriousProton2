@@ -16,7 +16,6 @@ class Shader : public NonCopyable
 public:    
     bool bind();
     void setUniform(const string& s, const Matrix4x4f& matrix);
-    void setUniform(const string& s, const Matrix4x4d& matrix);
     void setUniform(const string& s, const Vector2f& v);
     void setUniform(const string& s, const Vector3f& v);
     void setUniform(const string& s, const Color& v);
