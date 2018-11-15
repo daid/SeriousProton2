@@ -1,3 +1,8 @@
+#ifdef _WIN64
+//On 64bit Windows, we need some functions that where introduced with Windows Vista/Server 2008
+#define _WIN32_WINNT 0x0600
+#endif
+
 #include <private/exception/win32/context.h>
 #include <private/exception/win32/coffSymbol.h>
 
