@@ -51,8 +51,6 @@ void Engine::initialize()
     if (initialized)
         return;
 
-    glewInit();
-
     sp::multiplayer::ClassEntry::fillMappings();
     
     initialized = true;

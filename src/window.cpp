@@ -202,6 +202,7 @@ void Window::createRenderWindow()
         return;
     }
     render_context = SDL_GL_CreateContext(render_window);
+    initOpenGL();
     
     int major_version, minor_version;
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
