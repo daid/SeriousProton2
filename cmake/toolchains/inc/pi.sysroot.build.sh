@@ -6,8 +6,8 @@ cd "$(dirname "$(readlink -f "$0")")"
 
 TARGET=pi.sysroot
 
-#rm -rf "${TARGET}"
-#fakeroot /usr/sbin/multistrap -f pi.sysroot.multistrap.conf -d "${TARGET}"
+rm -rf "${TARGET}"
+fakeroot /usr/sbin/multistrap -f pi.sysroot.multistrap.conf -d "${TARGET}"
 
 # Strip a bunch of files we don't need anyhow. Saves disk space
 rm -rf "${TARGET}/usr/share/locale"
