@@ -1,0 +1,18 @@
+{
+    color: #FFFFFF
+    font: gui/theme/font.ttf
+    size: 30
+    [label] {
+    }
+    [button] {
+    }
+    [panel] {
+    }
+    [progressbar] {
+    }
+    [progressbar.background] {
+    }
+    [image] {
+    }
+}
+
