@@ -2,11 +2,11 @@ set(CMAKE_SYSTEM_NAME Linux)
 
 set(CROSS_COMPILE_TOOLCHAIN_PREFIX "arm-linux-gnueabihf")
 set(CROSS_COMPILE_TOOLCHAIN_POSTFIX "")
-set(CMAKE_SYSROOT ${CMAKE_CURRENT_LIST_DIR}/pi.sysroot/)
+set(CMAKE_SYSROOT ${CMAKE_CURRENT_LIST_DIR}/inc/pi.sysroot/)
 
 # Build the sysroot if it does not exists yet.
 if(NOT IS_DIRECTORY ${CMAKE_SYSROOT})
-    execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/pi.sysroot.build.sh WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+    execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/inc/pi.sysroot.build.sh WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/inc/gcc.toolchain")
