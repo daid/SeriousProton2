@@ -1,6 +1,6 @@
 # General gcc toolchain configuration.
 
-find_program(CMAKE_C_COMPILER "${CROSS_COMPILE_TOOLCHAIN_PREFIX}-gcc${CROSS_COMPILE_TOOLCHAIN_POSTFIX}")
+find_program(CMAKE_C_COMPILER "${CROSS_COMPILE_TOOLCHAIN_PREFIX}-gcc${CROSS_COMPILE_TOOLCHAIN_POSTFIX}" NO_CMAKE_FIND_ROOT_PATH)
 if(NOT CMAKE_C_COMPILER)
   message(FATAL_ERROR "Compiler not found, install proper environment for cross compiling")
 endif()
