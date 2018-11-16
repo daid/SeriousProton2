@@ -3,6 +3,7 @@
 #include <sp2/logging.h>
 #include <limits>
 #include <string.h>
+#include <stddef.h>
 
 const unsigned int NO_BUFFER = std::numeric_limits<unsigned int>::max();
 
