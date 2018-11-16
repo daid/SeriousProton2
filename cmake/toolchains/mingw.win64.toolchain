@@ -3,5 +3,5 @@
 
 # Needed tools on debian: apt-get install build-essential mingw-w64 nsis
 
-set(MINGW_ARCH i686)
+set(MINGW_ARCH x86_64)
 include("${CMAKE_CURRENT_LIST_DIR}/inc/mingw.win.base.toolchain")
