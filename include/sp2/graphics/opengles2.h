@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <unistd.h>
 
 /*
  * This document is licensed under the SGI Free Software B License Version
