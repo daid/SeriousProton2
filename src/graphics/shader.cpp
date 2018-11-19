@@ -100,9 +100,19 @@ bool Shader::bind()
         glDetachShader(program, fragment_shader_handle);
         
         LOG(Info, "Compiled shader:", name);
+
+        vertex_attribute = glGetAttribLocation(program, "a_vertex");
+        normal_attribute = glGetAttribLocation(program, "a_normal");
+        uv_attribute = glGetAttribLocation(program, "a_uv");
+        
+        if (vertex_attribute == -1)
+            LOG(Warning, "Shader:", name, "has no attribute for a_vertex, this is odd... (legacy shader with gl_Vertex?)");
     }
 
     glUseProgram(program);
+    if (vertex_attribute != -1) glEnableVertexAttribArray(vertex_attribute);
+    if (normal_attribute != -1) glEnableVertexAttribArray(normal_attribute);
+    if (uv_attribute != -1) glEnableVertexAttribArray(uv_attribute);
     return true;
 }
 

@@ -7,6 +7,10 @@ static io::InternalResourceProvider buildin_resources({
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -16,8 +20,8 @@ varying vec2 v_uv;
 
 void main()
 {
-    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    v_uv = gl_MultiTexCoord0.xy;
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    v_uv = a_uv.xy;
 }
 
 [FRAGMENT]
@@ -40,6 +44,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -51,10 +59,10 @@ varying vec3 v_normal;
 
 void main()
 {
-    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    v_uv = gl_MultiTexCoord0.xy;
-    v_normal = (camera_matrix * object_matrix * vec4(gl_Normal, 0.0)).xyz;
-    v_offset = (camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0)).xyz;
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    v_uv = a_uv.xy;
+    v_normal = (camera_matrix * object_matrix * vec4(a_normal, 0.0)).xyz;
+    v_offset = (camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0)).xyz;
 }
 
 [FRAGMENT]
@@ -80,6 +88,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -87,7 +99,7 @@ uniform vec3 object_scale;
 
 void main()
 {
-    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
 }
 
 [FRAGMENT]
@@ -108,6 +120,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -119,9 +135,9 @@ varying vec3 v_normal;
 
 void main()
 {
-    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    v_normal = (camera_matrix * object_matrix * vec4(gl_Normal, 0.0)).xyz;
-    v_offset = (camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0)).xyz;
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    v_normal = (camera_matrix * object_matrix * vec4(a_normal, 0.0)).xyz;
+    v_offset = (camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0)).xyz;
 }
 
 [FRAGMENT]
@@ -146,6 +162,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -155,8 +175,8 @@ varying vec3 v_col;
 
 void main()
 {
-    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    v_col = gl_Normal;
+    gl_Position = projection_matrix * camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    v_col = a_normal;
 }
 
 [FRAGMENT]
@@ -177,6 +197,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -187,14 +211,14 @@ varying vec2 v_uv;
 
 void main()
 {
-    vec4 position = camera_matrix * object_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    vec2 uv = vec2(gl_MultiTexCoord0.x, abs(gl_MultiTexCoord0.x) * sign(gl_MultiTexCoord0.y));
+    vec4 position = camera_matrix * object_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    vec2 uv = vec2(a_uv.x, abs(a_uv.x) * sign(a_uv.y));
     position += vec4(uv, 0, 0);
     gl_Position = projection_matrix * position;
     v_uv.x = sign(uv.x) / 2.0 + 0.5;
     v_uv.y = sign(uv.y) / 2.0 + 0.5;
-    color.rgb = gl_Normal.xyz;
-    color.a = abs(gl_MultiTexCoord0.y);
+    color.rgb = a_normal.xyz;
+    color.a = abs(a_uv.y);
 }
 
 [FRAGMENT]
@@ -215,6 +239,10 @@ void main()
 [VERTEX]
 #version 110
 
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
 uniform mat4 projection_matrix;
 uniform mat4 camera_matrix;
 uniform mat4 object_matrix;
@@ -225,18 +253,19 @@ varying vec2 v_uv;
 
 void main()
 {
-    vec4 position = camera_matrix * vec4(gl_Vertex.xyz * object_scale, 1.0);
-    vec2 uv = vec2(gl_MultiTexCoord0.x, abs(gl_MultiTexCoord0.x) * sign(gl_MultiTexCoord0.y));
+    vec4 position = camera_matrix * vec4(a_vertex.xyz * object_scale, 1.0);
+    vec2 uv = vec2(a_uv.x, abs(a_uv.x) * sign(a_uv.y));
     position += vec4(uv, 0, 0);
     gl_Position = projection_matrix * position;
     v_uv.x = sign(uv.x) / 2.0 + 0.5;
     v_uv.y = sign(uv.y) / 2.0 + 0.5;
-    color.rgb = gl_Normal.xyz;
-    color.a = abs(gl_MultiTexCoord0.y);
+    color.rgb = a_normal.xyz;
+    color.a = abs(a_uv.y);
 }
 
 [FRAGMENT]
 #version 110
+
 uniform sampler2D texture_map;
 
 varying vec4 color;

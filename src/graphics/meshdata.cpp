@@ -1,5 +1,6 @@
 #include <sp2/graphics/opengl.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/graphics/shader.h>
 #include <sp2/logging.h>
 #include <limits>
 #include <string.h>
@@ -60,10 +61,16 @@ void MeshData::render()
         }
         dirty = false;
     }
-    //TOFIX[OpenGL ES 2.0]: These calls don't exist in OpenGL ES 2.0.
-    glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, position));
-    glNormalPointer(GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+
+    if (Shader::bound_shader)
+    {
+        if (Shader::bound_shader->vertex_attribute != -1)
+            glVertexAttribPointer(Shader::bound_shader->vertex_attribute, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, position));
+        if (Shader::bound_shader->normal_attribute != -1)
+            glVertexAttribPointer(Shader::bound_shader->normal_attribute, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+        if (Shader::bound_shader->uv_attribute != -1)
+            glVertexAttribPointer(Shader::bound_shader->uv_attribute, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    }
     
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

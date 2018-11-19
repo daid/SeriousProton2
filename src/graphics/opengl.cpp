@@ -4,6 +4,7 @@
 
 static bool init_done = false;
 
+#ifdef SP2_GRAPHICS_OPENGLES2_H
 // OpenGL ES 2.0 functions:
 void (GL_APIENTRY * glActiveTexture)(GLenum texture);
 void (GL_APIENTRY * glAttachShader)(GLuint program, GLuint shader);
@@ -147,12 +148,7 @@ void (GL_APIENTRY * glVertexAttrib4f)(GLuint indx, GLfloat x, GLfloat y, GLfloat
 void (GL_APIENTRY * glVertexAttrib4fv)(GLuint indx, const GLfloat* values);
 void (GL_APIENTRY * glVertexAttribPointer)(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr);
 void (GL_APIENTRY * glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
-
-//OpenGL Desktop functions:
-void (GL_APIENTRY * glVertexPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-void (GL_APIENTRY * glNormalPointer)(GLenum type, GLsizei stride, const GLvoid *pointer);
-void (GL_APIENTRY * glTexCoordPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-void (GL_APIENTRY * glEnableClientState)(GLenum array);
+#endif//SP2_GRAPHICS_OPENGLES2_H
 
 namespace sp {
 
@@ -163,6 +159,7 @@ void initOpenGL()
     init_done = true;
     bool failure = false;
 
+#ifdef SP2_GRAPHICS_OPENGLES2_H
     //OpenGL ES 2.0 functions
     if ((glActiveTexture = (decltype(glActiveTexture))SDL_GL_GetProcAddress("glActiveTexture")) == nullptr) { LOG(Error, "Failed to find opengl function: glActiveTexture"); failure = true; }
     if ((glAttachShader = (decltype(glAttachShader))SDL_GL_GetProcAddress("glAttachShader")) == nullptr) { LOG(Error, "Failed to find opengl function: glAttachShader"); failure = true; }
@@ -306,13 +303,8 @@ void initOpenGL()
     if ((glVertexAttrib4fv = (decltype(glVertexAttrib4fv))SDL_GL_GetProcAddress("glVertexAttrib4fv")) == nullptr) { LOG(Error, "Failed to find opengl function: glVertexAttrib4fv"); failure = true; }
     if ((glVertexAttribPointer = (decltype(glVertexAttribPointer))SDL_GL_GetProcAddress("glVertexAttribPointer")) == nullptr) { LOG(Error, "Failed to find opengl function: glVertexAttribPointer"); failure = true; }
     if ((glViewport = (decltype(glViewport))SDL_GL_GetProcAddress("glViewport")) == nullptr) { LOG(Error, "Failed to find opengl function: glViewport"); failure = true; }
+#endif//SP2_GRAPHICS_OPENGLES2_H
 
-    //OpenGL desktop functions
-    if ((glVertexPointer = (decltype(glVertexPointer))SDL_GL_GetProcAddress("glVertexPointer")) == nullptr) { LOG(Error, "Failed to find opengl function: glVertexPointer"); failure = true; }
-    if ((glNormalPointer = (decltype(glNormalPointer))SDL_GL_GetProcAddress("glNormalPointer")) == nullptr) { LOG(Error, "Failed to find opengl function: glNormalPointer"); failure = true; }
-    if ((glTexCoordPointer = (decltype(glTexCoordPointer))SDL_GL_GetProcAddress("glTexCoordPointer")) == nullptr) { LOG(Error, "Failed to find opengl function: glTexCoordPointer"); failure = true; }
-    if ((glEnableClientState = (decltype(glEnableClientState))SDL_GL_GetProcAddress("glEnableClientState")) == nullptr) { LOG(Error, "Failed to find opengl function: glEnableClientState"); failure = true; }
-    
     if (failure)
         exit(1);
 }

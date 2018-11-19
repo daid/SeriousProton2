@@ -30,6 +30,9 @@ private:
     int getUniformLocation(const string& s);
 
     unsigned int program;
+    int vertex_attribute;
+    int normal_attribute;
+    int uv_attribute;
     std::map<string, int> uniform_mapping;
 
     string name;
@@ -42,6 +45,8 @@ public:
 private:
     static std::map<string, Shader*> cached_shaders;
     static Shader* bound_shader;
+    
+    friend class MeshData;
 };
 
 };//namespace sp

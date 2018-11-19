@@ -19,14 +19,6 @@ extern "C" {
 #define GL_DEPTH24_STENCIL8 0x88F0
 #define GL_DEPTH_STENCIL_ATTACHMENT 0x821A
 
-#define GL_VERTEX_ARRAY 0x8074
-#define GL_NORMAL_ARRAY 0x8075
-#define GL_TEXTURE_COORD_ARRAY 0x8078
-extern void (GL_APIENTRY * glVertexPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-extern void (GL_APIENTRY * glNormalPointer)(GLenum type, GLsizei stride, const GLvoid *pointer);
-extern void (GL_APIENTRY * glTexCoordPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-extern void (GL_APIENTRY * glEnableClientState)(GLenum array);
-
 #ifdef __cplusplus
 }//extern "C"
 #endif
