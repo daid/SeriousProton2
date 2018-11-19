@@ -24,8 +24,8 @@ Shader* Shader::get(string name)
     if (stream)
     {
         LOG(Info, "Loading shader:", name);
-        string vertex_shader;
-        string fragment_shader;
+        string vertex_shader = "#version 110\n";
+        string fragment_shader = "#version 110\n";
         int type = -1;
         while(stream->tell() != stream->getSize())
         {

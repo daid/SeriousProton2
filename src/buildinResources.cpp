@@ -5,8 +5,6 @@ namespace sp {
 static io::InternalResourceProvider buildin_resources({
     {"basic.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -25,8 +23,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -42,8 +38,6 @@ void main()
 
     {"basic_shaded.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -66,8 +60,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -86,8 +78,6 @@ void main()
 
     {"color.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -103,8 +93,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -118,8 +106,6 @@ void main()
 
     {"color_shaded.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -141,8 +127,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -160,8 +144,6 @@ void main()
 
     {"normal_as_color.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -180,8 +162,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 uniform vec4 color;
 
@@ -195,8 +175,6 @@ void main()
 
     {"local_particle.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -222,7 +200,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
 uniform sampler2D texture_map;
 
 varying vec4 color;
@@ -237,8 +214,6 @@ void main()
 
     {"global_particle.shader", R"EOS(
 [VERTEX]
-#version 110
-
 attribute vec3 a_vertex;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
@@ -264,8 +239,6 @@ void main()
 }
 
 [FRAGMENT]
-#version 110
-
 uniform sampler2D texture_map;
 
 varying vec4 color;
