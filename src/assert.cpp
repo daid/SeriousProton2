@@ -9,8 +9,6 @@ void __sp2assert(const char* e, const char* filename, const char* function, int 
     LOG(Error, "--------------------------------------------------");
     LOG(Error, "Assertion failed:", e, "at", filename, function, line_number);
     LOG(Error, msg);
-    
-    //Crash with a null pointer exception. The normal assert call does not end with a stacktrace on Windows.
-    //And this does.
-    *(int*)nullptr = 0;
+
+    __builtin_trap();
 }
