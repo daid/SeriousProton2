@@ -32,13 +32,13 @@ public:
         previous_value = value;
         return true;
     }
-    
-    virtual void send(io::DataBuffer& packet) override
+
+    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) override
     {
         packet.write(value);
     }
-    
-    virtual void receive(io::DataBuffer& packet) override
+
+    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) override
     {
         packet.read(value);
     }
