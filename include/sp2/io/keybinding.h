@@ -36,6 +36,11 @@ public:
     bool getUp() const; //True for 1 update cycle when the key is released.
     float getValue() const; //Returns a value in the range -1 to 1 for this keybinding. On keyboard keys this is always 0 or 1, but for joysticks this can be anywhere in the range -1.0 to 1.0
     
+    //Start a binding process from the user. The next button pressed by the user will be bound to this key.
+    //Note that this will add on top of the already existing binds, so clearKeys() need to be called if you want to bind a single key.
+    void startUserRebind();
+    bool isUserRebinding();
+    
     static void loadKeybindings(const string& filename);
     static void saveKeybindings(const string& filename);
 private:
@@ -61,6 +66,7 @@ private:
     static void updateKeys(int key_number, float value);
     
     static PList<Keybinding> keybindings;
+    static P<Keybinding> rebinding_key;
     
     static constexpr int type_mask = (0x0f << 16);
     static constexpr int keyboard_mask = (0x01 << 16);

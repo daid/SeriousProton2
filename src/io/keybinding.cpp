@@ -13,6 +13,7 @@ namespace sp {
 namespace io {
 
 PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
+P<Keybinding> Keybinding::rebinding_key SP2_INIT_EARLY;
 
 Keybinding::Keybinding(string name)
 : name(name), label(name)
@@ -134,6 +135,16 @@ bool Keybinding::getUp() const
 float Keybinding::getValue() const
 {
     return value;
+}
+
+void Keybinding::startUserRebind()
+{
+    rebinding_key = this;
+}
+
+bool Keybinding::isUserRebinding()
+{
+    return rebinding_key == this;
 }
 
 void Keybinding::loadKeybindings(const string& filename)
@@ -277,9 +288,11 @@ void Keybinding::handleEvent(const SDL_Event& event)
         //event.mouseWheel.delta
         break;
     case SDL_FINGERDOWN:
+        //event.tfinger.x, event.tfinger.x
         updateKeys(int(io::Pointer::Button::Touch) | pointer_mask, 1.0);
         break;
     case SDL_FINGERUP:
+        //event.tfinger.x, event.tfinger.x
         updateKeys(int(io::Pointer::Button::Touch) | pointer_mask, 0.0);
         break;
     case SDL_JOYBUTTONDOWN:
@@ -315,6 +328,12 @@ void Keybinding::handleEvent(const SDL_Event& event)
 
 void Keybinding::updateKeys(int key_number, float value)
 {
+    if (value > 0.5 && rebinding_key)
+    {
+        rebinding_key->key_number.push_back(key_number);
+        rebinding_key = nullptr;
+    }
+
     for(Keybinding* key : keybindings)
         for(int key_nr : key->key_number)
             if (key_nr == key_number)
