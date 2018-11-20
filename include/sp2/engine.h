@@ -53,7 +53,6 @@ private:
     float fixed_update_accumulator;
 
     float current_fps = 0.0;
-    float current_ups = 0.0;
     bool initialized = false;
 };
 

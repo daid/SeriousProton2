@@ -5,7 +5,7 @@
 #include <sp2/scene/node.h>
 
 class b2Joint;
-class b2JointDef;
+struct b2JointDef;
 
 namespace sp {
 namespace collision {

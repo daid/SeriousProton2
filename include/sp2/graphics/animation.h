@@ -10,6 +10,8 @@ namespace sp {
 class Animation : NonCopyable
 {
 public:
+    virtual ~Animation() {}
+
     virtual void play(string key, float speed=1.0) = 0;
     virtual void setFlags(int flags) = 0;
     virtual int getFlags() = 0;
