@@ -5,6 +5,7 @@
 #include <SDL2/SDL_audio.h>
 
 #include <unordered_map>
+#include <string.h>
 
 namespace sp {
 namespace audio {

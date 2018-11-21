@@ -91,7 +91,7 @@ Address Address::getLocalAddress()
         }
         free(addresses);
     }
-#else
+#elif !defined(__ANDROID_API__) || (__ANDROID_API__ >= 24)
     char buffer[128];
 
     struct ifaddrs* addrs;
@@ -112,6 +112,8 @@ Address Address::getLocalAddress()
         }
         freeifaddrs(addrs);
     }
+#else
+#warning "No way to get the local IP address"
 #endif
     return Address(std::move(addr_info));
 }
