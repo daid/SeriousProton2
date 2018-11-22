@@ -18,6 +18,24 @@ public:
         return p.x >= position.x && p.x <= position.x + size.x && p.y >= position.y && p.y <= position.y + size.y;
     }
     
+    void growToInclude(Vector2<T> p)
+    {
+        if (p.x < position.x)
+        {
+            size.x = size.x - p.x + position.x;
+            position.x = p.x;
+        }
+        if (p.y < position.y)
+        {
+            size.y = size.y - p.y + position.y;
+            position.y = p.y;
+        }
+        if (p.x > position.x + size.x)
+            size.x = p.x - position.x;
+        if (p.y > position.y + size.y)
+            size.y = p.y - position.y;
+    }
+    
     Vector2<T> position;
     Vector2<T> size;
 };
