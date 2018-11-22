@@ -78,7 +78,8 @@ void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr st
     if (stream)
     {
         sp::Image image;
-        image.loadFromStream(stream);
+        if (!image.loadFromStream(stream))
+            LOG(Warning, "Failed to load image:", texture->getName());
         (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(std::move(image));
     }
 }

@@ -20,6 +20,7 @@ public:
     };
     virtual void bind() = 0;
     int getRevision() { return revision; }
+    const string& getName() { return name; }
 protected:
     Texture(Type type, string name)
     : type(type), name(name), revision(0) {}
