@@ -38,10 +38,12 @@ private:
     
     bool dirty[2];
     bool flipped;
+    bool auto_clear;
     
     unsigned int frame_buffer[2];
     unsigned int color_buffer[2];
     unsigned int depth_buffer[2];
+    unsigned int stencil_buffer[2];
 };
 
 };//namespace sp

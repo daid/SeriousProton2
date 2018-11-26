@@ -5,9 +5,10 @@
 namespace sp {
 
 RenderTexture::RenderTexture(sp::string name, Vector2i size, bool double_buffered)
-: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered)
+: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size)
 {
     flipped = false;
+    auto_clear = !double_buffered;
 }
 
 RenderTexture::~RenderTexture()
@@ -39,8 +40,15 @@ void RenderTexture::create()
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer[n], 0);
         
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer[n]);
+#if defined(GL_DEPTH24_STENCIL8) && defined(GL_DEPTH_STENCIL_ATTACHMENT)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_buffer[n]);
+#else
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, size.x, size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buffer[n]);
+#endif
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LOG(Error, "Failed to create OpenGL FrameBuffer for RenderTexture!");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -51,7 +59,6 @@ void RenderTexture::create()
 void RenderTexture::bind()
 {
     int index = 0;
-    
     if (!frame_buffer[0])
         create();
     
@@ -80,6 +87,8 @@ void RenderTexture::activateRenderTarget()
 
     dirty[index] = true;
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer[index]);
+    if (auto_clear)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 };//namespace sp

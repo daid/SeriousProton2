@@ -226,9 +226,10 @@ void Window::render()
         return a->priority - b->priority;
     });
 
-    queue.add([this]()
+    queue.add([this, window_size]()
     {
-        glViewport(0, 0, 1, 1);
+        SDL_GL_MakeCurrent(render_window, render_context);
+        glViewport(0, 0, window_size.x, window_size.y);
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     });
@@ -238,24 +239,23 @@ void Window::render()
         {
             if (layer->getTarget())
             {
-                window_size = layer->getTarget()->getSize();
                 queue.add([layer]()
                 {
                     layer->getTarget()->activateRenderTarget();
                     glViewport(0, 0, layer->getTarget()->getSize().x, layer->getTarget()->getSize().y);
                 });
+                queue.setTargetAspectSize(float(layer->getTarget()->getSize().x) / float(layer->getTarget()->getSize().y));
             }
             else
             {
                 queue.add([this, layer, window_size]()
                 {
-                    SDL_GL_MakeCurrent(render_window, render_context);
                     Rect2d viewport = layer->viewport;
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
                     glViewport(viewport.position.x * window_size.x, viewport.position.y * window_size.y, viewport.size.x * window_size.x, viewport.size.y * window_size.y);
                 });
+                queue.setTargetAspectSize(float(window_size.x) / float(window_size.y));
             }
-            
-            queue.setTargetAspectSize(float(window_size.x) / float(window_size.y));
             layer->render(queue);
         }
     }
