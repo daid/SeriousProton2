@@ -22,6 +22,8 @@ class Shape;
 class Shape2D;
 class Joint2D;
 class Shape3D;
+class Box2DBackend;
+class BulletBackend;
 }
 class Node;
 class CollisionInfo
@@ -134,8 +136,7 @@ private:
     P<Scene> scene;
     P<Node> parent;
     PList<Node> children;
-    b2Body* collision_body2d = nullptr;
-    btRigidBody* collision_body3d = nullptr;
+    void* collision_body = nullptr;
     
     Vector3d translation;
     Quaterniond rotation;
@@ -155,6 +156,8 @@ private:
     friend class collision::Shape2D;
     friend class collision::Joint2D;
     friend class collision::Shape3D;
+    friend class collision::Box2DBackend;
+    friend class collision::BulletBackend;
 };
 
 };//namespace sp

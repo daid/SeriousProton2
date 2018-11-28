@@ -1,4 +1,5 @@
 #include <sp2/collision/2d/joint.h>
+#include <sp2/collision/2d/box2dBackend.h>
 #include <sp2/scene/scene.h>
 #include <sp2/assert.h>
 
@@ -17,14 +18,18 @@ void Joint2D::create(b2JointDef* joint_def, sp::P<sp::Node> node_a, sp::P<sp::No
 {
     sp2assert(node_a && node_b, "Must supply nodes to a joint.");
     sp2assert(node_a->getScene() == node_b->getScene(), "Scenes of nodes given to a joint must be the same.");
-    sp2assert(node_a->collision_body2d && node_b->collision_body2d, "Nodes given to a joint need a body.");
+    sp2assert(node_a->collision_body && node_b->collision_body, "Nodes given to a joint need a body.");
+    sp2assert(scene->collision_backend, "No collision backend when creating a joint.");
     
     scene = node_a->getScene();
-    joint_def->bodyA = node_a->collision_body2d;
-    joint_def->bodyB = node_b->collision_body2d;
+    collision::Box2DBackend* backend = dynamic_cast<collision::Box2DBackend*>(scene->collision_backend);
+    sp2assert(backend, "No 2d collision backend when creating a 2d joint.");
+    
+    joint_def->bodyA = static_cast<b2Body*>(node_a->collision_body);
+    joint_def->bodyB = static_cast<b2Body*>(node_b->collision_body);
     joint_def->userData = this;
 
-    joint = scene->collision_world2d->CreateJoint(joint_def);
+    joint = backend->world->CreateJoint(joint_def);
 }
 
 Joint2D::~Joint2D()
@@ -32,7 +37,8 @@ Joint2D::~Joint2D()
     if (joint && scene)
     {
         joint->SetUserData(nullptr);
-        scene->collision_world2d->DestroyJoint(joint);
+        collision::Box2DBackend* backend = static_cast<collision::Box2DBackend*>(scene->collision_backend);
+        backend->world->DestroyJoint(joint);
     }
 }
 

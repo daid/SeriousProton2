@@ -1,4 +1,5 @@
 #include <sp2/collision/3d/shape.h>
+#include <sp2/collision/3d/bullet3dBackend.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/scene.h>
 #include <sp2/assert.h>
@@ -13,18 +14,13 @@ namespace collision {
 void Shape3D::create(Node* node) const
 {
     P<Scene> scene = node->getScene();
-    if (!scene->collision_world3d)
-    {
-        scene->collision_configuration3d = new btDefaultCollisionConfiguration();
-        scene->collision_dispatcher3d = new btCollisionDispatcher(scene->collision_configuration3d);
-        scene->collision_broadphase3d = new btDbvtBroadphase();
-        scene->collision_solver3d = new btSequentialImpulseConstraintSolver();
-        scene->collision_world3d = new btDiscreteDynamicsWorld(scene->collision_dispatcher3d, scene->collision_broadphase3d, scene->collision_solver3d, scene->collision_configuration3d);
-        scene->collision_world3d->setGravity(btVector3(0, 0, 0));
-    }
 
-    sp2assert(node->collision_body2d == nullptr, "When setting a 3D collision shape, the node should not have a 2D collision shape");
     sp2assert(node->parent == scene->getRoot(), "3D collision shapes can only be added to top level nodes.");
+
+    if (!node->getScene()->collision_backend)
+        node->getScene()->collision_backend = new collision::BulletBackend();
+    sp2assert(dynamic_cast<collision::BulletBackend*>(node->getScene()->collision_backend), "Not having a Bullet collision backend, while already having a collision backend. Trying to mix different types of collision?");
+    btDiscreteDynamicsWorld* world = static_cast<collision::BulletBackend*>(node->getScene()->collision_backend)->world;
 
     btCollisionShape* shape = createShape();
     
@@ -63,9 +59,9 @@ void Shape3D::create(Node* node) const
     }
     if (fixed_rotation)
         body->setAngularFactor(0.0);
-    node->getScene()->collision_world3d->addRigidBody(body, filter_category, filter_mask);
+    world->addRigidBody(body, filter_category, filter_mask);
     
-    node->collision_body3d = body;
+    node->collision_body = body;
 }
 
 };//namespace collision

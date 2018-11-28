@@ -6,19 +6,12 @@
 #include <sp2/string.h>
 #include <sp2/math/vector.h>
 #include <sp2/math/ray.h>
+#include <sp2/math/rect.h>
 #include <sp2/io/pointer.h>
 #include <sp2/script/bindingObject.h>
+#include <sp2/collision/backend.h>
 
 #include <unordered_map>
-
-class b2World;
-class b2Body;
-class btDefaultCollisionConfiguration;
-class btCollisionDispatcher;
-class btBroadphaseInterface;
-class btSequentialImpulseConstraintSolver;
-class btDiscreteDynamicsWorld;
-class btRigidBody;
 
 
 namespace sp {
@@ -52,9 +45,12 @@ public:
     virtual void onPointerDrag(Ray3d ray, int id);
     virtual void onPointerUp(Ray3d ray, int id);
 
+    //Query for collision enabled objects at a specific position.
     void queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function);
+    //Query objects in a circle around a point. Note that the collision shape might not hit the collision shape.
     void queryCollision(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function);
-    void queryCollision(Vector2d position_a, Vector2d position_b, std::function<bool(P<Node> object)> callback_function);
+    //Get collision objects inside a rectangle area.
+    void queryCollision(Rect2d area, std::function<bool(P<Node> object)> callback_function);
     //Gives a callback for any object being hit by the ray from start to end. In any order.
     //Best used to see if start to end is blocked by anything (line of sight)
     //Return false to stop searching for colliding objects.
@@ -63,10 +59,7 @@ public:
     //Best used to trace towards the first object that will be hit by something. (hit trace weapons)
     //Return false to stop searching for colliding objects.
     void queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function);
-    
-    void destroyCollisionBody(b2Body* collision_body2d);
-    void destroyCollisionBody(btRigidBody* collision_body3d);
-    
+
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}
     virtual void onEnable() {}
@@ -78,17 +71,13 @@ public:
     friend class collision::Joint2D;
     friend class collision::Shape3D;
     friend class CollisionRenderPass;
+    friend class Node;
 private:
     string scene_name;
     
     P<Node> root;
     P<Camera> camera;
-    b2World* collision_world2d = nullptr;
-    btDefaultCollisionConfiguration* collision_configuration3d = nullptr;
-    btCollisionDispatcher* collision_dispatcher3d = nullptr;
-    btBroadphaseInterface* collision_broadphase3d = nullptr;
-    btSequentialImpulseConstraintSolver* collision_solver3d = nullptr;
-    btDiscreteDynamicsWorld* collision_world3d = nullptr;
+    collision::Backend* collision_backend = nullptr;
     bool enabled;
     int priority;
 

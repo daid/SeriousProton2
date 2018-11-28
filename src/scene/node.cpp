@@ -31,7 +31,7 @@ Node::Node(P<Node> parent)
 Node::Node(Scene* scene)
 : multiplayer(this), scene(scene)
 {
-    collision_body2d = nullptr;
+    collision_body = nullptr;
     parent = nullptr;
     
     global_transform = Matrix4x4f::identity();
@@ -40,10 +40,8 @@ Node::Node(Scene* scene)
 
 Node::~Node()
 {
-    if (collision_body2d)
-        scene->destroyCollisionBody(collision_body2d);
-    if (collision_body3d)
-        scene->destroyCollisionBody(collision_body3d);
+    if (collision_body)
+        scene->collision_backend->destroyBody(collision_body);
     for(Node* child : children)
         delete child;
 }
@@ -65,7 +63,7 @@ const PList<Node>& Node::getChildren()
 
 void Node::setParent(P<Node> new_parent)
 {
-    sp2assert(!collision_body2d, "Tried to switch parent of node that has collision attached. This is not supported.");
+    sp2assert(!collision_body, "Tried to switch parent of node that has collision attached. This is not supported.");
     sp2assert(parent, "Tried to switch parent of root node. This is not supported.");
     sp2assert(new_parent, "When switching parents, you must provide a new parent, not nullptr.");
     sp2assert(!multiplayer.isEnabled(), "Tried to switch parents on a multiplayer enabled node. This is not supported.");
@@ -91,33 +89,24 @@ void Node::setPosition(sp::Vector2d position)
 {
     translation.x = position.x;
     translation.y = position.y;
-    if (collision_body2d)
-        collision_body2d->SetTransform(toVector(position), collision_body2d->GetAngle());
-    if (collision_body3d)
-        collision_body3d->getWorldTransform().setOrigin(toVector(sp::Vector3d(position.x, position.y, 0)));
+    if (collision_body)
+        scene->collision_backend->updatePosition(collision_body, sp::Vector3d(position.x, position.y, 0));
     updateLocalTransform();
 }
 
 void Node::setPosition(sp::Vector3d position)
 {
     translation = position;
-    if (collision_body2d)
-        collision_body2d->SetTransform(toVector(sp::Vector2d(translation.x, translation.y)), collision_body2d->GetAngle());
-    if (collision_body3d)
-    {
-        collision_body3d->getWorldTransform().setOrigin(toVector(position));
-        collision_body3d->activate();
-    }
+    if (collision_body)
+        scene->collision_backend->updatePosition(collision_body, position);
     updateLocalTransform();
 }
 
 void Node::setRotation(double rotation)
 {
     this->rotation = Quaterniond::fromAngle(rotation);
-    if (collision_body2d)
-        collision_body2d->SetTransform(collision_body2d->GetPosition(), rotation / 180.0 * pi);
-    if (collision_body3d)
-        collision_body3d->getWorldTransform().setRotation(toQuadernion(this->rotation));
+    if (collision_body)
+        scene->collision_backend->updateRotation(collision_body, rotation);
     updateLocalTransform();
 }
 
@@ -125,55 +114,31 @@ void Node::setRotation(Quaterniond rotation)
 {
     this->rotation = rotation;
     this->rotation.normalize();
-    if (collision_body2d)
-        collision_body2d->SetTransform(collision_body2d->GetPosition(), getRotation2D() / 180.0 * pi);
-    if (collision_body3d)
-        collision_body3d->getWorldTransform().setRotation(toQuadernion(rotation));
     updateLocalTransform();
 }
 
 void Node::setLinearVelocity(sp::Vector2d velocity)
 {
-    if (collision_body2d)
-        collision_body2d->SetLinearVelocity(toVector(velocity));
-    if (collision_body3d)
-    {
-        collision_body3d->setLinearVelocity(toVector(sp::Vector3d(velocity.x, velocity.y, 0)));
-        collision_body3d->activate();
-    }
+    if (collision_body)
+        scene->collision_backend->setLinearVelocity(collision_body, sp::Vector3d(velocity.x, velocity.y, 0));
 }
 
 void Node::setLinearVelocity(Vector3d velocity)
 {
-    if (collision_body2d)
-        collision_body2d->SetLinearVelocity(toVector(sp::Vector2d(velocity.x, velocity.y)));
-    if (collision_body3d)
-    {
-        collision_body3d->setLinearVelocity(toVector(velocity));
-        collision_body3d->activate();
-    }
+    if (collision_body)
+        scene->collision_backend->setLinearVelocity(collision_body, velocity);
 }
 
 void Node::setAngularVelocity(double velocity)
 {
-    if (collision_body2d)
-        collision_body2d->SetAngularVelocity(velocity / 180.0 * pi);
-    if (collision_body3d)
-    {
-        collision_body3d->setAngularVelocity(btVector3(0, 0, velocity / 180.0 * pi));
-        collision_body3d->activate();
-    }
+    if (collision_body)
+        scene->collision_backend->setAngularVelocity(collision_body, sp::Vector3d(0, 0, velocity));
 }
 
 void Node::setAngularVelocity(sp::Vector3d velocity)
 {
-    if (collision_body2d)
-        collision_body2d->SetAngularVelocity(velocity.z / 180.0 * pi);
-    if (collision_body3d)
-    {
-        collision_body3d->setAngularVelocity(toVector(velocity / 180.0 * pi));
-        collision_body3d->activate();
-    }
+    if (collision_body)
+        scene->collision_backend->setAngularVelocity(collision_body, velocity);
 }
 
 Vector2d Node::getPosition2D()
@@ -208,20 +173,21 @@ Vector2d Node::getGlobalPoint2D(Vector2d v)
 
 sp::Vector2d Node::getLinearVelocity2D()
 {
-    if (collision_body2d)
-        return toVector<double>(collision_body2d->GetLinearVelocity());
-    if (collision_body3d)
+    if (collision_body)
     {
-        sp::Vector3d v = toVector<double>(collision_body3d->getLinearVelocity());
-        return sp::Vector2d(v.x, v.y);
+        Vector3d velocity = scene->collision_backend->getLinearVelocity(collision_body);
+        return Vector2d(velocity.x, velocity.y);
     }
-    return sp::Vector2d(0.0, 0.0);
+    return Vector2d(0.0, 0.0);
 }
 
 double Node::getAngularVelocity2D()
 {
-    if (collision_body2d)
-        return collision_body2d->GetAngularVelocity() / pi * 180.0f;
+    if (collision_body)
+    {
+        Vector3d velocity = scene->collision_backend->getAngularVelocity(collision_body);
+        return velocity.z;
+    }
     return 0.0;
 }
 
@@ -247,15 +213,15 @@ Vector3d Node::getGlobalPoint3D(Vector3d v)
 
 Vector3d Node::getLinearVelocity3D()
 {
-    if (collision_body3d)
-        return toVector<double>(collision_body3d->getLinearVelocity());
+    if (collision_body)
+        return scene->collision_backend->getLinearVelocity(collision_body);
     return Vector3d(0, 0, 0);
 }
 
 Vector3d Node::getAngularVelocity3D()
 {
-    if (collision_body3d)
-        return toVector<double>(collision_body3d->getAngularVelocity());
+    if (collision_body)
+        return scene->collision_backend->getAngularVelocity(collision_body);
     return Vector3d(0, 0, 0);
 }
 
@@ -266,33 +232,23 @@ void Node::setCollisionShape(const collision::Shape& shape)
 
 void Node::removeCollisionShape()
 {
-    if (collision_body2d)
-        scene->destroyCollisionBody(collision_body2d);
-    collision_body2d = nullptr;
+    if (collision_body)
+        scene->collision_backend->destroyBody(collision_body);
+    collision_body = nullptr;
 }
 
 bool Node::testCollision(sp::Vector2d position)
 {
-    if (!collision_body2d)
+    if (!collision_body)
         return false;
-    for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
-    {
-        if (f->TestPoint(toVector(position)))
-            return true;
-    }
-    return false;
+    return scene->collision_backend->testCollision(collision_body, Vector3d(position.x, position.y, 0));
 }
 
 bool Node::isSolid()
 {
-    if (!collision_body2d)
+    if (!collision_body)
         return false;
-    for(const b2Fixture* f = collision_body2d->GetFixtureList(); f; f = f->GetNext())
-    {
-        if (!f->IsSensor())
-            return true;
-    }
-    return false;
+    return scene->collision_backend->isSolid(collision_body);
 }
 
 void Node::setAnimation(std::unique_ptr<Animation> animation)
