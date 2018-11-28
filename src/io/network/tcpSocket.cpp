@@ -58,7 +58,7 @@ bool TcpSocket::connect(const Address& host, int port)
             struct sockaddr_in server_addr;
             memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
-            server_addr.sin_port = ::htons(port);
+            server_addr.sin_port = htons(port);
             if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
             {
                 setBlocking(blocking);
@@ -70,7 +70,7 @@ bool TcpSocket::connect(const Address& host, int port)
             struct sockaddr_in6 server_addr;
             memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
-            server_addr.sin6_port = ::htons(port);
+            server_addr.sin6_port = htons(port);
             if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
             {
                 setBlocking(blocking);

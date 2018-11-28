@@ -51,7 +51,7 @@ bool UdpSocket::bind(int port)
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin6_family = AF_INET6;
         server_addr.sin6_addr = in6addr_any;
-        server_addr.sin6_port = ::htons(port);
+        server_addr.sin6_port = htons(port);
 
         if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
         {
@@ -69,8 +69,8 @@ bool UdpSocket::bind(int port)
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-        server_addr.sin_port = ::htons(port);
+        server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        server_addr.sin_port = htons(port);
 
         if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
         {
@@ -127,7 +127,7 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
         if (is_set)
         {
             server_addr.sin6_family = AF_INET6;
-            server_addr.sin6_port = ::htons(port);
+            server_addr.sin6_port = htons(port);
 
             int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
             return result == int(size);
@@ -150,7 +150,7 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
     if (is_set)
     {
         server_addr.sin_family = AF_INET;
-        server_addr.sin_port = ::htons(port);
+        server_addr.sin_port = htons(port);
 
         int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
         return result == int(size);
