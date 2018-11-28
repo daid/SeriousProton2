@@ -32,6 +32,12 @@ Image::Image(Vector2i size)
     pixels.resize(size.x * size.y);
 }
 
+Image::Image(Vector2i size, uint32_t color)
+: size(size)
+{
+    pixels.resize(size.x * size.y, color);
+}
+
 void Image::operator=(Image&& other)
 {
     pixels = std::move(other.pixels);

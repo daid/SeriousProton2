@@ -16,6 +16,7 @@ public:
     Image();
     Image(Image&& other);
     Image(Vector2i size);
+    Image(Vector2i size, uint32_t color);
     
     void operator=(Image&& other);
     

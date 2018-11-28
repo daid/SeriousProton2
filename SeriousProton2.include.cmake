@@ -20,6 +20,10 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     if(NOT UNIX)
         list(FILTER SP2_SOURCES EXCLUDE REGEX .*/unix/.*)
     endif()
+    
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+    endif()
 
     # Set our optimization flags.
     set(OPTIMIZER_FLAGS "")
