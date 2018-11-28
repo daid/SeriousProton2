@@ -59,7 +59,7 @@ void CollisionRenderPass::render(RenderQueue& queue)
     }
     else
     {
-        for(Scene* scene : Scene::scenes)
+        for(Scene* scene : Scene::all())
             renderScene(queue, scene);
     }
 }

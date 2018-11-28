@@ -16,6 +16,7 @@ public:
     T end;
 };
 
+typedef Ray<Vector2i> Ray2i;
 typedef Ray<Vector2f> Ray2f;
 typedef Ray<Vector2d> Ray2d;
 typedef Ray<Vector3f> Ray3f;

@@ -19,9 +19,9 @@ void Joint2D::create(b2JointDef* joint_def, sp::P<sp::Node> node_a, sp::P<sp::No
     sp2assert(node_a && node_b, "Must supply nodes to a joint.");
     sp2assert(node_a->getScene() == node_b->getScene(), "Scenes of nodes given to a joint must be the same.");
     sp2assert(node_a->collision_body && node_b->collision_body, "Nodes given to a joint need a body.");
+    scene = node_a->getScene();
     sp2assert(scene->collision_backend, "No collision backend when creating a joint.");
     
-    scene = node_a->getScene();
     collision::Box2DBackend* backend = dynamic_cast<collision::Box2DBackend*>(scene->collision_backend);
     sp2assert(backend, "No 2d collision backend when creating a 2d joint.");
     

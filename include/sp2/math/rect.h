@@ -40,6 +40,7 @@ public:
     Vector2<T> size;
 };
 
+typedef Rect<int> Rect2i;
 typedef Rect<float> Rect2f;
 typedef Rect<double> Rect2d;
 
