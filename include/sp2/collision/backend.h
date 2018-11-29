@@ -2,6 +2,7 @@
 #define SP2_COLLISION_BACKEND_H
 
 #include <memory>
+#include <functional>
 #include <sp2/pointer.h>
 #include <sp2/math/vector3.h>
 #include <sp2/math/quaternion.h>
