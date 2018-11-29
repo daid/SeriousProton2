@@ -22,6 +22,18 @@ Window::Window()
 {
     sp2assert(Engine::getInstance(), "The sp::Engine needs to be created before the sp::Window is created");
 
+#ifdef __WIN32__
+    //On Vista or newer windows, let the OS know we are DPI aware, so we won't have odd scaling issues.
+    void* user_dll = SDL_LoadObject("USER32.DLL");
+    if (user_dll)
+    {
+        BOOL(WINAPI *SetProcessDPIAware)(void);
+        SetProcessDPIAware = (BOOL(WINAPI *)(void)) SDL_LoadFunction(user_dll, "SetProcessDPIAware");
+        if (SetProcessDPIAware)
+            SetProcessDPIAware();
+    }
+#endif
+
     windows.add(this);
     antialiasing = 0;
     fullscreen = false;
@@ -136,8 +148,8 @@ void Window::close()
 
 void Window::createRenderWindow()
 {
-    SDL_DisplayMode display_mode;
-    if (SDL_GetDesktopDisplayMode(0, &display_mode))
+    SDL_Rect display_mode;
+    if (SDL_GetDisplayBounds(0, &display_mode))
     {
         LOG(Warning, "Failed to get desktop size.");
         display_mode.w = 640;
@@ -201,6 +213,7 @@ void Window::createRenderWindow()
         LOG(Warning, "Failed to create SDL window.");
         return;
     }
+
     render_context = SDL_GL_CreateContext(render_window);
     initOpenGL();
     
