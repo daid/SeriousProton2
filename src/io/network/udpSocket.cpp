@@ -176,14 +176,14 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
                 char buffer[128];
                 ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET6, buffer, &from_addr, from_addr_len);
-                port = ::ntohs(from_addr.sin6_port);
+                port = ntohs(from_addr.sin6_port);
             }
             else if (from_addr_len == sizeof(struct sockaddr_in))
             {
                 char buffer[128];
                 ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET, buffer, &from_addr, from_addr_len);
-                port = ::ntohs(((struct sockaddr_in*)&from_addr)->sin_port);
+                port = ntohs(((struct sockaddr_in*)&from_addr)->sin_port);
             }
             return result;
         }
@@ -201,7 +201,7 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
                 char buffer[128];
                 ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET, buffer, &from_addr, from_addr_len);
-                port = ::ntohs(from_addr.sin_port);
+                port = ntohs(from_addr.sin_port);
             }
             return result;
         }
