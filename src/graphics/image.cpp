@@ -265,7 +265,14 @@ void Image::drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t col
 {
     if (polygon.size() < 3)
         return;
-    for(int y=0; y<size.y; y++)
+    int max = 0;
+    int min = size.y;
+    for(Vector2i p0 : polygon)
+    {
+        max = std::max(max, p0.y);
+        min = std::min(min, p0.y);
+    }
+    for(int y=min; y<max; y++)
     {
         std::vector<int> nodes;
         Vector2i p0 = polygon.back();
