@@ -38,6 +38,7 @@ public:
     void drawCircle(Vector2i position, int radius, uint32_t color);
     void drawFilledCircle(Vector2i position, int radius, uint32_t color);
     void drawFloodFill(Vector2i position, uint32_t color);
+    void drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t color);
 private:
     Vector2i size;
     std::vector<uint32_t> pixels;

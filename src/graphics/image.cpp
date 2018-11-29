@@ -261,4 +261,29 @@ void Image::drawFloodFill(Vector2i position, uint32_t color)
     }
 }
 
+void Image::drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t color)
+{
+    if (polygon.size() < 3)
+        return;
+    for(int y=0; y<size.y; y++)
+    {
+        std::vector<int> nodes;
+        Vector2i p0 = polygon.back();
+        for(Vector2i p1 : polygon)
+        {
+            if ((p1.y < y && p0.y >= y) || (p0.y < y && p1.y >= y))
+                nodes.push_back(p1.x + float(y-p1.y) / float(p0.y-p1.y) * float(p0.x-p1.x));
+            p0 = p1;
+        }
+        
+        std::sort(nodes.begin(), nodes.end());
+
+        for(unsigned int n=0; n<nodes.size(); n+=2)
+        {
+            for(int x=nodes[n]; x<nodes[n+1]; x++)
+                PUT_PIXEL(x, y, color);
+        }
+    }
+}
+
 };//namespace sp
