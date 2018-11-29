@@ -233,4 +233,32 @@ void Image::drawFilledCircle(Vector2i position, int radius, uint32_t color)
     }
 }
 
+void Image::drawFloodFill(Vector2i position, uint32_t color)
+{
+    if (position.x < 0 || position.y < 0 || position.x >= size.x || position.y >= size.y)
+        return;
+    uint32_t target_color = pixels[position.x + position.y * size.x];
+    if (target_color == color)
+        return;
+    std::vector<Vector2i> todo_list;
+    todo_list.push_back(position);
+    while(todo_list.size() > 0)
+    {
+        position = todo_list.back();
+        todo_list.pop_back();
+        
+        if (pixels[position.x + position.y * size.x] != target_color)
+            continue;
+        pixels[position.x + position.y * size.x] = color;
+        if (position.x > 0)
+            todo_list.emplace_back(position.x - 1, position.y);
+        if (position.y > 0)
+            todo_list.emplace_back(position.x, position.y - 1);
+        if (position.x < size.x - 1)
+            todo_list.emplace_back(position.x + 1, position.y);
+        if (position.y < size.y - 1)
+            todo_list.emplace_back(position.x, position.y + 1);
+    }
+}
+
 };//namespace sp

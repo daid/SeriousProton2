@@ -37,6 +37,7 @@ public:
     void drawFilled(Rect2i rect, uint32_t color);
     void drawCircle(Vector2i position, int radius, uint32_t color);
     void drawFilledCircle(Vector2i position, int radius, uint32_t color);
+    void drawFloodFill(Vector2i position, uint32_t color);
 private:
     Vector2i size;
     std::vector<uint32_t> pixels;
