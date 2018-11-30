@@ -354,7 +354,9 @@ Image CameraCapture::getFrame()
     }
     if (data->sample_grabber->GetCurrentBuffer(&buffer_size, (LONG*)data->buffer))
         return result;
-    
+    if (buffer_size != 3 * size.x * size.y)
+        return result;
+
     //In place convert 24bit BGR into 24bit RGBA.
     uint8_t* src = data->buffer + (size.x * size.y) * 3;
     uint32_t* dst = (uint32_t*)(data->buffer) + (size.x * size.y);
