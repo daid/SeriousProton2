@@ -8,6 +8,31 @@
 
 namespace sp {
 
+/**
+    The SpriteAnimation class can be attached to Node to provide flipbook like sprite animations.
+    The SpriteAnimation class provides a set of animation as well as horizontal flipping.
+    
+    SpriteAnimation are loaded from a KeyValueTree text files, and each node with an ID provides an animation.
+    Sprites are defined 
+    
+    The following keys are used from the tree node, including from parent nodes:
+    - texture: [String] Texture to use for the animation. Full path.
+    - texture_size: [Vector2i] Size in pixels of the texture.
+    - loop: [Boolean] True if the animation should loop, else it plays once.
+    - frames: [List of integers], indicates the sequence of frames to play. "0, 1, 0, 2" defines a 4 frame animation where 1 sprite is reused.
+    - frame_count: [Integer] If "frames" is not set, this sets frames to a sequence from 0 to the given number (excluding the given number)
+    - flip: [List of strings], Allows to set a H or V or HV flip per frame.
+    - line_length: [Integer], Amount of sprites in sequence on a single row.
+    - delay: [List of floats], Delay of each frame, should have the same length as "frames".
+    - position: [Vector2f] Position of the first sprite in the spritesheet, in pixels.
+    - frame_size: [Vector2f] Size of the sprites, in pixels.
+    - offset: [Vector2f] Offset of the sprites compared to point of origin. 0,0 centers the sprite.
+    - size: [Vector2f] Size of the final sprite in the engine. Generally a factor of the frame_size.
+    - margin: [Vector2f] Margin between each sprite in the sprite sheet.
+    
+    Minimal required are:
+    texture, texture_size, frames, position, size, frame_size
+*/
 class SpriteAnimation : public Animation
 {
 public:
