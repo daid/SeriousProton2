@@ -12,14 +12,14 @@ namespace collision {
 
 void Shape2D::create(Node* node) const
 {
-    if (!node->getScene()->collision_backend)
-        node->getScene()->collision_backend = new collision::Box2DBackend();
-    sp2assert(dynamic_cast<collision::Box2DBackend*>(node->getScene()->collision_backend), "Not having a Box2D collision backend, while already having a collision backend. Trying to mix different types of collision?");
-    b2World* world = static_cast<collision::Box2DBackend*>(node->getScene()->collision_backend)->world;
+    if (!getCollisionBackend(node))
+        setCollisionBackend(node, new collision::Box2DBackend());
+    sp2assert(dynamic_cast<collision::Box2DBackend*>(getCollisionBackend(node)), "Not having a Box2D collision backend, while already having a collision backend. Trying to mix different types of collision?");
+    b2World* world = static_cast<collision::Box2DBackend*>(getCollisionBackend(node))->world;
 
-    sp2assert(node->parent == node->getScene()->getRoot(), "2D collision shapes can only be added to top level nodes.");
+    sp2assert(node->getParent() == node->getScene()->getRoot(), "2D collision shapes can only be added to top level nodes.");
 
-    if (!node->collision_body)
+    if (!getCollisionBody(node))
     {
         b2BodyDef body_def;
         body_def.position = toVector(node->getGlobalPosition2D());
@@ -43,10 +43,10 @@ void Shape2D::create(Node* node) const
         }
         body_def.fixedRotation = fixed_rotation;
         body_def.userData = node;
-        node->collision_body = world->CreateBody(&body_def);
+        setCollisionBody(node, world->CreateBody(&body_def));
     }
     
-    b2Body* body = static_cast<b2Body*>(node->collision_body);
+    b2Body* body = static_cast<b2Body*>(getCollisionBody(node));
     while(body->GetFixtureList())
         body->DestroyFixture(body->GetFixtureList());
     createFixture(body);

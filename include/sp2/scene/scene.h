@@ -16,9 +16,8 @@
 
 namespace sp {
 namespace collision {
-class Shape2D;
+class Shape;
 class Joint2D;
-class Shape3D;
 }
 
 class Node;
@@ -67,9 +66,8 @@ public:
     
     string getName() const { return scene_name; }
     
-    friend class collision::Shape2D;
+    friend class collision::Shape;
     friend class collision::Joint2D;
-    friend class collision::Shape3D;
     friend class CollisionRenderPass;
     friend class Node;
 private:

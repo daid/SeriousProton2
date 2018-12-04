@@ -43,6 +43,13 @@ public:
     virtual void query(Rect2d area, std::function<bool(P<Node> object)> callback_function) = 0;
     virtual void queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) = 0;
     virtual void queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) = 0;
+
+protected:
+    void* getCollisionBody(sp::P<sp::Node>& node);
+    void setCollisionBody(sp::P<sp::Node>& node, void* body);
+
+    void modifyPositionByPhysics(Node* node, sp::Vector2d position, double rotation);
+    void modifyPositionByPhysics(Node* node, sp::Vector3d position, Quaterniond rotation);
 };
 
 };//namespace collision

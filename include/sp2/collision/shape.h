@@ -5,6 +5,7 @@ namespace sp {
 class Node;
 namespace collision {
 
+class Backend;
 class Shape
 {
 public:
@@ -45,9 +46,16 @@ public:
     //Normally you set 1 bit on the filter_category, and set the bits in the filter_mask where you want to collide with.
     int filter_category;
 	int filter_mask;
+protected:
+    Backend* getCollisionBackend(Node* node) const;
+    void setCollisionBackend(Node* node, Backend* backend) const;
+
+    void* getCollisionBody(Node* node) const;
+    void setCollisionBody(Node* node, void* body) const;
+
 private:
     virtual void create(Node* node) const = 0;
-    
+
     friend class sp::Node;
 };
 

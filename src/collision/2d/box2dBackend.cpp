@@ -251,7 +251,7 @@ void Box2DBackend::postUpdate(float delta)
     for(b2Body* body = world->GetBodyList(); body; body = body->GetNext())
     {
         Node* node = (Node*)body->GetUserData();
-        node->modifyPositionByPhysics(toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
+        modifyPositionByPhysics(node, toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
     }
 }
 

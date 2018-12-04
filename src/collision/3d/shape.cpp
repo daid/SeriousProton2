@@ -15,12 +15,12 @@ void Shape3D::create(Node* node) const
 {
     P<Scene> scene = node->getScene();
 
-    sp2assert(node->parent == scene->getRoot(), "3D collision shapes can only be added to top level nodes.");
+    sp2assert(node->getParent() == scene->getRoot(), "3D collision shapes can only be added to top level nodes.");
 
-    if (!node->getScene()->collision_backend)
-        node->getScene()->collision_backend = new collision::BulletBackend();
-    sp2assert(dynamic_cast<collision::BulletBackend*>(node->getScene()->collision_backend), "Not having a Bullet collision backend, while already having a collision backend. Trying to mix different types of collision?");
-    btDiscreteDynamicsWorld* world = static_cast<collision::BulletBackend*>(node->getScene()->collision_backend)->world;
+    if (!getCollisionBackend(node))
+        setCollisionBackend(node, new collision::BulletBackend());
+    sp2assert(dynamic_cast<collision::BulletBackend*>(getCollisionBackend(node)), "Not having a Bullet collision backend, while already having a collision backend. Trying to mix different types of collision?");
+    btDiscreteDynamicsWorld* world = static_cast<collision::BulletBackend*>(getCollisionBackend(node))->world;
 
     btCollisionShape* shape = createShape();
     
@@ -61,7 +61,7 @@ void Shape3D::create(Node* node) const
         body->setAngularFactor(0.0);
     world->addRigidBody(body, filter_category, filter_mask);
     
-    node->collision_body = body;
+    setCollisionBody(node, body);
 }
 
 };//namespace collision

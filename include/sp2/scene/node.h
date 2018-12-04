@@ -18,12 +18,9 @@ class Server;
 class Client;
 }
 namespace collision {
+class Backend;
 class Shape;
-class Shape2D;
 class Joint2D;
-class Shape3D;
-class Box2DBackend;
-class BulletBackend;
 }
 class Node;
 class CollisionInfo
@@ -153,11 +150,9 @@ private:
     void modifyPositionByPhysics(sp::Vector3d position, Quaterniond rotation);
 
     friend class Scene;
-    friend class collision::Shape2D;
+    friend class collision::Shape;
+    friend class collision::Backend;
     friend class collision::Joint2D;
-    friend class collision::Shape3D;
-    friend class collision::Box2DBackend;
-    friend class collision::BulletBackend;
 };
 
 };//namespace sp
