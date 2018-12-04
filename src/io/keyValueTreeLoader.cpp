@@ -8,7 +8,7 @@ class ParsingException : public std::exception
 {
 public:
     string message;
-    
+
     ParsingException(string message) : message(message) {}
 };
 
@@ -18,7 +18,7 @@ KeyValueTreePtr KeyValueTreeLoader::load(string resource_name)
     {
         KeyValueTreeLoader loader(resource_name);
         return loader.result;
-    }catch(ParsingException e)
+    }catch(ParsingException& e)
     {
         LOG(Error, "Error loading", resource_name, e.message);
         return nullptr;
@@ -33,7 +33,7 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
     if (!stream)
         throw ParsingException("Failed to open " + resource_name + " for tree loading");
     LOG(Info, "Loading tree", resource_name);
-    
+
     while(stream->tell() < stream->getSize())
     {
         string line = stream->readLine().strip();

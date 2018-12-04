@@ -2,7 +2,7 @@
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <string.h>
-#include <SDL2/SDL_audio.h>
+#include <SDL_audio.h>
 
 
 namespace sp {
@@ -65,7 +65,7 @@ void AudioSource::startAudioSystem()
     want.channels = 2;
     want.samples = 1024;
     want.callback = audioCallback;
-    
+
     SDL_OpenAudio(&want, &have);
     SDL_PauseAudio(0);
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");

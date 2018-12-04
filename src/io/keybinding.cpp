@@ -7,7 +7,7 @@
 #include <json11/json11.hpp>
 #include <fstream>
 
-#include <SDL2/SDL_events.h>
+#include <SDL_events.h>
 
 namespace sp {
 namespace io {
@@ -23,7 +23,7 @@ Keybinding::Keybinding(string name)
     up_event = false;
     fixed_down_event = false;
     fixed_up_event = false;
-    
+
     for(Keybinding* other : keybindings)
         sp2assert(other->name != name, "Duplicate keybinding name");
     keybindings.add(this);
@@ -155,14 +155,14 @@ void Keybinding::loadKeybindings(const string& filename)
     std::stringstream data;
     data << file.rdbuf();
     string err;
-    
+
     json11::Json json = json11::Json::parse(data.str(), err);
     if (err != "")
     {
         LOG(Warning, "Failed to load keybindings from", filename, ":", err);
         return;
     }
-    
+
     for(Keybinding* keybinding : keybindings)
     {
         const json11::Json& entry = json[keybinding->name];
@@ -201,7 +201,7 @@ void Keybinding::saveKeybindings(const string& filename)
         obj[keybinding->name] = data;
     }
     json11::Json json = obj;
-    
+
     std::ofstream file(filename);
     file << json.dump();
 }

@@ -11,7 +11,7 @@
 #include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 
 namespace sp {
@@ -35,9 +35,9 @@ Engine::Engine()
     maximum_frame_time = 0.5f;
     minimum_frame_time = 0.001f;
     fixed_update_accumulator = 0.0;
-    
+
     in_fixed_update = false;
-    
+
     SDL_Init(SDL_INIT_EVERYTHING);
     atexit(SDL_Quit);
 }
@@ -52,9 +52,9 @@ void Engine::initialize()
         return;
 
     sp::multiplayer::ClassEntry::fillMappings();
-    
+
     initialized = true;
-    
+
     audio::AudioSource::startAudioSystem();
 }
 
@@ -65,7 +65,7 @@ public:
     {
         start_time = std::chrono::steady_clock::now();
     }
-    
+
     float restart()
     {
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -73,7 +73,7 @@ public:
         start_time = now;
         return diff.count();
     }
-    
+
     float getElapsedTime()
     {
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -93,11 +93,11 @@ void Engine::run()
     int fps_count = 0;
     Clock fps_counter_clock;
     LOG(Info, "Engine started");
-    
+
     while(Window::anyWindowOpen())
     {
         SDL_Event event;
-    
+
         while (SDL_PollEvent(&event))
         {
             unsigned int window_id = 0;
@@ -134,7 +134,7 @@ void Engine::run()
             }
             io::Keybinding::handleEvent(event);
         }
-        
+
         float delta = frame_time_clock.restart();
         delta = std::min(maximum_frame_time, delta);
         delta = std::max(minimum_frame_time, delta);
@@ -156,7 +156,7 @@ void Engine::update(float time_delta)
 {
     UpdateTiming timing;
     Clock timing_clock;
-    
+
     time_delta *= game_speed;
     if (paused)
         time_delta = 0;

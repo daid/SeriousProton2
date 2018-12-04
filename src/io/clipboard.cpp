@@ -1,7 +1,7 @@
 #include <sp2/io/clipboard.h>
 #include <sp2/logging.h>
 
-#include <SDL2/SDL_clipboard.h>
+#include <SDL_clipboard.h>
 
 namespace sp {
 namespace io {

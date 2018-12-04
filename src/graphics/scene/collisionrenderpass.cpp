@@ -14,7 +14,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <private/collision/bulletVector.h>
 
-#include <SDL2/SDL_keyboard.h>
+#include <SDL_keyboard.h>
 
 
 namespace sp {
@@ -65,11 +65,11 @@ void CollisionRenderPass::render(RenderQueue& queue)
 }
 
 void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
-{    
+{
     P<Camera> camera = scene->getCamera();
     if (specific_camera)
         camera = specific_camera;
-    
+
     if (scene->isEnabled() && camera)
     {
         if (scene->collision_backend)

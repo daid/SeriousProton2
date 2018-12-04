@@ -2,7 +2,7 @@
 #include <sp2/audio/audioSource.h>
 #include <sp2/io/resourceProvider.h>
 
-#include <SDL2/SDL_audio.h>
+#include <SDL_audio.h>
 
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PUSHDATA_API
@@ -24,7 +24,7 @@ public:
         stop();
         if (vorbis)
             stb_vorbis_close(vorbis);
-        
+
         file_data.resize(stream->getSize());
         stream->read(file_data.data(), file_data.size());
         vorbis = stb_vorbis_open_memory(file_data.data(), file_data.size(), nullptr, nullptr);
@@ -45,7 +45,7 @@ protected:
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
         SDL_MixAudio((uint8_t*)stream, (const uint8_t*)&buffer, vorbis_samples * 2 * sizeof(float), mix_volume);
     }
-    
+
 private:
     std::vector<uint8_t> file_data;
     stb_vorbis* vorbis = nullptr;
@@ -71,7 +71,7 @@ void Music::stop()
 {
     music_source.stop();
 }
-    
+
 void Music::setVolume(float volume)
 {
     mix_volume = volume * SDL_MIX_MAXVOLUME / 100;

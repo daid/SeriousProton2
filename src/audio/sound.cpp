@@ -2,7 +2,7 @@
 #include <sp2/audio/audioSource.h>
 #include <sp2/io/resourceProvider.h>
 
-#include <SDL2/SDL_audio.h>
+#include <SDL_audio.h>
 
 #include <unordered_map>
 #include <string.h>
@@ -110,12 +110,12 @@ void Sound::play(string resource_name)
                 memcpy(data->data(), buffer, buffer_size);
             }
             SDL_FreeWAV(buffer);
-            
+
             LOG(Info, "Loaded", resource_name, "with", data->size(), "samples", float(data->size()) / 2 / 44100);
         }
         sound_cache[resource_name] = data;
     }
-    
+
     for(int n=0; n<slot_count; n++)
     {
         if (slot[n].buffer == nullptr)

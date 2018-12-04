@@ -7,7 +7,7 @@
 #include <sp2/graphics/scene/renderqueue.h>
 #include <sp2/graphics/opengl.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #ifdef __WIN32__
 #include <windows.h>
@@ -44,7 +44,7 @@ Window::Window()
 
     render_window = nullptr;
     render_context = nullptr;
-    
+
     createRenderWindow();
 }
 
@@ -52,7 +52,7 @@ Window::Window(float aspect_ratio)
 : Window()
 {
     window_aspect_ratio = aspect_ratio;
-    
+
     createRenderWindow();
 }
 
@@ -60,7 +60,7 @@ Window::Window(Vector2f size_factor)
 : Window()
 {
     max_window_size_ratio = size_factor;
-    
+
     createRenderWindow();
 }
 
@@ -126,7 +126,7 @@ void Window::setPosition(Vector2f position)
     SDL_GetWindowBordersSize(render_window, &top, &left, &bottom, &right);
     size.x += left + right;
     size.y += top + bottom;
-    
+
     SDL_SetWindowPosition(render_window, rect.x + left + (rect.w - size.x) * position.x, rect.y + top + (rect.h - size.y) * position.y);
 }
 
@@ -155,7 +155,7 @@ void Window::createRenderWindow()
         display_mode.w = 640;
         display_mode.h = 480;
     }
-    
+
     float window_width = display_mode.w;
     float window_height = display_mode.h;
     if (!fullscreen)
@@ -183,7 +183,7 @@ void Window::createRenderWindow()
                 window_height = window_width / window_aspect_ratio;
         }
     }
-    
+
     close();
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
@@ -192,7 +192,7 @@ void Window::createRenderWindow()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    
+
     if (antialiasing > 1)
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -203,7 +203,7 @@ void Window::createRenderWindow()
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
     }
-    
+
     int flags = SDL_WINDOW_OPENGL;
     if (fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
@@ -216,7 +216,7 @@ void Window::createRenderWindow()
 
     render_context = SDL_GL_CreateContext(render_window);
     initOpenGL();
-    
+
     int major_version, minor_version;
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
@@ -234,7 +234,7 @@ void Window::render()
 {
     Vector2i window_size;
     SDL_GetWindowSize(render_window, &window_size.x, &window_size.y);
-    
+
     graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
     });
@@ -280,15 +280,15 @@ void Window::render()
             SDL_GL_MakeCurrent(render_window, render_context);
             glViewport(0, 0, window_size.x, window_size.y);
         });
-        
+
         Vector2i mouse_pos;
         SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-    
+
         Vector2d position(mouse_pos.x, mouse_pos.y);
         Vector2d window_size(window_size.x, window_size.y);
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
-        
+
         queue.setCamera(Matrix4x4f::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4f::identity());
         RenderData rd;
         rd.type = RenderData::Type::Normal;
@@ -301,7 +301,7 @@ void Window::render()
     {
         SDL_GL_SwapWindow(render_window);
     });
-    
+
     queue.render();
 }
 
