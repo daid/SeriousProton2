@@ -124,8 +124,8 @@ void Tilemap::updateMesh()
     float fu = 1.0 / float(texture_tile_count_x);
     float fv = 1.0 / float(texture_tile_count_y);
     
-    float u_offset = 0.0;
-    float v_offset = 0.0;
+    float u_offset = 0.5 / 1024;
+    float v_offset = 0.5 / 1024;
     
     MeshData::Vertices vertices;
     MeshData::Indices indices;

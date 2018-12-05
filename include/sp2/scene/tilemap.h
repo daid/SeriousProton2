@@ -20,8 +20,8 @@ public:
     
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
     void setTileZOffset(int x, int y, double z_offset);
-    int getTileIndex(int x, int y);
-    Collision getTileCollision(int x, int y);
+    int getTileIndex(int x, int y);//Returns -1 on out of range
+    Collision getTileCollision(int x, int y);//Returns Open on out of range
     
     Vector2i getSize();
     

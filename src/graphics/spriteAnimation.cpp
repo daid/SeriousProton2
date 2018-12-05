@@ -135,8 +135,8 @@ void SpriteAnimation::Data::load(string resource_name)
     if (!tree)
         return;
 
-    float u_offset = 0.0;
-    float v_offset = 0.0;
+    float u_offset = 0.5 / 1024;
+    float v_offset = 0.5 / 1024;
 
     animations.clear();
     int total_frames = 0;
