@@ -149,7 +149,7 @@ void SpriteAnimation::Data::load(string resource_name)
         animation.loop = stringutil::convert::toBool(data["loop"]);
         
         std::vector<int> frames = stringutil::convert::toIntArray(data["frames"]);
-        if (frames.size() == 1)
+        if (frames.size() == 1 && frames[0] == 0)
         {
             int frame_count = stringutil::convert::toInt(data["frame_count"]);
             if (frame_count < 1)
@@ -193,16 +193,6 @@ void SpriteAnimation::Data::load(string resource_name)
             float v0 = position.y + (frame_size.y + margin.y) * y;
             float v1 = v0 + frame_size.y;
             
-            if (flip[n].strip().upper() == "H")
-                std::swap(u0, u1);
-            if (flip[n].strip().upper() == "V")
-                std::swap(v0, v1);
-            if (flip[n].strip().upper() == "HV")
-            {
-                std::swap(u0, u1);
-                std::swap(v0, v1);
-            }
-            
             u0 /= texture_size.x;
             u1 /= texture_size.x;
             v0 /= texture_size.y;
@@ -212,6 +202,16 @@ void SpriteAnimation::Data::load(string resource_name)
             u1 -= u_offset;
             v0 += v_offset;
             v1 -= v_offset;
+
+            if (flip[n].strip().upper() == "H")
+                std::swap(u0, u1);
+            if (flip[n].strip().upper() == "V")
+                std::swap(v0, v1);
+            if (flip[n].strip().upper() == "HV")
+            {
+                std::swap(u0, u1);
+                std::swap(v0, v1);
+            }
 
             animation.frames.emplace_back();
             Data::Animation::Frame& frame = animation.frames.back();
