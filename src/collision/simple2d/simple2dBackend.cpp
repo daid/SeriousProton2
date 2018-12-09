@@ -25,6 +25,8 @@ public:
     Rect2d shape;
     Node* owner;
     int broadphase_proxy;
+    int filter_category;
+    int filter_mask;
     
     b2AABB getAABB()
     {
@@ -236,23 +238,33 @@ void Simple2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vec
 void* Simple2DBackend::createBody(Node* owner, const Simple2DShape& shape)
 {
     Simple2DBody* body = new Simple2DBody();
-    body->type = shape.type;
     body->owner = owner;
+    body->type = shape.type;
     body->shape = shape.rect;
+    body->filter_category = shape.filter_category;
+	body->filter_mask = shape.filter_mask;
+
     body->broadphase_proxy = broadphase->CreateProxy(body->getAABB(), body);
+
     return body;
 }
 
 void Simple2DBackend::AddPair(void* _body_a, void* _body_b)
 {
+    Simple2DBody* body_a = static_cast<Simple2DBody*>(_body_a);
+    Simple2DBody* body_b = static_cast<Simple2DBody*>(_body_b);
+
+    if (!((body_a->filter_category & body_b->filter_mask) && (body_b->filter_category & body_a->filter_mask)))
+        return;
+
     for(auto& pair : collision_pairs)
     {
-        if (pair.body_a == static_cast<Simple2DBody*>(_body_a) && pair.body_b == static_cast<Simple2DBody*>(_body_b))
+        if (pair.body_a == body_a && pair.body_b == body_b)
             return;
     }
     collision_pairs.emplace_back();
-    collision_pairs.back().body_a = static_cast<Simple2DBody*>(_body_a);
-    collision_pairs.back().body_b = static_cast<Simple2DBody*>(_body_b);
+    collision_pairs.back().body_a = body_a;
+    collision_pairs.back().body_b = body_b;
 }
 
 };//namespace collision
