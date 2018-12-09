@@ -87,6 +87,8 @@ void Node::setParent(P<Node> new_parent)
 
 void Node::setPosition(sp::Vector2d position)
 {
+    if (translation.x == position.x && translation.y == position.y)
+        return;
     translation.x = position.x;
     translation.y = position.y;
     if (collision_body)
@@ -96,6 +98,8 @@ void Node::setPosition(sp::Vector2d position)
 
 void Node::setPosition(sp::Vector3d position)
 {
+    if (translation == position)
+        return;
     translation = position;
     if (collision_body)
         scene->collision_backend->updatePosition(collision_body, position);

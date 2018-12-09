@@ -1,23 +1,22 @@
-#ifndef SP2_COLLISION_2D_BOX2D_BACKEND_H
-#define SP2_COLLISION_2D_BOX2D_BACKEND_H
+#ifndef SP2_COLLISION_SIMPLE2D_SIMPLE2D_BACKEND_H
+#define SP2_COLLISION_SIMPLE2D_SIMPLE2D_BACKEND_H
 
 #include <sp2/collision/backend.h>
+#include <list>
 
-class b2World;
-class b2Body;
 
+
+class b2BroadPhase;
 namespace sp {
 namespace collision {
+class Simple2DShape;
+class CollisionPair;
 
-class Shape2D;
-class Joint2D;
-class Shape3D;
-
-class Box2DBackend : public Backend
+class Simple2DBackend : public Backend
 {
 public:
-    Box2DBackend();
-    virtual ~Box2DBackend();
+    Simple2DBackend();
+    virtual ~Simple2DBackend();
     
     virtual void step(float time_delta) override;
     virtual void postUpdate(float delta) override;
@@ -41,13 +40,17 @@ public:
     virtual void queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) override;
     virtual void queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) override;
 private:
-    b2World* world = nullptr;
-
-    friend class collision::Shape2D;
-    friend class collision::Joint2D;
+    void* createBody(Node* owner, const Simple2DShape& shape);
+    void AddPair(void* body_a, void* body_b); //Callback from the broadphase
+    
+    b2BroadPhase* broadphase;
+    std::list<CollisionPair> collision_pairs;
+    
+    friend class Simple2DShape;
+    friend class ::b2BroadPhase;
 };
 
 };//namespace collision
 };//namespace sp
 
-#endif//SP2_COLLISION_SHAPE_H
+#endif//SP2_COLLISION_SIMPLE2D_SIMPLE2D_BACKEND_H

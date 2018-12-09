@@ -331,7 +331,10 @@ private:
 void Tilemap::updateCollision()
 {
     TilemapCollisionBuilder builder(*this);
-    setCollisionShape(builder.result);
+    if (!builder.result.chains.empty() || !builder.result.loops.empty())
+        setCollisionShape(builder.result);
+    else
+        removeCollisionShape();
 }
 
 };//namespace sp
