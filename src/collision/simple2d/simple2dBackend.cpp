@@ -126,27 +126,14 @@ void Simple2DBackend::destroyBody(void* _body)
 
 void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
 {
-    class DebugRenderCollector
-    {
-    public:
-        bool QueryCallback(int proxy_id)
-        {
-            proxy_list.push_back(proxy_id);
-            return true;
-        }
-        std::vector<int> proxy_list;
-    };
-    DebugRenderCollector drc;
     b2AABB bounds;
     bounds.lowerBound.x = bounds.lowerBound.y = -std::numeric_limits<float>::infinity();
     bounds.upperBound.x = bounds.upperBound.y = std::numeric_limits<float>::infinity();
-    broadphase->Query(&drc, bounds);
-
     MeshData::Vertices vertices;
     MeshData::Indices indices;
-    for(int proxy_id : drc.proxy_list)
+    query_callback = [&vertices, &indices](void* _body)
     {
-        Simple2DBody* body = static_cast<Simple2DBody*>(broadphase->GetUserData(proxy_id));
+        Simple2DBody* body = static_cast<Simple2DBody*>(_body);
 
         Vector2d p0 = body->owner->getPosition2D() + body->shape.position;
         Vector2d p1 = p0 + body->shape.size;
@@ -163,7 +150,10 @@ void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
         indices.emplace_back(index + 2);
         indices.emplace_back(index + 1);
         indices.emplace_back(index + 3);
-    }
+        return true;
+    };
+    broadphase->Query(this, bounds);
+    query_callback = nullptr;
 
     if (!mesh)
         mesh = MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic);
@@ -217,22 +207,58 @@ bool Simple2DBackend::isSolid(void* _body)
 
 void Simple2DBackend::query(Vector2d position, std::function<bool(P<Node> object)> callback_function)
 {
+    b2AABB bounds;
+    bounds.lowerBound.x = bounds.upperBound.x = position.x;
+    bounds.lowerBound.y = bounds.upperBound.y = position.y;
+    query_callback = [&callback_function](void* _body)
+    {
+        return callback_function(static_cast<Simple2DBody*>(_body)->owner);
+    };
+    broadphase->Query(this, bounds);
+    query_callback = nullptr;
 }
 
 void Simple2DBackend::query(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function)
 {
+    b2AABB bounds;
+    bounds.lowerBound.x = position.x - range;
+    bounds.lowerBound.y = position.y - range;
+    bounds.upperBound.x = position.x + range;
+    bounds.upperBound.y = position.y + range;
+    query_callback = [&callback_function, position, range](void* _body)
+    {
+        Node* owner = static_cast<Simple2DBody*>(_body)->owner;
+        if ((owner->getPosition2D() - position).length() <= range)
+            return callback_function(owner);
+        return true;
+    };
+    broadphase->Query(this, bounds);
+    query_callback = nullptr;
 }
 
 void Simple2DBackend::query(Rect2d area, std::function<bool(P<Node> object)> callback_function)
 {
+    b2AABB bounds;
+    bounds.lowerBound.x = area.position.x;
+    bounds.lowerBound.y = area.position.y;
+    bounds.upperBound.x = area.position.x + area.size.x;
+    bounds.upperBound.y = area.position.y + area.size.y;
+    query_callback = [&callback_function](void* _body)
+    {
+        return callback_function(static_cast<Simple2DBody*>(_body)->owner);
+    };
+    broadphase->Query(this, bounds);
+    query_callback = nullptr;
 }
 
 void Simple2DBackend::queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
+    LOG(Warning, "Simple2D raycasting called, but not implemented yet.");
 }
 
 void Simple2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
 {
+    LOG(Warning, "Simple2D raycasting called, but not implemented yet.");
 }
 
 void* Simple2DBackend::createBody(Node* owner, const Simple2DShape& shape)
@@ -265,6 +291,11 @@ void Simple2DBackend::AddPair(void* _body_a, void* _body_b)
     collision_pairs.emplace_back();
     collision_pairs.back().body_a = body_a;
     collision_pairs.back().body_b = body_b;
+}
+
+bool Simple2DBackend::QueryCallback(int proxy_id)
+{
+    return query_callback(broadphase->GetUserData(proxy_id));
 }
 
 };//namespace collision

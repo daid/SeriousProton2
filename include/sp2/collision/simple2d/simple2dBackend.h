@@ -7,6 +7,7 @@
 
 
 class b2BroadPhase;
+class b2DynamicTree;
 namespace sp {
 namespace collision {
 class Simple2DShape;
@@ -42,12 +43,16 @@ public:
 private:
     void* createBody(Node* owner, const Simple2DShape& shape);
     void AddPair(void* body_a, void* body_b); //Callback from the broadphase
+    bool QueryCallback(int proxy_id); //Callback from broadphase queries.
     
     b2BroadPhase* broadphase;
     std::list<CollisionPair> collision_pairs;
     
+    std::function<bool(void*)> query_callback;
+    
     friend class Simple2DShape;
     friend class ::b2BroadPhase;
+    friend class ::b2DynamicTree;
 };
 
 };//namespace collision
