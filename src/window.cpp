@@ -261,7 +261,7 @@ void Window::render()
             }
             else
             {
-                queue.add([this, layer, window_size]()
+                queue.add([layer, window_size]()
                 {
                     Rect2d viewport = layer->viewport;
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -285,11 +285,10 @@ void Window::render()
         SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
 
         Vector2d position(mouse_pos.x, mouse_pos.y);
-        Vector2d window_size(window_size.x, window_size.y);
         position.x = position.x - window_size.x / 2.0;
         position.y = window_size.y / 2.0 - position.y;
 
-        queue.setCamera(Matrix4x4f::scale(2.0/window_size.x, 2.0/window_size.y, 1), Matrix4x4f::identity());
+        queue.setCamera(Matrix4x4f::scale(2.0/float(window_size.x), 2.0/float(window_size.y), 1), Matrix4x4f::identity());
         RenderData rd;
         rd.type = RenderData::Type::Normal;
         rd.shader = Shader::get("internal:basic.shader");
