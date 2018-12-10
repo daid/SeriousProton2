@@ -1,5 +1,6 @@
 #include <sp2/graphics/scene/collisionrenderpass.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/graphics/opengl.h>
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/camera.h>
@@ -53,6 +54,7 @@ void CollisionRenderPass::render(RenderQueue& queue)
     }
     if (!enabled)
         return;
+    queue.add([]() { glDisable(GL_DEPTH_TEST); });
     if (specific_camera)
     {
         renderScene(queue, *specific_camera->getScene());
@@ -62,6 +64,7 @@ void CollisionRenderPass::render(RenderQueue& queue)
         for(Scene* scene : Scene::all())
             renderScene(queue, scene);
     }
+    queue.add([]() { glEnable(GL_DEPTH_TEST); });
 }
 
 void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)

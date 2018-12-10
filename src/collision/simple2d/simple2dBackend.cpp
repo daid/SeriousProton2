@@ -68,7 +68,8 @@ void Simple2DBackend::step(float time_delta)
         if (rect_a.overlaps(rect_b))
         {
             CollisionInfo info;
-            //TODO: Handle static to dynamic object collision, push the dynamic out of the static object.
+            
+            //Handle static to dynamic object collision, push the dynamic out of the static object.
             double overlap_x = std::min(rect_a.position.x + rect_a.size.x, rect_b.position.x + rect_b.size.x) - std::max(rect_a.position.x, rect_b.position.x);
             double overlap_y = std::min(rect_a.position.y + rect_a.size.y, rect_b.position.y + rect_b.size.y) - std::max(rect_a.position.y, rect_b.position.y);
             if (overlap_x > overlap_y)
