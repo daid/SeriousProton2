@@ -92,7 +92,7 @@ void Simple2DBackend::step(float time_delta)
             if (pair.body_a->type == Shape::Type::Dynamic && isSolid(pair.body_b))
                 modifyPositionByPhysics(pair.body_a->owner, pair.body_a->owner->getPosition2D() + info.normal * double(info.force), 0);
             if (pair.body_b->type == Shape::Type::Dynamic && isSolid(pair.body_a))
-                modifyPositionByPhysics(pair.body_a->owner, pair.body_a->owner->getPosition2D() - info.normal * double(info.force), 0);
+                modifyPositionByPhysics(pair.body_b->owner, pair.body_b->owner->getPosition2D() - info.normal * double(info.force), 0);
             
             //Move the points to P<> pointers, as the onCollision could delete one of the objects.
             P<Node> node_a = pair.body_a->owner;
