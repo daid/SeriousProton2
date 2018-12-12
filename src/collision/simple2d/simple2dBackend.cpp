@@ -96,7 +96,7 @@ void Simple2DBackend::step(float time_delta)
             
             //Move the points to P<> pointers, as the onCollision could delete one of the objects.
             P<Node> node_a = pair.body_a->owner;
-            P<Node> node_b = pair.body_a->owner;
+            P<Node> node_b = pair.body_b->owner;
 
             info.other = node_b;
             node_a->onCollision(info);
@@ -138,7 +138,7 @@ void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
 
         Vector2d p0 = body->owner->getPosition2D() + body->shape.position;
         Vector2d p1 = p0 + body->shape.size;
-        Vector3f c(1, 1, 1);
+        Vector3f c(0.7, 0.7, 1.0);
         int index = vertices.size();
         vertices.emplace_back(Vector3f(p0.x, p0.y, 0.0f), c, Vector2f());
         vertices.emplace_back(Vector3f(p1.x, p0.y, 0.0f), c, Vector2f());
@@ -268,8 +268,9 @@ void* Simple2DBackend::createBody(Node* owner, const Simple2DShape& shape)
     body->owner = owner;
     body->type = shape.type;
     body->shape = shape.rect;
+    body->shape.position -= body->shape.size / 2.0;
     body->filter_category = shape.filter_category;
-	body->filter_mask = shape.filter_mask;
+    body->filter_mask = shape.filter_mask;
 
     body->broadphase_proxy = broadphase->CreateProxy(body->getAABB(), body);
 

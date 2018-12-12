@@ -12,9 +12,9 @@ class Simple2DShape : public Shape
 {
 public:
     Simple2DShape(sp::Vector2d size)
-    : rect(-size / 2.0, size) {}
+    : rect(Vector2d(0, 0), size) {}
     Simple2DShape(sp::Rect2d rect)
-    : rect(rect.position - rect.size / 2.0, rect.size) {}
+    : rect(rect) {}
 
     Rect2d rect;
 
