@@ -22,7 +22,7 @@ class Simple2DBody
 {
 public:
     Shape::Type type;
-    Rect2d shape;
+    Rect2d rect;
     Node* owner;
     int broadphase_proxy;
     int filter_category;
@@ -32,8 +32,8 @@ public:
     {
         b2AABB aabb;
         sp::Vector2d position = owner->getPosition2D();
-        aabb.lowerBound = toVector<double>(position + shape.position);
-        aabb.upperBound = toVector<double>(position + shape.position + shape.size);
+        aabb.lowerBound = toVector<double>(position + rect.position);
+        aabb.upperBound = toVector<double>(position + rect.position + rect.size);
         return aabb;
     }
 };
@@ -61,8 +61,8 @@ void Simple2DBackend::step(float time_delta)
     std::list<CollisionPair> pairs = collision_pairs;
     for(auto& pair : pairs)
     {
-        Rect2d rect_a = pair.body_a->shape;
-        Rect2d rect_b = pair.body_b->shape;
+        Rect2d rect_a = pair.body_a->rect;
+        Rect2d rect_b = pair.body_b->rect;
         rect_a.position += pair.body_a->owner->getPosition2D();
         rect_b.position += pair.body_b->owner->getPosition2D();
         if (rect_a.overlaps(rect_b))
@@ -136,9 +136,9 @@ void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
     {
         Simple2DBody* body = static_cast<Simple2DBody*>(_body);
 
-        Vector2d p0 = body->owner->getPosition2D() + body->shape.position;
-        Vector2d p1 = p0 + body->shape.size;
-        Vector3f c(0.7, 0.7, 1.0);
+        Vector2d p0 = body->owner->getPosition2D() + body->rect.position;
+        Vector2d p1 = p0 + body->rect.size;
+        Vector3f c(0.8, 0.8, 1);
         int index = vertices.size();
         vertices.emplace_back(Vector3f(p0.x, p0.y, 0.0f), c, Vector2f());
         vertices.emplace_back(Vector3f(p1.x, p0.y, 0.0f), c, Vector2f());
@@ -197,7 +197,7 @@ Vector3d Simple2DBackend::getAngularVelocity(void* body)
 bool Simple2DBackend::testCollision(void* _body, Vector3d position)
 {
     Simple2DBody* body = static_cast<Simple2DBody*>(_body);
-    return body->shape.contains(Vector2d(position.x, position.y) - body->owner->getPosition2D());
+    return body->rect.contains(Vector2d(position.x, position.y) - body->owner->getPosition2D());
 }
 
 bool Simple2DBackend::isSolid(void* _body)
@@ -267,8 +267,8 @@ void* Simple2DBackend::createBody(Node* owner, const Simple2DShape& shape)
     Simple2DBody* body = new Simple2DBody();
     body->owner = owner;
     body->type = shape.type;
-    body->shape = shape.rect;
-    body->shape.position -= body->shape.size / 2.0;
+    body->rect = shape.rect;
+    body->rect.position -= body->rect.size / 2.0;
     body->filter_category = shape.filter_category;
     body->filter_mask = shape.filter_mask;
 
