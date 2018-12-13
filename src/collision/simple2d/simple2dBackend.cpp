@@ -281,7 +281,7 @@ void Simple2DBackend::AddPair(void* _body_a, void* _body_b)
 {
     Simple2DBody* body_a = static_cast<Simple2DBody*>(_body_a);
     Simple2DBody* body_b = static_cast<Simple2DBody*>(_body_b);
-
+    
     if (!((body_a->filter_category & body_b->filter_mask) && (body_b->filter_category & body_a->filter_mask)))
         return;
 

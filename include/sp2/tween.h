@@ -2,6 +2,8 @@
 #define SP2_TWEEN_H
 
 #include <sp2/graphics/color.h>
+#include <sp2/math/vector.h>
+
 
 namespace sp {
 
@@ -56,6 +58,8 @@ public:
 };
 
 template<> Color Tween<Color>::tweenApply(float f, const Color& value0, const Color& value1);
+template<> Vector2d Tween<Vector2d>::tweenApply(float f, const Vector2d& value0, const Vector2d& value1);
+template<> Vector3d Tween<Vector3d>::tweenApply(float f, const Vector3d& value0, const Vector3d& value1);
 
 };//namespace sp
 
