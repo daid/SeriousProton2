@@ -14,8 +14,8 @@ class Simple2DBody;
 class CollisionPair
 {
 public:
-    Simple2DBody* body_a;
-    Simple2DBody* body_b;
+    P<Node> node_a;
+    P<Node> node_b;
 };
 
 class Simple2DBody
@@ -54,17 +54,24 @@ void Simple2DBackend::step(float time_delta)
 
     collision_pairs.remove_if([this](CollisionPair& pair)
     {
-        return !broadphase->TestOverlap(pair.body_a->broadphase_proxy, pair.body_b->broadphase_proxy);
+        if (!pair.node_a || !pair.node_b)
+            return true;
+        Simple2DBody* body_a = static_cast<Simple2DBody*>(getCollisionBody(pair.node_a));
+        Simple2DBody* body_b = static_cast<Simple2DBody*>(getCollisionBody(pair.node_b));
+        return !broadphase->TestOverlap(body_a->broadphase_proxy, body_b->broadphase_proxy);
     });
     
     //We make a copy of the collision list, as onCollision could delete an object, which can erase items from the collision pairs list.
-    std::list<CollisionPair> pairs = collision_pairs;
-    for(auto& pair : pairs)
+    for(auto& pair : collision_pairs)
     {
-        Rect2d rect_a = pair.body_a->rect;
-        Rect2d rect_b = pair.body_b->rect;
-        rect_a.position += pair.body_a->owner->getPosition2D();
-        rect_b.position += pair.body_b->owner->getPosition2D();
+        if (!pair.node_a || !pair.node_b)
+            continue;
+        Simple2DBody* body_a = static_cast<Simple2DBody*>(getCollisionBody(pair.node_a));
+        Simple2DBody* body_b = static_cast<Simple2DBody*>(getCollisionBody(pair.node_b));
+        Rect2d rect_a = body_a->rect;
+        Rect2d rect_b = body_b->rect;
+        rect_a.position += pair.node_a->getPosition2D();
+        rect_b.position += pair.node_b->getPosition2D();
         if (rect_a.overlaps(rect_b))
         {
             CollisionInfo info;
@@ -89,22 +96,19 @@ void Simple2DBackend::step(float time_delta)
                     info.normal = sp::Vector2d(1, 0);
             }
             
-            if (pair.body_a->type == Shape::Type::Dynamic && isSolid(pair.body_b))
-                modifyPositionByPhysics(pair.body_a->owner, pair.body_a->owner->getPosition2D() + info.normal * double(info.force), 0);
-            if (pair.body_b->type == Shape::Type::Dynamic && isSolid(pair.body_a))
-                modifyPositionByPhysics(pair.body_b->owner, pair.body_b->owner->getPosition2D() - info.normal * double(info.force), 0);
+            if (body_a->type == Shape::Type::Dynamic && isSolid(body_b))
+                modifyPositionByPhysics(body_a->owner, body_a->owner->getPosition2D() + info.normal * double(info.force), 0);
+            if (body_b->type == Shape::Type::Dynamic && isSolid(body_a))
+                modifyPositionByPhysics(body_b->owner, body_b->owner->getPosition2D() - info.normal * double(info.force), 0);
             
             //Move the points to P<> pointers, as the onCollision could delete one of the objects.
-            P<Node> node_a = pair.body_a->owner;
-            P<Node> node_b = pair.body_b->owner;
-
-            info.other = node_b;
-            node_a->onCollision(info);
-            if (node_b)
+            info.other = pair.node_b;
+            pair.node_a->onCollision(info);
+            if (pair.node_b)
             {
-                info.other = node_a;
+                info.other = pair.node_a;
                 info.normal = -info.normal;
-                node_b->onCollision(info);
+                pair.node_b->onCollision(info);
             }
         }
     }
@@ -118,10 +122,6 @@ void Simple2DBackend::destroyBody(void* _body)
 {
     Simple2DBody* body = static_cast<Simple2DBody*>(_body);
     broadphase->DestroyProxy(body->broadphase_proxy);
-    collision_pairs.remove_if([body](CollisionPair& pair)
-    {
-        return pair.body_a == body || pair.body_b == body;
-    });
     delete body;
 }
 
@@ -287,12 +287,12 @@ void Simple2DBackend::AddPair(void* _body_a, void* _body_b)
 
     for(auto& pair : collision_pairs)
     {
-        if (pair.body_a == body_a && pair.body_b == body_b)
+        if (pair.node_a == body_a->owner && pair.node_b == body_b->owner)
             return;
     }
     collision_pairs.emplace_back();
-    collision_pairs.back().body_a = body_a;
-    collision_pairs.back().body_b = body_b;
+    collision_pairs.back().node_a = body_a->owner;
+    collision_pairs.back().node_b = body_b->owner;
 }
 
 bool Simple2DBackend::QueryCallback(int proxy_id)
