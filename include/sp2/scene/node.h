@@ -91,6 +91,7 @@ public:
     void animationPlay(string key, float speed=1.0);
     void animationSetFlags(int flags);
     int animationGetFlags();
+    bool animationIsFinished();
     
     //Event called every frame.
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.

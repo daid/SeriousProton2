@@ -281,6 +281,13 @@ int Node::animationGetFlags()
     return 0;
 }
 
+bool Node::animationIsFinished()
+{
+    if (!animation)
+        return true;
+    return animation->finished();
+}
+
 void Node::updateLocalTransform()
 {
     local_transform = Matrix4x4f::translate(Vector3f(translation)) * Matrix4x4f::fromQuaternion(Quaternionf(rotation));

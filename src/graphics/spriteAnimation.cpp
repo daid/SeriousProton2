@@ -45,6 +45,11 @@ int SpriteAnimation::getFlags()
     return 0;
 }
 
+bool SpriteAnimation::finished()
+{
+    return !playing;
+}
+
 void SpriteAnimation::prepare(RenderData& render_data)
 {
     render_data.shader = Shader::get("internal:basic.shader");

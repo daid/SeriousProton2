@@ -39,6 +39,7 @@ public:
     virtual void play(string key, float speed=1.0) override;
     virtual void setFlags(int flags) override;
     virtual int getFlags() override;
+    virtual bool finished() override;
 protected:
     virtual void prepare(RenderData& render_data) override;
     virtual void update(float delta, RenderData& render_data) override;

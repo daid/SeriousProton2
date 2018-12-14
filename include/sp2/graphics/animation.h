@@ -16,6 +16,8 @@ public:
     virtual void setFlags(int flags) = 0;
     virtual int getFlags() = 0;
 
+    virtual bool finished() = 0;
+
     virtual void prepare(RenderData& render_data) = 0;
     virtual void update(float delta, RenderData& render_data) = 0;
 };
