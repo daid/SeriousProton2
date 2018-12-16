@@ -138,7 +138,12 @@ void SpriteAnimation::Data::load(string resource_name)
 #endif
     KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
     if (!tree)
+    {
+#ifdef DEBUG
+        this->resource_update_time = io::ResourceProvider::getModifyTime(resource_name);
+#endif
         return;
+    }
 
     float u_offset = 0.5 / 1024;
     float v_offset = 0.5 / 1024;
