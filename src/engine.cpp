@@ -180,7 +180,7 @@ void Engine::update(float time_delta)
             if (scene->isEnabled())
             {
                 scene->fixedUpdate();
-                scene->postFixedUpdate(fixed_update_accumulator);
+                scene->postFixedUpdate(fixed_update_delta);
             }
         }
         io::Keybinding::allPostFixedUpdate();
@@ -189,7 +189,7 @@ void Engine::update(float time_delta)
     for(Scene* scene : Scene::all())
     {
         if (scene->isEnabled())
-            scene->postFixedUpdate(fixed_update_accumulator);
+            scene->postFixedUpdate(fixed_update_delta);
     }
     timing.fixed_update = timing_clock.restart();
     for(Scene* scene : Scene::all())
