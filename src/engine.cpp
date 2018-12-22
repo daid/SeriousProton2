@@ -180,7 +180,6 @@ void Engine::update(float time_delta)
             if (scene->isEnabled())
             {
                 scene->fixedUpdate();
-                scene->postFixedUpdate(fixed_update_accumulator);
             }
         }
         io::Keybinding::allPostFixedUpdate();
