@@ -19,7 +19,6 @@ struct ZipEOCD
     uint32_t central_directory_offset;
     uint16_t comment_length;
 } __attribute__((__packed__));
-static_assert(sizeof(ZipEOCD) == 22, "Something is wrong with structure packing...");
 
 struct ZipCentralDirectory
 {
@@ -41,7 +40,6 @@ struct ZipCentralDirectory
     uint32_t external_file_attributes;
     uint32_t offset_local_file_header;
 } __attribute__((__packed__));
-static_assert(sizeof(ZipCentralDirectory) == 46, "Something is wrong with structure packing...");
 
 struct ZipLocalHeader
 {
@@ -57,7 +55,6 @@ struct ZipLocalHeader
     uint16_t filename_length;
     uint16_t extra_field_length;
 } __attribute__((__packed__));
-static_assert(sizeof(ZipLocalHeader) == 30, "Something is wrong with structure packing...");
 
 class ZipResourceStream : public ResourceStream
 {
@@ -181,7 +178,7 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
     }
     fseek(f, -22, SEEK_END);
     ZipEOCD eocd;
-    if (fread(&eocd, sizeof(eocd), 1, f) != 1)
+    if (fread(&eocd, 22, 1, f) != 1)
     {
         fclose(f);
         LOG(Warning, "Corrupt zip file, failed to read EOCD:", zip_filename);
@@ -198,14 +195,14 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
     while(eocd.central_directory_size > 0)
     {
         ZipCentralDirectory central_directory;
-        if (fread(&central_directory, sizeof(central_directory), 1, f) != 1)
+        if (fread(&central_directory, 46, 1, f) != 1)
         {
             fclose(f);
             LOG(Warning, "Corrupt zip file, failed to read central directory record:", zip_filename);
             contents.clear();
             return;
         }
-        eocd.central_directory_size -= sizeof(central_directory);
+        eocd.central_directory_size -= 46;
         if (central_directory.signature != 0x02014b50 || central_directory.disk_nr != 0)
         {
             fclose(f);
@@ -240,7 +237,7 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
     {
         ZipLocalHeader local_header;
         fseek(f, it.second.offset, SEEK_SET);
-        if (fread(&local_header, sizeof(local_header), 1, f) != 1)
+        if (fread(&local_header, 30, 1, f) != 1)
         {
             fclose(f);
             LOG(Warning, "Corrupt zip file, failed to read local header:", zip_filename);
@@ -254,7 +251,7 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
             contents.clear();
             return;
         }
-        it.second.offset += sizeof(local_header) + local_header.filename_length + local_header.extra_field_length;
+        it.second.offset += 30 + local_header.filename_length + local_header.extra_field_length;
     }
     fclose(f);
 }
