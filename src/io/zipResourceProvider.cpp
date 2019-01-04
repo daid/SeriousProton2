@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <zlib.h>
+#include <string.h>
 
 
 namespace sp {
