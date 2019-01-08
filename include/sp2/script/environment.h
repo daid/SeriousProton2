@@ -20,6 +20,9 @@ public:
     void setGlobal(string name, lua_CFunction function);
     /** Bind an object to this lua environment. */
     void setGlobal(string name, P<ScriptBindingObject> ptr);
+    void setGlobal(string name, bool value);
+    void setGlobal(string name, int value);
+    void setGlobal(string name, string value);
     
     template<typename RET, typename... ARGS> void setGlobal(string name, RET(*func)(ARGS...))
     {

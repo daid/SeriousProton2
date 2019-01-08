@@ -67,6 +67,45 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     lua_pop(global_lua_state, 1);
 }
 
+void Environment::setGlobal(string name, bool value)
+{
+    //Get the environment table from the registry.
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    
+    //Set our variable in this environment table
+    lua_pushboolean(global_lua_state, value);
+    lua_setfield(global_lua_state, -2, name.c_str());
+    
+    //Pop the table
+    lua_pop(global_lua_state, 1);
+}
+
+void Environment::setGlobal(string name, int value)
+{
+    //Get the environment table from the registry.
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    
+    //Set our variable in this environment table
+    lua_pushinteger(global_lua_state, value);
+    lua_setfield(global_lua_state, -2, name.c_str());
+    
+    //Pop the table
+    lua_pop(global_lua_state, 1);
+}
+
+void Environment::setGlobal(string name, string value)
+{
+    //Get the environment table from the registry.
+    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    
+    //Set our variable in this environment table
+    lua_pushstring(global_lua_state, value.c_str());
+    lua_setfield(global_lua_state, -2, name.c_str());
+    
+    //Pop the table
+    lua_pop(global_lua_state, 1);
+}
+
 bool Environment::load(string resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
