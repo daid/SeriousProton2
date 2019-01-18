@@ -8,6 +8,7 @@
 #include <sp2/math/ray.h>
 #include <sp2/math/rect.h>
 #include <sp2/io/pointer.h>
+#include <sp2/io/textinput.h>
 #include <sp2/script/bindingObject.h>
 #include <sp2/collision/backend.h>
 
@@ -43,6 +44,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id);
     virtual void onPointerDrag(Ray3d ray, int id);
     virtual void onPointerUp(Ray3d ray, int id);
+    virtual void onTextInput(const string& text) {}
+    virtual void onTextInput(TextInputEvent e) {}
 
     //Query for collision enabled objects at a specific position.
     void queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function);

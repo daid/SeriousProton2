@@ -65,6 +65,7 @@ bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera,
     {
         pointer_scene[id] = scene;
         pointer_camera[id] = camera;
+        focus_scene = scene;
         return true;
     }
     return false;
@@ -87,6 +88,18 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
         it->second->onPointerUp(pointerPositionToRay(pointer_camera[id], position), id);
         pointer_scene.erase(it);
     }
+}
+
+void BasicNodeRenderPass::onTextInput(const string& text)
+{
+    if (focus_scene)
+        focus_scene->onTextInput(text);
+}
+
+void BasicNodeRenderPass::onTextInput(TextInputEvent e)
+{
+    if (focus_scene)
+        focus_scene->onTextInput(e);
 }
 
 void BasicNodeRenderPass::renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera)

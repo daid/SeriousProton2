@@ -79,6 +79,14 @@ void Widget::onPointerUp(Vector2d position, int id)
 {
 }
 
+void Widget::onTextInput(const string& text)
+{
+}
+
+void Widget::onTextInput(TextInputEvent e)
+{
+}
+
 Widget::State Widget::getState() const
 {
     if (!enabled)

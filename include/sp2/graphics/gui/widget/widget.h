@@ -8,6 +8,7 @@
 #include <sp2/variant.h>
 #include <sp2/alignment.h>
 #include <sp2/io/pointer.h>
+#include <sp2/io/textinput.h>
 
 
 namespace sp {
@@ -65,6 +66,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, sp::Vector2d position, int id);
     virtual void onPointerDrag(sp::Vector2d position, int id);
     virtual void onPointerUp(sp::Vector2d position, int id);
+    virtual void onTextInput(const string& text);
+    virtual void onTextInput(TextInputEvent e);
     State getState() const;
     
     void setPosition(float x, float y, Alignment alignment);

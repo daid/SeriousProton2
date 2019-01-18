@@ -19,4 +19,12 @@ void RenderPass::onPointerUp(Vector2d position, int id)
 {
 }
 
+void RenderPass::onTextInput(const string& text)
+{
+}
+
+void RenderPass::onTextInput(TextInputEvent e)
+{
+}
+
 };//namespace sp

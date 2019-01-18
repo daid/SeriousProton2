@@ -3,6 +3,7 @@
 
 #include <sp2/pointer.h>
 #include <sp2/io/pointer.h>
+#include <sp2/io/textinput.h>
 #include <sp2/math/vector2.h>
 #include <map>
 
@@ -19,6 +20,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);
     virtual void onPointerUp(Vector2d position, int id);
+    virtual void onTextInput(const string& text);
+    virtual void onTextInput(TextInputEvent e);
 };
 
 };//namespace sp

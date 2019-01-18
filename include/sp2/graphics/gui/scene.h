@@ -19,9 +19,11 @@ public:
 
     Scene(Vector2d size, Direction fixed_direction=Direction::Vertical, string scene_name="GUI", int priority=100);
 
-    virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id);
-    virtual void onPointerDrag(Ray3d ray, int id);
-    virtual void onPointerUp(Ray3d ray, int id);
+    virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id) override;
+    virtual void onPointerDrag(Ray3d ray, int id) override;
+    virtual void onPointerUp(Ray3d ray, int id) override;
+    virtual void onTextInput(const string& text) override;
+    virtual void onTextInput(TextInputEvent e) override;
     
     P<RootWidget> getRootWidget();
 private:

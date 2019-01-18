@@ -54,6 +54,7 @@ bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d posi
         if (pass->onPointerDown(button, position, id))
         {
             pointer_render_pass[id] = pass;
+            focus_render_pass = pass;
             return true;
         }
     }
@@ -77,6 +78,18 @@ void SceneGraphicsLayer::onPointerUp(Vector2d position, int id)
         it->second->onPointerUp(position, id);
         pointer_render_pass.erase(it);
     }
+}
+
+void SceneGraphicsLayer::onTextInput(const string& text)
+{
+    if (focus_render_pass)
+        focus_render_pass->onTextInput(text);
+}
+
+void SceneGraphicsLayer::onTextInput(TextInputEvent e)
+{
+    if (focus_render_pass)
+        focus_render_pass->onTextInput(e);
 }
 
 void SceneGraphicsLayer::addRenderPass(P<RenderPass> render_pass)

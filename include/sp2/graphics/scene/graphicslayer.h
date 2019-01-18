@@ -18,10 +18,13 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual void onTextInput(const string& text) override;
+    virtual void onTextInput(TextInputEvent e) override;
     
     void addRenderPass(P<RenderPass> render_pass);
 private:
     std::map<int, P<RenderPass>> pointer_render_pass;
+    P<RenderPass> focus_render_pass;
 
     PList<RenderPass> render_passes;
 };

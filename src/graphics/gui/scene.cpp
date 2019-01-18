@@ -99,6 +99,18 @@ void Scene::onPointerUp(Ray3d ray, int id)
     }
 }
 
+void Scene::onTextInput(const string& text)
+{
+    if (focus_widget)
+        focus_widget->onTextInput(text);
+}
+
+void Scene::onTextInput(TextInputEvent e)
+{
+    if (focus_widget)
+        focus_widget->onTextInput(e);
+}
+
 P<RootWidget> Scene::getRootWidget()
 {
     return root_widget;

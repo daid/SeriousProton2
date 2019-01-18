@@ -3,24 +3,11 @@
 
 #include <sp2/pointerList.h>
 #include <sp2/io/pointer.h>
+#include <sp2/io/textinput.h>
 #include <sp2/math/vector.h>
 #include <sp2/math/rect.h>
 
 namespace sp {
-
-enum class TextInputEvent
-{
-    Left,
-    Right,
-    Up,
-    Down,
-    LineStart,
-    LineEnd,
-    TextStart,
-    TextEnd,
-    Delete,
-    Backspace
-};
 
 class Window;
 class RenderTexture;
@@ -42,8 +29,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;
-    virtual void onTextInput(string text) {}
-    virtual void onTextInput(TextInputEvent e) {}
+    virtual void onTextInput(const string& text) = 0;
+    virtual void onTextInput(TextInputEvent e) = 0;
 
     void setViewport(Rect2d rect) { viewport = rect; }
 protected:

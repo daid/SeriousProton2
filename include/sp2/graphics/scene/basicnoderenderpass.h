@@ -22,6 +22,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual void onTextInput(const string& text) override;
+    virtual void onTextInput(TextInputEvent e) override;
     
     void addCamera(P<Camera> camera);
 protected:
@@ -31,6 +33,7 @@ private:
     PList<Camera> cameras;
     std::map<int, P<Scene>> pointer_scene;
     std::map<int, P<Camera>> pointer_camera;
+    P<Scene> focus_scene;
     
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
