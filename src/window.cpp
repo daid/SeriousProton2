@@ -340,6 +340,26 @@ void Window::handleEvent(const SDL_Event& event)
     case SDL_FINGERUP:
         pointerUp(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
         break;
+    case SDL_TEXTINPUT:
+        if (focus_layer)
+            focus_layer->onTextInput(event.text.text);
+        break;
+    case SDL_KEYDOWN:
+        if (focus_layer)
+        {
+            switch(event.key.keysym.sym)
+            {
+            case SDLK_LEFT: focus_layer->onTextInput(TextInputEvent::Left); break;
+            case SDLK_RIGHT: focus_layer->onTextInput(TextInputEvent::Right); break;
+            case SDLK_UP: focus_layer->onTextInput(TextInputEvent::Up); break;
+            case SDLK_DOWN: focus_layer->onTextInput(TextInputEvent::Down); break;
+            case SDLK_HOME: focus_layer->onTextInput(TextInputEvent::LineStart); break;
+            case SDLK_END: focus_layer->onTextInput(TextInputEvent::LineEnd); break;
+            case SDLK_DELETE: focus_layer->onTextInput(TextInputEvent::Delete); break;
+            case SDLK_BACKSPACE: focus_layer->onTextInput(TextInputEvent::Backspace); break;
+            }
+        }
+        break;
     case SDL_WINDOWEVENT:
         switch(event.window.event)
         {
@@ -360,6 +380,7 @@ void Window::pointerDown(io::Pointer::Button button, Vector2d position, int id)
         if (l->onPointerDown(button, position, id))
         {
             pointer_focus_layer[id] = l;
+            focus_layer = l;
             return;
         }
     }

@@ -11,7 +11,7 @@
 namespace sp {
 
 std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
-{    
+{
     float size_scale = text_size / float(pixel_size);
     float line_spacing = getLineSpacing(pixel_size) * size_scale;
 

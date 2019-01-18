@@ -125,6 +125,12 @@ void Engine::run()
             case SDL_FINGERMOTION:
                 window_id = SDL_GetWindowID(SDL_GetMouseFocus());
                 break;
+            case SDL_TEXTEDITING:
+                window_id = event.edit.windowID;
+                break;
+            case SDL_TEXTINPUT:
+                window_id = event.text.windowID;
+                break;
             }
             if (window_id != 0)
             {

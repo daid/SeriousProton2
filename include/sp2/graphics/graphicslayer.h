@@ -8,6 +8,20 @@
 
 namespace sp {
 
+enum class TextInputEvent
+{
+    Left,
+    Right,
+    Up,
+    Down,
+    LineStart,
+    LineEnd,
+    TextStart,
+    TextEnd,
+    Delete,
+    Backspace
+};
+
 class Window;
 class RenderTexture;
 class RenderQueue;
@@ -28,6 +42,8 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;
+    virtual void onTextInput(string text) {}
+    virtual void onTextInput(TextInputEvent e) {}
 
     void setViewport(Rect2d rect) { viewport = rect; }
 protected:

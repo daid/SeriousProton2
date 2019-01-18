@@ -67,7 +67,8 @@ private:
     Vector2f max_window_size_ratio; //If != 0 then this is the maximum size the window may take of screen, in faction (0.0 to 1.0)
     
     int mouse_button_down_mask;
-    std::map<int, P<GraphicsLayer>> pointer_focus_layer;
+    std::map<int, P<GraphicsLayer>> pointer_focus_layer; //Layer on which a pointer that is down has focus, cleared on pointer up event.
+    P<GraphicsLayer> focus_layer;   //Last layer that gained focus, for text input related events.
 
     static PList<Window> windows;
     static bool anyWindowOpen();
