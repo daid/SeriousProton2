@@ -85,7 +85,7 @@ public:
             start = 0;
         }
         len = std::min(end, len);
-        if (end <= start)
+        if (end <= start || start >= len)
         {
             return "";
         }

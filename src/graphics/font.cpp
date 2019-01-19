@@ -61,13 +61,11 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, Alignmen
             glyph.bounds.size.x = 0;
         }
 
-        if (glyph.bounds.size.x > 0.0)
-        {
-            PreparedFontString::GlyphData data;
-            data.position = position;
-            data.string_offset = index;
-            result.data.push_back(data);
-        }
+        PreparedFontString::GlyphData data;
+        data.position = position;
+        data.string_offset = index;
+        result.data.push_back(data);
+
         current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x));
         position.x += glyph.advance;
         index += glyph.consumed_characters;
