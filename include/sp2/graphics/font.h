@@ -19,9 +19,34 @@ public:
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.
         Compare the texture revision to the revision that it initially had to check if the data is still valid or needs to be re-generated.
      */
-    std::shared_ptr<MeshData> createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
+    std::shared_ptr<MeshData> createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
     virtual Texture* getTexture(int pixel_size) = 0;
 
+    class PreparedFontString
+    {
+    public:
+        class GlyphData
+        {
+        public:
+            sp::Vector2f position;
+            int string_offset;
+        };
+        std::vector<GlyphData> data;
+        
+        std::shared_ptr<MeshData> create(float text_size, Vector2d area_size);
+    private:
+        Font* font;
+        string s;
+        Alignment alignment;
+        int pixel_size;
+        float max_line_width;
+        int line_count;
+        
+        void alignLine(unsigned int line_start_result_index, float current_line_width);
+        
+        friend class Font;
+    };
+    PreparedFontString prepare(const string& s, int pixel_size, Alignment alignment);
 protected:
     class GlyphInfo
     {

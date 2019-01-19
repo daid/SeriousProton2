@@ -82,6 +82,7 @@ public:
     void enable();
     void disable();
     bool isEnabled();
+    bool isFocused();
     void setID(string id);
 
     sp::Vector2d getRenderSize() { return render_size; }

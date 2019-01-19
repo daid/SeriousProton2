@@ -185,6 +185,11 @@ bool Widget::isEnabled()
     return enabled;
 }
 
+bool Widget::isFocused()
+{
+    return focus;
+}
+
 void Widget::setID(string id)
 {
     this->id = id;

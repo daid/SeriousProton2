@@ -10,27 +10,33 @@
 
 namespace sp {
 
-std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
+std::shared_ptr<MeshData> Font::createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
 {
-    float size_scale = text_size / float(pixel_size);
-    float line_spacing = getLineSpacing(pixel_size) * size_scale;
+    return prepare(s, pixel_size, alignment).create(text_size, area_size);
+}
 
-    MeshData::Vertices vertices;
-    MeshData::Indices indices;
-    
-    vertices.reserve(s.size() * 6);
-    sp::Vector2f position;
+Font::PreparedFontString Font::prepare(const string& s, int pixel_size, Alignment alignment)
+{
+    float line_spacing = getLineSpacing(pixel_size);
+    PreparedFontString result;
+
+    result.font = this;
+    result.s = s;
+    result.alignment = alignment;
+    result.pixel_size = pixel_size;
+    result.max_line_width = 0;
+    result.line_count = 1;
+
+    sp::Vector2f position(0, -line_spacing);
     int previous_character_index = -1;
-    int line_count = 1;
-    float max_line_width = 0;
     float current_line_width = 0;
-    unsigned int line_start_vertex_index = 0;
+    unsigned int line_start_result_index = 0;
     
     for(unsigned int index=0; index<s.size(); )
     {
         if (previous_character_index > -1)
         {
-            position.x += getKerning(&s[previous_character_index], &s[index]) * size_scale;
+            position.x += getKerning(&s[previous_character_index], &s[index]);
         }
         previous_character_index = index;
 
@@ -38,49 +44,11 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
         {
             position.x = 0;
             position.y -= line_spacing;
-            line_count++;
-            switch(alignment)
-            {
-            case Alignment::TopLeft:
-            case Alignment::BottomLeft:
-            case Alignment::Left:
-                break;
-            case Alignment::Center:
-            case Alignment::Top:
-            case Alignment::Bottom:
-                if (current_line_width < max_line_width)
-                {
-                    float offset = (max_line_width - current_line_width) / 2.0;
-                    for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
-                        vertices[n].position[0] += offset;
-                }
-                else
-                {
-                    float offset = (current_line_width - max_line_width) / 2.0;
-                    for(unsigned int n=0; n<line_start_vertex_index; n++)
-                        vertices[n].position[0] += offset;
-                }
-                break;
-            case Alignment::TopRight:
-            case Alignment::Right:
-            case Alignment::BottomRight:
-                if (current_line_width < max_line_width)
-                {
-                    float offset = max_line_width - current_line_width;
-                    for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
-                        vertices[n].position[0] += offset;
-                }
-                else
-                {
-                    float offset = current_line_width - max_line_width;
-                    for(unsigned int n=0; n<line_start_vertex_index; n++)
-                        vertices[n].position[0] += offset;
-                }
-                break;
-            }
-            max_line_width = std::max(max_line_width, current_line_width);
+            result.line_count++;
+            result.alignLine(line_start_result_index, current_line_width);
+            result.max_line_width = std::max(result.max_line_width, current_line_width);
             current_line_width = 0;
-            line_start_vertex_index = vertices.size();
+            line_start_result_index = result.data.size();
             index += 1;
             continue;
         }
@@ -95,15 +63,105 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
 
         if (glyph.bounds.size.x > 0.0)
         {
+            PreparedFontString::GlyphData data;
+            data.position = position;
+            data.string_offset = index;
+            result.data.push_back(data);
+        }
+        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x));
+        position.x += glyph.advance;
+        index += glyph.consumed_characters;
+    }
+
+    result.alignLine(line_start_result_index, current_line_width);
+    result.max_line_width = std::max(result.max_line_width, current_line_width);
+    
+    return result;
+}
+
+std::shared_ptr<MeshData> Font::PreparedFontString::create(float text_size, Vector2d area_size)
+{
+    float size_scale = text_size / float(pixel_size);
+    float line_spacing = font->getLineSpacing(pixel_size) * size_scale;
+
+    MeshData::Vertices vertices;
+    MeshData::Indices indices;
+    
+    vertices.reserve(data.size() * 6);
+    indices.reserve(data.size() * 4);
+
+    float x_offset = 0;
+    float y_offset = 0;
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        x_offset = 0;
+        break;
+    case Alignment::Top:
+    case Alignment::Center:
+    case Alignment::Bottom:
+        x_offset = (area_size.x - max_line_width * size_scale) / 2;
+        break;
+    case Alignment::TopRight:
+    case Alignment::Right:
+    case Alignment::BottomRight:
+        x_offset = area_size.x - max_line_width * size_scale;
+        break;
+    }
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::Top:
+    case Alignment::TopRight:
+        y_offset = area_size.y;
+        break;
+    case Alignment::Left:
+    case Alignment::Center:
+    case Alignment::Right:
+        y_offset = (area_size.y + line_spacing * (line_count + 1)) / 2;
+        y_offset -= font->getBaseline(pixel_size) * size_scale * 0.5;
+        break;
+    case Alignment::BottomLeft:
+    case Alignment::Bottom:
+    case Alignment::BottomRight:
+        y_offset = line_spacing * line_count;
+        break;
+    }
+    
+    for(const GlyphData& d : data)
+    {
+        GlyphInfo glyph;
+        if (d.string_offset < 0)
+        {
+            char tmp[2] = {char(-d.string_offset), 0};
+            if (!font->getGlyphInfo(tmp, pixel_size, glyph))
+            {
+                glyph.consumed_characters = 1;
+                glyph.advance = 0;
+                glyph.bounds.size.x = 0;
+            }
+        }else{
+            if (!font->getGlyphInfo(&s[d.string_offset], pixel_size, glyph))
+            {
+                glyph.consumed_characters = 1;
+                glyph.advance = 0;
+                glyph.bounds.size.x = 0;
+            }
+        }
+
+        if (glyph.bounds.size.x > 0.0)
+        {
             float u0 = glyph.uv_rect.position.x;
             float v0 = glyph.uv_rect.position.y;
             float u1 = glyph.uv_rect.position.x + glyph.uv_rect.size.x;
             float v1 = glyph.uv_rect.position.y + glyph.uv_rect.size.y;
             
-            float left = position.x + glyph.bounds.position.x * size_scale;
-            float right = position.x + glyph.bounds.position.x * size_scale + glyph.bounds.size.x * size_scale;
-            float top = position.y + glyph.bounds.position.y * size_scale;
-            float bottom = position.y + glyph.bounds.position.y * size_scale - glyph.bounds.size.y * size_scale;
+            float left = x_offset + d.position.x * size_scale + glyph.bounds.position.x * size_scale;
+            float right = left + glyph.bounds.size.x * size_scale;
+            float top = y_offset + d.position.y * size_scale + glyph.bounds.position.y * size_scale;
+            float bottom = top - glyph.bounds.size.y * size_scale;
 
             Vector3f p0(left, top, 0.0f);
             Vector3f p1(right, top, 0.0f);
@@ -122,11 +180,13 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
             vertices.emplace_back(p2, sp::Vector2f(u0, v1));
             vertices.emplace_back(p3, sp::Vector2f(u1, v1));
         }
-        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
-        position.x += glyph.advance * size_scale;
-        index += glyph.consumed_characters;
     }
 
+    return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
+}
+
+void Font::PreparedFontString::alignLine(unsigned int line_start_result_index, float current_line_width)
+{
     switch(alignment)
     {
     case Alignment::TopLeft:
@@ -139,14 +199,14 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
         if (current_line_width < max_line_width)
         {
             float offset = (max_line_width - current_line_width) / 2.0;
-            for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
-                vertices[n].position[0] += offset;
+            for(unsigned int n=line_start_result_index; n<data.size(); n++)
+                data[n].position.x += offset;
         }
         else
         {
             float offset = (current_line_width - max_line_width) / 2.0;
-            for(unsigned int n=0; n<line_start_vertex_index; n++)
-                vertices[n].position[0] += offset;
+            for(unsigned int n=0; n<line_start_result_index; n++)
+                data[n].position.x += offset;
         }
         break;
     case Alignment::TopRight:
@@ -155,66 +215,17 @@ std::shared_ptr<MeshData> Font::createString(string s, int pixel_size, float tex
         if (current_line_width < max_line_width)
         {
             float offset = max_line_width - current_line_width;
-            for(unsigned int n=line_start_vertex_index; n<vertices.size(); n++)
-                vertices[n].position[0] += offset;
+            for(unsigned int n=line_start_result_index; n<data.size(); n++)
+                data[n].position.x += offset;
         }
         else
         {
             float offset = current_line_width - max_line_width;
-            for(unsigned int n=0; n<line_start_vertex_index; n++)
-                vertices[n].position[0] += offset;
+            for(unsigned int n=0; n<line_start_result_index; n++)
+                data[n].position.x += offset;
         }
         break;
     }
-
-    max_line_width = std::max(max_line_width, current_line_width);
-
-    float x_offset = 0;
-    float y_offset = 0;
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        x_offset = 0;
-        break;
-    case Alignment::Top:
-    case Alignment::Center:
-    case Alignment::Bottom:
-        x_offset = (area_size.x - max_line_width) / 2;
-        break;
-    case Alignment::TopRight:
-    case Alignment::Right:
-    case Alignment::BottomRight:
-        x_offset = area_size.x - max_line_width;
-        break;
-    }
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::Top:
-    case Alignment::TopRight:
-        y_offset = area_size.y - line_spacing;
-        break;
-    case Alignment::Left:
-    case Alignment::Center:
-    case Alignment::Right:
-        y_offset = (area_size.y - line_spacing * (line_count - 1)) / 2;
-        y_offset -= getBaseline(pixel_size) * size_scale * 0.5;
-        break;
-    case Alignment::BottomLeft:
-    case Alignment::Bottom:
-    case Alignment::BottomRight:
-        y_offset = line_spacing * (line_count - 1);
-        break;
-    }
-    for(auto& vertex : vertices)
-    {
-        vertex.position[0] += x_offset;
-        vertex.position[1] += y_offset;
-    }
-    
-    return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
 class FreetypeFontTexture : public Texture
