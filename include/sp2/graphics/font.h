@@ -33,20 +33,22 @@ public:
         };
         std::vector<GlyphData> data;
         
-        std::shared_ptr<MeshData> create(float text_size, Vector2d area_size);
+        std::shared_ptr<MeshData> create();
     private:
         Font* font;
         string s;
         Alignment alignment;
         int pixel_size;
+        float text_size;
         float max_line_width;
         int line_count;
         
         void alignLine(unsigned int line_start_result_index, float current_line_width);
+        void alignAll(const sp::Vector2d& area_size);
         
         friend class Font;
     };
-    PreparedFontString prepare(const string& s, int pixel_size, Alignment alignment);
+    PreparedFontString prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
 protected:
     class GlyphInfo
     {

@@ -12,17 +12,19 @@ namespace sp {
 
 std::shared_ptr<MeshData> Font::createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
 {
-    return prepare(s, pixel_size, alignment).create(text_size, area_size);
+    return prepare(s, pixel_size, text_size, area_size, alignment).create();
 }
 
-Font::PreparedFontString Font::prepare(const string& s, int pixel_size, Alignment alignment)
+Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
 {
-    float line_spacing = getLineSpacing(pixel_size);
+    float size_scale = text_size / float(pixel_size);
+    float line_spacing = getLineSpacing(pixel_size) * size_scale;
     PreparedFontString result;
 
     result.font = this;
     result.s = s;
     result.alignment = alignment;
+    result.text_size = text_size;
     result.pixel_size = pixel_size;
     result.max_line_width = 0;
     result.line_count = 1;
@@ -36,7 +38,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, Alignmen
     {
         if (previous_character_index > -1)
         {
-            position.x += getKerning(&s[previous_character_index], &s[index]);
+            position.x += getKerning(&s[previous_character_index], &s[index]) * size_scale;
         }
         previous_character_index = index;
 
@@ -66,21 +68,71 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, Alignmen
         data.string_offset = index;
         result.data.push_back(data);
 
-        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x));
-        position.x += glyph.advance;
+        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
+        position.x += glyph.advance * size_scale;
         index += glyph.consumed_characters;
     }
 
     result.alignLine(line_start_result_index, current_line_width);
     result.max_line_width = std::max(result.max_line_width, current_line_width);
     
+    result.alignAll(area_size);
+    
     return result;
 }
 
-std::shared_ptr<MeshData> Font::PreparedFontString::create(float text_size, Vector2d area_size)
+void Font::PreparedFontString::alignAll(const sp::Vector2d& area_size)
 {
     float size_scale = text_size / float(pixel_size);
     float line_spacing = font->getLineSpacing(pixel_size) * size_scale;
+
+    sp::Vector2f offset;
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::BottomLeft:
+    case Alignment::Left:
+        offset.x = 0;
+        break;
+    case Alignment::Top:
+    case Alignment::Center:
+    case Alignment::Bottom:
+        offset.x = (area_size.x - max_line_width) / 2;
+        break;
+    case Alignment::TopRight:
+    case Alignment::Right:
+    case Alignment::BottomRight:
+        offset.x = area_size.x - max_line_width;
+        break;
+    }
+    switch(alignment)
+    {
+    case Alignment::TopLeft:
+    case Alignment::Top:
+    case Alignment::TopRight:
+        offset.y = area_size.y;
+        break;
+    case Alignment::Left:
+    case Alignment::Center:
+    case Alignment::Right:
+        offset.y = (area_size.y + line_spacing * (line_count + 1)) / 2;
+        offset.y -= font->getBaseline(pixel_size) * size_scale * 0.5;
+        break;
+    case Alignment::BottomLeft:
+    case Alignment::Bottom:
+    case Alignment::BottomRight:
+        offset.y = line_spacing * line_count;
+        break;
+    }
+    for(GlyphData& d : data)
+    {
+        d.position += offset;
+    }
+}
+
+std::shared_ptr<MeshData> Font::PreparedFontString::create()
+{
+    float size_scale = text_size / float(pixel_size);
 
     MeshData::Vertices vertices;
     MeshData::Indices indices;
@@ -88,46 +140,6 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(float text_size, Vect
     vertices.reserve(data.size() * 6);
     indices.reserve(data.size() * 4);
 
-    float x_offset = 0;
-    float y_offset = 0;
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        x_offset = 0;
-        break;
-    case Alignment::Top:
-    case Alignment::Center:
-    case Alignment::Bottom:
-        x_offset = (area_size.x - max_line_width * size_scale) / 2;
-        break;
-    case Alignment::TopRight:
-    case Alignment::Right:
-    case Alignment::BottomRight:
-        x_offset = area_size.x - max_line_width * size_scale;
-        break;
-    }
-    switch(alignment)
-    {
-    case Alignment::TopLeft:
-    case Alignment::Top:
-    case Alignment::TopRight:
-        y_offset = area_size.y;
-        break;
-    case Alignment::Left:
-    case Alignment::Center:
-    case Alignment::Right:
-        y_offset = (area_size.y + line_spacing * (line_count + 1)) / 2;
-        y_offset -= font->getBaseline(pixel_size) * size_scale * 0.5;
-        break;
-    case Alignment::BottomLeft:
-    case Alignment::Bottom:
-    case Alignment::BottomRight:
-        y_offset = line_spacing * line_count;
-        break;
-    }
-    
     for(const GlyphData& d : data)
     {
         GlyphInfo glyph;
@@ -156,9 +168,9 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(float text_size, Vect
             float u1 = glyph.uv_rect.position.x + glyph.uv_rect.size.x;
             float v1 = glyph.uv_rect.position.y + glyph.uv_rect.size.y;
             
-            float left = x_offset + d.position.x * size_scale + glyph.bounds.position.x * size_scale;
+            float left = d.position.x + glyph.bounds.position.x * size_scale;
             float right = left + glyph.bounds.size.x * size_scale;
-            float top = y_offset + d.position.y * size_scale + glyph.bounds.position.y * size_scale;
+            float top = d.position.y + glyph.bounds.position.y * size_scale;
             float bottom = top - glyph.bounds.size.y * size_scale;
 
             Vector3f p0(left, top, 0.0f);

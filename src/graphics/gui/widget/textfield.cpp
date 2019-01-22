@@ -46,16 +46,16 @@ void TextField::updateRenderData()
         Font::PreparedFontString result;
         if (isFocused())
         {
-            result = t.font->prepare(value + "_", 64, Alignment::Left);
+            result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
             for(auto d : result.data)
                 if (d.string_offset == cursor)
                     result.data.back().position = d.position;
         }
         else
         {
-            result = t.font->prepare(value, 64, Alignment::Left);
+            result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
         }
-        render_data.mesh = result.create(text_size < 0 ? t.size : text_size, getRenderSize());
+        render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
     }
@@ -71,7 +71,21 @@ void TextField::onUpdate(float delta)
 
 bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    cursor = value.length();
+    if (isFocused())
+    {
+        const ThemeData::StateData& t = theme->states[int(getState())];
+        if (t.font)
+        {
+            Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
+            for(auto& d : result.data)
+            {
+                if (d.position.x <= position.x)
+                    cursor = d.string_offset;
+            }
+        }
+    }else{
+        cursor = value.length();
+    }
     return true;
 }
 
