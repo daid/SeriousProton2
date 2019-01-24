@@ -126,6 +126,9 @@ void TextField::onTextInput(TextInputEvent e)
             cursor -= 1;
         }
         break;
+    case TextInputEvent::Return:
+        runCallback(value);
+        break;
     }
     markRenderDataOutdated();
 }

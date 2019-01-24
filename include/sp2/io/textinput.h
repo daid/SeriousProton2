@@ -14,7 +14,8 @@ enum class TextInputEvent
     TextStart,
     TextEnd,
     Delete,
-    Backspace
+    Backspace,
+    Return
 };
 
 };//namespace sp
