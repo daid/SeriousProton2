@@ -42,6 +42,11 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
         }
         previous_character_index = index;
 
+        PreparedFontString::GlyphData data;
+        data.position = position;
+        data.string_offset = index;
+        result.data.push_back(data);
+
         if (s[index] == '\n')
         {
             position.x = 0;
@@ -62,11 +67,6 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
             glyph.advance = 0;
             glyph.bounds.size.x = 0;
         }
-
-        PreparedFontString::GlyphData data;
-        data.position = position;
-        data.string_offset = index;
-        result.data.push_back(data);
 
         current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
         position.x += glyph.advance * size_scale;
@@ -152,7 +152,9 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create()
                 glyph.advance = 0;
                 glyph.bounds.size.x = 0;
             }
-        }else{
+        }
+        else
+        {
             if (!font->getGlyphInfo(&s[d.string_offset], pixel_size, glyph))
             {
                 glyph.consumed_characters = 1;
