@@ -1,4 +1,4 @@
-#include <sp2/graphics/gui/widget/textfield.h>
+#include <sp2/graphics/gui/widget/textarea.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/engine.h>
@@ -6,12 +6,12 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("textfield", TextField);
+SP_REGISTER_WIDGET("textarea", TextArea);
 
-TextField::TextField(P<Widget> parent)
+TextArea::TextArea(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("textfield");
+    loadThemeData("textarea");
     text_size = -1;
     texture_revision = -1;
     setFocusable(true);
@@ -19,7 +19,7 @@ TextField::TextField(P<Widget> parent)
     setAttribute("order", "-1");
 }
 
-void TextField::setAttribute(const string& key, const string& value)
+void TextArea::setAttribute(const string& key, const string& value)
 {
     if (key == "text")
     {
@@ -36,7 +36,7 @@ void TextField::setAttribute(const string& key, const string& value)
     }
 }
 
-void TextField::updateRenderData()
+void TextArea::updateRenderData()
 {
     const ThemeData::StateData& t = theme->states[int(getState())];
 
@@ -46,14 +46,14 @@ void TextField::updateRenderData()
         Font::PreparedFontString result;
         if (isFocused())
         {
-            result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
+            result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
             for(auto d : result.data)
                 if (d.string_offset == cursor)
                     result.data.back().position = d.position;
         }
         else
         {
-            result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
+            result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
         }
         render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
@@ -62,25 +62,37 @@ void TextField::updateRenderData()
     render_data.color = t.color;
 }
 
-void TextField::onUpdate(float delta)
+void TextArea::onUpdate(float delta)
 {
     if (render_data.texture && render_data.texture->getRevision() != texture_revision)
         markRenderDataOutdated();
     Widget::onUpdate(delta);
 }
 
-bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
+bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     if (isFocused())
     {
         const ThemeData::StateData& t = theme->states[int(getState())];
         if (t.font)
         {
-            Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
-            for(auto& d : result.data)
+            Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+            unsigned int n;
+            for(n=0; n<result.data.size(); n++)
             {
-                if (d.position.x <= position.x)
-                    cursor = d.string_offset;
+                auto& d = result.data[n];
+                if (d.position.y < position.y)
+                    break;
+            }
+            float line_y = result.data[n].position.y;
+            for(; n<result.data.size(); n++)
+            {
+                auto& d = result.data[n];
+                if (d.position.x > position.x)
+                    break;
+                if (d.position.y < line_y)
+                    break;
+                cursor = d.string_offset;
             }
         }
     }else{
@@ -89,22 +101,22 @@ bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int
     return true;
 }
 
-void TextField::onPointerDrag(Vector2d position, int id)
+void TextArea::onPointerDrag(Vector2d position, int id)
 {
 }
 
-void TextField::onPointerUp(Vector2d position, int id)
+void TextArea::onPointerUp(Vector2d position, int id)
 {
 }
 
-void TextField::onTextInput(const string& text)
+void TextArea::onTextInput(const string& text)
 {
     value = value.substr(0, cursor) + text + value.substr(cursor);
     cursor += text.length();
     markRenderDataOutdated();
 }
 
-void TextField::onTextInput(TextInputEvent e)
+void TextArea::onTextInput(TextInputEvent e)
 {
     switch(e)
     {
@@ -127,7 +139,7 @@ void TextField::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Return:
-        runCallback(value);
+        onTextInput("\n");
         break;
     }
     markRenderDataOutdated();

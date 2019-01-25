@@ -381,6 +381,10 @@ void Window::handleEvent(const SDL_Event& event)
             case SDLK_KP_PERIOD: if (event.key.keysym.mod & KMOD_NUM) break;
             case SDLK_DELETE: focus_layer->onTextInput(TextInputEvent::Delete); break;
             case SDLK_BACKSPACE: focus_layer->onTextInput(TextInputEvent::Backspace); break;
+            case SDLK_KP_ENTER:
+            case SDLK_RETURN:
+                focus_layer->onTextInput(TextInputEvent::Return);
+                break;
             }
         }
         break;
