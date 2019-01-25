@@ -33,7 +33,7 @@ public:
         };
         std::vector<GlyphData> data;
         
-        std::shared_ptr<MeshData> create();
+        std::shared_ptr<MeshData> create(bool clip=false);
     private:
         Font* font;
         string s;
@@ -42,9 +42,10 @@ public:
         float text_size;
         float max_line_width;
         int line_count;
+        sp::Vector2d area_size;
         
         void alignLine(unsigned int line_start_result_index, float current_line_width);
-        void alignAll(const sp::Vector2d& area_size);
+        void alignAll();
         
         friend class Font;
     };

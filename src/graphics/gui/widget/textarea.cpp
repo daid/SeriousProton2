@@ -55,7 +55,7 @@ void TextArea::updateRenderData()
         {
             result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
         }
-        render_data.mesh = result.create();
+        render_data.mesh = result.create(true);
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
     }

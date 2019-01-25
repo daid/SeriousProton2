@@ -28,6 +28,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     result.pixel_size = pixel_size;
     result.max_line_width = 0;
     result.line_count = 1;
+    result.area_size = area_size;
 
     sp::Vector2f position(0, -line_spacing);
     int previous_character_index = -1;
@@ -76,12 +77,12 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     result.alignLine(line_start_result_index, current_line_width);
     result.max_line_width = std::max(result.max_line_width, current_line_width);
     
-    result.alignAll(area_size);
+    result.alignAll();
     
     return result;
 }
 
-void Font::PreparedFontString::alignAll(const sp::Vector2d& area_size)
+void Font::PreparedFontString::alignAll()
 {
     float size_scale = text_size / float(pixel_size);
     float line_spacing = font->getLineSpacing(pixel_size) * size_scale;
@@ -130,7 +131,7 @@ void Font::PreparedFontString::alignAll(const sp::Vector2d& area_size)
     }
 }
 
-std::shared_ptr<MeshData> Font::PreparedFontString::create()
+std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
 {
     float size_scale = text_size / float(pixel_size);
 
@@ -174,6 +175,41 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create()
             float right = left + glyph.bounds.size.x * size_scale;
             float top = d.position.y + glyph.bounds.position.y * size_scale;
             float bottom = top - glyph.bounds.size.y * size_scale;
+            
+            if (clip)
+            {
+                if (right < 0)
+                    continue;
+                if (left < 0)
+                {
+                    u0 = u1 - glyph.uv_rect.size.x * (0 - right) / (left - right);
+                    left = 0;
+                }
+
+                if (left > area_size.x)
+                    continue;
+                if (right > area_size.x)
+                {
+                    u1 = u0 + glyph.uv_rect.size.x * (area_size.x - left) / (right - left);
+                    right = area_size.x;
+                }
+
+                if (top < 0)
+                    continue;
+                if (bottom < 0)
+                {
+                    v1 = v0 + glyph.uv_rect.size.y * (0 - top) / (bottom - top);
+                    bottom = 0;
+                }
+
+                if (bottom > area_size.y)
+                    continue;
+                if (top > area_size.y)
+                {
+                    v0 = v1 - glyph.uv_rect.size.y * (area_size.y - bottom) / (top - bottom);
+                    top = area_size.y;
+                }
+            }
 
             Vector3f p0(left, top, 0.0f);
             Vector3f p1(right, top, 0.0f);
