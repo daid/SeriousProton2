@@ -17,6 +17,7 @@
 namespace sp {
 
 PList<Window> Window::windows;
+void* Window::shared_render_context;
 
 Window::Window()
 {
@@ -43,7 +44,6 @@ Window::Window()
     clear_color = Color(0.1, 0.1, 0.1);
 
     render_window = nullptr;
-    render_context = nullptr;
 
     createRenderWindow();
 }
@@ -140,9 +140,7 @@ void Window::close()
     if (render_window)
     {
         SDL_DestroyWindow(render_window);
-        SDL_GL_DeleteContext(render_context);
         render_window = nullptr;
-        render_context = nullptr;
     }
 }
 
@@ -184,8 +182,6 @@ void Window::createRenderWindow()
         }
     }
 
-    close();
-
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
@@ -207,20 +203,31 @@ void Window::createRenderWindow()
     int flags = SDL_WINDOW_OPENGL;
     if (fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
-    render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+    if (render_window)
+    {
+        SDL_SetWindowSize(render_window, window_width, window_height);
+        SDL_SetWindowFullscreen(render_window, flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP));
+    }
+    else
+    {
+        render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+    }
     if (!render_window)
     {
         LOG(Warning, "Failed to create SDL window.");
         return;
     }
 
-    render_context = SDL_GL_CreateContext(render_window);
-    initOpenGL();
+    if (!shared_render_context)
+    {
+        shared_render_context = SDL_GL_CreateContext(render_window);
+        initOpenGL();
 
-    int major_version, minor_version;
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
-    LOG(Info, "OpenGL version:", major_version, minor_version);
+        int major_version, minor_version;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
+        LOG(Info, "OpenGL version:", major_version, minor_version);
+    }
 
     //Enable VSync.
     SDL_GL_SetSwapInterval(1);
@@ -241,7 +248,7 @@ void Window::render()
 
     queue.add([this, window_size]()
     {
-        SDL_GL_MakeCurrent(render_window, render_context);
+        SDL_GL_MakeCurrent(render_window, shared_render_context);
         glViewport(0, 0, window_size.x, window_size.y);
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -277,7 +284,7 @@ void Window::render()
     {
         queue.add([this, window_size]()
         {
-            SDL_GL_MakeCurrent(render_window, render_context);
+            SDL_GL_MakeCurrent(render_window, shared_render_context);
             glViewport(0, 0, window_size.x, window_size.y);
         });
 

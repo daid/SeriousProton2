@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 
+
 struct SDL_Window;
 union SDL_Event;
 
@@ -27,24 +28,24 @@ public:
     Window(float aspect_ratio);
     Window(Vector2f size_factor);
     Window(Vector2f size_factor, float aspect_ratio);
-    
+
     void setFullScreen(bool fullscreen);
     void setClearColor(Color color);
     void hideCursor();
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
     void setPosition(Vector2f position);
-    
+
     void addLayer(P<GraphicsLayer> layer);
-    
+
     void close();
 private:
     SDL_Window* render_window;
-    void* render_context;
+    static void* shared_render_context;
     RenderQueue queue;
 
     virtual ~Window();
-    
+
     void createRenderWindow();
     void render();
     void handleEvent(const SDL_Event& event);
@@ -52,9 +53,9 @@ private:
     void pointerDrag(Vector2d position, int id);
     void pointerUp(Vector2d position, int id);
     Vector2d screenToGLPosition(int x, int y);
-    
+
     PList<GraphicsLayer> graphics_layers;
-    
+
     string title;
     int antialiasing;
     bool fullscreen;
@@ -65,14 +66,14 @@ private:
     //Screen size/position information.
     float window_aspect_ratio; //If != 0 then this is the forced aspect ratio in window mode (ignored in full screen)
     Vector2f max_window_size_ratio; //If != 0 then this is the maximum size the window may take of screen, in faction (0.0 to 1.0)
-    
+
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer; //Layer on which a pointer that is down has focus, cleared on pointer up event.
     P<GraphicsLayer> focus_layer;   //Last layer that gained focus, for text input related events.
 
     static PList<Window> windows;
     static bool anyWindowOpen();
-    
+
     //Engine needs to be able to access the render window, as this is needed for event polling.
     friend class Engine;
     friend class GraphicsLayer;
