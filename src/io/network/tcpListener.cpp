@@ -32,6 +32,7 @@ TcpListener::~TcpListener()
 
 bool TcpListener::listen(int port)
 {
+    Address::initSocketLib();
     if (isListening())
         close();
     

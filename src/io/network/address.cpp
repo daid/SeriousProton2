@@ -23,16 +23,8 @@ namespace network {
 
 Address::Address(string hostname)
 {
-#ifdef __WIN32
-    static bool wsa_startup_done = false;
-    if (!wsa_startup_done)
-    {
-        WSADATA wsa_data;
-        memset(&wsa_data, 0, sizeof(WSADATA));
-        WSAStartup(MAKEWORD(2, 2), &wsa_data);
-        wsa_startup_done = true;
-    }
-#endif
+    initSocketLib();
+
     struct addrinfo* result;
     if (::getaddrinfo(hostname.c_str(), nullptr, nullptr, &result))
         return;
@@ -57,6 +49,8 @@ Address::Address(std::list<AddrInfo>&& addr_info)
 
 Address Address::getLocalAddress()
 {
+    initSocketLib();
+
     std::list<AddrInfo> addr_info;
 
 #ifdef __WIN32
@@ -126,6 +120,21 @@ Address::AddrInfo::AddrInfo(int family, const string& human_readable, const void
 Address::AddrInfo::~AddrInfo()
 {
 }
+
+void Address::initSocketLib()
+{
+#ifdef __WIN32
+    static bool wsa_startup_done = false;
+    if (!wsa_startup_done)
+    {
+        WSADATA wsa_data;
+        memset(&wsa_data, 0, sizeof(WSADATA));
+        WSAStartup(MAKEWORD(2, 2), &wsa_data);
+        wsa_startup_done = true;
+    }
+#endif
+}
+
 
 };//namespace network
 };//namespace io

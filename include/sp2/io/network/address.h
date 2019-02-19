@@ -18,6 +18,8 @@ public:
     
     static Address getLocalAddress();
 private:
+    static void initSocketLib();
+
     class AddrInfo
     {
     public:
@@ -35,6 +37,7 @@ private:
     
     friend class TcpSocket;
     friend class UdpSocket;
+    friend class TcpListener;
 };
 
 };//namespace network

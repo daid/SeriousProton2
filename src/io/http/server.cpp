@@ -24,7 +24,7 @@ Server::Server(int port_nr)
 
 void Server::setStaticFilePath(string static_file_path)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     
     if (!static_file_path.endswith("/"))
         static_file_path += "/";
@@ -33,14 +33,21 @@ void Server::setStaticFilePath(string static_file_path)
 
 void Server::addHandler(string url, std::function<string(const Request&)> func)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     
     http_handlers[url] = func;
 }
 
+void Server::addWebsocketHandler(string url, std::function<void(const string& data)> func)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
+    websocket_handlers[url] = func;
+}
+
 void Server::sendToWebsockets(string url, string data)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     
     for(Connection& connection : connections)
     {
@@ -57,7 +64,7 @@ void Server::handlerThread()
     {
         selector.wait(1000);
 
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard<std::recursive_mutex> lock(mutex);
         if (selector.isReady(listen_socket))
         {
             connections.emplace_back(*this);
@@ -90,7 +97,7 @@ void Server::handlerThread()
 
 void Server::onUpdate(float delta)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock(mutex);
 
     for(Connection& connection : connections)
     {
@@ -232,10 +239,14 @@ bool Server::Connection::update()
             case 0x01://text
                 if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
                     websock_pending.push_back(message);
+                else
+                    LOG(Warning, "Websocket text message for unknown path:", request.path);
                 break;
             case 0x02://binary
                 if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
                     websock_pending.push_back(message);
+                else
+                    LOG(Warning, "Websocket binary message for unknown path:", request.path);
                 break;
             case 0x08://close
                 {
@@ -283,16 +294,26 @@ void Server::Connection::handleRequest(const Request& request)
         && request.headers.find("sec-websocket-version")->second.lower() == "13"
         )
         {
-            string reply = "HTTP/1.1 101 Switching Protocols\r\n";
-            reply += "Upgrade: websocket\r\n";
-            reply += "Connection: upgrade\r\n";
-            reply += "Sec-WebSocket-Accept: " + stringutil::SHA1(request.headers.find("sec-websocket-key")->second + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").base64() + "\r\n";
-            if (request.headers.find("sec-websocket-protocol") != request.headers.end())
-                reply += "Sec-WebSocket-Protocol: chat\r\n";
-            reply += "\r\n";
-            socket.send(reply.c_str(), reply.size());
-            
-            state = State::Websocket;
+            if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
+            {
+                string reply = "HTTP/1.1 101 Switching Protocols\r\n";
+                reply += "Upgrade: websocket\r\n";
+                reply += "Connection: upgrade\r\n";
+                reply += "Sec-WebSocket-Accept: " + stringutil::SHA1(request.headers.find("sec-websocket-key")->second + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").base64() + "\r\n";
+                if (request.headers.find("sec-websocket-protocol") != request.headers.end())
+                    reply += "Sec-WebSocket-Protocol: chat\r\n";
+                reply += "\r\n";
+                socket.send(reply.c_str(), reply.size());
+                
+                state = State::Websocket;
+            }
+            else
+            {
+                LOG(Warning, "Tried to open websocket without handler:", request.path);
+                startHttpReply(404);
+                httpChunk("404 - File not found.");
+                httpChunk("");
+            }
             return;
         }
     }

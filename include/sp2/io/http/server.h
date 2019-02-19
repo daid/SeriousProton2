@@ -30,6 +30,7 @@ public:
         * File hosting
         * APIs
         * Websockets
+    Protocol and file handling is done on a seperate thread, while URL handlers and Websocket handlers are processed on the main thread.
     
     Note that the websockets implementation is limited to small text messages, less then 4k in size. Without fragmentation/continuation frames.
  */
@@ -49,7 +50,7 @@ private:
     virtual void onUpdate(float delta) override;
 
     std::thread handler_thread;
-    std::mutex mutex;
+    std::recursive_mutex mutex;
     std::map<string, std::function<string(const Request&)>> http_handlers;
     std::map<string, std::function<void(const string& data)>> websocket_handlers;
 
