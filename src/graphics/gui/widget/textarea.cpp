@@ -142,8 +142,25 @@ void TextArea::onTextInput(TextInputEvent e)
     {
     case TextInputEvent::Left: if (cursor > 0) cursor -= 1; break;
     case TextInputEvent::Right: if (cursor < int(value.length())) cursor += 1; break;
-    case TextInputEvent::Up: break;
-    case TextInputEvent::Down: break;
+    case TextInputEvent::Up:{
+        int end_of_line = value.substr(0, cursor).rfind("\n");
+        if (end_of_line < 0) return;
+        int start_of_line = value.substr(0, end_of_line).rfind("\n") + 1;
+        int offset = cursor - end_of_line - 1;
+        int line_length = end_of_line - start_of_line;
+        cursor = start_of_line + std::min(line_length, offset);
+        }break;
+    case TextInputEvent::Down:{
+        int start_of_current_line = value.substr(0, cursor).rfind("\n") + 1;
+        int end_of_current_line = value.find("\n", cursor);
+        if (end_of_current_line < 0)
+            return;
+        int end_of_end_line = value.find("\n", end_of_current_line + 1);
+        if (end_of_end_line == -1)
+            end_of_end_line = value.length();
+        int offset = cursor - start_of_current_line;
+        cursor = end_of_current_line + 1 + std::min(offset, end_of_end_line - (end_of_current_line + 1));
+        }break;
     case TextInputEvent::LineStart: cursor = 0; break;
     case TextInputEvent::LineEnd: cursor = value.length(); break;
     case TextInputEvent::TextStart: cursor = 0; break;
