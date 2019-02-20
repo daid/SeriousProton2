@@ -34,6 +34,7 @@ public:
         std::vector<GlyphData> data;
         
         std::shared_ptr<MeshData> create(bool clip=false);
+        sp::Vector2f getUsedAreaSize();
     private:
         Font* font;
         string s;

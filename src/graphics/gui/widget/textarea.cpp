@@ -1,4 +1,5 @@
 #include <sp2/graphics/gui/widget/textarea.h>
+#include <sp2/graphics/gui/widget/slider.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/engine.h>
@@ -17,6 +18,13 @@ TextArea::TextArea(P<Widget> parent)
     setFocusable(true);
     
     setAttribute("order", "-1");
+    
+    vertical_scroll = new Slider(this);
+    vertical_scroll->setSize(theme->states[int(getState())].size, 0);
+    vertical_scroll->layout.alignment = Alignment::Right;
+    vertical_scroll->layout.fill_height = true;
+    vertical_scroll->setRange(100, 0);
+    vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
 }
 
 void TextArea::setAttribute(const string& key, const string& value)
@@ -28,6 +36,7 @@ void TextArea::setAttribute(const string& key, const string& value)
     else if (key == "text_size" || key == "text.size")
     {
         text_size = stringutil::convert::toFloat(value);
+        vertical_scroll->setSize(text_size, 0);
         markRenderDataOutdated();
     }
     else
@@ -55,6 +64,9 @@ void TextArea::updateRenderData()
         {
             result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
         }
+        vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
+        for(auto& data : result.data)
+            data.position.y += vertical_scroll->getValue();
         render_data.mesh = result.create(true);
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
@@ -71,32 +83,28 @@ void TextArea::onUpdate(float delta)
 
 bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    if (isFocused())
+    position.y -= vertical_scroll->getValue();
+    const ThemeData::StateData& t = theme->states[int(getState())];
+    if (t.font)
     {
-        const ThemeData::StateData& t = theme->states[int(getState())];
-        if (t.font)
+        Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+        unsigned int n;
+        for(n=0; n<result.data.size(); n++)
         {
-            Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
-            unsigned int n;
-            for(n=0; n<result.data.size(); n++)
-            {
-                auto& d = result.data[n];
-                if (d.position.y < position.y)
-                    break;
-            }
-            float line_y = result.data[n].position.y;
-            for(; n<result.data.size(); n++)
-            {
-                auto& d = result.data[n];
-                if (d.position.x > position.x)
-                    break;
-                if (d.position.y < line_y)
-                    break;
-                cursor = d.string_offset;
-            }
+            auto& d = result.data[n];
+            if (d.position.y < position.y)
+                break;
         }
-    }else{
-        cursor = value.length();
+        float line_y = result.data[n].position.y;
+        for(; n<result.data.size(); n++)
+        {
+            auto& d = result.data[n];
+            if (d.position.x > position.x)
+                break;
+            if (d.position.y < line_y)
+                break;
+            cursor = d.string_offset;
+        }
     }
     return true;
 }

@@ -20,7 +20,8 @@ public:
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
     
-    void setValue(float value) { this->value = value; }
+    void setValue(float value);
+    void setRange(float min, float max);
     float getValue() { return value; }
 private:
     float min_value, max_value;

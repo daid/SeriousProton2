@@ -46,6 +46,19 @@ void Slider::setAttribute(const string& key, const string& value)
     }
 }
 
+void Slider::setValue(float value)
+{
+    this->value = value;
+    markRenderDataOutdated();
+}
+
+void Slider::setRange(float min, float max)
+{
+    min_value = min;
+    max_value = max;
+    markRenderDataOutdated();
+}
+
 void Slider::updateRenderData()
 {
     Vector2d size(getRenderSize());
@@ -56,6 +69,8 @@ void Slider::updateRenderData()
     render_data.color = t.color;
     
     float f = (value - min_value) / (max_value - min_value);
+    if (max_value - min_value == 0.0)
+        f = 0.5;
     if (size.x > size.y)
     {
         dial->layout.size.x = size.y;

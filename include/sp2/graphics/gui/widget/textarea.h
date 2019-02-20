@@ -7,6 +7,7 @@
 namespace sp {
 namespace gui {
 
+class Slider;
 class TextArea : public Widget
 {
 public:
@@ -23,6 +24,7 @@ public:
     virtual void onTextInput(TextInputEvent e) override;
 
 private:
+    sp::P<Slider> vertical_scroll;
     float text_size;
     int texture_revision;
     

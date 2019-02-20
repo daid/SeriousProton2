@@ -131,6 +131,11 @@ void Font::PreparedFontString::alignAll()
     }
 }
 
+sp::Vector2f Font::PreparedFontString::getUsedAreaSize()
+{
+    return sp::Vector2f(max_line_width, (float(line_count) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
+}
+
 std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
 {
     float size_scale = text_size / float(pixel_size);
