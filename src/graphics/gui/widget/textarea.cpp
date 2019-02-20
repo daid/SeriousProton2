@@ -55,10 +55,22 @@ void TextArea::updateRenderData()
         Font::PreparedFontString result;
         if (isFocused())
         {
-            result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+            float ts = text_size < 0 ? t.size : text_size;
+            result = t.font->prepare(value + "_", 64, ts, getRenderSize(), Alignment::TopLeft);
             for(auto d : result.data)
+            {
                 if (d.string_offset == cursor)
+                {
                     result.data.back().position = d.position;
+                    
+                    float y = getRenderSize().y - d.position.y;
+                    y -= vertical_scroll->getValue();
+                    if (y < ts)
+                        vertical_scroll->setValue(vertical_scroll->getValue() + y - ts);
+                    if (y + ts * 0.3 > getRenderSize().y)
+                        vertical_scroll->setValue(vertical_scroll->getValue() + y + ts * 0.3 - getRenderSize().y);
+                }
+            }
         }
         else
         {
