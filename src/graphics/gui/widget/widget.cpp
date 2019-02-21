@@ -12,7 +12,6 @@ namespace sp {
 namespace gui {
 
 WidgetClassRegistry* WidgetClassRegistry::first;
-float Widget::text_scale_factor = 0.5;
 
 SP_REGISTER_WIDGET("", Widget);
 

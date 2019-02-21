@@ -18,7 +18,7 @@ Button::Button(P<Widget> parent)
     label = new Label(this, "button.label");
     label->layout.fill_height = true;
     label->layout.fill_width = true;
-    //SP2TODO: Update label with "state"
+    slave_widget = label;
 }
 
 void Button::setLabel(string value)

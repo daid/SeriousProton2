@@ -3,6 +3,7 @@
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/engine.h>
 
+
 namespace sp {
 namespace gui {
 
@@ -21,6 +22,7 @@ Slider::Slider(P<Widget> parent)
     dial->layout.fill_width = false;
     dial->layout.fill_height = false;
     dial->layout.lock_aspect_ratio = true;
+    slave_widget = dial;
 }
 
 void Slider::setAttribute(const string& key, const string& value)

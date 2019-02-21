@@ -120,12 +120,24 @@ public:
 #endif
 protected:
     const ThemeData* theme;
+    sp::P<Widget> slave_widget;
     
     void loadThemeData(string name);
     void setFocusable(bool value);
-protected:
+
     void runCallback(Variant v);
-    void markRenderDataOutdated() { render_data_outdated = true; }
+    void markRenderDataOutdated()
+    {
+        if (slave_widget)
+        {
+            slave_widget->visible = visible;
+            slave_widget->enabled = enabled;
+            slave_widget->focus = focus;
+            slave_widget->hover = hover;
+            slave_widget->markRenderDataOutdated();
+        }
+        render_data_outdated = true;
+    }
 
     std::shared_ptr<MeshData> createStretched(Vector2d size);
     std::shared_ptr<MeshData> createStretchedH(Vector2d size);
@@ -164,15 +176,13 @@ private:
     std::vector<AutoReloadData> auto_reload;
 #endif
 
-    static float text_scale_factor;
-
     friend class GraphicsLayer;
     friend class Scene;
     friend class RootWidget;
     friend class Layout;
 };
 
-class WidgetClassRegistry : NonCopyable
+class WidgetClassRegistry : NonCopyable 
 {
 public:
     static WidgetClassRegistry* first;

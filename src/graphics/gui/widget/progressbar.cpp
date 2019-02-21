@@ -19,6 +19,7 @@ Progressbar::Progressbar(P<Widget> parent)
     
     fill = new ThemeImage(this, "progressbar.forground");
     fill->layout.alignment = Alignment::Left;
+    slave_widget = fill;
 }
 
 void Progressbar::setValue(float value)
