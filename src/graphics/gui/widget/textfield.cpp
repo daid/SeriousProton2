@@ -71,20 +71,15 @@ void TextField::onUpdate(float delta)
 
 bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    if (isFocused())
+    const ThemeData::StateData& t = theme->states[int(getState())];
+    if (t.font)
     {
-        const ThemeData::StateData& t = theme->states[int(getState())];
-        if (t.font)
+        Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
+        for(auto& d : result.data)
         {
-            Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
-            for(auto& d : result.data)
-            {
-                if (d.position.x <= position.x)
-                    cursor = d.string_offset;
-            }
+            if (d.position.x <= position.x)
+                cursor = d.string_offset;
         }
-    }else{
-        cursor = value.length();
     }
     return true;
 }
