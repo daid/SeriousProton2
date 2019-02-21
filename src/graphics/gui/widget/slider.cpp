@@ -48,14 +48,22 @@ void Slider::setAttribute(const string& key, const string& value)
 
 void Slider::setValue(float value)
 {
-    this->value = value;
-    markRenderDataOutdated();
+    if (max_value < min_value)
+        value = std::max(std::min(value, min_value), max_value);
+    else
+        value = std::max(std::min(value, max_value), min_value);
+    if (this->value != value)
+    {
+        this->value = value;
+        markRenderDataOutdated();
+    }
 }
 
 void Slider::setRange(float min, float max)
 {
     min_value = min;
     max_value = max;
+    setValue(value);
     markRenderDataOutdated();
 }
 
@@ -69,8 +77,8 @@ void Slider::updateRenderData()
     render_data.color = t.color;
     
     float f = (value - min_value) / (max_value - min_value);
-    if (max_value - min_value == 0.0)
-        f = 0.5;
+    dial->setVisible(max_value - min_value != 0.0);
+        
     if (size.x > size.y)
     {
         dial->layout.size.x = size.y;
@@ -109,9 +117,8 @@ void Slider::onPointerDrag(Vector2d position, int id)
     float new_value = (f * (max_value - min_value)) + min_value;
     if (new_value != value)
     {
-        value = new_value;
+        setValue(new_value);
         runCallback(value);
-        markRenderDataOutdated();
     }
 }
 
