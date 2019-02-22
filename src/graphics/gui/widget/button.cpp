@@ -6,6 +6,7 @@
 #include <sp2/graphics/fontManager.h>
 #include <sp2/engine.h>
 
+
 namespace sp {
 namespace gui {
 
@@ -15,7 +16,7 @@ Button::Button(P<Widget> parent)
 : Widget(parent)
 {
     loadThemeData("button.background");
-    label = new Label(this, "button.label");
+    label = new Label(this, "button.forground");
     label->layout.fill_height = true;
     label->layout.fill_width = true;
     slave_widget = label;
@@ -35,6 +36,11 @@ void Button::setAttribute(const string& key, const string& value)
     else if (key == "text_size" || key == "text.size")
     {
         label->setAttribute(key, value);
+    }
+    else if (key == "theme_data")
+    {
+        Widget::setAttribute("theme_data", value + ".background");
+        label->setAttribute("theme_data", value + ".forground");
     }
     else
     {

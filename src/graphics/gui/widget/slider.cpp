@@ -42,6 +42,11 @@ void Slider::setAttribute(const string& key, const string& value)
         this->value = stringutil::convert::toFloat(value);
         markRenderDataOutdated();
     }
+    else if (key == "theme_data")
+    {
+        Widget::setAttribute("theme_data", value + ".background");
+        dial->setAttribute("theme_data", value + ".forground");
+    }
     else
     {
         Widget::setAttribute(key, value);

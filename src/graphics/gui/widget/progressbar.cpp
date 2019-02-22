@@ -63,7 +63,8 @@ void Progressbar::setAttribute(const string& key, const string& value)
     }
     else if (key == "theme_data")
     {
-        fill->setAttribute(key, value);
+        Widget::setAttribute("theme_data", value + ".background");
+        fill->setAttribute("theme_data", value + ".forground");
     }
     else
     {
