@@ -67,7 +67,7 @@ protected:
 };
 
 
-class FreetypeFontTexture;
+class AtlasTexture;
 class FreetypeFont : public Font
 {
 public:
@@ -93,12 +93,12 @@ private:
     io::ResourceStreamPtr font_resource_stream;
     
     //Keep a cache of wrapped Texture objects per font size
-    std::unordered_map<int, FreetypeFontTexture*> texture_cache;
+    std::unordered_map<int, AtlasTexture*> texture_cache;
     //Keep track of glyphs that are loaded in the texture already.
     //As soon as we load a new glyph, the texture becomes invalid and needs to be updated.
     std::unordered_map<int, std::unordered_map<int, GlyphInfo>> loaded_glyphs;
     
-    friend class FreetypeFontTexture;
+    friend class AtlasTexture;
 };
 
 class BitmapFont : public Font

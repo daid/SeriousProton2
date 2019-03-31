@@ -1,5 +1,6 @@
 #include <sp2/graphics/font.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/graphics/textureAtlas.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/assert.h>
@@ -281,110 +282,6 @@ void Font::PreparedFontString::alignLine(unsigned int line_start_result_index, f
     }
 }
 
-class FreetypeFontTexture : public Texture
-{
-public:
-    FreetypeFontTexture(string name, int pixel_size)
-    : Texture(Type::Dynamic, name)
-    {
-        glGenTextures(1, &handle);
-        glBindTexture(GL_TEXTURE_2D, handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        texture_size = Vector2i(pixel_size * 16, pixel_size * 16);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size.x, texture_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    }
-
-    FreetypeFont::GlyphInfo loadGlyph(FT_Face face, int character)
-    {
-        FreetypeFont::GlyphInfo info;
-        info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
-        info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
-        info.advance = 0;
-        info.consumed_characters = 1;
-        
-        int glyph_index = FT_Get_Char_Index(face, character);
-        if (glyph_index == 0)
-            return info;
-        if (FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
-            return info;
-
-        FT_Glyph glyph;
-        if (FT_Get_Glyph(face->glyph, &glyph) != 0)
-            return info;
-        
-        FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
-        FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
-        
-        info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
-        info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6);
-        info.bounds.position.y = float(face->glyph->metrics.horiBearingY) / float(1 << 6);
-        info.bounds.size.x = float(face->glyph->metrics.width) / float(1 << 6);
-        info.bounds.size.y = float(face->glyph->metrics.height) / float(1 << 6);
-        
-        int row_index = findRowFor(Vector2i(bitmap.width + 2, bitmap.rows + 2));
-        
-        const uint8_t* src_pixels = bitmap.buffer;
-        std::vector<uint8_t> dst_pixels;
-        dst_pixels.resize(bitmap.width * bitmap.rows * 4, 255);
-        if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
-        {
-            sp2assert(false, "TODO");
-        }
-        else
-        {
-            for(unsigned int y=0; y<bitmap.rows; y++)
-            {
-                for(unsigned int x=0; x<bitmap.width; x++)
-                    dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
-                src_pixels += bitmap.pitch - bitmap.width;
-            }
-        }
-        
-        glBindTexture(GL_TEXTURE_2D, handle);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, rows[row_index].x + 1, rows[row_index].y - 1 - bitmap.rows, bitmap.width, bitmap.rows, GL_RGBA, GL_UNSIGNED_BYTE, dst_pixels.data());
-        revision++;
-        
-        info.uv_rect.position.x = float(rows[row_index].x + 1) / float(texture_size.x);
-        info.uv_rect.position.y = float(rows[row_index].y - 1 - bitmap.rows) / float(texture_size.y);
-        info.uv_rect.size.x = float(bitmap.width) / float(texture_size.x);
-        info.uv_rect.size.y = float(bitmap.rows) / float(texture_size.y);
-        
-        rows[row_index].x += bitmap.width + 2;
-        FT_Done_Glyph(glyph);
-        
-        return info;
-    }
-
-    virtual void bind() override
-    {
-        glBindTexture(GL_TEXTURE_2D, handle);
-    }
-private:
-    int findRowFor(Vector2i size)
-    {
-        int y = 0;
-        for(unsigned int index=0; index<rows.size(); index++)
-        {
-            int row_height = rows[index].y - y;
-            if (size.y <= row_height && size.y >= row_height / 2)
-            {
-                if (rows[index].x + size.x < int(texture_size.x))
-                    return index;
-            }
-            y = rows[index].y;
-        }
-        rows.emplace_back(Vector2i(0, y + size.y * 1.1));
-        return rows.size() - 1;
-    }
-
-    unsigned int handle;
-    Vector2i texture_size;
-    std::vector<Vector2i> rows; //Keep track of the bottom and right most pixel of each glyph row.
-};
-
 static unsigned long ft_stream_read(FT_Stream rec, unsigned long offset, unsigned char* buffer, unsigned long count)
 {
     io::ResourceStreamPtr& stream = *static_cast<io::ResourceStreamPtr*>(rec->descriptor.pointer);
@@ -398,6 +295,7 @@ static unsigned long ft_stream_read(FT_Stream rec, unsigned long offset, unsigne
     else
         return count > 0 ? 0 : 1; // error code is 0 if we're reading, or nonzero if we're seeking
 }
+
 void ft_stream_close(FT_Stream)
 {
 }
@@ -476,7 +374,54 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
 
     if (known_glyphs.find(*str) == known_glyphs.end())
     {
-        known_glyphs[*str] = texture_cache[pixel_size]->loadGlyph(FT_Face(ft_face), *str);
+        FT_Face face = FT_Face(ft_face);
+        
+        GlyphInfo info;
+        info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
+        info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
+        info.advance = 0;
+        info.consumed_characters = 1;
+        
+        int glyph_index = FT_Get_Char_Index(face, *str);
+        if (glyph_index != 0 && FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) == 0)
+        {
+            FT_Glyph glyph;
+            if (FT_Get_Glyph(face->glyph, &glyph) == 0)
+            {
+                FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+                FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
+                
+                info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
+                info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6);
+                info.bounds.position.y = float(face->glyph->metrics.horiBearingY) / float(1 << 6);
+                info.bounds.size.x = float(face->glyph->metrics.width) / float(1 << 6);
+                info.bounds.size.y = float(face->glyph->metrics.height) / float(1 << 6);
+                
+                const uint8_t* src_pixels = bitmap.buffer;
+                //We make a full white image, and then copy the alpha from the freetype render
+                Image image(Vector2i(bitmap.width, bitmap.rows), 0xFFFFFFFF);
+                if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+                {
+                    sp2assert(false, "TODO");
+                }
+                else
+                {
+                    uint8_t* dst_pixels = (uint8_t*)image.getPtr();
+                    for(unsigned int y=0; y<bitmap.rows; y++)
+                    {
+                        for(unsigned int x=0; x<bitmap.width; x++)
+                            dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
+                        src_pixels += bitmap.pitch - bitmap.width;
+                    }
+                }
+
+                info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
+                
+                FT_Done_Glyph(glyph);
+            }
+        }
+        
+        known_glyphs[*str] = info;
     }
     info = known_glyphs[*str];
     return true;
@@ -490,7 +435,7 @@ float FreetypeFont::getLineSpacing(int pixel_size)
     }
     if (texture_cache.find(pixel_size) == texture_cache.end())
     {
-        texture_cache[pixel_size] = new FreetypeFontTexture(name, pixel_size);
+        texture_cache[pixel_size] = new AtlasTexture(Vector2i(pixel_size * 16, pixel_size * 16));
     }
     return float(((FT_Face)ft_face)->size->metrics.height) / float(1 << 6);
 }
