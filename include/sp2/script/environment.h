@@ -44,6 +44,7 @@ public:
     bool load(sp::string resource_name);
     bool load(sp::io::ResourceStreamPtr resource);
     
+    //Call a script function. Return true if the call was made, false on an error.
     template<typename... ARGS> bool call(string global_function, ARGS... args)
     {
         //Get the environment table from the registry.

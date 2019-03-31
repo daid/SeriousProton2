@@ -14,6 +14,7 @@ public:
 
     void setFallbackColors(sp::Color primary_color, sp::Color secondary_color);
     void setDefaultSmoothFiltering(bool enabled);
+    bool isDefaultSmoothFiltering();
     
     //In case a texture is changed on disk, you can call this function to forcefully reload the texture.
     //Note that the loading still happens in the background, and the old texture will be shown till load is done.
@@ -26,8 +27,6 @@ private:
     sp::Color fallback_secondary_color;
     
     bool default_smooth;
-    
-    friend class OpenGLTexture;
 };
 extern TextureManager texture_manager;
 

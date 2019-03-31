@@ -68,6 +68,11 @@ void TextureManager::setDefaultSmoothFiltering(bool enabled)
     default_smooth = enabled;
 }
 
+bool TextureManager::isDefaultSmoothFiltering()
+{
+    return default_smooth;
+}
+
 Texture* TextureManager::prepare(string name)
 {
     return new TextureManagerTexture(name);

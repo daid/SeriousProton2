@@ -62,7 +62,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
     if (io::ResourceProvider::getModifyTime(data.resource_name) != data.resource_update_time)
     {
         string animation_name;
-        for(auto it : data.animations)
+        for(auto& it : data.animations)
             if (&it.second == animation)
                 animation_name = it.first;
         
@@ -71,7 +71,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
         animation = nullptr;
         (const_cast<Data*>(&data))->load(data.resource_name);
         
-        
+        revision = data.revision;
         play(animation_name, speed);
     }
     if (data.revision != revision)
