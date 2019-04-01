@@ -49,8 +49,17 @@ void AtlasTexture::bind()
     }
 }
 
-//Add an image to the atlas and return the area where the image is located in normalized coordinates.
-//Returns a negative size if the image cannot be added.
+bool AtlasTexture::canAdd(const Image& image, int margin)
+{
+    Vector2i size = image.getSize() + Vector2i(margin * 2, margin * 2);
+    for(int n=int(available_areas.size()) - 1; n >= 0; n--)
+    {
+        if (available_areas[n].size.x >= size.x && available_areas[n].size.y >= size.y)
+            return true;
+    }
+    return false;
+}
+
 Rect2f AtlasTexture::add(Image&& image, int margin)
 {
     Vector2i size = image.getSize() + Vector2i(margin * 2, margin * 2);
@@ -88,6 +97,15 @@ Rect2f AtlasTexture::add(Image&& image, int margin)
     return Rect2f(0, 0, -1, -1);
 }
 
+float AtlasTexture::usageRate()
+{
+    int all_texture_volume = texture_size.x * texture_size.y;
+    int unused_texture_volume = 0;
+    for(auto& area : available_areas)
+        unused_texture_volume += area.size.x * area.size.y;
+    return float(all_texture_volume - unused_texture_volume) / float(all_texture_volume);
+}
+
 void AtlasTexture::addArea(Rect2i area)
 {
     //Ignore really slim areas, they are never really used and use up a lot of room in the available_areas otherwise.
@@ -99,6 +117,62 @@ void AtlasTexture::addArea(Rect2i area)
         return r.size.x * r.size.y > volume;
     });
     available_areas.insert(it, area);
+}
+
+AtlasManager::AtlasManager(Vector2i texture_size, int default_margin)
+: texture_size(texture_size), default_margin(default_margin)
+{
+}
+
+AtlasManager::~AtlasManager()
+{
+    for(auto t : textures)
+        delete t;
+}
+
+AtlasManager::Result AtlasManager::get(string resource_name)
+{
+    auto it = cached_items.find(resource_name);
+    if (it != cached_items.end())
+    {
+        return it->second;
+    }
+    io::ResourceStreamPtr stream;
+    if (resource_name.find("#") > -1)
+        stream = io::ResourceProvider::get(resource_name.substr(0, resource_name.find("#")));
+    else
+        stream = io::ResourceProvider::get(resource_name);
+
+    Result result;
+    result.texture = nullptr;
+    result.rect = Rect2f(0, 0, -1, -1);
+
+    if (!stream)
+        return result;
+    Image image;
+    if (!image.loadFromStream(stream))
+        return result;
+    
+    for(auto t : textures)
+    {
+        if (t->canAdd(image, default_margin))
+        {
+            result.rect = t->add(std::move(image), default_margin);
+            result.texture = t;
+            break;
+        }
+    }
+    if (result.texture != nullptr)
+    {
+        cached_items[resource_name] = result;
+        return result;
+    }
+    AtlasTexture* texture = new AtlasTexture("AtlasManager", texture_size);
+    result.texture = texture;
+    result.rect = texture->add(std::move(image), default_margin);
+    textures.push_back(texture);
+    cached_items[resource_name] = result;
+    return result;
 }
 
 };//namespace sp
