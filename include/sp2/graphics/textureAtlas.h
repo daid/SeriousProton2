@@ -66,6 +66,8 @@ public:
     };
     
     Result get(string resource_name);
+    Result add(string resource_name, Image&& image);
+    bool has(string resource_name);
 private:
     Vector2i texture_size;
     int default_margin;

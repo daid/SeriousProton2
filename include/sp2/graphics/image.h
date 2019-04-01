@@ -21,6 +21,7 @@ public:
     void operator=(Image&& other);
     
     void update(Vector2i size, const uint32_t* ptr);
+    void update(Vector2i size, const uint32_t* ptr, int pitch);
     bool loadFromStream(io::ResourceStreamPtr stream);
     
     //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
@@ -39,6 +40,8 @@ public:
     void drawFilledCircle(Vector2i position, int radius, uint32_t color);
     void drawFloodFill(Vector2i position, uint32_t color);
     void drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t color);
+    
+    Image subImage(Rect2i area);
 private:
     Vector2i size;
     std::vector<uint32_t> pixels;

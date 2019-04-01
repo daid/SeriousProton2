@@ -8,6 +8,8 @@
 
 namespace sp {
 
+class AtlasManager;
+
 /**
     The SpriteAnimation class can be attached to Node to provide flipbook like sprite animations.
     The SpriteAnimation class provides a set of animation as well as horizontal flipping.
@@ -54,12 +56,12 @@ private:
             class Frame
             {
             public:
+                Texture* texture;
                 std::shared_ptr<MeshData> normal_mesh;
                 std::shared_ptr<MeshData> mirrored_mesh;
                 float delay;
             };
             
-            Texture* texture;
             std::vector<Frame> frames;
             bool loop;
         };
@@ -89,8 +91,12 @@ private:
 public:
     static std::unique_ptr<Animation> load(string resource_name);
     static constexpr int FlipFlag = 0x0001;
+
+    //Set a global atlas manager, newly loaded animations will be added to the atlas manager,
+    static void setAtlasManager(AtlasManager* atlas_manager);
 private:
     static std::map<string, Data*> cache;
+    static AtlasManager* atlas_manager;
 };
 
 };//namespace sp

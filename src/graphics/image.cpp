@@ -52,6 +52,14 @@ void Image::update(Vector2i size, const uint32_t* ptr)
     memcpy(pixels.data(), ptr, size.x * size.y * sizeof(uint32_t));
 }
 
+void Image::update(Vector2i size, const uint32_t* ptr, int pitch)
+{
+    this->size = size;
+    pixels.resize(size.x * size.y);
+    for(int y=0; y<size.y; y++)
+        memcpy(pixels.data() + size.x * y, ptr + pitch * y, size.x * sizeof(uint32_t));
+}
+
 void Image::clear()
 {
     pixels.clear();
@@ -291,6 +299,14 @@ void Image::drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t col
                 PUT_PIXEL(x, y, color);
         }
     }
+}
+
+Image Image::subImage(Rect2i area)
+{
+    area.shrinkToFitWithin(Rect2i(Vector2i(0, 0), size));
+    Image result;
+    result.update(area.size, pixels.data() + area.position.x + size.x * area.position.y, size.x);
+    return result;
 }
 
 };//namespace sp

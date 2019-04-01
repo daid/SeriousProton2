@@ -1,6 +1,7 @@
 #include <sp2/graphics/spriteAnimation.h>
 #include <sp2/graphics/meshdata.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/graphics/textureAtlas.h>
 #include <sp2/io/keyValueTreeLoader.h>
 #include <sp2/logging.h>
 
@@ -108,7 +109,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
     }
 
     const Data::Animation::Frame& frame = animation->frames[keyframe];
-    render_data.texture = animation->texture;
+    render_data.texture = frame.texture;
     if (flip)
         render_data.mesh = frame.mirrored_mesh;
     else
@@ -116,6 +117,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
 }
 
 std::map<string, SpriteAnimation::Data*> SpriteAnimation::cache;
+AtlasManager* SpriteAnimation::atlas_manager;
 
 std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
 {
@@ -155,7 +157,12 @@ void SpriteAnimation::Data::load(string resource_name)
         Data::Animation& animation = animations[it.first];
         std::map<string, string>& data = it.second;
         
-        animation.texture = texture_manager.get(data["texture"]);
+        Texture* main_texture = nullptr;
+        Image main_image;
+        if (atlas_manager)
+            main_image.loadFromStream(io::ResourceProvider::get(data["texture"]));
+        else
+            main_texture = texture_manager.get(data["texture"]);
         animation.loop = stringutil::convert::toBool(data["loop"]);
         
         std::vector<int> frames = stringutil::convert::toIntArray(data["frames"]);
@@ -213,6 +220,29 @@ void SpriteAnimation::Data::load(string resource_name)
             v0 += v_offset;
             v1 -= v_offset;
 
+            animation.frames.emplace_back();
+            Data::Animation::Frame& frame = animation.frames.back();
+
+            if (atlas_manager)
+            {
+                Rect2i image_rect(position.x + (frame_size.x + margin.x) * x, position.y + (frame_size.y + margin.y) * y, frame_size.x, frame_size.y);
+                string name_in_atlas = data["texture"] + ":" + string(image_rect.position.x) + "," + string(image_rect.position.y) + "," + string(image_rect.size.x) + "," + string(image_rect.size.y);
+                AtlasManager::Result result;
+                if (atlas_manager->has(name_in_atlas))
+                    result = atlas_manager->get(name_in_atlas);
+                else
+                    result = atlas_manager->add(name_in_atlas, main_image.subImage(image_rect));
+                frame.texture = result.texture;
+                u0 = result.rect.position.x;
+                v0 = result.rect.position.y;
+                u1 = u0 + result.rect.size.x;
+                v1 = v0 + result.rect.size.y;
+            }
+            else
+            {
+                frame.texture = main_texture;
+            }
+
             if (flip[n].strip().upper() == "H")
                 std::swap(u0, u1);
             if (flip[n].strip().upper() == "V")
@@ -223,9 +253,6 @@ void SpriteAnimation::Data::load(string resource_name)
                 std::swap(v0, v1);
             }
 
-            animation.frames.emplace_back();
-            Data::Animation::Frame& frame = animation.frames.back();
-            
             sp::MeshData::Vertices vertices;
             sp::MeshData::Indices indices{0,1,2, 2,1,3};
             vertices.emplace_back(p0, sp::Vector2f(u0, v1));
@@ -251,6 +278,11 @@ void SpriteAnimation::Data::load(string resource_name)
     this->resource_name = resource_name;
     this->resource_update_time = io::ResourceProvider::getModifyTime(resource_name);
 #endif
+}
+
+void SpriteAnimation::setAtlasManager(AtlasManager* atlas_manager)
+{
+    SpriteAnimation::atlas_manager = atlas_manager;
 }
 
 };//namespace sp

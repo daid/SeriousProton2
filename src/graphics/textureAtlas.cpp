@@ -152,7 +152,15 @@ AtlasManager::Result AtlasManager::get(string resource_name)
     Image image;
     if (!image.loadFromStream(stream))
         return result;
-    
+    return add(resource_name, std::move(image));
+}
+
+AtlasManager::Result AtlasManager::add(string resource_name, Image&& image)
+{
+    Result result;
+    result.texture = nullptr;
+    result.rect = Rect2f(0, 0, -1, -1);
+
     for(auto t : textures)
     {
         if (t->canAdd(image, default_margin))
@@ -173,6 +181,11 @@ AtlasManager::Result AtlasManager::get(string resource_name)
     textures.push_back(texture);
     cached_items[resource_name] = result;
     return result;
+}
+
+bool AtlasManager::has(string resource_name)
+{
+    return cached_items.find(resource_name) != cached_items.end();
 }
 
 };//namespace sp

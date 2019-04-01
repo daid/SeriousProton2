@@ -47,6 +47,34 @@ public:
             size.y = p.y - position.y;
     }
     
+    void shrinkToFitWithin(const Rect<T>& other)
+    {
+        if (position.x < other.position.x)
+        {
+            size.x -= other.position.x - position.x;
+            position.x = other.position.x;
+        }
+        if (position.y < other.position.y)
+        {
+            size.y -= other.position.y - position.y;
+            position.y = other.position.y;
+        }
+        if (position.x + size.x > other.position.x + other.size.x)
+            size.x -= (position.x + size.x) - (other.position.x + other.size.x);
+        if (position.y + size.y > other.position.y + other.size.y)
+            size.y -= (position.y + size.y) - (other.position.y + other.size.y);
+        if (size.x < 0)
+        {
+            position.x += size.x;
+            size.x = 0;
+        }
+        if (size.y < 0)
+        {
+            position.y += size.y;
+            size.y = 0;
+        }
+    }
+    
     Vector2<T> position;
     Vector2<T> size;
 };
