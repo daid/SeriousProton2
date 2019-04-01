@@ -7,8 +7,8 @@
 
 namespace sp {
 
-AtlasTexture::AtlasTexture(Vector2i size)
-: Texture(Texture::Type::Static, "[ATLAS]")
+AtlasTexture::AtlasTexture(string name, Vector2i size)
+: Texture(Texture::Type::Dynamic, name)
 {
     texture_size = size;
     available_areas.emplace_back(0, 0, size.x, size.y);

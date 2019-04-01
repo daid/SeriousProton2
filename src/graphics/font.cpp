@@ -435,7 +435,7 @@ float FreetypeFont::getLineSpacing(int pixel_size)
     }
     if (texture_cache.find(pixel_size) == texture_cache.end())
     {
-        texture_cache[pixel_size] = new AtlasTexture(Vector2i(pixel_size * 16, pixel_size * 16));
+        texture_cache[pixel_size] = new AtlasTexture(name, Vector2i(pixel_size * 16, pixel_size * 16));
     }
     return float(((FT_Face)ft_face)->size->metrics.height) / float(1 << 6);
 }

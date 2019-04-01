@@ -8,7 +8,7 @@ namespace sp {
 class AtlasTexture : public Texture
 {
 public:
-    AtlasTexture(Vector2i size);
+    AtlasTexture(string name, Vector2i size);
     virtual ~AtlasTexture();
     
     virtual void bind() override;
