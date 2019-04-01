@@ -416,7 +416,6 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
                 }
 
                 info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
-                LOG(Debug, texture_cache[pixel_size]->usageRate());
                 
                 FT_Done_Glyph(glyph);
             }
