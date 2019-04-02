@@ -311,3 +311,15 @@ void initOpenGL()
 
 };//namespace sp
 
+
+#ifdef SP2_ENABLE_OPENGL_TRACING
+namespace sp {
+void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, sp::string parameters)
+{
+    static FILE* f = nullptr;
+    if (!f)
+        f = fopen("opengl.trace.txt", "wt");
+    fprintf(f, "%80s:%4d %60s %s %s\n", source_file, source_line_number, source_function, function_name, parameters.c_str());
+}
+};//namespace sp
+#endif//SP2_ENABLE_OPENGL_TRACING

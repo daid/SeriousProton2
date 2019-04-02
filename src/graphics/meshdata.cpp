@@ -73,8 +73,6 @@ void MeshData::render()
     }
     
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void MeshData::update(Vertices&& vertices, Indices&& indices)
