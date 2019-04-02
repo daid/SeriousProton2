@@ -310,4 +310,3 @@ void initOpenGL()
 }
 
 };//namespace sp
-

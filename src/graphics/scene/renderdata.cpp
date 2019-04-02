@@ -16,17 +16,25 @@ bool RenderData::operator<(const RenderData& other) const
 {
     if (order < other.order)
         return true;
-    if (order == other.order)
-    {
-        if (type < other.type)
-            return true;
-        if (type == other.type)
-        {
-            return false;
-        }
-    }
+    if (order > other.order)
+        return false;
+
+    if (type < other.type)
+        return true;
+    if (type > other.type)
+        return false;
+
+    if (shader < other.shader)
+        return true;
+    if (shader > other.shader)
+        return false;
+
+    if (texture < other.texture)
+        return true;
+    if (texture > other.texture)
+        return false;
+
     return false;
 }
 
 };//namespace sp
-
