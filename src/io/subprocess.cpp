@@ -112,15 +112,32 @@ int Subprocess::wait()
 #endif//__linux__
 }
 
-int Subprocess::kill()
+#ifdef __WIN32__
+static BOOL CALLBACK terminateApplicationWindow(HWND hwnd, LPARAM param)
+{
+    DWORD id;
+    GetWindowThreadProcessId(hwnd, &id);
+    if(id == (DWORD)param)
+        PostMessage(hwnd, WM_CLOSE, 0, 0) ;
+    return true;
+}
+#endif//__WIN32__
+
+int Subprocess::kill(bool forcefuly)
 {
     if (!data)
         return std::numeric_limits<int>::min();
 #ifdef __WIN32__
-    TerminateProcess(data->handle, -1);
+    if (forcefuly)
+        TerminateProcess(data->handle, -1);
+    else
+        EnumWindows(terminateApplicationWindow, (LPARAM)data->handle);
 #endif//__WIN32__
 #ifdef __linux__
-    ::kill(data->pid, SIGTERM);
+    if (forcefuly)
+        ::kill(data->pid, SIGKILL);
+    else
+        ::kill(data->pid, SIGTERM);
 #endif//__linux__
     return wait();
 }

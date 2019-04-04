@@ -17,7 +17,7 @@ public:
     ~Subprocess();
 
     int wait();
-    int kill();
+    int kill(bool forcefuly=false);
     
     bool isRunning();
 private:

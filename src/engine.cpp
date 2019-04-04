@@ -13,6 +13,8 @@
 
 #include <SDL.h>
 
+#include <signal.h>
+
 
 namespace sp {
 
@@ -23,6 +25,12 @@ static io::Keybinding single_step_enable("single_step_enable", "`");
 static io::Keybinding single_step_step("single_step_step", "Tab");
 static bool single_step_enabled = false;
 #endif
+
+static void requestShutdownSignal(int signal)
+{
+    LOG(Info, "SIGTERM received, requesting shutdown");
+    Engine::getInstance()->shutdown();
+}
 
 Engine::Engine()
 {
@@ -42,6 +50,7 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
+    signal(SIGTERM, requestShutdownSignal);
     atexit(SDL_Quit);
 }
 
