@@ -9,6 +9,16 @@ RenderTexture::RenderTexture(sp::string name, Vector2i size, bool double_buffere
 {
     flipped = false;
     auto_clear = !double_buffered;
+    
+    for(int n=0; n<2; n++)
+    {
+        dirty[n] = false;
+
+        frame_buffer[n] = 0;
+        color_buffer[n] = 0;
+        depth_buffer[n] = 0;
+        stencil_buffer[n] = 0;
+    }
 }
 
 RenderTexture::~RenderTexture()
