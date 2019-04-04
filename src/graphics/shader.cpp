@@ -89,7 +89,7 @@ bool Shader::bind()
         {
             char log[1024];
             glGetProgramInfoLog(program, sizeof(log), nullptr, log);
-            LOG(Error, "Error in shader:", name, log);
+            LOG(Error, "Link error in shader:", name, log);
             glDeleteProgram(program);
             glDeleteShader(vertex_shader_handle);
             glDeleteShader(fragment_shader_handle);
@@ -127,7 +127,7 @@ unsigned int Shader::compileShader(const char* code, int type)
     {
         char log[1024];
         glGetShaderInfoLog(shader_handle, sizeof(log), nullptr, log);
-        LOG(Error, "Error in shader:", name, log);
+        LOG(Error, "Compile error in shader:", name, log);
         glDeleteShader(shader_handle);
         glDeleteProgram(program);
         program = 0;

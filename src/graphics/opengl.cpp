@@ -316,10 +316,13 @@ void initOpenGL()
 namespace sp {
 void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, sp::string parameters)
 {
+    int error = glGetError();
     static FILE* f = nullptr;
     if (!f)
         f = fopen("opengl.trace.txt", "wt");
     fprintf(f, "%80s:%4d %60s %s %s\n", source_file, source_line_number, source_function, function_name, parameters.c_str());
+    if (error)
+        fprintf(f, "ERROR: %d\n", error);
 }
 };//namespace sp
 #endif//SP2_ENABLE_OPENGL_TRACING
