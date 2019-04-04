@@ -19,6 +19,7 @@ class Subprocess::Data
 public:
 #ifdef __WIN32__
     HANDLE handle;
+    int pid;
 #endif
 #ifdef __linux__
     pid_t pid;
@@ -57,6 +58,7 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
     {
         data = new Data();
         data->handle = process_information.hProcess;
+        data->pid = process_information.dwProcessId;
     }
 #endif//__WIN32__
 #ifdef __linux__
@@ -113,7 +115,7 @@ int Subprocess::wait()
 }
 
 #ifdef __WIN32__
-static BOOL CALLBACK terminateApplicationWindow(HWND hwnd, LPARAM param)
+static BOOL CALLBACK terminateApplicationWindows(HWND hwnd, LPARAM param)
 {
     DWORD id;
     GetWindowThreadProcessId(hwnd, &id);
@@ -131,7 +133,7 @@ int Subprocess::kill(bool forcefuly)
     if (forcefuly)
         TerminateProcess(data->handle, -1);
     else
-        EnumWindows(terminateApplicationWindow, (LPARAM)data->handle);
+        EnumWindows(terminateApplicationWindows, (LPARAM)data->pid);
 #endif//__WIN32__
 #ifdef __linux__
     if (forcefuly)
