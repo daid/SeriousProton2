@@ -1,5 +1,5 @@
-#ifndef RENDER_TEXTURE_H
-#define RENDER_TEXTURE_H
+#ifndef SP2_GRAPHICS_RENDER_TEXTURE_H
+#define SP2_GRAPHICS_RENDER_TEXTURE_H
 
 #include <sp2/graphics/texture.h>
 #include <sp2/math/vector.h>

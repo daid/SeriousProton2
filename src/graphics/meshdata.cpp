@@ -71,7 +71,7 @@ void MeshData::render()
         if (Shader::bound_shader->uv_attribute != -1)
             glVertexAttribPointer(Shader::bound_shader->uv_attribute, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
     }
-    
+
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 }
 
