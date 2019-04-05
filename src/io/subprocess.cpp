@@ -60,6 +60,10 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
         data->handle = process_information.hProcess;
         data->pid = process_information.dwProcessId;
     }
+    else
+    {
+        LOG(Warning, "Failed to start:", command);
+    }
 #endif//__WIN32__
 #ifdef __linux__
     pid_t pid = fork();
@@ -74,6 +78,7 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
             parameters[n] = (char*)command[n].c_str();
         parameters[command.size()] = nullptr;
         execvp(command[0].c_str(), parameters);
+        LOG(Warning, "Failed to start:", command);
         exit(-1);
     }
     

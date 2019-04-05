@@ -37,7 +37,7 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
     while(stream->tell() < stream->getSize())
     {
         string line = stream->readLine().strip();
-        int comment_start = line.find("//");
+        int comment_start = line.find(" //");
         if (comment_start >= 0)
             line = line.substr(0, comment_start);
         if (line == "{")
@@ -74,7 +74,7 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
     while(stream->tell() < stream->getSize())
     {
         string line = stream->readLine().strip();
-        int comment_start = line.find("//");
+        int comment_start = line.find(" //");
         if (comment_start >= 0)
             line = line.substr(0, comment_start);
         if (line == "{")
