@@ -21,6 +21,49 @@ DEFINE_GUID(CLSID_NullRenderer,0xc1f400a4,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08
 namespace sp {
 namespace io {
 
+class DataBufferResourceStream : public ResourceStream
+{
+private:
+    void* buffer;
+    size_t buffer_length;
+    int64_t offset;
+    
+public:
+    DataBufferResourceStream(void* buffer, size_t buffer_length)
+    : buffer(buffer), buffer_length(buffer_length)
+    {
+        offset = 0;
+    }
+    
+    virtual ~DataBufferResourceStream()
+    {
+    }
+    
+    virtual int64_t read(void* data, int64_t size)
+    {
+        size = std::min(int(buffer_length - offset), int(size));
+        memcpy(data, ((char*)buffer) + offset, size);
+        offset += size;
+        return size;
+    }
+    
+    virtual int64_t seek(int64_t position)
+    {
+        offset = std::max(0, std::min(int(buffer_length), int(position)));
+        return offset;
+    }
+    
+    virtual int64_t tell()
+    {
+        return offset;
+    }
+    
+    virtual int64_t getSize()
+    {
+        return buffer_length;
+    }
+};
+
 #if defined(__linux__)
 
 class CameraCapture::Data
@@ -130,49 +173,6 @@ bool CameraCapture::init(int index)
     return true;
 }
 
-class DataBufferResourceStream : public ResourceStream
-{
-private:
-    void* buffer;
-    size_t buffer_length;
-    int64_t offset;
-    
-public:
-    DataBufferResourceStream(void* buffer, size_t buffer_length)
-    : buffer(buffer), buffer_length(buffer_length)
-    {
-        offset = 0;
-    }
-    
-    virtual ~DataBufferResourceStream()
-    {
-    }
-    
-    virtual int64_t read(void* data, int64_t size)
-    {
-        size = std::min(int(buffer_length - offset), int(size));
-        memcpy(data, ((char*)buffer) + offset, size);
-        offset += size;
-        return size;
-    }
-    
-    virtual int64_t seek(int64_t position)
-    {
-        offset = std::max(0, std::min(int(buffer_length), int(position)));
-        return offset;
-    }
-    
-    virtual int64_t tell()
-    {
-        return offset;
-    }
-    
-    virtual int64_t getSize()
-    {
-        return buffer_length;
-    }
-};
-
 Image CameraCapture::getFrame()
 {
     Image result;
@@ -236,6 +236,8 @@ public:
     IMediaEventEx* media_event = nullptr;
     uint8_t* buffer = nullptr;
     long buffer_size = 0;
+    
+    bool is_mjpg = false;
 };
 
 bool CameraCapture::init(int index)
@@ -316,6 +318,13 @@ bool CameraCapture::init(int index)
     mt.subtype = MEDIASUBTYPE_RGB24;
     mt.formattype = FORMAT_VideoInfo;
     data->sample_grabber->SetMediaType(&mt);
+    data->sample_grabber->GetConnectedMediaType(&mt);
+    if (mt.pbFormat) CoTaskMemFree(mt.pbFormat);
+    if (mt.pUnk) mt.pUnk->Release();
+    if (mt.subtype == MEDIASUBTYPE_MJPG)
+    {
+        data->is_mjpg = true;
+    }
 
     data->media_control->Run();//For some reason, this reports failure, but the stream works...
 
@@ -354,29 +363,40 @@ Image CameraCapture::getFrame()
     }
     if (data->sample_grabber->GetCurrentBuffer(&buffer_size, (LONG*)data->buffer))
         return result;
-    if (buffer_size != 3 * size.x * size.y)
-        return result;
+    
+    if (data->is_mjpg)
+    {
+        //As we have an JPG, we should be able to load it as resource stream.
+        result.loadFromStream(std::make_shared<DataBufferResourceStream>(data->buffer, buffer_size));
+    }
+    else
+    {
+        if (buffer_size != 3 * size.x * size.y)
+        {
+            LOG(Warning, "Incorrect buffer size result on CameraCapture:", buffer_size, 3 * size.x * size.y);
+            return result;
+        }
 
-    //In place convert 24bit BGR into 24bit RGBA.
-    uint8_t* src = data->buffer + (size.x * size.y) * 3;
-    uint32_t* dst = (uint32_t*)(data->buffer) + (size.x * size.y);
-    for(int n=0; n<size.x*size.y; n++)
-    {
-        src -= 3;
-        dst -= 1;
-        *dst = 0xff000000 | src[2] | (src[1] << 8) | (src[0] << 16);
+        //In place convert 24bit BGR into 24bit RGBA.
+        uint8_t* src = data->buffer + (size.x * size.y) * 3;
+        uint32_t* dst = (uint32_t*)(data->buffer) + (size.x * size.y);
+        for(int n=0; n<size.x*size.y; n++)
+        {
+            src -= 3;
+            dst -= 1;
+            *dst = 0xff000000 | src[2] | (src[1] << 8) | (src[0] << 16);
+        }
+        
+        //Flip upsize down.
+        uint32_t tmp[size.x];
+        for(int n=0; n<size.y / 2; n++)
+        {
+            memcpy(tmp, data->buffer + size.x * n * 4, size.x * 4);
+            memcpy(data->buffer + size.x * n * 4, data->buffer + size.x * (size.y - 1 - n) * 4, size.x * 4);
+            memcpy(data->buffer + size.x * (size.y - 1 - n) * 4, tmp, size.x * 4);
+        }
+        result.update(size, (uint32_t*)data->buffer);
     }
-    
-    //Flip upsize down.
-    uint32_t tmp[size.x];
-    for(int n=0; n<size.y / 2; n++)
-    {
-        memcpy(tmp, data->buffer + size.x * n * 4, size.x * 4);
-        memcpy(data->buffer + size.x * n * 4, data->buffer + size.x * (size.y - 1 - n) * 4, size.x * 4);
-        memcpy(data->buffer + size.x * (size.y - 1 - n) * 4, tmp, size.x * 4);
-    }
-    
-    result.update(size, (uint32_t*)data->buffer);
     return result;
 }
 
