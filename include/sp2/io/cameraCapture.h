@@ -14,6 +14,9 @@ public:
     
     bool isOpen();
     
+    //Get a new frame from the camera stream.
+    //Note: On windows this always returns the latest image,
+    //      while on linux it might return a zero sized image when there is no new frame available.
     Image getFrame();
 private:
     bool init(int index);

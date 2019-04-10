@@ -170,6 +170,10 @@ bool CameraCapture::init(int index)
         return false;
     }
 
+    int flags = ::fcntl(data->fd, F_GETFL, 0);
+    flags |= O_NONBLOCK;
+    ::fcntl(data->fd, F_SETFL, flags);
+
     return true;
 }
 
@@ -185,9 +189,11 @@ Image CameraCapture::getFrame()
     bufferinfo.memory = V4L2_MEMORY_MMAP;
     bufferinfo.index = 0;
     
-    //Wait till we have a frame.
+    //Grab a frame if possible.
     if(ioctl(data->fd, VIDIOC_DQBUF, &bufferinfo) < 0)
     {
+        if (errno == EAGAIN || errno == EINPROGRESS || errno == EWOULDBLOCK)
+            return result;
         LOG(Warning, "VIDIOC_DQBUF failed");
         return result;
     }
