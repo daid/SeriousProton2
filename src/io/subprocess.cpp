@@ -92,6 +92,7 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
 
 Subprocess::~Subprocess()
 {
+    kill(true);
     wait();
 }
 
@@ -157,12 +158,18 @@ bool Subprocess::isRunning()
     DWORD exit_status;
     if (!GetExitCodeProcess(data->handle, &exit_status))
         exit_status = -1;
-    return exit_status == STILL_ACTIVE;
+    if (exit_status == STILL_ACTIVE)
+        return true;
 #endif//__WIN32__
 #ifdef __linux__
     int exit_status;
-    return ::waitpid(data->pid, &exit_status, WNOHANG) == 0;
+    if (::waitpid(data->pid, &exit_status, WNOHANG) == 0)
+        return true;
 #endif//__linux__
+    delete data;
+    data = nullptr;
+
+    return false;
 }
 
 };//namespace io
