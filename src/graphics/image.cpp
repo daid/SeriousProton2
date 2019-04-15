@@ -92,6 +92,8 @@ static stbi_io_callbacks stream_callbacks{
 
 bool Image::loadFromStream(io::ResourceStreamPtr stream)
 {
+    if (!stream)
+        return false;
     int x, y, channels;
     uint32_t* buffer = (uint32_t*)stbi_load_from_callbacks(&stream_callbacks, stream.get(), &x, &y, &channels, 4);
     if (buffer)
