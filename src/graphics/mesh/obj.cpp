@@ -109,16 +109,16 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
                 
                 MeshData::Vertex v(sp::Vector3f(0, 0, 0));
                 if (v_index > 0 && v_index <= int(v_list.size()))
-                    v.setPosition(v_list[v_index - 1]);
+                    v.position = v_list[v_index - 1];
                 if (vt_index > 0 && vt_index <= int(vt_list.size()))
-                    v.setUV(vt_list[vt_index - 1]);
+                    v.uv = vt_list[vt_index - 1];
                 if (vn_index > 0 && vn_index <= int(vn_list.size()))
-                    v.setNormal(vn_list[vn_index - 1].normalized());
+                    v.normal = vn_list[vn_index - 1].normalized();
                 
                 if (mode == Mode::DiffuseMaterialColorToNormal)
-                    v.setNormal(Vector3f(materials[active_material].diffuse.r, materials[active_material].diffuse.g, materials[active_material].diffuse.b));
+                    v.normal = Vector3f(materials[active_material].diffuse.r, materials[active_material].diffuse.g, materials[active_material].diffuse.b);
                 else if (mode == Mode::DiffuseMaterialColorToTexture)
-                    v.setUV(materials[active_material].uv);
+                    v.uv = materials[active_material].uv;
                 
                 vertices.push_back(v);
             }

@@ -22,42 +22,25 @@ public:
         Vertex() {}
         
         Vertex(Vector3f pos)
+        : position(pos)
         {
-            position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
-            normal[0] = 0.0; normal[1] = 0.0; normal[2] = 0.0;
-            uv[0] = 0.0; uv[1] = 0.0;
         }
         Vertex(Vector3f pos, Vector2f uv)
+        : position(pos), uv(uv)
         {
-            position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
-            normal[0] = 0.0; normal[1] = 0.0; normal[2] = 0.0;
-            this->uv[0] = uv.x; this->uv[1] = uv.y;
+        }
+        Vertex(Vector3f pos, Vector3f norm)
+        : position(pos), normal(norm)
+        {
         }
         Vertex(Vector3f pos, Vector3f norm, Vector2f uv)
+        : position(pos), normal(norm), uv(uv)
         {
-            position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
-            normal[0] = norm.x; normal[1] = norm.y; normal[2] = norm.z;
-            this->uv[0] = uv.x; this->uv[1] = uv.y;
         }
         
-        void setPosition(Vector3f pos)
-        {
-            position[0] = pos.x; position[1] = pos.y; position[2] = pos.z;
-        }
-
-        void setNormal(Vector3f norm)
-        {
-            normal[0] = norm.x; normal[1] = norm.y; normal[2] = norm.z;
-        }
-
-        void setUV(Vector2f uv)
-        {
-            this->uv[0] = uv.x; this->uv[1] = uv.y;
-        }
-
-        float position[3];
-        float normal[3];
-        float uv[2];
+        Vector3f position;
+        Vector3f normal;
+        Vector2f uv;
     };
     typedef std::vector<Vertex> Vertices;
     typedef std::vector<uint16_t> Indices;
