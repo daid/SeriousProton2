@@ -199,20 +199,20 @@ bool Server::Connection::update()
             bool fin = buffer[0] & websocket::fin_mask;
             bool mask = buffer[1] & websocket::mask_mask;
             unsigned int index = 2;
-                        
+
             //Close the connection if any of the RSV bits are set.
             if (buffer[0] & websocket::rsv_mask)
             {
                 LOG(Warning, "Closing websocket due to RSV bits, we do not support extensions.");
                 return false;
             }
-            
+
             if (!fin)
             {
                 LOG(Warning, "Websocket frame did not have fin bit set. Implementation does not support fragmentation. So closing connection.");
                 return false;
             }
-            
+
             if (payload_length == websocket::payload_length_16bit)
             {
                 if (buffer.size() < index + 2)
@@ -229,7 +229,7 @@ bool Server::Connection::update()
                 payload_length |= uint8_t(buffer[index++]) << 8;
                 payload_length |= uint8_t(buffer[index++]);
             }
-            
+            LOG(Debug, payload_length);
             uint8_t mask_values[4] = {0, 0, 0, 0};
             if (mask)
             {
