@@ -67,6 +67,7 @@ private:
         
         Request request;
         bool request_pending = false;
+        string websocket_received_fragment;
         std::vector<string> websocket_received_pending;
 
         bool update();

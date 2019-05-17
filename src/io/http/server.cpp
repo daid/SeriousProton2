@@ -207,12 +207,6 @@ bool Server::Connection::update()
                 return false;
             }
 
-            if (!fin)
-            {
-                LOG(Warning, "Websocket frame did not have fin bit set. Implementation does not support fragmentation. So closing connection.");
-                return false;
-            }
-
             if (payload_length == websocket::payload_length_16bit)
             {
                 if (buffer.size() < index + 2)
@@ -251,19 +245,24 @@ bool Server::Connection::update()
             switch(opcode)
             {
             case websocket::opcode_continuation:
-                LOG(Warning, "Got a websocket continuation frame, this generally only happens on large packets and isn't implemented, closing connection.");
-                return false;
+                websocket_received_fragment += message;
+                if (fin)
+                {
+                    websocket_received_pending.push_back(std::move(websocket_received_fragment));
+                    websocket_received_fragment = "";
+                }
+                break;
             case websocket::opcode_text:
-                if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
+                if (fin)
                     websocket_received_pending.push_back(message);
                 else
-                    LOG(Warning, "Websocket text message for unknown path:", request.path);
+                    websocket_received_fragment = message;
                 break;
             case websocket::opcode_binary:
-                if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
+                if (fin)
                     websocket_received_pending.push_back(message);
                 else
-                    LOG(Warning, "Websocket binary message for unknown path:", request.path);
+                    websocket_received_fragment = message;
                 break;
             case websocket::opcode_close:
                 {
