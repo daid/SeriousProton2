@@ -32,17 +32,17 @@ public:
         * Websockets
     Protocol and file handling is done on a seperate thread, while URL handlers and Websocket handlers are processed on the main thread.
     
-    Note that the websockets implementation is limited to small text messages, less then 4k in size. Without fragmentation/continuation frames.
+    Note that the websockets implementation is limited to small text messages. Without fragmentation/continuation frames.
  */
 class Server : public Updatable
 {
 public:
     Server(int port_nr=80);
     
-    void setStaticFilePath(string static_file_path);
-    void addHandler(string url, std::function<string(const Request&)> func);
-    void addWebsocketHandler(string url, std::function<void(const string& data)> func);
-    void sendToWebsockets(string url, string data);
+    void setStaticFilePath(const string& static_file_path);
+    void addURLHandler(const string& url, std::function<string(const Request&)> func);
+    void addWebsocketHandler(const string& url, std::function<void(const string& data)> func);
+    void broadcastToWebsockets(const string& url, const string& data);
 private:
     string static_file_path;
 
@@ -67,13 +67,13 @@ private:
         
         Request request;
         bool request_pending = false;
-        std::vector<string> websock_pending;
+        std::vector<string> websocket_received_pending;
 
         bool update();
         void handleRequest(const Request& request);
         void startHttpReply(int reply_code);
-        void httpChunk(const string data);
-        void sendWebsocketTextPacket(string data);
+        void httpChunk(const string& data);
+        void sendWebsocketTextPacket(const string& data);
         
         enum class State
         {

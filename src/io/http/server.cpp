@@ -9,6 +9,23 @@
 namespace sp {
 namespace io {
 namespace http {
+namespace websocket {
+    static constexpr int fin_mask = 0x80;
+    static constexpr int rsv_mask = 0x70;
+    static constexpr int opcode_mask = 0x0f;
+    
+    static constexpr int mask_mask = 0x80;
+    static constexpr int payload_length_mask = 0x7f;
+    static constexpr int payload_length_16bit = 126;
+    static constexpr int payload_length_64bit = 127;
+    
+    static constexpr int opcode_continuation = 0x00;
+    static constexpr int opcode_text = 0x01;
+    static constexpr int opcode_binary = 0x02;
+    static constexpr int opcode_close = 0x08;
+    static constexpr int opcode_ping = 0x09;
+    static constexpr int opcode_pong = 0x0a;
+};
 
 Server::Server(int port_nr)
 {
@@ -22,30 +39,30 @@ Server::Server(int port_nr)
     std::swap(handler_thread, thread);
 }
 
-void Server::setStaticFilePath(string static_file_path)
+void Server::setStaticFilePath(const string& static_file_path)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
-    if (!static_file_path.endswith("/"))
-        static_file_path += "/";
     this->static_file_path = static_file_path;
+    if (!this->static_file_path.endswith("/"))
+        this->static_file_path += "/";
 }
 
-void Server::addHandler(string url, std::function<string(const Request&)> func)
+void Server::addURLHandler(const string& url, std::function<string(const Request&)> func)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
     http_handlers[url] = func;
 }
 
-void Server::addWebsocketHandler(string url, std::function<void(const string& data)> func)
+void Server::addWebsocketHandler(const string& url, std::function<void(const string& data)> func)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
     websocket_handlers[url] = func;
 }
 
-void Server::sendToWebsockets(string url, string data)
+void Server::broadcastToWebsockets(const string& url, const string& data)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
@@ -111,11 +128,11 @@ void Server::onUpdate(float delta)
 
             connection.request_pending = false;
         }
-        for(string& message : connection.websock_pending)
+        for(string& message : connection.websocket_received_pending)
         {
             websocket_handlers[connection.request.path](message);
         }
-        connection.websock_pending.clear();
+        connection.websocket_received_pending.clear();
     }
 }
 
@@ -177,14 +194,14 @@ bool Server::Connection::update()
         {
             if (buffer.size() < 2)
                 return true;
-            unsigned int size = buffer[1] & 0x7f;
-            int opcode = buffer[0] & 0x0f;
-            bool fin = buffer[0] & 0x80;
-            bool mask = buffer[1] & 0x80;
+            unsigned int payload_length = buffer[1] & websocket::payload_length_mask;
+            int opcode = buffer[0] & websocket::opcode_mask;
+            bool fin = buffer[0] & websocket::fin_mask;
+            bool mask = buffer[1] & websocket::mask_mask;
             unsigned int index = 2;
                         
             //Close the connection if any of the RSV bits are set.
-            if (buffer[0] & 0x70)
+            if (buffer[0] & websocket::rsv_mask)
             {
                 LOG(Warning, "Closing websocket due to RSV bits, we do not support extensions.");
                 return false;
@@ -196,21 +213,21 @@ bool Server::Connection::update()
                 return false;
             }
             
-            if (size == 126)
+            if (payload_length == websocket::payload_length_16bit)
             {
                 if (buffer.size() < index + 2)
                     return true;
-                size = uint8_t(buffer[index++]) << 8;
-                size |= uint8_t(buffer[index++]);
-            }else if (size == 127)
+                payload_length = uint8_t(buffer[index++]) << 8;
+                payload_length |= uint8_t(buffer[index++]);
+            }else if (payload_length == websocket::payload_length_64bit)
             {
                 if (buffer.size() < index + 8)
                     return true;
                 index += 4;
-                size = uint8_t(buffer[index++]) << 24;
-                size |= uint8_t(buffer[index++]) << 16;
-                size |= uint8_t(buffer[index++]) << 8;
-                size |= uint8_t(buffer[index++]);
+                payload_length = uint8_t(buffer[index++]) << 24;
+                payload_length |= uint8_t(buffer[index++]) << 16;
+                payload_length |= uint8_t(buffer[index++]) << 8;
+                payload_length |= uint8_t(buffer[index++]);
             }
             
             uint8_t mask_values[4] = {0, 0, 0, 0};
@@ -220,47 +237,47 @@ bool Server::Connection::update()
                     return true;
                 for(unsigned int n=0; n<4; n++)
                     mask_values[n] = buffer[index++];
-                if (buffer.size() < index + size)
+                if (buffer.size() < index + payload_length)
                     return true;
-                for(unsigned int n=0; n<size; n++)
+                for(unsigned int n=0; n<payload_length; n++)
                     buffer[index + n] ^= mask_values[n % 4];
             }
-            if (buffer.size() < index + size)
+            if (buffer.size() < index + payload_length)
                 return true;
             
-            string message = buffer.substr(index, index + size);
-            buffer = buffer.substr(index + size);
+            string message = buffer.substr(index, index + payload_length);
+            buffer = buffer.substr(index + payload_length);
 
             switch(opcode)
             {
-            case 0x00://continuation
+            case websocket::opcode_continuation:
                 LOG(Warning, "Got a websocket continuation frame, this generally only happens on large packets and isn't implemented, closing connection.");
                 return false;
-            case 0x01://text
+            case websocket::opcode_text:
                 if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
-                    websock_pending.push_back(message);
+                    websocket_received_pending.push_back(message);
                 else
                     LOG(Warning, "Websocket text message for unknown path:", request.path);
                 break;
-            case 0x02://binary
+            case websocket::opcode_binary:
                 if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
-                    websock_pending.push_back(message);
+                    websocket_received_pending.push_back(message);
                 else
                     LOG(Warning, "Websocket binary message for unknown path:", request.path);
                 break;
-            case 0x08://close
+            case websocket::opcode_close:
                 {
-                    uint8_t reply[] = {0x88, 0};//close packet
+                    uint8_t reply[] = {websocket::fin_mask | websocket::opcode_close, 0};//close packet
                     socket.send(reply, sizeof(reply));
                 }
                 return false;
-            case 0x09://ping
+            case websocket::opcode_ping:
                 {
-                    uint8_t reply[] = {0x8a, 0};//pong packet
+                    uint8_t reply[] = {websocket::fin_mask | websocket::opcode_pong, 0};//pong packet
                     socket.send(reply, sizeof(reply));
                 }
                 break;
-            case 0x0a://pong
+            case websocket::opcode_pong:
                 LOG(Info, "Websocket pong");
                 break;
             }
@@ -362,7 +379,7 @@ void Server::Connection::startHttpReply(int reply_code)
     socket.send(reply.c_str(), reply.size());
 }
 
-void Server::Connection::httpChunk(const string data)
+void Server::Connection::httpChunk(const string& data)
 {
     string chunk_len_string = string::hex(data.size()) + "\r\n";
     socket.send(chunk_len_string.c_str(), chunk_len_string.size());
@@ -371,7 +388,7 @@ void Server::Connection::httpChunk(const string data)
     socket.send("\r\n", 2);
 }
 
-void Server::Connection::sendWebsocketTextPacket(string data)
+void Server::Connection::sendWebsocketTextPacket(const string& data)
 {
     if (data.size() < 126)
     {
