@@ -31,9 +31,7 @@ public:
         * File hosting
         * APIs
         * Websockets
-    Protocol and file handling is done on a seperate thread, while URL handlers and Websocket handlers are processed on the main thread.
-    
-    Note that the websockets implementation is limited to small text messages. Without fragmentation/continuation frames.
+    Protocol and file handling is done on a separate thread, while URL handlers and Websocket handlers are processed on the main thread.
  */
 class Server : public Updatable
 {
