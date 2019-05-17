@@ -87,22 +87,28 @@ void Server::handlerThread()
             connections.emplace_back(*this);
             Connection& connection = connections.back();
             listen_socket.accept(connection.socket);
+            connection.last_received_data_time = std::chrono::steady_clock::now();
             selector.add(connection.socket);
         }
         for(auto it = connections.begin(); it != connections.end();)
         {
             Connection& connection = *it;
+            bool remove = false;
             if (selector.isReady(connection.socket))
             {
-                if (connection.update())
-                {
-                    it++;
-                }
-                else
-                {
-                    selector.remove(connection.socket);
-                    it = connections.erase(it);
-                }
+                connection.last_received_data_time = std::chrono::steady_clock::now();
+                remove = !connection.processIncommingData();
+            }
+            else
+            {
+                if (std::chrono::steady_clock::now() - connection.last_received_data_time > std::chrono::seconds(5))
+                    remove = !connection.handleTimeout();
+            }
+            
+            if (remove)
+            {
+                selector.remove(connection.socket);
+                it = connections.erase(it);
             }
             else
             {
@@ -143,7 +149,7 @@ Server::Connection::Connection(Server& server)
     state = State::HTTPRequest;
 }
 
-bool Server::Connection::update()
+bool Server::Connection::processIncommingData()
 {
     char receive_buffer[4096];
     size_t received_size;
@@ -272,18 +278,35 @@ bool Server::Connection::update()
                 return false;
             case websocket::opcode_ping:
                 {
+                    //Note: The standard says that we need to include the payload of the ping packet as payload in the pong packet.
+                    //      We ignore this, as this no client seems to use this.
                     uint8_t reply[] = {websocket::fin_mask | websocket::opcode_pong, 0};//pong packet
                     socket.send(reply, sizeof(reply));
                 }
                 break;
             case websocket::opcode_pong:
-                LOG(Info, "Websocket pong");
+                //There is no real need to track PONG replies. TCP/IP will close the connection if the other side is gone.
                 break;
             }
         }
         break;
     }
     
+    return true;
+}
+
+bool Server::Connection::handleTimeout()
+{
+    switch(state)
+    {
+    case State::HTTPRequest:{
+        return false;
+        }break;
+    case State::Websocket:{
+        uint8_t ping[] = {websocket::fin_mask | websocket::opcode_ping, 0};
+        socket.send(ping, sizeof(ping));
+        }break;
+    }
     return true;
 }
 

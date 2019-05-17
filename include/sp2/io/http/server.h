@@ -8,6 +8,7 @@
 #include <list>
 #include <thread>
 #include <mutex>
+#include <chrono>
 #include <unordered_map>
 
 
@@ -39,9 +40,18 @@ class Server : public Updatable
 public:
     Server(int port_nr=80);
     
+    //Set the path on the filesystem where statics files are read from.
+    //  Note: This does not use the ResourceProvider system.
     void setStaticFilePath(const string& static_file_path);
+    //Add a callback function to handle a specific URL request.
+    // The URL should be prefixed with a "/", the return value of the callback is send back as data to the browser.
     void addURLHandler(const string& url, std::function<string(const Request&)> func);
+    //Add a simple websocket handler, this handler will process any websocket message from any websocket connected to a specific URL.
+    //  No distinction or state between connections is made.
+    //  URLs should start with a "/"
     void addWebsocketHandler(const string& url, std::function<void(const string& data)> func);
+    //Send a message to all connected websockets to a specific URL endpoint.
+    //  No distinction is made between websockets, all are equal. Useful to distribute game state to all websockets.
     void broadcastToWebsockets(const string& url, const string& data);
 private:
     string static_file_path;
@@ -62,6 +72,7 @@ private:
         Connection(Server& server);
 
         sp::io::network::TcpSocket socket;
+        std::chrono::steady_clock::time_point last_received_data_time;
         string buffer;
         Server& server;
         
@@ -70,7 +81,8 @@ private:
         string websocket_received_fragment;
         std::vector<string> websocket_received_pending;
 
-        bool update();
+        bool processIncommingData();
+        bool handleTimeout();
         void handleRequest(const Request& request);
         void startHttpReply(int reply_code);
         void httpChunk(const string& data);
