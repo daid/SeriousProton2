@@ -35,8 +35,7 @@ Server::Server(int port_nr)
         return;
     }
 
-    std::thread thread([this]() { handlerThread(); });
-    std::swap(handler_thread, thread);
+    handler_thread = std::move(std::thread([this]() { handlerThread(); }));
 }
 
 void Server::setStaticFilePath(const string& static_file_path)
