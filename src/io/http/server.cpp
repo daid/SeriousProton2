@@ -147,7 +147,7 @@ bool Server::Connection::update()
 {
     char receive_buffer[4096];
     size_t received_size;
-    received_size = socket.receive(receive_buffer, sizeof(receive_buffer) - buffer.size());
+    received_size = socket.receive(receive_buffer, sizeof(receive_buffer));
     if (received_size < 1)
         return false;
     buffer.resize(buffer.size() + received_size);
@@ -229,7 +229,7 @@ bool Server::Connection::update()
                 payload_length |= uint8_t(buffer[index++]) << 8;
                 payload_length |= uint8_t(buffer[index++]);
             }
-            LOG(Debug, payload_length);
+
             uint8_t mask_values[4] = {0, 0, 0, 0};
             if (mask)
             {
