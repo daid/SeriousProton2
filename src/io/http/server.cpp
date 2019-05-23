@@ -258,11 +258,6 @@ bool Server::Connection::processIncommingData()
                 }
                 break;
             case websocket::opcode_text:
-                if (fin)
-                    websocket_received_pending.push_back(message);
-                else
-                    websocket_received_fragment = message;
-                break;
             case websocket::opcode_binary:
                 if (fin)
                     websocket_received_pending.push_back(message);
@@ -411,19 +406,19 @@ void Server::Connection::httpChunk(const string& data)
 
 void Server::Connection::sendWebsocketTextPacket(const string& data)
 {
-    if (data.size() < 126)
+    if (data.size() < websocket::payload_length_16bit)
     {
         uint8_t header[] = {
-            0x81, //fin + text
+            websocket::fin_mask | websocket::opcode_text,
             uint8_t(data.size()),
         };
         socket.send(header, sizeof(header));
     }
-    else if (data.size() < 0x10000)
+    else if (data.size() < (1 << 16))
     {
         uint8_t header[] = {
-            0x81, //fin + text
-            126,
+            websocket::fin_mask | websocket::opcode_text,
+            websocket::payload_length_16bit,
             uint8_t((data.size() >> 8) & 0xFF),
             uint8_t(data.size() & 0xFF),
         };
@@ -432,8 +427,8 @@ void Server::Connection::sendWebsocketTextPacket(const string& data)
     else
     {
         uint8_t header[] = {
-            0x81, //fin + text
-            127,
+            websocket::fin_mask | websocket::opcode_text,
+            websocket::payload_length_64bit,
             0, 0, 0, 0,
             uint8_t((data.size() >> 24) & 0xFF),
             uint8_t((data.size() >> 16) & 0xFF),
