@@ -42,18 +42,30 @@ void Websocket::setMessageCallback(std::function<void(const string&)> callback)
 bool Websocket::connect(const string& url)
 {
     state = State::Disconnected;
-    if (!url.startswith("ws://"))
+    
+    int scheme_length = 5;
+    if (!url.startswith("ws://") && !url.startswith("wss://"))
         return false;
-    int end_of_hostname = url.find("/", 5);
-    string hostname = url.substr(5, end_of_hostname);
+    if (url.startswith("wss://"))
+        scheme_length = 6;
+    int end_of_hostname = url.find("/", scheme_length);
+    string hostname = url.substr(scheme_length, end_of_hostname);
     int port = 80;
     if (hostname.find(":") != -1)
     {
         port = sp::stringutil::convert::toInt(hostname.substr(hostname.find(":") + 1));
         hostname = hostname.substr(0, hostname.find(":"));
     }
-    if (!socket.connect(sp::io::network::Address(hostname), port))
-        return false;
+    if (url.startswith("wss://"))
+    {
+        if (!socket.connectSSL(sp::io::network::Address(hostname), port))
+            return false;
+    }
+    else
+    {
+        if (!socket.connect(sp::io::network::Address(hostname), port))
+            return false;
+    }
     string path = url.substr(end_of_hostname);
     for(int n=0;n<16;n++)
         websock_key += char(sp::irandom(0, 255));
