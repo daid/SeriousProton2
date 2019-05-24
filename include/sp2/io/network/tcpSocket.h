@@ -19,6 +19,7 @@ public:
     ~TcpSocket();
 
     bool connect(const Address& host, int port);
+    bool connectSSL(const Address& host, int port);
     void close();
 
     bool isConnected();
@@ -31,6 +32,8 @@ public:
 
 private:
     bool sendSendQueue();
+    
+    void* ssl_handle;
 
     std::string send_queue;
     std::vector<uint8_t> receive_buffer;

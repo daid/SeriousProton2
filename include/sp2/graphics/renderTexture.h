@@ -7,7 +7,6 @@
 
 namespace sp {
 
-//NOTE: Untested
 class RenderTexture : public Texture
 {
 public:

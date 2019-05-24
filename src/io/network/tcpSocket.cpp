@@ -16,18 +16,120 @@ static constexpr int flags = MSG_NOSIGNAL;
 #endif
 
 
+extern "C" {
+    struct X509;
+    struct X509_STORE;
+    struct SSL_CTX;
+    struct SSL_METHOD;
+    struct SSL;
+
+    static X509_STORE* (*X509_STORE_new)();
+    static X509* (*d2i_X509)(X509**, const unsigned char **, long);
+    static int (*X509_STORE_add_cert)(X509_STORE*, X509*);
+    static void (*X509_free)(X509*);
+    static SSL_CTX* (*SSL_CTX_new)(const SSL_METHOD*);
+    static const SSL_METHOD* (*TLSv1_2_client_method)();
+    static long (*SSL_CTX_set_options)(SSL_CTX*, long);
+    static int (*SSL_CTX_set_default_verify_paths)(SSL_CTX*);
+    static void (*SSL_CTX_set_cert_store)(SSL_CTX*, X509_STORE*);
+    static SSL* (*SSL_new)(SSL_CTX*);
+    static int (*SSL_set_fd)(SSL *ssl, int fd);
+    static int (*SSL_connect)(SSL *ssl);
+    static long (*SSL_get_verify_result)(const SSL *ssl);
+    static int (*SSL_read)(SSL *ssl, void *buf, int num);
+    static int (*SSL_write)(SSL *ssl, const void *buf, int num);
+    static void (*SSL_free)(SSL *ssl);
+    
+    static SSL_CTX* ssl_context;
+}
+
+# define SSL_OP_NO_SSLv2                                 0x01000000L
+# define SSL_OP_NO_SSLv3                                 0x02000000L
+# define SSL_OP_NO_TLSv1                                 0x04000000L
+# define SSL_OP_NO_TLSv1_2                               0x08000000L
+# define SSL_OP_NO_TLSv1_1                               0x10000000L
+
+#include "SDL.h"
+
+static void initializeLibSSL()
+{
+    static bool initialized = false;
+    if (initialized) return;
+    initialized = true;
+
+#ifdef __WIN32
+    void* libcrypto = SDL_LoadObject("libcrypto-1_1.dll");
+    void* libssl = SDL_LoadObject("libssl-1_1.dll");
+#else
+    void* libcrypto = SDL_LoadObject("libcrypto.so.1.1");
+    void* libssl = SDL_LoadObject("libssl.so.1.1");
+#endif
+    if (!libcrypto || !libssl)
+        return;
+
+    X509_STORE_new = (X509_STORE*(*)())SDL_LoadFunction(libcrypto, "X509_STORE_new");
+    d2i_X509 = (X509* (*)(X509**, const unsigned char **, long))SDL_LoadFunction(libcrypto, "d2i_X509");
+    X509_STORE_add_cert = (int (*)(X509_STORE*, X509*))SDL_LoadFunction(libcrypto, "X509_STORE_add_cert");
+    X509_free = (void (*)(X509*))SDL_LoadFunction(libcrypto, "X509_free");
+
+    SSL_CTX_new = (SSL_CTX*(*)(const SSL_METHOD*))SDL_LoadFunction(libssl, "SSL_CTX_new");
+    TLSv1_2_client_method = (const SSL_METHOD* (*)())SDL_LoadFunction(libssl, "TLSv1_2_client_method");
+    SSL_CTX_set_options = (long (*)(SSL_CTX*, long))SDL_LoadFunction(libssl, "SSL_CTX_set_options");
+    SSL_CTX_set_default_verify_paths = (int (*)(SSL_CTX*))SDL_LoadFunction(libssl, "SSL_CTX_set_default_verify_paths");
+    SSL_CTX_set_cert_store = (void (*)(SSL_CTX*, X509_STORE*))SDL_LoadFunction(libssl, "SSL_CTX_set_cert_store");
+    SSL_new = (SSL* (*)(SSL_CTX*))SDL_LoadFunction(libssl, "SSL_new");
+    SSL_set_fd = (int (*)(SSL *ssl, int fd))SDL_LoadFunction(libssl, "SSL_set_fd");
+    SSL_connect = (int (*)(SSL *ssl))SDL_LoadFunction(libssl, "SSL_connect");
+    SSL_get_verify_result = (long (*)(const SSL *ssl))SDL_LoadFunction(libssl, "SSL_get_verify_result");
+    SSL_read = (int (*)(SSL *ssl, void *buf, int num))SDL_LoadFunction(libssl, "SSL_read");
+    SSL_write = (int (*)(SSL *ssl, const void *buf, int num))SDL_LoadFunction(libssl, "SSL_write");
+    SSL_free = (void (*)(SSL *ssl))SDL_LoadFunction(libssl, "SSL_free");
+    
+#ifdef __WIN32
+    HCERTSTORE hStore;
+    PCCERT_CONTEXT pContext = NULL;
+    X509 *x509;
+    X509_STORE *store = X509_STORE_new();
+
+    hStore = CertOpenSystemStore(0, "ROOT");
+    while((pContext = CertEnumCertificatesInStore(hStore, pContext)) != nullptr)
+    {
+        const unsigned char* c = pContext->pbCertEncoded;
+        x509 = d2i_X509(nullptr, &c, pContext->cbCertEncoded);
+        if (x509)
+        {
+            X509_STORE_add_cert(store, x509);
+            X509_free(x509);
+        }
+    }
+    CertFreeCertificateContext(pContext);
+    CertCloseStore(hStore, 0);
+#endif
+    
+    ssl_context = SSL_CTX_new(TLSv1_2_client_method());
+    SSL_CTX_set_options(ssl_context, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
+#ifdef __WIN32
+    SSL_CTX_set_cert_store(ssl_context, store);
+#else
+    SSL_CTX_set_default_verify_paths(ssl_context);
+#endif
+}
+
+
 namespace sp {
 namespace io {
 namespace network {
 
 
 TcpSocket::TcpSocket()
+: ssl_handle(nullptr)
 {
 }
 
 TcpSocket::TcpSocket(TcpSocket&& socket)
 {
     handle = socket.handle;
+    ssl_handle = socket.ssl_handle;
     send_queue = std::move(socket.send_queue);
     blocking = socket.blocking;
     receive_buffer = std::move(socket.receive_buffer);
@@ -36,6 +138,7 @@ TcpSocket::TcpSocket(TcpSocket&& socket)
     socket.handle = -1;
     socket.send_queue.clear();
     socket.receive_buffer.clear();
+    socket.ssl_handle = nullptr;
 }
 
 TcpSocket::~TcpSocket()
@@ -82,6 +185,34 @@ bool TcpSocket::connect(const Address& host, int port)
     return false;
 }
 
+bool TcpSocket::connectSSL(const Address& host, int port)
+{
+    if (!connect(host, port))
+        return false;
+    initializeLibSSL();
+    if (!SSL_new)
+    {
+        LOG(Warning, "Failed to connect SSL socket due to missing libssl/libcrypto v1.1");
+        return false;
+    }
+    
+    ssl_handle = SSL_new(ssl_context);
+    SSL_set_fd((SSL*)ssl_handle, handle);
+    if (!SSL_connect((SSL*)ssl_handle))
+    {
+        LOG(Warning, "Failed to connect SSL socket due to SSL negotiation failure.");
+        close();
+        return false;
+    }
+    if (SSL_get_verify_result((SSL*)ssl_handle) != 0)
+    {
+        LOG(Warning, "Failed to connect SSL socket due to certificate verfication failure.");
+        close();
+        return false;
+    }
+    return true;
+}
+
 void TcpSocket::close()
 {
     if (isConnected())
@@ -93,6 +224,9 @@ void TcpSocket::close()
 #endif
         handle = -1;
         send_queue.clear();
+        if (ssl_handle)
+            SSL_free((SSL*)ssl_handle);
+        ssl_handle = nullptr;
     }
 }
 
@@ -113,7 +247,11 @@ void TcpSocket::send(const void* data, size_t size)
 
     for(size_t done = 0; done < size; )
     {
-        int result = ::send(handle, ((const char*)data) + done, size - done, flags);
+        int result;
+        if (ssl_handle)
+            result = SSL_write((SSL*)ssl_handle, ((const char*)data) + done, size - done);
+        else
+            result = ::send(handle, ((const char*)data) + done, size - done, flags);
         if (result < 0)
         {
             if (!isLastErrorNonBlocking())
@@ -133,7 +271,11 @@ size_t TcpSocket::receive(void* data, size_t size)
     if (!isConnected())
         return 0;
     
-    int result = ::recv(handle, (char*)data, size, flags);
+    int result;
+    if (ssl_handle)
+        result = SSL_read((SSL*)ssl_handle, (char*)data, size);
+    else
+        result = ::recv(handle, (char*)data, size, flags);
     if (result < 0)
     {
         result = 0;
@@ -162,7 +304,11 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
         while(idx < sizeof(uint32_t))
         {
             //TOFIX: This blocks if we receive less then 4 bytes. Allows denial of service attack.
-            int result = ::recv(handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx, flags);
+            int result;
+            if (ssl_handle)
+                result = SSL_read((SSL*)ssl_handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx);
+            else
+                result = ::recv(handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx, flags);
             if (result < 0)
             {
                 result = 0;
@@ -186,7 +332,11 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
 
     while(true)
     {
-        int result = ::recv(handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size, flags);
+        int result;
+        if (ssl_handle)
+            result = SSL_read((SSL*)ssl_handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size);
+        else
+            result = ::recv(handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size, flags);
         if (result < 0)
         {
             result = 0;
@@ -218,7 +368,10 @@ bool TcpSocket::sendSendQueue()
     int result;
     do
     {
-        result = ::send(handle, (const char*)send_queue.data(), send_queue.size(), flags);
+        if (ssl_handle)
+            result = SSL_write((SSL*)ssl_handle, (const char*)send_queue.data(), send_queue.size());
+        else
+            result = ::send(handle, (const char*)send_queue.data(), send_queue.size(), flags);
         if (result < 0)
         {
             result = 0;
