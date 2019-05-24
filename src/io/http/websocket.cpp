@@ -202,101 +202,103 @@ void Websocket::onUpdate(float delta)
             state = State::Operational;
         }
         }break;
-    case State::Operational:{
-        if (buffer.size() < 2)
-            return;
-        unsigned int payload_length = buffer[1] & websocket::payload_length_mask;
-        int opcode = buffer[0] & websocket::opcode_mask;
-        bool fin = buffer[0] & websocket::fin_mask;
-        bool mask = buffer[1] & websocket::mask_mask;
-        unsigned int index = 2;
-
-        //Close the connection if any of the RSV bits are set.
-        if (buffer[0] & websocket::rsv_mask)
+    case State::Operational:
+        while(true)
         {
-            LOG(Warning, "Closing client websocket due to RSV bits, we do not support extensions.");
-            close();
-            return;
-        }
-
-        if (payload_length == websocket::payload_length_16bit)
-        {
-            if (buffer.size() < index + 2)
+            if (buffer.size() < 2)
                 return;
-            payload_length = uint8_t(buffer[index++]) << 8;
-            payload_length |= uint8_t(buffer[index++]);
-        }else if (payload_length == websocket::payload_length_64bit)
-        {
-            if (buffer.size() < index + 8)
-                return;
-            index += 4;
-            payload_length = uint8_t(buffer[index++]) << 24;
-            payload_length |= uint8_t(buffer[index++]) << 16;
-            payload_length |= uint8_t(buffer[index++]) << 8;
-            payload_length |= uint8_t(buffer[index++]);
-        }
+            unsigned int payload_length = buffer[1] & websocket::payload_length_mask;
+            int opcode = buffer[0] & websocket::opcode_mask;
+            bool fin = buffer[0] & websocket::fin_mask;
+            bool mask = buffer[1] & websocket::mask_mask;
+            unsigned int index = 2;
 
-        uint8_t mask_values[4] = {0, 0, 0, 0};
-        if (mask)
-        {
-            if (buffer.size() < index + 4)
+            //Close the connection if any of the RSV bits are set.
+            if (buffer[0] & websocket::rsv_mask)
+            {
+                LOG(Warning, "Closing client websocket due to RSV bits, we do not support extensions.");
+                close();
                 return;
-            for(unsigned int n=0; n<4; n++)
-                mask_values[n] = buffer[index++];
+            }
+
+            if (payload_length == websocket::payload_length_16bit)
+            {
+                if (buffer.size() < index + 2)
+                    return;
+                payload_length = uint8_t(buffer[index++]) << 8;
+                payload_length |= uint8_t(buffer[index++]);
+            }else if (payload_length == websocket::payload_length_64bit)
+            {
+                if (buffer.size() < index + 8)
+                    return;
+                index += 4;
+                payload_length = uint8_t(buffer[index++]) << 24;
+                payload_length |= uint8_t(buffer[index++]) << 16;
+                payload_length |= uint8_t(buffer[index++]) << 8;
+                payload_length |= uint8_t(buffer[index++]);
+            }
+
+            uint8_t mask_values[4] = {0, 0, 0, 0};
+            if (mask)
+            {
+                if (buffer.size() < index + 4)
+                    return;
+                for(unsigned int n=0; n<4; n++)
+                    mask_values[n] = buffer[index++];
+                if (buffer.size() < index + payload_length)
+                    return;
+                for(unsigned int n=0; n<payload_length; n++)
+                    buffer[index + n] ^= mask_values[n % 4];
+            }
             if (buffer.size() < index + payload_length)
                 return;
-            for(unsigned int n=0; n<payload_length; n++)
-                buffer[index + n] ^= mask_values[n % 4];
-        }
-        if (buffer.size() < index + payload_length)
-            return;
-        
-        string message = buffer.substr(index, index + payload_length);
-        buffer = buffer.substr(index + payload_length);
+            
+            string message = buffer.substr(index, index + payload_length);
+            buffer = buffer.substr(index + payload_length);
 
-        switch(opcode)
-        {
-        case websocket::opcode_continuation:
-            received_fragment += message;
-            if (fin)
+            switch(opcode)
             {
-                if (callback)
-                    callback(received_fragment);
-                received_fragment = "";
+            case websocket::opcode_continuation:
+                received_fragment += message;
+                if (fin)
+                {
+                    if (callback)
+                        callback(received_fragment);
+                    received_fragment = "";
+                }
+                break;
+            case websocket::opcode_text:
+            case websocket::opcode_binary:
+                if (fin)
+                {
+                    if (callback)
+                        callback(message);
+                }
+                else
+                {
+                    received_fragment = message;
+                }
+                break;
+            case websocket::opcode_close:
+                {
+                    uint8_t reply[] = {websocket::fin_mask | websocket::opcode_close, 0};//close packet
+                    socket.send(reply, sizeof(reply));
+                }
+                close();
+                return;
+            case websocket::opcode_ping:
+                {
+                    //Note: The standard says that we need to include the payload of the ping packet as payload in the pong packet.
+                    //      We ignore this, as this no client seems to use this.
+                    uint8_t reply[] = {websocket::fin_mask | websocket::opcode_pong, 0};//pong packet
+                    socket.send(reply, sizeof(reply));
+                }
+                break;
+            case websocket::opcode_pong:
+                //There is no real need to track PONG replies. TCP/IP will close the connection if the other side is gone.
+                break;
             }
-            break;
-        case websocket::opcode_text:
-        case websocket::opcode_binary:
-            if (fin)
-            {
-                if (callback)
-                    callback(message);
-            }
-            else
-            {
-                received_fragment = message;
-            }
-            break;
-        case websocket::opcode_close:
-            {
-                uint8_t reply[] = {websocket::fin_mask | websocket::opcode_close, 0};//close packet
-                socket.send(reply, sizeof(reply));
-            }
-            close();
-            return;
-        case websocket::opcode_ping:
-            {
-                //Note: The standard says that we need to include the payload of the ping packet as payload in the pong packet.
-                //      We ignore this, as this no client seems to use this.
-                uint8_t reply[] = {websocket::fin_mask | websocket::opcode_pong, 0};//pong packet
-                socket.send(reply, sizeof(reply));
-            }
-            break;
-        case websocket::opcode_pong:
-            //There is no real need to track PONG replies. TCP/IP will close the connection if the other side is gone.
-            break;
         }
-        }break;
     }
 }
 
