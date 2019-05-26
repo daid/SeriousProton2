@@ -38,6 +38,15 @@ Server::Server(int port_nr)
     handler_thread = std::move(std::thread([this]() { handlerThread(); }));
 }
 
+Server::~Server()
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        listen_socket.close();
+    }
+    handler_thread.join();
+}
+
 void Server::setStaticFilePath(const string& static_file_path)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
@@ -85,7 +94,7 @@ void Server::handlerThread()
 {
     sp::io::network::Selector selector;
     selector.add(listen_socket);
-    while(true)
+    while(listen_socket.isListening())
     {
         selector.wait(1000);
 

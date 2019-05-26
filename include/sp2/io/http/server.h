@@ -37,6 +37,7 @@ class Server : public Updatable
 {
 public:
     Server(int port_nr=80);
+    ~Server();
     
     //Set the path on the filesystem where statics files are read from.
     //  Note: This does not use the ResourceProvider system.
