@@ -61,12 +61,21 @@ void Server::addSimpleWebsocketHandler(const string& url, std::function<void(con
     simple_websocket_handlers[url] = func;
 }
 
+void Server::addAdvancedWebsocketHandler(const string& url, std::function<sp::P<WebsocketHandler>()> func)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
+    advanced_websocket_handlers[url] = func;
+}
+
 void Server::broadcastToWebsockets(const string& url, const string& data)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
     for(Connection& connection : connections)
     {
+        if (connection.remove)
+            continue;
         if (connection.state == Connection::State::Websocket && connection.request.path == url)
             connection.sendWebsocketTextPacket(data);
     }
@@ -463,6 +472,11 @@ void Server::Connection::sendWebsocketTextPacket(const string& data)
     }
     
     socket.send(data.data(), data.size());
+}
+
+void WebsocketHandler::send(const string& message)
+{
+    connection->sendWebsocketTextPacket(message);
 }
 
 };//namespace http
