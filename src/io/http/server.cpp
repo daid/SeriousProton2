@@ -141,7 +141,10 @@ void Server::onUpdate(float delta)
         if (connection.remove)
         {
             if (connection.websocket_handler)
+            {
+                connection.websocket_handler->connection = nullptr;
                 connection.websocket_handler->onDisconnect();
+            }
             it = connections.erase(it);
             continue;
         }
@@ -485,7 +488,8 @@ void Server::Connection::sendWebsocketTextPacket(const string& data)
 
 void WebsocketHandler::send(const string& message)
 {
-    connection->sendWebsocketTextPacket(message);
+    if (connection)
+        connection->sendWebsocketTextPacket(message);
 }
 
 };//namespace http

@@ -117,7 +117,7 @@ public:
     
     void send(const string& message);
 private:
-    Server::Connection* connection;
+    Server::Connection* connection = nullptr;
     
     friend class Server;
 };
