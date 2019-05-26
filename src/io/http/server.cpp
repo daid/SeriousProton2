@@ -54,11 +54,11 @@ void Server::addURLHandler(const string& url, std::function<string(const Request
     http_handlers[url] = func;
 }
 
-void Server::addWebsocketHandler(const string& url, std::function<void(const string& data)> func)
+void Server::addSimpleWebsocketHandler(const string& url, std::function<void(const string& data)> func)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     
-    websocket_handlers[url] = func;
+    simple_websocket_handlers[url] = func;
 }
 
 void Server::broadcastToWebsockets(const string& url, const string& data)
@@ -92,27 +92,22 @@ void Server::handlerThread()
         for(auto it = connections.begin(); it != connections.end();)
         {
             Connection& connection = *it;
-            bool remove = false;
+            if (connection.remove)
+                continue;
             if (selector.isReady(connection.socket))
             {
                 connection.last_received_data_time = std::chrono::steady_clock::now();
-                remove = !connection.processIncommingData();
+                connection.remove = !connection.processIncommingData();
             }
             else
             {
                 if (std::chrono::steady_clock::now() - connection.last_received_data_time > std::chrono::seconds(5))
-                    remove = !connection.handleTimeout();
+                    connection.remove = !connection.handleTimeout();
             }
             
-            if (remove)
-            {
+            if (connection.remove)
                 selector.remove(connection.socket);
-                it = connections.erase(it);
-            }
-            else
-            {
-                it++;
-            }
+            it++;
         }
     }
 }
@@ -121,8 +116,18 @@ void Server::onUpdate(float delta)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
 
-    for(Connection& connection : connections)
+    for(auto it = connections.begin(); it != connections.end();)
     {
+        Connection& connection = *it;
+
+        if (connection.remove)
+        {
+            if (connection.websocket_handler)
+                connection.websocket_handler->onDisconnect();
+            it = connections.erase(it);
+            continue;
+        }
+        
         if (connection.request_pending)
         {
             string reply = http_handlers[connection.request.path](connection.request);
@@ -133,11 +138,27 @@ void Server::onUpdate(float delta)
 
             connection.request_pending = false;
         }
+        if (connection.websocket_connected)
+        {
+            if (advanced_websocket_handlers.find(connection.request.path) != advanced_websocket_handlers.end())
+                connection.websocket_handler = advanced_websocket_handlers[connection.request.path]();
+            if (connection.websocket_handler)
+            {
+                connection.websocket_handler->connection = &connection;
+                connection.websocket_handler->onConnect();
+            }
+            connection.websocket_connected = false;
+        }
         for(string& message : connection.websocket_received_pending)
         {
-            websocket_handlers[connection.request.path](message);
+            if (simple_websocket_handlers.find(connection.request.path) != simple_websocket_handlers.end())
+                simple_websocket_handlers[connection.request.path](message);
+            if (connection.websocket_handler)
+                connection.websocket_handler->onMessage(message);
         }
         connection.websocket_received_pending.clear();
+        
+        it++;
     }
 }
 
@@ -146,6 +167,7 @@ Server::Connection::Connection(Server& server)
 {
     buffer.reserve(4096);
     state = State::HTTPRequest;
+    remove = false;
 }
 
 bool Server::Connection::processIncommingData()
@@ -327,7 +349,7 @@ void Server::Connection::handleRequest(const Request& request)
         && request.headers.find("sec-websocket-version")->second.lower() == "13"
         )
         {
-            if (server.websocket_handlers.find(request.path) != server.websocket_handlers.end())
+            if (server.simple_websocket_handlers.find(request.path) != server.simple_websocket_handlers.end() || server.advanced_websocket_handlers.find(request.path) != server.advanced_websocket_handlers.end())
             {
                 string reply = "HTTP/1.1 101 Switching Protocols\r\n";
                 reply += "Upgrade: websocket\r\n";
@@ -337,6 +359,8 @@ void Server::Connection::handleRequest(const Request& request)
                     reply += "Sec-WebSocket-Protocol: chat\r\n";
                 reply += "\r\n";
                 socket.send(reply.c_str(), reply.size());
+                
+                websocket_connected = true;
                 
                 state = State::Websocket;
             }

@@ -24,7 +24,7 @@ public:
     string post_data;
     std::unordered_map<string, string> headers;
 };
-
+class WebsocketHandler;
 /**
     Basic HTTP webserver.
     Runs a single threaded webserver which can handle:
@@ -47,7 +47,11 @@ public:
     //Add a simple websocket handler, this handler will process any websocket message from any websocket connected to a specific URL.
     //  No distinction or state between connections is made.
     //  URLs should start with a "/"
-    void addWebsocketHandler(const string& url, std::function<void(const string& data)> func);
+    void addSimpleWebsocketHandler(const string& url, std::function<void(const string& data)> func);
+    //Add an advanced websocket handler, this handler needs to return a subclass of the WebsocketHandler interface.
+    //  This interface will get callbacks to handle this specific instance of the websocket connection.
+    //  This can be used to keep per-connection state.
+    void addAdvancedWebsocketHandler(const string& url, std::function<sp::P<WebsocketHandler>()> func);
     //Send a message to all connected websockets to a specific URL endpoint.
     //  No distinction is made between websockets, all are equal. Useful to distribute game state to all websockets.
     void broadcastToWebsockets(const string& url, const string& data);
@@ -60,7 +64,8 @@ private:
     std::thread handler_thread;
     std::recursive_mutex mutex;
     std::map<string, std::function<string(const Request&)>> http_handlers;
-    std::map<string, std::function<void(const string& data)>> websocket_handlers;
+    std::map<string, std::function<void(const string& data)>> simple_websocket_handlers;
+    std::map<string, std::function<sp::P<WebsocketHandler>()>> advanced_websocket_handlers;
 
     sp::io::network::TcpListener listen_socket;
     
@@ -68,6 +73,8 @@ private:
     {
     public:
         Connection(Server& server);
+        
+        bool remove;
 
         sp::io::network::TcpSocket socket;
         std::chrono::steady_clock::time_point last_received_data_time;
@@ -76,8 +83,10 @@ private:
         
         Request request;
         bool request_pending = false;
+        bool websocket_connected = false;
         string websocket_received_fragment;
         std::vector<string> websocket_received_pending;
+        sp::P<WebsocketHandler> websocket_handler;
 
         bool processIncommingData();
         bool handleTimeout();
@@ -94,7 +103,24 @@ private:
     };
     
     std::list<Connection> connections;
+    
+    friend class WebsocketHandler;
 };
+
+class WebsocketHandler : public AutoPointerObject
+{
+public:
+    virtual void onConnect() = 0;
+    virtual void onMessage(const string& message) = 0;
+    virtual void onDisconnect() = 0;
+    
+    void send(const string& message);
+private:
+    Server::Connection* connection;
+    
+    friend class Server;
+};
+
 
 };//namespace http
 };//namespace io
