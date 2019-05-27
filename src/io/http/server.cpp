@@ -111,7 +111,10 @@ void Server::handlerThread()
         {
             Connection& connection = *it;
             if (connection.remove)
+            {
+                it++;
                 continue;
+            }
             if (selector.isReady(connection.socket))
             {
                 connection.last_received_data_time = std::chrono::steady_clock::now();
@@ -401,6 +404,8 @@ void Server::Connection::handleRequest(const Request& request)
     if (request.path.find("..") == -1)
     {
         full_path = server.static_file_path + request.path;
+        if (request.path.endswith("/"))
+            full_path = full_path + "index.html";
     }
     
     FILE* f = fopen(full_path.c_str(), "rb");
