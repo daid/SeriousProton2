@@ -23,8 +23,7 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     this->tile_width = tile_width;
     this->tile_height = tile_height;
 
-    this->texture_tile_count_x = texture_tile_count_x;
-    this->texture_tile_count_y = texture_tile_count_y;
+    this->texture_tile_count = Vector2i(texture_tile_count_x, texture_tile_count_y);
 
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = texture_manager.get(texture);
@@ -32,6 +31,15 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     render_data.order = -1;
     
     dirty = false;
+}
+
+void Tilemap::setTilemapSpacingMargin(float spacing, float margin)
+{
+    texture_spacing.x = spacing / (float(texture_tile_count.x) + spacing * float(texture_tile_count.x - 1));
+    texture_spacing.y = spacing / (float(texture_tile_count.y) + spacing * float(texture_tile_count.y - 1));
+    texture_margin = Vector2f(margin, margin);
+    
+    dirty = true;
 }
 
 void Tilemap::setTile(int x, int y, int index, Collision collision)
@@ -121,12 +129,11 @@ void Tilemap::onFixedUpdate()
 
 void Tilemap::updateMesh()
 {
-    float fu = 1.0 / float(texture_tile_count_x);
-    float fv = 1.0 / float(texture_tile_count_y);
-    
-    float u_offset = 0.5 / 1024;
-    float v_offset = 0.5 / 1024;
-    
+    Vector2f uv_step_size = Vector2f(
+        (1.0 - texture_margin.x * 2.0f + texture_spacing.x) / float(texture_tile_count.x),
+        (1.0 - texture_margin.y * 2.0f + texture_spacing.y) / float(texture_tile_count.y));
+    Vector2f uv_size = uv_step_size - texture_spacing;
+
     MeshData::Vertices vertices;
     MeshData::Indices indices;
     for(unsigned int y=0; y<tiles.size(); y++)
@@ -136,11 +143,21 @@ void Tilemap::updateMesh()
             const auto& tile = tiles[y][x];
             if (tile.index < 0)
                 continue;
+            int tile_index = tile.index & ~(flip_horizontal | flip_vertical);
             float px = x * tile_width;
             float py = y * tile_height;
-            int u = tile.index % texture_tile_count_x;
-            int v = tile.index / texture_tile_count_x;
-            
+            int u = tile_index % texture_tile_count.x;
+            int v = tile_index / texture_tile_count.y;
+            float u0 = texture_margin.x + u * uv_step_size.x;
+            float v0 = texture_margin.y + v * uv_step_size.y;
+            float u1 = u0 + uv_size.x;
+            float v1 = v0 + uv_size.y;
+
+            if (tile.index & flip_horizontal)
+                std::swap(u0, u1);
+            if (tile.index & flip_vertical)
+                std::swap(v0, v1);
+
             indices.emplace_back(vertices.size() + 0);
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 2);
@@ -148,10 +165,10 @@ void Tilemap::updateMesh()
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 3);
             
-            vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u * fu + u_offset, (v + 1) * fv - v_offset));
-            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f((u + 1) * fu - u_offset, (v + 1) * fv - v_offset));
-            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u * fu + u_offset, v * fv + v_offset));
-            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f((u + 1) * fu - u_offset, v * fv + v_offset));
+            vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u0, v1));
+            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
+            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u1, v0));
         }
     }
     

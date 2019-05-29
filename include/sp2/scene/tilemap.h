@@ -14,9 +14,13 @@ public:
         Solid,
         Platform
     };
+    static constexpr int flip_horizontal = 0x100000;
+    static constexpr int flip_vertical = 0x200000;
 
     Tilemap(P<Node> parent, string texture, float tile_size, int texture_tile_count);
     Tilemap(P<Node> parent, string texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y);
+    
+    void setTilemapSpacingMargin(float spacing, float margin);
     
     void setTile(int x, int y, int index, Collision collision=Collision::Open);
     void setTileZOffset(int x, int y, double z_offset);
@@ -39,8 +43,9 @@ private:
 
     float tile_width;
     float tile_height;
-    int texture_tile_count_x;
-    int texture_tile_count_y;
+    Vector2i texture_tile_count;
+    Vector2f texture_spacing;
+    Vector2f texture_margin;
     std::vector<std::vector<Tile>> tiles;
     bool dirty;
     
