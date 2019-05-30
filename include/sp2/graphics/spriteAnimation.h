@@ -30,7 +30,7 @@ class AtlasManager;
     - frame_size: [Vector2f] Size of the sprites, in pixels.
     - offset: [Vector2f] Offset of the sprites compared to point of origin. 0,0 centers the sprite.
     - size: [Vector2f] Size of the final sprite in the engine. Generally a factor of the frame_size.
-    - margin: [Vector2f] Margin between each sprite in the sprite sheet.
+    - margin: [Vector2f] Margin between each sprite in the sprite sheet in pixels.
     
     Minimal required are:
     texture, texture_size, frames, position, size, frame_size

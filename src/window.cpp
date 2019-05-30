@@ -13,6 +13,15 @@
 #include <windows.h>
 #endif
 
+/* //NOTE: Disabled this for now. On battery power this seems to lower performance on laptops... (30fps limit)
+extern "C"
+{
+    //Tell NVIDIA drivers to use the NVIDIA card if multiple cards are available (common in laptops)
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+    //Tell AMD drivers to use the AMD card if multiple cards are available (common in laptops)
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+*/
 
 namespace sp {
 
@@ -227,14 +236,13 @@ void Window::createRenderWindow()
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version);
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version);
         LOG(Info, "OpenGL version:", major_version, minor_version);
+        LOG(Info, "OpenGL driver vendor:", glGetString(GL_VENDOR));
+        LOG(Info, "OpenGL driver renderer:", glGetString(GL_RENDERER));
+        LOG(Info, "OpenGL driver version:", glGetString(GL_VERSION));
     }
 
     //Enable VSync.
     SDL_GL_SetSwapInterval(1);
-
-    //TODO:SDL? render_window.setMouseCursorVisible(true);
-    //TODO:SDL? render_window.setKeyRepeatEnabled(false);
-    //TODO:SDL? render_window.setActive(false);
 }
 
 void Window::render()
