@@ -94,4 +94,13 @@ double tweak(string name, double value, double min, double max)
     return TweakScene::get()->update(name, value, min, max);
 }
 
+Color tweak(string name, Color color)
+{
+    return Color(
+        tweak(name + ".r", color.r, 0.0, 1.0), 
+        tweak(name + ".g", color.g, 0.0, 1.0), 
+        tweak(name + ".b", color.b, 0.0, 1.0), 
+        tweak(name + ".a", color.a, 0.0, 1.0));
+}
+
 };//namespace sp
