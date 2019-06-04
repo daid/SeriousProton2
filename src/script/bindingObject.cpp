@@ -8,7 +8,7 @@ namespace script {
 
 int lazyLoading(lua_State* L)
 {
-    //Het the object reference for this object.
+    //Get the object reference for this object.
     lua_getfield(L, 1, "__ptr");
     sp::ScriptBindingObject* sbc = static_cast<sp::ScriptBindingObject*>(lua_touserdata(L, -1));
     lua_pop(L, 1);

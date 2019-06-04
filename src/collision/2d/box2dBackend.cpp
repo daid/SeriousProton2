@@ -110,36 +110,31 @@ class ContactListener : public b2ContactListener
 public:
 	virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 	{
-		b2Fixture* fixture_a = contact->GetFixtureA();
-		b2Fixture* fixture_b = contact->GetFixtureB();
-
-        if (fixture_a->GetType() == b2Shape::Type::e_chain)
-        {
-            b2ChainShape* chain = (b2ChainShape*)fixture_a->GetShape();
-            b2EdgeShape edge;
-            chain->GetChildEdge(&edge, contact->GetChildIndexA());
-            
-            b2WorldManifold world_manifold;
-            contact->GetWorldManifold(&world_manifold);
-            
-            Vector2d edge_normal = toVector<double>(b2Mul(fixture_a->GetBody()->GetTransform().q, b2Vec2(edge.m_vertex2.y - edge.m_vertex1.y, edge.m_vertex1.x - edge.m_vertex2.x))).normalized();
-            if (edge_normal.dot(toVector<double>(world_manifold.normal)) > -0.3)
-                contact->SetEnabled(false);
-        }
-        if (fixture_b->GetType() == b2Shape::Type::e_chain)
-        {
-            b2ChainShape* chain = (b2ChainShape*)fixture_b->GetShape();
-            b2EdgeShape edge;
-            chain->GetChildEdge(&edge, contact->GetChildIndexB());
-            
-            b2WorldManifold world_manifold;
-            contact->GetWorldManifold(&world_manifold);
-            
-            Vector2d edge_normal = toVector<double>(b2Mul(fixture_b->GetBody()->GetTransform().q, b2Vec2(edge.m_vertex2.y - edge.m_vertex1.y, edge.m_vertex1.x - edge.m_vertex2.x))).normalized();
-            if (edge_normal.dot(toVector<double>(world_manifold.normal)) < 0.3)
-                contact->SetEnabled(false);
-        }
+        checkContact(contact, contact->GetFixtureA(), contact->GetChildIndexA(), contact->GetFixtureB(), 1.0);
+        checkContact(contact, contact->GetFixtureB(), contact->GetChildIndexB(), contact->GetFixtureA(), -1.0);
 	}
+private:
+    void checkContact(b2Contact* contact, b2Fixture* fixture, int child_index, b2Fixture* other, float direction)
+    {
+        if (fixture->GetType() == b2Shape::Type::e_chain)
+        {
+            b2ChainShape* chain = (b2ChainShape*)fixture->GetShape();
+            b2EdgeShape edge;
+            chain->GetChildEdge(&edge, child_index);
+            
+            b2WorldManifold world_manifold;
+            contact->GetWorldManifold(&world_manifold);
+            
+            Vector2d contact_normal = toVector<double>(world_manifold.normal);
+            Vector2d edge_normal = toVector<double>(b2Mul(fixture->GetBody()->GetTransform().q, b2Vec2(edge.m_vertex2.y - edge.m_vertex1.y, edge.m_vertex1.x - edge.m_vertex2.x))).normalized();
+            if (edge_normal.dot(contact_normal) * direction > -0.3) //Touching the proper side of the edge.
+                contact->SetEnabled(false);
+
+            Vector2d velocity_diff = toVector<double>(fixture->GetBody()->GetLinearVelocity() - other->GetBody()->GetLinearVelocity());
+            if (velocity_diff.dot(edge_normal) * direction >= 0.0)   //Moving towards the edge, not away from it.
+                contact->SetEnabled(false);
+        }
+    }
 };
 
 class DestructionListener : public b2DestructionListener
