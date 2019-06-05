@@ -42,6 +42,11 @@ Window::Window()
         if (SetProcessDPIAware)
             SetProcessDPIAware();
     }
+
+    //Move the console window to the top left corner, makes it easier to read the log output in debug mode.
+    HWND console_handle = GetConsoleWindow();
+    if (console_handle)
+        SetWindowPos(console_handle, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER);
 #endif
 
     windows.add(this);

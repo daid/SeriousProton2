@@ -45,7 +45,7 @@ Engine::Engine()
     fixed_update_accumulator = 0.0;
 
     in_fixed_update = false;
-
+    
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");

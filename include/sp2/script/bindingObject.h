@@ -22,7 +22,7 @@ public:
 protected:
     virtual void onRegisterScriptBindings(ScriptBindingClass& script_binding_class);
     
-    friend int script::lazyLoading(lua_State* L);
+    friend void script::lazyLoading(int table_index, lua_State* L);
 };
 
 };//namespace sp

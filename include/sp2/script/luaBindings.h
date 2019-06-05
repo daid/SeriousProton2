@@ -13,7 +13,9 @@ namespace script {
 
 void createGlobalLuaState();
 
-int lazyLoading(lua_State* L);
+int lazyLoadingIndex(lua_State* L);
+int lazyLoadingNewIndex(lua_State* L);
+void lazyLoading(int table_index, lua_State* L);
 extern lua_State* global_lua_state;
 
 template<typename T> struct typeIdentifier{};
@@ -144,6 +146,19 @@ template<typename RET, typename... ARGS> int callFunction(lua_State* L)
     FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
     std::tuple<ARGS...> args = getArgs<ARGS...>(L);
     return callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+}
+
+template<typename TYPE> int getProperty(lua_State* L)
+{
+    TYPE* t = reinterpret_cast<TYPE*>(lua_touserdata(L, lua_upvalueindex(1)));
+    return pushToLua(L, *t);
+}
+
+template<typename TYPE> int setProperty(lua_State* L)
+{
+    TYPE* t = reinterpret_cast<TYPE*>(lua_touserdata(L, lua_upvalueindex(1)));
+    *t = convertFromLua(L, typeIdentifier<TYPE>{}, -1);
+    return 0;
 }
 
 template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
