@@ -9,13 +9,12 @@ namespace script {
 int lazyLoading(lua_State* L)
 {
     //Get the object reference for this object.
-    lua_getfield(L, 1, "__ptr");
+    lua_getfield(L, -2, "__ptr");
     sp::ScriptBindingObject* sbc = static_cast<sp::ScriptBindingObject*>(lua_touserdata(L, -1));
     lua_pop(L, 1);
     
     //Create a new table as meta table.
     lua_newtable(L);
-    lua_pushstring(L, "__index");
     //Create a new table as __index table for this object.
     lua_newtable(L);
     //Put a field "valid" in this metatable that is always true. (We clear the metatable on object destruction, causing valid to become "nil" and thus false)
@@ -27,11 +26,11 @@ int lazyLoading(lua_State* L)
     sbc->onRegisterScriptBindings(script_binding_class);
     
     //Set the __index table as actual field in the metatable.
-    lua_settable(L, -3);
+    lua_setfield(L, -2, "__index");
     //Register the metatable on our object table
-    lua_setmetatable(L, 1);
+    lua_setmetatable(L, -3);
     //Return the actual field that was requested by lazyloading.
-    lua_gettable(L, 1);
+    lua_gettable(L, -2);
     return 1;
 }
 
