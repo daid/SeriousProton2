@@ -45,6 +45,29 @@ void Shape2D::create(Node* node) const
         body_def.userData = node;
         setCollisionBody(node, world->CreateBody(&body_def));
     }
+    else
+    {
+        b2Body* body = static_cast<b2Body*>(getCollisionBody(node));
+        
+        body->SetLinearDamping(linear_damping);
+        body->SetAngularDamping(angular_damping);
+        switch(type)
+        {
+        case Type::Sensor:
+            body->SetType(b2_dynamicBody);
+            break;
+        case Type::Static:
+            body->SetType(b2_staticBody);
+            break;
+        case Type::Kinematic:
+            body->SetType(b2_kinematicBody);
+            break;
+        case Type::Dynamic:
+            body->SetType(b2_dynamicBody);
+            break;
+        }
+        body->SetFixedRotation(fixed_rotation);
+    }
     
     b2Body* body = static_cast<b2Body*>(getCollisionBody(node));
     while(body->GetFixtureList())
