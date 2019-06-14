@@ -183,7 +183,7 @@ Vector3d BulletBackend::getLinearVelocity(void* _body)
 Vector3d BulletBackend::getAngularVelocity(void* _body)
 {
     btRigidBody* body = static_cast<btRigidBody*>(_body);
-    return toVector<double>(body->getAngularVelocity());
+    return toVector<double>(body->getAngularVelocity()) / pi * 180.0;
 }
 
 bool BulletBackend::testCollision(void* _body, Vector3d position)

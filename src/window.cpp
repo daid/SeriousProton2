@@ -124,13 +124,16 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
     cursor_mesh = mesh;
 }
 
-void Window::setPosition(Vector2f position)
+void Window::setPosition(Vector2f position, int monitor_number)
 {
     if (!render_window)
         return;
 
     SDL_Rect rect;
-    SDL_GetDisplayUsableBounds(0, &rect);
+    if (SDL_GetDisplayUsableBounds(monitor_number, &rect) < 0)
+    {
+        SDL_GetDisplayUsableBounds(0, &rect);
+    }
 
     Vector2i size;
     SDL_GetWindowSize(render_window, &size.x, &size.y);

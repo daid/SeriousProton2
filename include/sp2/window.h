@@ -34,7 +34,7 @@ public:
     void hideCursor();
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
-    void setPosition(Vector2f position);
+    void setPosition(Vector2f position, int monitor_number=0);
 
     void addLayer(P<GraphicsLayer> layer);
 
