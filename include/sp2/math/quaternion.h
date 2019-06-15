@@ -68,6 +68,28 @@ public:
         return Quaternion<T>(x / len, y / len, z / len, w / len);
     }
     
+    Quaternion<T> inverse()
+    {
+        return Quaternion<T>(-x, -y, -z, w);
+    }
+    
+    Quaternion<T> diff(const Quaternion<T>& other)
+    {
+        return inverse() * other;
+    }
+    
+    Vector3<T> toAxisAngle()
+    {
+        T wclamped = std::max(-1.0, std::min(1.0, w));
+        T angle = std::acos(wclamped) * 2.0 / sp::pi * 180.0;
+        T d = std::sqrt(1-wclamped*wclamped);
+        if (d < 0.0001)
+            return Vector3<T>(0, 0, 0);
+        if (angle > 180.0)
+            angle = angle - 360.0;
+        return Vector3<T>(x / d, y / d, z / d) * angle;
+    }
+    
     void normalize()
     {
         T len = std::sqrt(x * x + y * y + z * z + w * w);
