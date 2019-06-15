@@ -63,6 +63,7 @@ public:
     
     virtual void updateRenderData();
     virtual void onUpdate(float delta) override;
+    virtual void postLoading();    //Called after the loader finished loading this widget and children have been added.
     virtual bool onPointerDown(io::Pointer::Button button, sp::Vector2d position, int id);
     virtual void onPointerDrag(sp::Vector2d position, int id);
     virtual void onPointerUp(sp::Vector2d position, int id);

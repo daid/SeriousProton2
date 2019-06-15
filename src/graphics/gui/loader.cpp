@@ -59,6 +59,7 @@ P<Widget> Loader::SubLoader::createWidget(P<Widget> parent, KeyValueTreeNode& no
         P<Widget> widget = reg->creation_function(parent);
         widget->setID(node.id.format(parameters));
         loadWidgetFromTree(widget, node, parameters);
+        widget->postLoading();
         return widget;
     }else{
         LOG(Error, "Failed to find widget type:", type);

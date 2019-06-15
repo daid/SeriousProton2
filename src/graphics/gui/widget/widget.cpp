@@ -65,6 +65,10 @@ void Widget::onUpdate(float delta)
     }
 }
 
+void Widget::postLoading()
+{
+}
+
 bool Widget::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     return false;
@@ -324,6 +328,7 @@ void Widget::setAttribute(const string& key, const string& value)
         {
             theme_data_name = value;
             theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+            markRenderDataOutdated();
         }
     }
     else if (key == "visible")

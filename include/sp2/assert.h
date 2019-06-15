@@ -1,6 +1,9 @@
 #ifndef SP2_ASSERT_H
 #define SP2_ASSERT_H
 
+//We include iostream here to ensure std::cerr is initialized, else the logging functions can crash in constructors.
+#include <iostream>
+
 #ifndef NO_ASSERT
 #define sp2assert(e, msg) do { if (!(e)) { __sp2assert(#e, __FILE__, __FUNCTION__, __LINE__, msg); } } while(0)
 #else

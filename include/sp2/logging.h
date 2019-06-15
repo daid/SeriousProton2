@@ -1,6 +1,9 @@
 #ifndef SP2_LOGGING_H
 #define SP2_LOGGING_H
 
+//We include iostream here to ensure std::cerr is initialized, else the logging functions can crash in constructors.
+#include <iostream>
+
 #include <ostream>
 #include <vector>
 #include <unordered_map>

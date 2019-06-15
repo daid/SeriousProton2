@@ -118,6 +118,8 @@ void Node::setRotation(Quaterniond rotation)
 {
     this->rotation = rotation;
     this->rotation.normalize();
+    if (collision_body)
+        scene->collision_backend->updateRotation(collision_body, rotation);
     updateLocalTransform();
 }
 

@@ -1,4 +1,5 @@
 #include <sp2/logging.h>
+#include <sp2/attributes.h>
 #include <iostream>
 
 namespace sp {

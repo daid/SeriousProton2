@@ -42,7 +42,9 @@ void Shape3D::create(Node* node) const
     construction_info.m_friction = friction;
     construction_info.m_restitution = restitution;
     
-    construction_info.m_angularSleepingThreshold = 0.1; //Default threshold for sleeping on angular velocity is very high, so we lower this else slowly rotating objects will sleep.
+    //Default threshold for sleeping is quite high, we lower this to prevent slow moving objects from suddenly stopping.
+    construction_info.m_linearSleepingThreshold = 0.01;
+    construction_info.m_angularSleepingThreshold = 0.5 / 180.0 * pi;
 
     btRigidBody* body = new btRigidBody(construction_info);
     body->setUserPointer(node);

@@ -22,6 +22,7 @@ public:
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
 
+    const string& getValue() { return value; }
 private:
     float text_size;
     int texture_revision;

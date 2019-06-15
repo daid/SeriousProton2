@@ -6,7 +6,6 @@
 #include <sp2/stringutil/convert.h>
 #include <json11/json11.hpp>
 #include <fstream>
-
 #include <SDL_events.h>
 
 namespace sp {
