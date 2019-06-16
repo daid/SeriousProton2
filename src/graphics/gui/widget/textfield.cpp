@@ -21,9 +21,10 @@ TextField::TextField(P<Widget> parent)
 
 void TextField::setAttribute(const string& key, const string& value)
 {
-    if (key == "text")
+    if (key == "text" || key == "value")
     {
         this->value = value;
+        markRenderDataOutdated();
     }
     else if (key == "text_size" || key == "text.size")
     {
