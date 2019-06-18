@@ -16,10 +16,10 @@ class RenderData
 public:
     enum class Type
     {
-        None,
-        Normal,
-        Transparent,
-        Additive,
+        None,       //Default rendering action: No rendering at all.
+        Normal,     //Rendered with full depth testing and depth drawing
+        Transparent,//Rendered with depth testing, but without drawing to the depth buffer.
+        Additive,   //Rendered with additive blending and without depth buffer drawing.
     };
     int order;
     Type type;

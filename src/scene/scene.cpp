@@ -22,7 +22,7 @@ Scene::Scene(string scene_name, int priority)
     
     scenes.add(this);
     scenes.sort([](const P<Scene>& a, const P<Scene>& b){
-        return a->priority - b->priority;
+        return b->priority - a->priority;
     });
 }
 

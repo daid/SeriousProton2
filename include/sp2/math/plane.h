@@ -6,11 +6,11 @@
 
 namespace sp {
 
-template<typename T> class Plane
+template<typename T> class Plane3
 {
 public:
-    Plane() {}
-    Plane(Vector3<T> normal, T distance) : normal(normal), distance(distance) {}
+    Plane3() {}
+    Plane3(Vector3<T> normal, T distance) : normal(normal), distance(distance) {}
     
     Vector3<T> intersect(Ray<Vector3<T>> ray)
     {
@@ -30,8 +30,8 @@ public:
     T distance;
 };
 
-typedef Plane<float> Plane3f;
-typedef Plane<double> Plane3d;
+typedef Plane3<float> Plane3f;
+typedef Plane3<double> Plane3d;
 
 };//namespace sp
 
