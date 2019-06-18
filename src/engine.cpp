@@ -63,7 +63,7 @@ void Engine::initialize()
     if (initialized)
         return;
 
-    sp::multiplayer::ClassEntry::fillMappings();
+    multiplayer::ClassEntry::fillMappings();
 
     initialized = true;
 

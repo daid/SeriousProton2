@@ -73,6 +73,11 @@ private:
     static constexpr int pointer_mask =  (0x02 << 16);
     static constexpr int joystick_button_mask = (0x03 << 16);
     static constexpr int joystick_axis_mask = (0x04 << 16);
+    static constexpr int joystick_axis_inverted_mask = (0x05 << 16);
+    static constexpr int mouse_wheel_mask = (0x06 << 16);
+    static constexpr int game_controller_button_mask = (0x07 << 16);
+    static constexpr int game_controller_axis_mask = (0x08 << 16);
+    static constexpr int game_controller_axis_inverted_mask = (0x09 << 16);
     
     friend class sp::Engine;
 };
