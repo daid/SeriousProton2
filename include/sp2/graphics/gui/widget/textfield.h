@@ -24,11 +24,17 @@ public:
 
     const string& getValue() { return value; }
 private:
+    int getTextOffsetForPosition(Vector2d position);
+
     float text_size;
     int texture_revision;
     
     string value;
-    int cursor;
+    int selecting_start_offset;
+    int selection_start;
+    int selection_end;
+    
+    P<Widget> cursor_widget;
 };
 
 };//namespace gui
