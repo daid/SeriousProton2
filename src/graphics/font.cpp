@@ -372,7 +372,31 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
 {
     std::unordered_map<int, GlyphInfo>& known_glyphs = loaded_glyphs[pixel_size];
 
-    if (known_glyphs.find(*str) == known_glyphs.end())
+    int unicode = *str;
+    int consumed_characters = 1;
+    if ((unicode & 0xe0) == 0xc0)
+    {
+        unicode = ((unicode & 0x1f) << 6) | (str[1] & 0x3f);
+        consumed_characters = 2;
+    }
+    else if ((unicode & 0xf0) == 0xe0)
+    {
+        unicode = ((unicode & 0x0f) << 12) | ((str[1] & 0x3f) << 6) | (str[2] & 0x3f);
+        consumed_characters = 3;
+    }
+    else if ((unicode & 0xf8) == 0xf0)
+    {
+        unicode = ((unicode & 0x0f) << 18) | ((str[1] & 0x3f) << 12) | ((str[2] & 0x3f) << 6) | (str[3] & 0x3f);
+        consumed_characters = 4;
+    }
+    else if (unicode & 0x80)
+    {
+        unicode = '?';
+        LOG(Warning, "Malform utf-8 string.");
+    }
+
+    
+    if (known_glyphs.find(unicode) == known_glyphs.end())
     {
         FT_Face face = FT_Face(ft_face);
         
@@ -380,10 +404,14 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
         info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.advance = 0;
-        info.consumed_characters = 1;
+        info.consumed_characters = consumed_characters;
         
-        int glyph_index = FT_Get_Char_Index(face, *str);
-        if (glyph_index != 0 && FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) == 0)
+        int glyph_index = FT_Get_Char_Index(face, unicode);
+        if (glyph_index == 0 || FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
+        {
+            LOG(Warning, "Failed to find glyph in font:", string::hex(unicode));
+        }
+        else
         {
             FT_Glyph glyph;
             if (FT_Get_Glyph(face->glyph, &glyph) == 0)
@@ -421,9 +449,9 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
             }
         }
         
-        known_glyphs[*str] = info;
+        known_glyphs[unicode] = info;
     }
-    info = known_glyphs[*str];
+    info = known_glyphs[unicode];
     return true;
 }
 
