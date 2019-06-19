@@ -76,6 +76,52 @@ void Keybinding::addKey(string key)
         }
         return;
     }
+    //Format for gamecontroller keys:
+    //gamecontroller:[joystick_id]:axis:[axis_name]
+    //gamecontroller:[joystick_id]:button:[button_name]
+    if (key.startswith("gamecontroller:"))
+    {
+        std::vector<string> parts = key.split(":");
+        if (parts.size() == 4)
+        {
+            int controller_id = stringutil::convert::toInt(parts[1]);
+            if (parts[2] == "axis")
+            {
+                int axis = SDL_GameControllerGetAxisFromString(parts[3].c_str());
+                if (axis < 0)
+                {
+                    LOG(Warning, "Unknown axis in game controller binding:", key);
+                    return;
+                }
+                key_number.push_back(axis | int(controller_id) << 8 | game_controller_axis_mask);
+            }
+            else if (parts[2] == "invertedaxis")
+            {
+                int axis = SDL_GameControllerGetAxisFromString(parts[3].c_str());
+                if (axis < 0)
+                {
+                    LOG(Warning, "Unknown axis in game controller binding:", key);
+                    return;
+                }
+                key_number.push_back(axis | int(controller_id) << 8 | game_controller_axis_inverted_mask);
+            }
+            else if (parts[2] == "button")
+            {
+                int button = SDL_GameControllerGetButtonFromString(parts[3].c_str());
+                if (button < 0)
+                {
+                    LOG(Warning, "Unknown button in game controller binding:", key);
+                    return;
+                }
+                key_number.push_back(button | int(controller_id) << 8 | game_controller_button_mask);
+            }
+            else
+            {
+                LOG(Warning, "Unknown game controller binding:", key);
+            }
+        }
+        return;
+    }
     if (key.startswith("pointer:"))
     {
         key_number.push_back(pointer_mask | stringutil::convert::toInt(key.substr(8)));
@@ -133,6 +179,12 @@ string Keybinding::getKey(int index)
             case 2: return "wheel:y+";
             case 3: return "wheel:y-";
             }
+        case game_controller_button_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":button:" + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
+        case game_controller_axis_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":axis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+        case game_controller_axis_inverted_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         }
     }
     return "Unknown";
