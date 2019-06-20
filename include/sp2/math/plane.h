@@ -26,6 +26,16 @@ public:
         return ray.start + d * (dot_w / dot_d);
     }
     
+    Vector3<T> project(const Vector3<T> p)
+    {
+        return p - normal * normal.dot(p - normal * distance);
+    }
+    
+    bool isAbove(const Vector3<T> p)
+    {
+        return normal.dot(p - normal * distance) > 0.0;
+    }
+    
     Vector3<T> normal;
     T distance;
 };
