@@ -177,6 +177,14 @@ void Shader::setUniform(const string& s, const Color& c)
     glUniform4fv(location, 1, &c.r);
 }
 
+void Shader::setUniform(const string& s, float v)
+{
+    int location = getUniformLocation(s);
+    if (location == -1)
+        return;
+    glUniform1f(location, v);
+}
+
 void Shader::setUniform(const string& s, Texture* texture)
 {
     sp2assert(bound_shader == this, "Shader needs to be bound before uniforms can be set");

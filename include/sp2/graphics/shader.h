@@ -19,6 +19,7 @@ public:
     void setUniform(const string& s, const Vector2f& v);
     void setUniform(const string& s, const Vector3f& v);
     void setUniform(const string& s, const Color& v);
+    void setUniform(const string& s, float v);
     void setUniform(const string& s, Texture* v);
 
 private:
