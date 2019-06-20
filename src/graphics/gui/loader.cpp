@@ -71,17 +71,22 @@ void Loader::SubLoader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& n
 {
     if (node.items.find("@ref") != node.items.end())
     {
-        auto values = node.items["@ref"].format(parameters).split();
-        string reference_name = values.front();
-        values.erase(values.begin());
-        
+        string args = node.items["@ref"].format(parameters);
         std::map<string, string> new_parameters = parameters;
-        for(auto parameter : values)
+
+        int start_of_value = args.rfind("=");
+        while(start_of_value > -1)
         {
-            auto key_value = parameter.split("=", 1);
-            if (key_value.size() > 1)
-                new_parameters[key_value[0]] = key_value[1];
+            string value = args.substr(start_of_value + 1);
+            args = args.substr(0, start_of_value);
+            int start_of_key = args.rfind(" ");
+            string key = args.substr(start_of_key + 1);
+            args = args.substr(0, start_of_key);
+            new_parameters[key] = value;
+            
+            start_of_value = args.rfind("=");
         }
+        string reference_name = args;
         
         KeyValueTreeNode* ref = findRef(reference_name);
         if (ref)

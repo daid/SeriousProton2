@@ -2,6 +2,7 @@
 #define SP2_STRING_H
 
 #include <stdlib.h>
+#include <string.h>
 #include <string>
 #include <limits>
 #include <vector>
@@ -189,14 +190,16 @@ public:
     */
     int find(const string sub, int start=0) const
     {
+        if (start < 0)
+            start = length() + start;
+        if (start >= int(length()))
+            return -1;
         if (sub.length() + start > length() || sub.length() < 1)
             return -1;
-        for(unsigned int n=start; n<=length() - sub.length(); n++)
-        {
-            if(substr(n, n+sub.length()) == sub)
-                return n;
-        }
-        return -1;
+        const char* ptr = ::strstr(c_str() + start, sub.c_str());
+        if (!ptr)
+            return -1;
+        return int(ptr - c_str());
     }
 
     /*
