@@ -24,12 +24,12 @@ void BasicNodeRenderPass::render(RenderQueue& queue)
 {
     if (!cameras.empty())
     {
-        for(Camera* camera : cameras)
+        for(P<Camera> camera : cameras)
             renderScene(queue, camera->getScene(), camera);
     }
     else
     {
-        for(Scene* scene : Scene::all())
+        for(P<Scene> scene : Scene::all())
             renderScene(queue, scene, nullptr);
     }
 }
@@ -38,7 +38,7 @@ bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d pos
 {
     if (!cameras.empty())
     {
-        for(Camera* camera : cameras)
+        for(P<Camera> camera : cameras)
         {
             if (privateOnPointerDown(camera->getScene(), camera, button, position, id))
                 return true;
@@ -46,7 +46,7 @@ bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d pos
     }
     else
     {
-        for(Scene* scene : Scene::all())
+        for(P<Scene> scene : Scene::all())
         {
             if (privateOnPointerDown(scene, nullptr, button, position, id))
                 return true;
@@ -110,14 +110,14 @@ void BasicNodeRenderPass::renderScene(RenderQueue& queue, P<Scene> scene, P<Came
     if (scene->isEnabled() && camera)
     {
         queue.setCamera(camera);
-        recursiveNodeRender(queue, *scene->getRoot());
+        recursiveNodeRender(queue, scene->getRoot());
     }
 }
 
-void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, Node* node)
+void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, P<Node> node)
 {
     addNodeToRenderQueue(queue, node);
-    for(Node* child : node->getChildren())
+    for(P<Node> child : node->getChildren())
     {
         recursiveNodeRender(queue, child);
     }
@@ -130,7 +130,7 @@ Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector
     return Ray3d(Vector3d(transform * (project_inv * Vector3f(position.x, position.y, 0))), Vector3d(transform * (project_inv * Vector3f(position.x, position.y, -1))));
 }
 
-void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, Node* node)
+void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, P<Node>& node)
 {
     if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
         queue.add(node->getGlobalTransform(), node->render_data);

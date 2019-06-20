@@ -27,7 +27,7 @@ public:
     
     void addCamera(P<Camera> camera);
 protected:
-    virtual void addNodeToRenderQueue(RenderQueue& queue, Node* node);
+    virtual void addNodeToRenderQueue(RenderQueue& queue, P<Node>& node);
 
 private:
     PList<Camera> cameras;
@@ -37,7 +37,7 @@ private:
     
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
-    void recursiveNodeRender(RenderQueue& queue, Node* node);
+    void recursiveNodeRender(RenderQueue& queue, P<Node> node);
     Ray3d pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position);
 };
 

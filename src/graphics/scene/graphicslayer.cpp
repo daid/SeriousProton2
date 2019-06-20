@@ -14,8 +14,8 @@ SceneGraphicsLayer::SceneGraphicsLayer(int priority)
 
 SceneGraphicsLayer::~SceneGraphicsLayer()
 {
-    for(RenderPass* pass : render_passes)
-        delete pass;
+    for(P<RenderPass> pass : render_passes)
+        pass.destroy();
 }
 
 void SceneGraphicsLayer::render(RenderQueue& queue)
@@ -32,7 +32,7 @@ void SceneGraphicsLayer::render(RenderQueue& queue)
         glDepthFunc(GL_LEQUAL);
     });
     
-    for(RenderPass* pass : render_passes)
+    for(P<RenderPass> pass : render_passes)
         pass->render(queue);
 
     queue.add([]()
@@ -49,7 +49,7 @@ bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d posi
     position = screenToViewportPosition(position);
     if (position.x < -1.0 || position.y < -1.0 || position.x > 1.0 || position.y > 1.0)
         return false;
-    for(RenderPass* pass : render_passes)
+    for(P<RenderPass> pass : render_passes)
     {
         if (pass->onPointerDown(button, position, id))
         {

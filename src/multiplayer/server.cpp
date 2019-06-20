@@ -37,27 +37,27 @@ Server::~Server()
     delete new_connection_socket;
 }
 
-void Server::recursiveAddNewNodes(Node* node)
+void Server::recursiveAddNewNodes(P<Node> node)
 {
     if (node->multiplayer.enabled)
     {
         if (node->multiplayer.id == 0)
             addNewObject(node);
-        for(Node* child : node->getChildren())
+        for(P<Node> child : node->getChildren())
             recursiveAddNewNodes(child);
     }
 }
 
 void Server::onUpdate(float delta)
 {
-    for(Scene* scene : Scene::all())
+    for(P<Scene> scene : Scene::all())
     {
-        recursiveAddNewNodes(*scene->getRoot());
+        recursiveAddNewNodes(scene->getRoot());
     }
 
     //When creating new objects, we first send out packets for all objects to be created.
     //And then we send out variable value updates. This because else we could update a pointer variable to an object that does not exist yet.
-    for(Node* node : new_nodes)
+    for(P<Node> node : new_nodes)
     {
         io::DataBuffer packet;
         buildCreatePacket(packet, node);
@@ -66,7 +66,7 @@ void Server::onUpdate(float delta)
         
         addNode(node);
     }
-    for(Node* node : new_nodes)
+    for(P<Node> node : new_nodes)
     {
         if (node->multiplayer.replication_links.size() > 0)
         {
@@ -182,7 +182,7 @@ void Server::onUpdate(float delta)
     }
 }
 
-void Server::buildCreatePacket(io::DataBuffer& packet, Node* node)
+void Server::buildCreatePacket(io::DataBuffer& packet, P<Node> node)
 {
     auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*node));
     sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*node).name()).c_str());
@@ -206,7 +206,7 @@ void Server::onDeleted(uint64_t id)
     sendToAllConnectedClients(io::DataBuffer(PacketIDs::delete_object, id));
 }
 
-void Server::addNewObject(Node* node)
+void Server::addNewObject(P<Node> node)
 {
     node->multiplayer.id = next_object_id;
     next_object_id++;

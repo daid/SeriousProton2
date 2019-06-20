@@ -128,9 +128,8 @@ void Widget::setSize(Vector2d v)
 static void recursiveSetRenderType(P<Widget> widget, RenderData::Type type)
 {
     widget->render_data.type = type;
-    for(Node* child : widget->getChildren())
+    for(P<Widget> w : widget->getChildren())
     {
-        P<Widget> w = P<Node>(child);
         if (!w)
             continue;
         if (w->isVisible())
@@ -356,9 +355,8 @@ P<Widget> Widget::getWidgetWithID(const string& id)
 {
     if (this->id == id)
         return this;
-    for(Node* child : getChildren())
+    for(P<Widget> w : getChildren())
     {
-        P<Widget> w = P<Node>(child);
         if (!w)
             continue;
         w = w->getWidgetWithID(id);
@@ -407,9 +405,8 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
         {
             Vector2d content_size_min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
             Vector2d content_size_max(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-            for(Node* child : getChildren())
+            for(P<Widget> w : getChildren())
             {
-                P<Widget> w = P<Node>(child);
                 if (w && w->isVisible())
                 {
                     Vector2d p0 = w->getPosition2D();

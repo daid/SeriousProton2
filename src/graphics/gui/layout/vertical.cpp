@@ -9,9 +9,8 @@ SP_REGISTER_LAYOUT("vertical", VerticalLayout);
 void VerticalLayout::update(P<Widget> container, Rect2d rect)
 {
     float y = rect.position.y + rect.size.y;
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         float h = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;

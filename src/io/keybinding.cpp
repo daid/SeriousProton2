@@ -23,7 +23,7 @@ Keybinding::Keybinding(string name)
     fixed_down_event = false;
     fixed_up_event = false;
 
-    for(Keybinding* other : keybindings)
+    for(P<Keybinding> other : keybindings)
         sp2assert(other->name != name, "Duplicate keybinding name");
     keybindings.add(this);
 }
@@ -242,7 +242,7 @@ void Keybinding::loadKeybindings(const string& filename)
         return;
     }
 
-    for(Keybinding* keybinding : keybindings)
+    for(P<Keybinding> keybinding : keybindings)
     {
         const json11::Json& entry = json[keybinding->name];
         if (!entry.is_object())
@@ -270,7 +270,7 @@ void Keybinding::loadKeybindings(const string& filename)
 void Keybinding::saveKeybindings(const string& filename)
 {
     json11::Json::object obj;
-    for(Keybinding* keybinding : keybindings)
+    for(P<Keybinding> keybinding : keybindings)
     {
         json11::Json::object data;
         json11::Json::array keys;
@@ -314,13 +314,13 @@ void Keybinding::postFixedUpdate()
 
 void Keybinding::allPostUpdate()
 {
-    for(Keybinding* key : keybindings)
+    for(P<Keybinding> key : keybindings)
         key->postUpdate();
 }
 
 void Keybinding::allPostFixedUpdate()
 {
-    for(Keybinding* key : keybindings)
+    for(P<Keybinding> key : keybindings)
         key->postFixedUpdate();
 }
 
@@ -461,7 +461,7 @@ void Keybinding::handleEvent(const SDL_Event& event)
         if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
         {
             //Focus lost, release all keys.
-            for(Keybinding* key : keybindings)
+            for(P<Keybinding> key : keybindings)
                 if (key->key_number.size() > 0)
                     key->setValue(0.0);
         }
@@ -479,7 +479,7 @@ void Keybinding::updateKeys(int key_number, float value)
         rebinding_key = nullptr;
     }
 
-    for(Keybinding* key : keybindings)
+    for(P<Keybinding> key : keybindings)
         for(int key_nr : key->key_number)
             if (key_nr == key_number)
                 key->setValue(value);

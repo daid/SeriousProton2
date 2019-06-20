@@ -42,8 +42,8 @@ Node::~Node()
 {
     if (collision_body)
         scene->collision_backend->destroyBody(collision_body);
-    for(Node* child : children)
-        delete child;
+    for(P<Node> child : children)
+        child.destroy();
 }
 
 P<Node> Node::getParent()
@@ -75,7 +75,7 @@ void Node::setParent(P<Node> new_parent)
     if (new_parent->scene != scene)
     {
         scene = new_parent->scene;
-        for(Node* child : children)
+        for(P<Node> child : children)
         {
             sp2assert(child->children.size() == 0, "Implementation incomplete...");
             child->scene = new_parent->scene;

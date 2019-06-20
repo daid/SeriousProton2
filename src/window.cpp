@@ -269,7 +269,7 @@ void Window::render()
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     });
-    for(GraphicsLayer* layer : graphics_layers)
+    for(P<GraphicsLayer> layer : graphics_layers)
     {
         if (layer->isEnabled())
         {
@@ -456,7 +456,7 @@ Vector2d Window::screenToGLPosition(int x, int y)
 
 bool Window::anyWindowOpen()
 {
-    for(Window* window : windows)
+    for(P<Window> window : windows)
     {
         if (window->render_window)
         {

@@ -57,7 +57,7 @@ string ResourceStream::readAll()
 
 ResourceStreamPtr ResourceProvider::get(const string filename)
 {
-    for(ResourceProvider* rp : providers)
+    for(P<ResourceProvider> rp : providers)
     {
         ResourceStreamPtr stream = rp->getStream(filename);
         if (stream)
@@ -68,7 +68,7 @@ ResourceStreamPtr ResourceProvider::get(const string filename)
 
 std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const string filename)
 {
-    for(ResourceProvider* rp : providers)
+    for(P<ResourceProvider> rp : providers)
     {
         std::chrono::system_clock::time_point time = rp->getResourceModifyTime(filename);
         if (time != std::chrono::system_clock::time_point())
@@ -80,7 +80,7 @@ std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const stri
 std::vector<string> ResourceProvider::find(string search_pattern)
 {
     std::vector<string> found_files;
-    for(ResourceProvider* rp : providers)
+    for(P<ResourceProvider> rp : providers)
     {
         std::vector<string> res = rp->findResources(search_pattern);
         found_files.insert(found_files.end(), res.begin(), res.end());

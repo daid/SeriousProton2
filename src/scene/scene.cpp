@@ -98,7 +98,7 @@ void Scene::updateNode(float delta, P<Node> node)
         node->animation->update(delta, node->render_data);
     if (node)
     {
-        for(Node* child : node->children)
+        for(P<Node> child : node->children)
             updateNode(delta, child);
     }
 }
@@ -108,7 +108,7 @@ void Scene::fixedUpdateNode(P<Node> node)
     node->onFixedUpdate();
     if (node)
     {
-        for(Node* child : node->children)
+        for(P<Node> child : node->children)
             fixedUpdateNode(child);
     }
 }

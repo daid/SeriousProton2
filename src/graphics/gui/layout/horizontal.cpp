@@ -9,9 +9,8 @@ SP_REGISTER_LAYOUT("horizontal", HorizontalLayout);
 void HorizontalLayout::update(P<Widget> container, Rect2d rect)
 {
     float x = rect.position.x;
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         float width = w->layout.size.x + w->layout.margin.left + w->layout.margin.right;

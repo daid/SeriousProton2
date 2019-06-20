@@ -11,9 +11,8 @@ void VerticalFlowLayout::update(P<Widget> container, Rect2d rect)
     float y = rect.position.y + rect.size.y;
     double x0 = rect.position.x;
     double x1 = rect.position.x;
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         float height = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;

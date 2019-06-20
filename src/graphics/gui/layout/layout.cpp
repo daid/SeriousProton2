@@ -9,9 +9,8 @@ SP_REGISTER_LAYOUT("default", Layout);
 
 void Layout::update(P<Widget> container, Rect2d rect)
 {
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         basicLayout(rect, *w);

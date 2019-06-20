@@ -116,6 +116,7 @@ void TextField::onTextInput(const string& text)
 
 void TextField::onTextInput(TextInputEvent e)
 {
+    //SP2TODO: Handle proper unicode/utf-8 when the font does this as well.
     switch(e)
     {
     case TextInputEvent::Left: if (selection_start > 0) selection_start -= 1; selection_end = selection_start; break;

@@ -193,7 +193,7 @@ void Engine::update(float time_delta)
     while(fixed_update_accumulator > fixed_update_delta)
     {
         fixed_update_accumulator -= fixed_update_delta;
-        for(Scene* scene : Scene::all())
+        for(P<Scene> scene : Scene::all())
         {
             if (scene->isEnabled())
             {
@@ -203,25 +203,25 @@ void Engine::update(float time_delta)
         io::Keybinding::allPostFixedUpdate();
     }
     in_fixed_update = false;
-    for(Scene* scene : Scene::all())
+    for(P<Scene> scene : Scene::all())
     {
         if (scene->isEnabled())
             scene->postFixedUpdate(fixed_update_accumulator);
     }
     timing.fixed_update = timing_clock.restart();
-    for(Scene* scene : Scene::all())
+    for(P<Scene> scene : Scene::all())
     {
         if (scene->isEnabled())
             scene->update(time_delta);
     }
-    for(Updatable* updatable : Updatable::updatables)
+    for(P<Updatable> updatable : Updatable::updatables)
     {
         updatable->onUpdate(time_delta);
     }
     io::Keybinding::allPostUpdate();
     timing.dynamic_update = timing_clock.restart();
 
-    for(Window* window : Window::windows)
+    for(P<Window> window : Window::windows)
     {
         if (window->render_window)
             window->render();
@@ -252,7 +252,7 @@ bool Engine::getPause()
 
 void Engine::shutdown()
 {
-    for(Window* window : Window::windows)
+    for(P<Window> window : Window::windows)
         window->close();
 }
 

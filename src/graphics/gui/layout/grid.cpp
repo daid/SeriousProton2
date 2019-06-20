@@ -9,9 +9,8 @@ SP_REGISTER_LAYOUT("grid", GridLayout);
 void GridLayout::update(P<Widget> container, Rect2d rect)
 {
     Vector2i grid_size;
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         Vector2i position = Vector2i(w->layout.position);
@@ -27,9 +26,8 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
     for(int n=0; n<grid_size.y; n++)
         row_height[n] = 0.0;
 
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         Vector2i position = Vector2i(w->layout.position);
@@ -63,9 +61,8 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
             row_y[n] += row_height[m];
     }
     
-    for(Node* n : container->getChildren())
+    for(P<Widget> w : container->getChildren())
     {
-        P<Widget> w = P<Node>(n);
         if (!w || !w->isVisible())
             continue;
         Vector2i position = Vector2i(w->layout.position);

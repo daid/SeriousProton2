@@ -255,7 +255,7 @@ public:
         {
         }
     
-        T* operator*()
+        P<T> operator*()
         {
             return static_cast<T*>(entry->object);
         }
@@ -274,7 +274,7 @@ public:
         {
         }
     
-        T* operator*()
+        P<T> operator*()
         {
             return static_cast<T*>(entry->object);
         }

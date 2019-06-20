@@ -61,13 +61,13 @@ void CollisionRenderPass::render(RenderQueue& queue)
     }
     else
     {
-        for(Scene* scene : Scene::all())
+        for(P<Scene> scene : Scene::all())
             renderScene(queue, scene);
     }
     queue.add([]() { glEnable(GL_DEPTH_TEST); });
 }
 
-void CollisionRenderPass::renderScene(RenderQueue& queue, Scene* scene)
+void CollisionRenderPass::renderScene(RenderQueue& queue, P<Scene> scene)
 {
     P<Camera> camera = scene->getCamera();
     if (specific_camera)

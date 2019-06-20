@@ -24,7 +24,7 @@ private:
     bool enabled_toggled;
     P<Camera> specific_camera;
     
-    void renderScene(RenderQueue& queue, Scene* scene);
+    void renderScene(RenderQueue& queue, P<Scene> scene);
 
     std::shared_ptr<MeshData> mesh;
 };

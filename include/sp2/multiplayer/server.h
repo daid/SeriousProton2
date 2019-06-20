@@ -49,14 +49,14 @@ private:
     io::network::TcpListener new_connection_listener;
     io::network::TcpSocket* new_connection_socket;
     
-    void recursiveAddNewNodes(Node* node);
+    void recursiveAddNewNodes(P<Node> node);
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
-    void addNewObject(Node* node);
+    void addNewObject(P<Node> node);
     
     virtual void onUpdate(float delta) override;
     virtual void onDeleted(uint64_t id) override;
     
-    void buildCreatePacket(io::DataBuffer& packet, Node* node);
+    void buildCreatePacket(io::DataBuffer& packet, P<Node> node);
     void sendToAllConnectedClients(const io::DataBuffer& packet);
 
     friend class Node::Multiplayer;
