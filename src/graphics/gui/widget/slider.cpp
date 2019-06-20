@@ -37,6 +37,21 @@ void Slider::setAttribute(const string& key, const string& value)
         max_value = stringutil::convert::toFloat(value);
         markRenderDataOutdated();
     }
+    else if (key == "range")
+    {
+        if (value.find(",") != -1)
+        {
+            Vector2f tmp = stringutil::convert::toVector2f(value);
+            min_value = tmp.x;
+            max_value = tmp.y;
+        }
+        else
+        {
+            min_value = 0.0;
+            max_value = stringutil::convert::toFloat(value);
+        }
+        markRenderDataOutdated();
+    }
     else if (key == "value")
     {
         this->value = stringutil::convert::toFloat(value);
