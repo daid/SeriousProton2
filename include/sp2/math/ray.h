@@ -12,6 +12,37 @@ public:
     Ray() {}
     Ray(T start, T end) : start(start), end(end) {}
     
+    Ray<T> shortestDistance(const Ray<T>& other, bool clamp=true) const
+    {
+        T v13 = start - other.start;
+        T v21 = end - start;
+        T v43 = other.end - other.start;
+        
+        auto d1343 = v13.dot(v43);
+        auto d4321 = v43.dot(v21);
+        auto d1321 = v13.dot(v21);
+        auto d4343 = v43.dot(v43);
+        auto d2121 = v21.dot(v21);
+        
+        auto denom = d2121 * d4343 - d4321 * d4321;
+        auto numer = d1343 * d4321 - d1321 * d4343;
+
+        //TODO: Check for div/zero
+        auto mua = numer / denom;
+        //TODO: Check for div/zero
+        auto mub = (d1343 + d4321 * mua) / d4343;
+        
+        if (clamp)
+        {
+            if (mua < 0) mua = 0;
+            if (mua > 1) mua = 1;
+            if (mub < 0) mub = 0;
+            if (mub > 1) mub = 1;
+        }
+        
+        return Ray<T>(start + (end - start) * mua, other.start + (other.end - other.start) * mub);
+    }
+    
     T start;
     T end;
 };
