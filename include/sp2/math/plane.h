@@ -11,6 +11,7 @@ template<typename T> class Plane3
 public:
     Plane3() {}
     Plane3(Vector3<T> normal, T distance) : normal(normal), distance(distance) {}
+    Plane3(Vector3<T> position, Vector3<T> normal) : normal(normal), distance(position.dot(normal)) {}
     
     Vector3<T> intersect(Ray<Vector3<T>> ray)
     {

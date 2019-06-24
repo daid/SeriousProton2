@@ -12,12 +12,12 @@ public:
     Ray() {}
     Ray(T start, T end) : start(start), end(end) {}
     
-    T closestOnRayTo(const T& point, bool clamp) const
+    T closestOnRayTo(const T& point, bool clamp=true) const
     {
         T start_to_point = point - start;
         T ray_vector = end - start;
         
-        float distance_normalized = start_to_point.dot(ray_vector) / ray_vector.dot(ray_vector);
+        auto distance_normalized = start_to_point.dot(ray_vector) / ray_vector.dot(ray_vector);
         if (clamp)
         {
             if (distance_normalized < 0) return start;
