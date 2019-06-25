@@ -35,6 +35,7 @@ Keybinding::Keybinding(string name, string default_key)
 }
 
 Keybinding::Keybinding(string name, const std::initializer_list<const string>& default_keys)
+: Keybinding(name)
 {
     for(const string& key : default_keys)
         addKey(key);
