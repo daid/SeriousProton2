@@ -34,11 +34,10 @@ Keybinding::Keybinding(string name, string default_key)
     addKey(default_key);
 }
 
-Keybinding::Keybinding(string name, string default_key, string alternative_default_key)
-: Keybinding(name)
+Keybinding::Keybinding(string name, const std::initializer_list<const string>& default_keys)
 {
-    addKey(default_key);
-    addKey(alternative_default_key);
+    for(const string& key : default_keys)
+        addKey(key);
 }
 
 void Keybinding::setKey(string key)

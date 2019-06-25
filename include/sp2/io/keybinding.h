@@ -18,7 +18,7 @@ class Keybinding : public AutoPointerObject
 public:
     Keybinding(string name);
     Keybinding(string name, string default_key);
-    Keybinding(string name, string default_key, string alternative_default_key);
+    Keybinding(string name, const std::initializer_list<const string>& default_keys);
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
