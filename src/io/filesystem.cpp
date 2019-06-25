@@ -45,7 +45,7 @@ bool makeDirectory(const sp::string& path)
     if (n > 0)
     {
         sp::string base = path.substr(0, n);
-        if (!makeDirectory(path))
+        if (!makeDirectory(base))
             return false;
     }
 #ifdef __WIN32__
