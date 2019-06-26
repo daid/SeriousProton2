@@ -3,6 +3,7 @@
 #include <sp2/graphics/textureAtlas.h>
 #include <sp2/graphics/opengl.h>
 #include <sp2/stringutil/convert.h>
+#include <sp2/stringutil/utf8.h>
 #include <sp2/assert.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -372,30 +373,9 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
 {
     std::unordered_map<int, GlyphInfo>& known_glyphs = loaded_glyphs[pixel_size];
 
-    int unicode = *str;
-    int consumed_characters = 1;
-    if ((unicode & 0xe0) == 0xc0)
-    {
-        unicode = ((unicode & 0x1f) << 6) | (str[1] & 0x3f);
-        consumed_characters = 2;
-    }
-    else if ((unicode & 0xf0) == 0xe0)
-    {
-        unicode = ((unicode & 0x0f) << 12) | ((str[1] & 0x3f) << 6) | (str[2] & 0x3f);
-        consumed_characters = 3;
-    }
-    else if ((unicode & 0xf8) == 0xf0)
-    {
-        unicode = ((unicode & 0x0f) << 18) | ((str[1] & 0x3f) << 12) | ((str[2] & 0x3f) << 6) | (str[3] & 0x3f);
-        consumed_characters = 4;
-    }
-    else if (unicode & 0x80)
-    {
-        unicode = '?';
-        LOG(Warning, "Malform utf-8 string.");
-    }
+    int consumed_characters;
+    int unicode = stringutil::utf8::decodeSingle(str, &consumed_characters);
 
-    
     if (known_glyphs.find(unicode) == known_glyphs.end())
     {
         FT_Face face = FT_Face(ft_face);
