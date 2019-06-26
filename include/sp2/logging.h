@@ -1,6 +1,8 @@
 #ifndef SP2_LOGGING_H
 #define SP2_LOGGING_H
 
+#include <sp2/string.h>
+
 //We include iostream here to ensure std::cerr is initialized, else the logging functions can crash in constructors.
 #include <iostream>
 
@@ -32,9 +34,15 @@ public:
         logArg(args...);
         logEnd();
     }
+    
+    static void setOutputFile(const string& filename);
+    static void setOutputStream(std::ostream* stream);
+    static void setFormat(Format format);
+    static void setLevel(Level level);
 private:
     static std::ostream* stream;
     static Format format;
+    static Level level;
 
     template<typename A1> static inline void logArg(const A1& a)
     {
