@@ -19,6 +19,7 @@ public:
     /** Bind a C function to lua. Use with care, as you need to manage the lua stack yourself */
     void setGlobal(string name, lua_CFunction function);
     /** Bind an object to this lua environment. */
+    void setGlobal(string name, ScriptBindingObject* ptr);
     void setGlobal(string name, P<ScriptBindingObject> ptr);
     void setGlobal(string name, bool value);
     void setGlobal(string name, int value);

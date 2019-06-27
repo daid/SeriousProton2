@@ -1,4 +1,7 @@
 #include <sp2/graphics/fontManager.h>
+#include <sp2/graphics/font/bitmap.h>
+#include <sp2/graphics/font/freetype.h>
+
 
 namespace sp {
 

@@ -54,7 +54,7 @@ void Environment::setGlobal(string name, lua_CFunction function)
     lua_pop(global_lua_state, 1);
 }
 
-void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
+void Environment::setGlobal(string name, ScriptBindingObject* ptr)
 {
     //Get the environment table from the registry.
     lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
@@ -65,6 +65,11 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
     
     //Pop the table
     lua_pop(global_lua_state, 1);
+}
+
+void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
+{
+    setGlobal(name, *ptr);
 }
 
 void Environment::setGlobal(string name, bool value)
