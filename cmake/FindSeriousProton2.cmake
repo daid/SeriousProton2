@@ -21,7 +21,8 @@ set(FIND_SP2_PATHS
     /opt)
 
 find_path(SP2_DIR SeriousProton2.include.cmake
-          PATHS ${FIND_SP2_PATHS})
+          PATHS ${FIND_SP2_PATHS}
+          NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
 if(NOT SP2_DIR)
     message(FATAL_ERROR "Failed to find SeriousProton2, set SP2_ROOT to root directory of SeriousProton2")
 endif()
