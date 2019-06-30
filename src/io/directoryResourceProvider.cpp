@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <SDL.h>
 
 namespace sp {
 namespace io {
@@ -15,7 +16,7 @@ private:
 public:
     FileResourceStream(string filename)
     {
-        rw_ops = SDL_RWFromFile(filename, "rb");
+        rw_ops = SDL_RWFromFile(filename.c_str(), "rb");
     }
     virtual ~FileResourceStream()
     {
