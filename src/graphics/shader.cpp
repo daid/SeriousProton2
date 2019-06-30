@@ -24,8 +24,13 @@ Shader* Shader::get(string name)
     if (stream)
     {
         LOG(Info, "Loading shader:", name);
+#ifdef ANDROID
+        string vertex_shader = "#version 101\n";
+        string fragment_shader = "#version 101\nprecision mediump float;\n";
+#else
         string vertex_shader = "#version 110\n";
         string fragment_shader = "#version 110\n";
+#endif
         int type = -1;
         while(stream->tell() != stream->getSize())
         {

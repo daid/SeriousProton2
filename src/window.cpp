@@ -170,7 +170,10 @@ void Window::createRenderWindow()
         display_mode.w = 640;
         display_mode.h = 480;
     }
-
+#ifdef ANDROID
+    fullscreen = true;
+#endif
+    
     float window_width = display_mode.w;
     float window_height = display_mode.h;
     if (!fullscreen)
@@ -247,6 +250,10 @@ void Window::createRenderWindow()
         LOG(Info, "OpenGL driver vendor:", glGetString(GL_VENDOR));
         LOG(Info, "OpenGL driver renderer:", glGetString(GL_RENDERER));
         LOG(Info, "OpenGL driver version:", glGetString(GL_VERSION));
+        
+        int w, h;
+        SDL_GetWindowSize(render_window, &w, &h);
+        LOG(Info, "Window size:", w, h);
     }
 
     //Enable VSync.
@@ -411,6 +418,9 @@ void Window::handleEvent(const SDL_Event& event)
             close();
             break;
         }
+        break;
+    case SDL_QUIT:
+        close();
         break;
     default:
         break;

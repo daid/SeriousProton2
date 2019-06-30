@@ -3,13 +3,23 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef ANDROID
+#include <android/log.h>
+#endif//ANDROID
+
 namespace sp {
 
-static std::ofstream log_file_stream;
+#ifdef ANDROID
+static std::stringstream log_string_stream;
+std::ostream* Logger::stream = &log_string_stream;
+#else
 std::ostream* Logger::stream = &std::cerr;
+#endif
 Logger::Format Logger::format = Logger::Format::Basic;
 Logger::Level Logger::level = Logger::Level::Debug;
 
+
+static std::ofstream log_file_stream;
 
 void Logger::setOutputFile(const string& filename)
 {
@@ -76,7 +86,12 @@ void Logger::logStart(Level level, const char* filename, const char* function, i
 
 void Logger::logEnd()
 {
+#ifdef ANDROID
+    __android_log_write(ANDROID_LOG_INFO, "SP2", log_string_stream.str().c_str());
+    log_string_stream.str("");
+#else
     *stream << "\n";
+#endif
 }
 
 };//namespace sp

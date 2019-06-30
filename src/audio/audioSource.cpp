@@ -57,6 +57,9 @@ void audioCallback(void* userdata, uint8_t* stream, int length)
 
 void AudioSource::startAudioSystem()
 {
+#ifdef ANDROID
+#warning TODO, Android has no audio support at the moment, as it seems to need different format support
+#else
     SDL_AudioSpec want, have;
 
     memset(&want, 0, sizeof(want));
@@ -66,10 +69,14 @@ void AudioSource::startAudioSystem()
     want.samples = 1024;
     want.callback = audioCallback;
 
-    SDL_OpenAudio(&want, &have);
+    int result = SDL_OpenAudio(&want, &have);
+    sp2assert(result == 0, "SDL_OpenAudio failed");
+    LOG(Info, "Opened audio:", have.format, have.freq, have.channels);
     SDL_PauseAudio(0);
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
     sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");
+    sp2assert(have.channels == 2, "Needs 2 channel audio output.");
+#endif
 }
 
 void AudioSource::onAudioCallback(float* stream, int sample_count)
