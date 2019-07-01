@@ -32,6 +32,17 @@ static void requestShutdownSignal(int signal)
     Engine::getInstance()->shutdown();
 }
 
+#ifdef ANDROID
+#undef main
+extern "C" int main(int argc, char *argv[]);
+extern "C" DECLSPEC int SDL_main(int argc, char *argv[])
+{
+    //TODO: SDL2 on Android calls the SDL_main function multiple times.
+    //      Handle this properly.
+    return main(argc, argv);
+}
+#endif
+
 Engine::Engine()
 {
     sp2assert(!engine, "SP2 does not support more then 1 engine.");
