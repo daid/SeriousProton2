@@ -250,10 +250,6 @@ void Window::createRenderWindow()
         LOG(Info, "OpenGL driver vendor:", glGetString(GL_VENDOR));
         LOG(Info, "OpenGL driver renderer:", glGetString(GL_RENDERER));
         LOG(Info, "OpenGL driver version:", glGetString(GL_VERSION));
-        
-        int w, h;
-        SDL_GetWindowSize(render_window, &w, &h);
-        LOG(Info, "Window size:", w, h);
     }
 
     //Enable VSync.
@@ -263,7 +259,15 @@ void Window::createRenderWindow()
 void Window::render()
 {
     Vector2i window_size;
+#ifdef ANDROID
+    //Reported window size seems wrong on Android, so we grab the glViewport, which should hold the full render size.
+    int android_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, android_viewport);
+    window_size.x = android_viewport[2];
+    window_size.y = android_viewport[3];
+#else
     SDL_GetWindowSize(render_window, &window_size.x, &window_size.y);
+#endif
 
     graphics_layers.sort([](const P<GraphicsLayer>& a, const P<GraphicsLayer>& b){
         return a->priority - b->priority;
@@ -326,6 +330,12 @@ void Window::render()
         rd.texture = cursor_texture;
         queue.add(Matrix4x4f::translate(position.x, position.y, 0), rd);
     }
+#ifdef ANDROID
+    queue.add([window_size]()
+    {
+        glViewport(0, 0, window_size.x, window_size.y);
+    });
+#endif
     queue.add([this]()
     {
         SDL_GL_SwapWindow(render_window);

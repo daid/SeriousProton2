@@ -318,11 +318,9 @@ void traceOpenGLCall(const char* function_name, const char* source_file, const c
 {
     int error = glGetError();
 #ifdef ANDROID
+    LOG(Debug, "GL_TRACE", source_file, source_line_number, source_function, function_name, parameters);
     if (error)
-    {
-        LOG(Debug, "GL_TRACE", source_file, source_line_number, source_function, function_name, parameters);
         LOG(Error, "GL_TRACE ERROR", error);
-    }
 #else
     static FILE* f = nullptr;
     if (!f)
