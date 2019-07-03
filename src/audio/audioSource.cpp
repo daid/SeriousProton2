@@ -9,6 +9,7 @@ namespace sp {
 namespace audio {
 
 AudioSource* AudioSource::source_list_start;
+static SDL_AudioDeviceID sdl_audio_device = 0;
 
 AudioSource::~AudioSource()
 {
@@ -19,27 +20,31 @@ void AudioSource::start()
 {
     if (active)
         return;
-    SDL_LockAudio();
+    SDL_LockAudioDevice(sdl_audio_device);
     active = true;
     next = source_list_start;
     if (next)
         next->previous = this;
+    else
+        SDL_PauseAudioDevice(sdl_audio_device, 0);
     previous = nullptr;
     source_list_start = this;
-    SDL_UnlockAudio();
+    SDL_UnlockAudioDevice(sdl_audio_device);
 }
 
 void AudioSource::stop()
 {
     if (!active)
         return;
-    SDL_LockAudio();
+    SDL_LockAudioDevice(sdl_audio_device);
     active = false;
     if (source_list_start == this)
     {
         source_list_start = next;
         if (source_list_start)
             source_list_start->previous = nullptr;
+        else
+            SDL_PauseAudioDevice(sdl_audio_device, 1);
     }
     else
     {
@@ -47,7 +52,7 @@ void AudioSource::stop()
     }
     if (next)
         next->previous = previous;
-    SDL_UnlockAudio();
+    SDL_UnlockAudioDevice(sdl_audio_device);
 }
 
 void audioCallback(void* userdata, uint8_t* stream, int length)
@@ -57,9 +62,6 @@ void audioCallback(void* userdata, uint8_t* stream, int length)
 
 void AudioSource::startAudioSystem()
 {
-#ifdef ANDROID
-#warning TODO, Android has no audio support at the moment, as it seems to need different format support
-#else
     SDL_AudioSpec want, have;
 
     memset(&want, 0, sizeof(want));
@@ -69,14 +71,12 @@ void AudioSource::startAudioSystem()
     want.samples = 1024;
     want.callback = audioCallback;
 
-    int result = SDL_OpenAudio(&want, &have);
-    sp2assert(result == 0, "SDL_OpenAudio failed");
-    LOG(Info, "Opened audio:", have.format, have.freq, have.channels);
-    SDL_PauseAudio(0);
+    sdl_audio_device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
+    sp2assert(sdl_audio_device != 0, "SDL_OpenAudio failed");
+    LOG(Info, "Opened audio:", have.format, have.freq, int(have.channels));
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
     sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");
     sp2assert(have.channels == 2, "Needs 2 channel audio output.");
-#endif
 }
 
 void AudioSource::onAudioCallback(float* stream, int sample_count)

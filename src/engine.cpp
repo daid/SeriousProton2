@@ -37,8 +37,8 @@ static void requestShutdownSignal(int signal)
 extern "C" int main(int argc, char *argv[]);
 extern "C" DECLSPEC int SDL_main(int argc, char *argv[])
 {
-    //TODO: SDL2 on Android calls the SDL_main function multiple times.
-    //      Handle this properly.
+    if (Engine::getInstance())
+        return 0;
     return main(argc, argv);
 }
 #endif
