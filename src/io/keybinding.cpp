@@ -47,10 +47,11 @@ void Keybinding::setKey(string key)
     addKey(key);
 }
 
-void Keybinding::setKeys(string key1, string key2)
+void Keybinding::setKeys(const std::initializer_list<const string>& keys)
 {
-    setKey(key1);
-    addKey(key2);
+    key_number.clear();
+    for(const string& key : keys)
+        addKey(key);
 }
 
 void Keybinding::addKey(string key)

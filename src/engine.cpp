@@ -60,6 +60,9 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
+    //This forces Android properly into landscape mode, however, we still have our screen size bug,
+    //of which we use the glViewport hack, which no longer works with just this hint, so we set it in the manifest as well.
+    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeRight");
     SDL_Init(SDL_INIT_EVERYTHING);
     signal(SIGTERM, requestShutdownSignal);
     atexit(SDL_Quit);

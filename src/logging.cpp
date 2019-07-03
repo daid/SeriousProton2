@@ -10,6 +10,7 @@
 namespace sp {
 
 #ifdef ANDROID
+//TOFIX: Logging done before SDL_main is called will crash android.
 static std::stringstream log_string_stream;
 std::ostream* Logger::stream = &log_string_stream;
 #else
