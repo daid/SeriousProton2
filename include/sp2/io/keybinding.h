@@ -43,6 +43,8 @@ public:
     
     static void loadKeybindings(const string& filename);
     static void saveKeybindings(const string& filename);
+    
+    static void setVirtualKey(int index, float value);
 private:
     string name;
     string label;
@@ -54,7 +56,7 @@ private:
     bool up_event;
     bool fixed_down_event;
     bool fixed_up_event;
-
+ 
     void setValue(float value);
     void postUpdate();
     void postFixedUpdate();
@@ -78,6 +80,7 @@ private:
     static constexpr int game_controller_button_mask = (0x07 << 16);
     static constexpr int game_controller_axis_mask = (0x08 << 16);
     static constexpr int game_controller_axis_inverted_mask = (0x09 << 16);
+    static constexpr int virtual_mask = (0x0f << 16);
     
     friend class sp::Engine;
 };

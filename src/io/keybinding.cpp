@@ -136,6 +136,12 @@ void Keybinding::addKey(string key)
         else LOG(Warning, "Unknown mouse wheel binding:", key);
         return;
     }
+    if (key.startswith("virtual:"))
+    {
+        int index = stringutil::convert::toInt(key.substr(8));
+        key_number.push_back(virtual_mask | index);
+        return;
+    }
 
     SDL_Keycode code = SDL_GetKeyFromName(key.c_str());
     if (code != SDLK_UNKNOWN)
@@ -185,6 +191,8 @@ string Keybinding::getKey(int index)
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":axis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case game_controller_axis_inverted_mask:
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+        case virtual_mask:
+            return "virtual:" + string(key & 0xff);
         }
     }
     return "Unknown";
@@ -283,6 +291,13 @@ void Keybinding::saveKeybindings(const string& filename)
 
     std::ofstream file(filename);
     file << json.dump();
+}
+
+void Keybinding::setVirtualKey(int index, float value)
+{
+    sp2assert(index >= 0 && index <= 255, "Virtual key indexes need to be in the range 0-255");
+    
+    updateKeys(virtual_mask | index, value);
 }
 
 void Keybinding::setValue(float value)
