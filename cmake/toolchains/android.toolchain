@@ -1,0 +1,76 @@
+# Android APK build toolchain file.
+# This toolchain file differs from most others and should not be seen as an example.
+# This is because the android NDK has a perfectly usable toolchain file already,
+# and thus we use that.
+# This file just facilitates in setting up the SDK/NDK if we do not have it yet.
+
+
+# We need the following things:
+# - Android SDK, with:
+#   - build-tools (aapt, dx, zipalign)
+#   - platform/android-{target_api} (for android.jar)
+# - java JDK with:
+#   - javac compiler for java 8 
+#   - jarsigner
+# - SDL2 build with the toolchain
+# - a signing key
+# This toolchain file is designed to setup everything if it's not supplied by the user, with the exception of the java JDK
+
+set(ANDROID_SDK_PATH "" CACHE PATH "Location of the android SDK installation.")
+set(ANDROID_API_MIN "16" CACHE STRING "Minimal API version for android build, any device below this version is not supported.")
+set(ANDROID_API_TARGET "26" CACHE STRING "Targeting API version for android, any features above this version cannot be used.")
+
+
+#################################################################################
+
+# Configuration options for the NDK CMake toolchain file.
+set(ANDROID_ABI "armeabi-v7a")
+set(ANDROID_PLATFORM "android-${ANDROID_API_MIN}")
+
+find_package(Java 1.8 COMPONENTS Development JarSigner REQUIRED)
+if(ANDROID_SDK_PATH STREQUAL "")
+    set(ANDROID_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}/android/sdk/")
+    set(ANDROID_BUILD_TOOLS_VERSION "29.0.0")
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/tools/bin/sdkmanager")
+        file(DOWNLOAD https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip "${ANDROID_SDK_PATH}/sdk-tools.zip" SHOW_PROGRESS EXPECTED_HASH SHA256=92ffee5a1d98d856634e8b71132e8a95d96c83a63fde1099be3d86df3106def9)
+        execute_process(COMMAND unzip sdk-tools.zip WORKING_DIRECTORY "${ANDROID_SDK_PATH}")
+    endif()
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/platforms/android-${ANDROID_API_TARGET}")
+        execute_process(COMMAND "${ANDROID_SDK_PATH}/tools/bin/sdkmanager" "platforms;android-${ANDROID_API_TARGET}")
+    endif()
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}")
+        execute_process(COMMAND "${ANDROID_SDK_PATH}/tools/bin/sdkmanager" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}")
+    endif()
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/ndk-bundle")
+        execute_process(COMMAND "${ANDROID_SDK_PATH}/tools/bin/sdkmanager" "ndk-bundle")
+    endif()
+else()
+    file(GLOB ANDROID_BUILD_TOOLS_VERSION LIST_DIRECTORIES true "${ANDROID_SDK_PATH}/build-tools/*.*.*")
+    get_filename_component(ANDROID_BUILD_TOOLS_VERSION "${ANDROID_BUILD_TOOLS_VERSION}" NAME)
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/platforms/android-${ANDROID_API_TARGET}")
+        message(FATAL_ERROR "Missing android platform in supplied android SDK: android-${ANDROID_API_TARGET}")
+    endif()
+endif()
+
+set(SDL_SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source")
+set(SDL_INSTALL_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/install")
+if(NOT EXISTS "${SDL_SRC_PATH}")
+    file(DOWNLOAD https://www.libsdl.org/release/SDL2-2.0.9.zip "${CMAKE_CURRENT_LIST_DIR}/android/SDL/SDL2_src.zip" SHOW_PROGRESS)
+    execute_process(COMMAND unzip SDL2_src.zip WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL")
+    file(RENAME "${CMAKE_CURRENT_LIST_DIR}/android/SDL/SDL2-2.0.9" "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source")
+    execute_process(COMMAND patch -p1 -i "${SP2_DIR}/android/sdl2.patch" WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source")
+endif()
+if(NOT EXISTS "${SDL_INSTALL_PATH}")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/build")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}" "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source" "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake" "-DANDROID_ABI=${ANDROID_ABI}" "-DANDROID_PLATFORM=${ANDROID_PLATFORM}" "-DCMAKE_INSTALL_PREFIX=${SDL_INSTALL_PATH}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/build")
+    execute_process(
+        COMMAND "${CMAKE_MAKE_PROGRAM}" "install"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/build")
+endif()
+set(SDL2_DIR "${SDL_INSTALL_PATH}/lib/cmake/SDL2")
+
+include("${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake")
+# We need to add a small thing here, or else the compiler checks fail, as those run with less configuration options enabled.
+list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES ANDROID_SDK_PATH)
