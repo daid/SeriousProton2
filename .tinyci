@@ -25,3 +25,9 @@ directory = _build_pi
 commands =
     cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/pi.toolchain
     make -j 3
+
+[build-android]
+directory = _build_android
+commands =
+    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.toolchain
+    make -j 3
