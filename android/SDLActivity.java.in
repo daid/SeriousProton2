@@ -1,0 +1,5 @@
+package sp2.${PROJECT_NAME};
+
+//Simple empty subclass of the standard SDLActivity, this to put our SDLActivity in the proper package name.
+public class SDLActivity extends org.libsdl.app.SDLActivity {
+}

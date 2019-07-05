@@ -72,6 +72,9 @@ else()
         message(FATAL_ERROR "Missing android platform in supplied android SDK: android-${ANDROID_API_TARGET}")
     endif()
 endif()
+set(AAPT "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/aapt")
+set(DX "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/dx${HOST_BAT}")
+set(ANDROID_PLATFORM_JAR "${ANDROID_SDK_PATH}/platforms/android-${ANDROID_API_TARGET}/android.jar")
 
 set(SDL_SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source")
 set(SDL_INSTALL_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/install")
@@ -84,7 +87,7 @@ endif()
 if(NOT EXISTS "${SDL_INSTALL_PATH}")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/build")
     execute_process_ex(
-        COMMAND "${CMAKE_COMMAND}" "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source" "-G" "${CMAKE_GENERATOR}" "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}" "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake" "-DANDROID_ABI=${ANDROID_ABI}" "-DANDROID_PLATFORM=${ANDROID_PLATFORM}" "-DCMAKE_INSTALL_PREFIX=${SDL_INSTALL_PATH}"
+        COMMAND "${CMAKE_COMMAND}" "${SDL_SRC_PATH}" "-G" "${CMAKE_GENERATOR}" "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}" "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake" "-DANDROID_ABI=${ANDROID_ABI}" "-DANDROID_PLATFORM=${ANDROID_PLATFORM}" "-DCMAKE_INSTALL_PREFIX=${SDL_INSTALL_PATH}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/android/SDL/build")
     execute_process_ex(
         COMMAND "${CMAKE_MAKE_PROGRAM}" "install"
@@ -95,3 +98,62 @@ set(SDL2_DIR "${SDL_INSTALL_PATH}/lib/cmake/SDL2")
 include("${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake")
 # We need to add a small thing here, or else the compiler checks fail, as those run with less configuration options enabled.
 list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES ANDROID_SDK_PATH)
+
+
+# Macro to build the android apk
+macro(android_apk NAME ASSETS_FOLDER)
+    configure_file("${SP2_DIR}/android/AndroidManifest.xml.in" "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml")
+    configure_file("${SP2_DIR}/android/SDLActivity.java.in" "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
+    # TODO: Generate icon resouces
+    file(COPY "${SDL_SRC_PATH}/android-project/app/src/main/res/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/android_resources")
+    # Generate the R.java file
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/R.java"
+        COMMAND "${AAPT}" ARGS package -m -J "${CMAKE_CURRENT_BINARY_DIR}/java_source" -M "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml" -S "${CMAKE_CURRENT_BINARY_DIR}/android_resources" -I "${ANDROID_PLATFORM_JAR}"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml"
+    )
+    # Generate apk with resource files and manifest, but nothing else
+    # Compile the java sources (TODO, warning about bootstrap classpath, rt.jar wrong version)
+    file(GLOB JAVA_SOURCES "${SDL_SRC_PATH}/android-project/app/src/main/java/org/libsdl/app/*.java")
+    list(APPEND JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/R.java")
+    list(APPEND JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/")
+    add_custom_command(
+        OUTPUT "java_compiled/sp2/Template/R.class"
+        COMMAND ${Java_JAVAC_EXECUTABLE} ARGS -source 1.7 -target 1.7 -classpath "${ANDROID_PLATFORM_JAR}" ${JAVA_SOURCES} -d "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
+        DEPENDS ${JAVA_SOURCES}
+    )
+    # Convert sources into dex file
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/classes.dex"
+        COMMAND "${DX}" ARGS "--dex" "--output=${CMAKE_CURRENT_BINARY_DIR}/apk_contents/classes.dex" "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
+        DEPENDS "java_compiled/sp2/Template/R.class"
+    )
+
+    file(COPY "${SDL_INSTALL_PATH}/lib/libSDL2.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
+    file(COPY "${SDL_INSTALL_PATH}/lib/libhidapi.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/libmain.so"
+        COMMAND "${CMAKE_COMMAND}" ARGS -E copy "$<TARGET_FILE:main>" "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/libmain.so"
+        DEPENDS "$<TARGET_FILE:main>"
+    )
+
+    set(APK "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.apk.unsigned")
+    file(COPY "${ASSETS_FOLDER}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/assets/")
+    file(GLOB_RECURSE ASSETS LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/" "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/assets/*")
+    add_custom_command(
+        OUTPUT "${APK}"
+        COMMAND "${AAPT}" ARGS package -f -M "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml" -S "${CMAKE_CURRENT_BINARY_DIR}/android_resources" -I "${ANDROID_PLATFORM_JAR}" -F "${APK}"
+        COMMAND "${AAPT}" ARGS add "${APK}" classes.dex
+        COMMAND "${AAPT}" ARGS add "${APK}" lib/${ANDROID_ABI}/libmain.so lib/${ANDROID_ABI}/libSDL2.so lib/${ANDROID_ABI}/libhidapi.so
+        COMMAND "${AAPT}" ARGS add "${APK}" ${ASSETS}
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/classes.dex" "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/libmain.so"
+    )
+    add_custom_target(apk ALL DEPENDS "${APK}")
+
+    # Sign and align the apk
+    #KEY_STORE_PASSWORD=ee_pass jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $HOME/android_ee_key.keystore -storepass:env KEY_STORE_PASSWORD -keypass:env KEY_STORE_PASSWORD $TARGET EmptyEpsilon
+    #rm -rf test.apk
+    #$ZIPALIGN 4 $TARGET test.apk
+endmacro()
