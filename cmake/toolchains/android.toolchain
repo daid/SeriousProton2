@@ -69,6 +69,9 @@ if(ANDROID_SDK_PATH STREQUAL "")
     if(NOT EXISTS "${ANDROID_SDK_PATH}/ndk-bundle")
         execute_process_ex(COMMAND "${ANDROID_SDK_PATH}/tools/bin/sdkmanager${HOST_BAT}" "ndk-bundle")
     endif()
+    if(NOT EXISTS "${ANDROID_SDK_PATH}/platform-tools")
+        execute_process_ex(COMMAND "${ANDROID_SDK_PATH}/tools/bin/sdkmanager${HOST_BAT}" "platform-tools")
+    endif()
 else()
     file(GLOB ANDROID_BUILD_TOOLS_VERSION LIST_DIRECTORIES true "${ANDROID_SDK_PATH}/build-tools/*.*.*")
     get_filename_component(ANDROID_BUILD_TOOLS_VERSION "${ANDROID_BUILD_TOOLS_VERSION}" NAME)
@@ -80,6 +83,7 @@ set(AAPT "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/aapt")
 set(DX "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/dx${HOST_BAT}")
 set(ZIPALIGN "${ANDROID_SDK_PATH}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign")
 set(ANDROID_PLATFORM_JAR "${ANDROID_SDK_PATH}/platforms/android-${ANDROID_API_TARGET}/android.jar")
+set(ADB "${ANDROID_SDK_PATH}/platform-tools/adb")
 
 set(SDL_SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/source")
 set(SDL_INSTALL_PATH "${CMAKE_CURRENT_LIST_DIR}/android/SDL/install")
@@ -159,8 +163,14 @@ macro(android_apk NAME ASSETS_FOLDER)
     )
     add_custom_command(
         OUTPUT "${APK_ALIGNED}"
+        COMMAND "${CMAKE_COMMAND}" -E remove -f "${APK_ALIGNED}"
         COMMAND "${ZIPALIGN}" ARGS 4 "${APK}" "${APK_ALIGNED}"
         DEPENDS "${APK}"
     )
     add_custom_target(apk ALL DEPENDS "${APK_ALIGNED}")
+    add_custom_target(upload
+        COMMAND ${ADB} install -r "${APK_ALIGNED}"
+        COMMAND ${ADB} shell am start -n "sp2.${NAME}/.SDLActivity"
+        DEPENDS "${APK_ALIGNED}" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    )
 endmacro()
