@@ -11,6 +11,7 @@ namespace audio {
 AudioSource* AudioSource::source_list_start;
 static SDL_AudioDeviceID sdl_audio_device = 0;
 
+
 AudioSource::~AudioSource()
 {
     stop();
@@ -73,7 +74,7 @@ void AudioSource::startAudioSystem()
 
     sdl_audio_device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
     sp2assert(sdl_audio_device != 0, "SDL_OpenAudio failed");
-    LOG(Info, "Opened audio:", have.format, have.freq, int(have.channels));
+    LOG(Info, "Opened audio:", have.freq, int(have.channels));
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
     sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");
     sp2assert(have.channels == 2, "Needs 2 channel audio output.");
@@ -84,6 +85,11 @@ void AudioSource::onAudioCallback(float* stream, int sample_count)
     memset(stream, 0, sample_count * sizeof(float));
     for(AudioSource* source = AudioSource::source_list_start; source; source = source->next)
         source->onMixSamples(stream, sample_count);
+}
+
+void AudioSource::mix(float* stream, const float* source, int sample_count, int volume)
+{
+    SDL_MixAudioFormat((uint8_t*)stream, (const uint8_t*)&source, AUDIO_F32, sample_count * sizeof(float), volume);
 }
 
 };//namespace audio

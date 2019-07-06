@@ -43,7 +43,7 @@ protected:
     {
         float buffer[sample_count];
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
-        SDL_MixAudio((uint8_t*)stream, (const uint8_t*)&buffer, vorbis_samples * 2 * sizeof(float), mix_volume);
+        mix(stream, buffer, vorbis_samples * 2, mix_volume);
     }
 
 private:

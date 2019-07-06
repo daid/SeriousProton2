@@ -21,6 +21,7 @@ public:
 
 protected:
     virtual void onMixSamples(float* stream, int sample_count) = 0;
+    static void mix(float* stream, const float* source, int sample_count, int volume);
 private:
     bool active = false;
     AudioSource* next;

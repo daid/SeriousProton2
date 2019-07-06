@@ -20,7 +20,7 @@ public:
     virtual void onMixSamples(float* stream, int sample_count)
     {
         sample_count = std::min(sample_count, int(buffer->size() - index));
-        SDL_MixAudio((uint8_t*)stream, (const uint8_t*)&(*buffer)[index], sample_count * sizeof(float), mix_volume);
+        mix(stream, &(*buffer)[index], sample_count, mix_volume);
         index += sample_count;
         if (index == buffer->size())
         {
