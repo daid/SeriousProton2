@@ -29,8 +29,9 @@ void BasicNodeRenderPass::render(RenderQueue& queue)
     }
     else
     {
-        for(P<Scene> scene : Scene::all())
-            renderScene(queue, scene, nullptr);
+        const auto& all_scenes = Scene::all();
+        for(auto it = all_scenes.rbegin(); it != all_scenes.rend(); ++it)
+            renderScene(queue, *it, nullptr);
     }
 }
 
