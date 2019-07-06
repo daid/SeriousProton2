@@ -40,7 +40,8 @@ extern "C" DECLSPEC int SDL_main(int argc, char *argv[])
     if (Engine::getInstance())
         return 0;
     chdir(SDL_AndroidGetInternalStoragePath());
-    return main(argc, argv);
+    exit(main(argc, argv));
+    return 0;
 }
 #endif
 

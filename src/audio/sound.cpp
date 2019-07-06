@@ -20,7 +20,7 @@ public:
     virtual void onMixSamples(float* stream, int sample_count)
     {
         sample_count = std::min(sample_count, int(buffer->size() - index));
-        mix(stream, &(*buffer)[index], sample_count, mix_volume);
+        mix(stream, &(buffer->data()[index]), sample_count, mix_volume);
         index += sample_count;
         if (index == buffer->size())
         {

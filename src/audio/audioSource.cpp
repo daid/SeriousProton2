@@ -89,7 +89,7 @@ void AudioSource::onAudioCallback(float* stream, int sample_count)
 
 void AudioSource::mix(float* stream, const float* source, int sample_count, int volume)
 {
-    SDL_MixAudioFormat((uint8_t*)stream, (const uint8_t*)&source, AUDIO_F32, sample_count * sizeof(float), volume);
+    SDL_MixAudioFormat((uint8_t*)stream, (const uint8_t*)source, AUDIO_F32, sample_count * sizeof(float), volume);
 }
 
 };//namespace audio
