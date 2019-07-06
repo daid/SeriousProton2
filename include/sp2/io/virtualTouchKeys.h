@@ -16,7 +16,9 @@ class Keybinding;
     
     There are 3 types of bindings:
     * Simple keys, on/off pressed or not.
-    * TODO: Single direction "joystick" like axis.
+    * TODO: Single direction "joystick" like axis
+            - With a pre-defined center point
+            - With the "first hit" as center point
     * TODO: 2 direction "joystick" bound to 2 different keybindings.
  */
 class VirtualTouchKeyLayer : public sp::GraphicsLayer
@@ -37,14 +39,27 @@ private:
     int getIndexForKey(Keybinding& key);
     Vector2f convertPosition(const Vector2d& position) const;
 
-    class VirtualButton
+    class IVirtualTouchKey
     {
     public:
+        virtual bool onDown(Vector2f position) = 0;
+        virtual bool onDrag(Vector2f position) = 0;
+        virtual void onUp(Vector2f position) = 0;
+    };
+    class VirtualButton : public IVirtualTouchKey
+    {
+    public:
+        VirtualButton(Rect2f area, int key_index);
+
+        virtual bool onDown(Vector2f position);
+        virtual bool onDrag(Vector2f position);
+        virtual void onUp(Vector2f position);
+    private:
         Rect2f area;
-        int virtual_key_index;
+        int key_index;
     };
 
-    std::vector<VirtualButton> buttons;
+    std::vector<IVirtualTouchKey*> keys;
     std::unordered_map<int, int> active_pointers;
 };
 
