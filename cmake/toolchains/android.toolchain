@@ -111,8 +111,7 @@ include("${ANDROID_SDK_PATH}/ndk-bundle/build/cmake/android.toolchain.cmake")
 # We need to add a small thing here, or else the compiler checks fail, as those run with less configuration options enabled.
 list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES ANDROID_SDK_PATH)
 add_compile_options(-ffunction-sections -fdata-sections -fvisibility=hidden -fvisibility-inlines-hidden)
-add_link_options(-Wl,--gc-sections -fvisibility=hidden -fvisibility-inlines-hidden)
-add_link_options(-s)
+set(CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT "${CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT} -Wl,--gc-sections -fvisibility=hidden -fvisibility-inlines-hidden -s")
 
 # Macro to build the android apk
 macro(android_apk NAME ASSETS_FOLDER)
