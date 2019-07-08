@@ -26,8 +26,8 @@ Shader* Shader::get(string name)
     {
         LOG(Info, "Loading shader:", name);
 #ifdef ANDROID
-        string vertex_shader = "#version 101\n";
-        string fragment_shader = "#version 101\nprecision mediump float;\n";
+        string vertex_shader = "#version 100\n";
+        string fragment_shader = "#version 100\nprecision mediump float;\n";
 #else
         string vertex_shader = "#version 110\n";
         string fragment_shader = "#version 110\n";
