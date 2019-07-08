@@ -5,6 +5,7 @@
 #include <sp2/assert.h>
 #include <sp2/graphics/texture.h>
 
+#include <SDL_messagebox.h>
 
 namespace sp {
 
@@ -99,6 +100,9 @@ bool Shader::bind()
             glDeleteShader(vertex_shader_handle);
             glDeleteShader(fragment_shader_handle);
             program = 0;
+#ifdef ANDROID
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Shader error", log, nullptr);
+#endif
             return false;
         }
         glDetachShader(program, vertex_shader_handle);
@@ -135,6 +139,9 @@ unsigned int Shader::compileShader(const char* code, int type)
         LOG(Error, "Compile error in shader:", name, log);
         glDeleteShader(shader_handle);
         glDeleteProgram(program);
+#ifdef ANDROID
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Shader error", log, nullptr);
+#endif
         program = 0;
         return 0;
     }
