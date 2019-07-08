@@ -5,7 +5,6 @@ enabled = True
 directory = _build_native
 commands =
     cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/
-    make clean
     make -j 3
 
 [build-win32]
