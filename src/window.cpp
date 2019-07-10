@@ -258,7 +258,8 @@ void Window::createRenderWindow()
     }
 
     //Enable VSync.
-    SDL_GL_SetSwapInterval(1);
+    if (SDL_GL_SetSwapInterval(-1))
+        SDL_GL_SetSwapInterval(1);
 }
 
 void Window::render()
