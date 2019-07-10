@@ -90,7 +90,7 @@ void Server::onUpdate(float delta)
         for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
         {
             ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
-            if (replication_link->isChanged())
+            if (replication_link->isChanged(delta))
             {
                 packet.write(uint16_t(n));
                 replication_link->send(*this, packet);

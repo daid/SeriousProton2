@@ -11,7 +11,7 @@ class ReplicationLinkBase : NonCopyable
 {
 public:
     virtual ~ReplicationLinkBase() {}
-    virtual bool isChanged() = 0;
+    virtual bool isChanged(float time_delta) = 0;
     virtual void initialSend(NodeRegistry& registry, io::DataBuffer& packet) { send(registry, packet); }
     virtual void send(NodeRegistry& registry, io::DataBuffer& packet) = 0;
     virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) = 0;
@@ -21,15 +21,25 @@ template<typename T> class ReplicationLink : public ReplicationLinkBase
 {
 public:
     ReplicationLink(T& value)
-    : value(value), previous_value(value)
+    : value(value), previous_value(value), timeout(0.0), max_update_interval(0.0)
     {
     }
 
-    virtual bool isChanged() override
+    ReplicationLink(T& value, float max_update_interval)
+    : value(value), previous_value(value), timeout(0.0), max_update_interval(max_update_interval)
     {
+    }
+
+    virtual bool isChanged(float time_delta) override
+    {
+        if (timeout > 0.0)
+            timeout -= time_delta;
+        if (timeout > 0.0)
+            return false;
         if (value == previous_value)
             return false;
         previous_value = value;
+        timeout = max_update_interval;
         return true;
     }
 
@@ -45,6 +55,8 @@ public:
 private:
     T& value;
     T previous_value;
+    float timeout;
+    float max_update_interval;
 };
 
 template<class T> class ReplicationLink<P<T>> : public ReplicationLinkBase
@@ -55,7 +67,7 @@ public:
     {
     }
 
-    virtual bool isChanged() override
+    virtual bool isChanged(float time_delta) override
     {
         uint64_t id = object ? object.multiplayer.getId() : 0;
         if (id == previous_id)

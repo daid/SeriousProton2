@@ -117,6 +117,11 @@ public:
         {
             replication_links.push_back(new multiplayer::ReplicationLink<T>(&var));
         }
+
+        template<typename T> void replicate(T& var, float max_update_interval)
+        {
+            replication_links.push_back(new multiplayer::ReplicationLink<T>(&var, max_update_interval));
+        }
         
         uint64_t getId() const { return id; }
     private:
