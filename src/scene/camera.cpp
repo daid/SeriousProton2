@@ -10,14 +10,17 @@ Camera::Camera(P<Node> parent)
     view_distance = 1.0;
 }
 
-void Camera::setOrtographic(double view_distance, Direction direction)
+void Camera::setOrtographic(double view_size, Direction direction, double view_distance)
 {
     switch(direction)
     {
     case Direction::Horizontal: this->type = Type::OrtographicHorizontal; break;
     case Direction::Vertical: this->type = Type::OrtographicVertical; break;
     }
+    this->field_of_view = view_size;
     this->view_distance = view_distance;
+    if (this->view_distance < view_size)
+        this->view_distance = view_size;
 }
 
 void Camera::setPerspective(double field_of_view, double view_distance)
@@ -32,10 +35,10 @@ void Camera::setAspectRatio(double ratio)
     switch(type)
     {
     case Type::OrtographicVertical:
-        setProjectionMatrix(Matrix4x4f::ortho(-ratio * view_distance, ratio * view_distance, -view_distance, view_distance, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-ratio * field_of_view, ratio * field_of_view, -field_of_view, field_of_view, -view_distance, view_distance));
         break;
     case Type::OrtographicHorizontal:
-        setProjectionMatrix(Matrix4x4f::ortho(-view_distance, view_distance, -view_distance / ratio, view_distance / ratio, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-field_of_view, field_of_view, -field_of_view / ratio, field_of_view / ratio, -view_distance, view_distance));
         break;
     case Type::Perspective:
         setProjectionMatrix(Matrix4x4f::perspective(field_of_view, ratio, 1.0f, view_distance));
