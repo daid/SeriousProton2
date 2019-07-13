@@ -130,6 +130,11 @@ public:
         return Quaternion<T>(x * s0 + v.x * s1, y * s0 + v.y * s1, z * s0 + v.z * s1, w * s0 + v.w * s1);
     }
     
+    Quaternion conjugate()
+    {
+        return Quaternion<T>(-x, -y, -z, w);
+    }
+    
     static Quaternion fromAxisAngle(const Vector3<T>& axis, T angle)
     {
         Vector3<T> a = axis.normalized();

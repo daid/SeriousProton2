@@ -3,6 +3,9 @@
 
 #include <sp2/multiplayer/nodeRegistry.h>
 #include <sp2/io/dataBuffer.h>
+#include <sp2/math/vector.h>
+#include <sp2/math/quaternion.h>
+
 
 namespace sp {
 namespace multiplayer {
@@ -91,6 +94,33 @@ public:
 private:
     P<T>& object;
     uint64_t previous_id;
+};
+
+struct DeadReckoningConfig
+{
+    float min_update_delay = 0.0;
+    float max_update_delay = 5.0;
+    double max_position_diviation;
+    double max_angle_diviation;
+};
+class ReplicationDeadReckoning : public ReplicationLinkBase
+{
+public:
+    ReplicationDeadReckoning(Node& node, const DeadReckoningConfig& config);
+
+    virtual bool isChanged(float time_delta);
+    virtual void initialSend(NodeRegistry& registry, io::DataBuffer& packet);
+    virtual void send(NodeRegistry& registry, io::DataBuffer& packet);
+    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet);
+
+private:
+    Node& node;
+    DeadReckoningConfig config;
+    float last_update_time = 0.0;
+
+    Vector3d last_position;
+    Vector3d last_velocity;
+    Quaterniond last_rotation;
 };
 
 };//namespace multiplayer

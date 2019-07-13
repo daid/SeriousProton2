@@ -113,6 +113,11 @@ public:
         void enable();
         bool isEnabled();
 
+        void enableDeadReckoning(const multiplayer::DeadReckoningConfig& config)
+        {
+            replication_links.push_back(new multiplayer::ReplicationDeadReckoning(*node, config));
+        }
+        
         template<typename T> void replicate(T& var)
         {
             replication_links.push_back(new multiplayer::ReplicationLink<T>(&var));
