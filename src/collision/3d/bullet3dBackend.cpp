@@ -165,6 +165,7 @@ void BulletBackend::setLinearVelocity(void* _body, Vector3d velocity)
 {
     btRigidBody* body = static_cast<btRigidBody*>(_body);
     body->setLinearVelocity(toVector(velocity));
+    body->activate();
 }
 
 void BulletBackend::setAngularVelocity(void* _body, Vector3d velocity)

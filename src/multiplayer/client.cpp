@@ -13,6 +13,7 @@ namespace multiplayer {
 Client::Client(string hostname, int port_nr)
 {
     socket.setBlocking(false);
+    LOG(Info, "Multiplayer client connecting:", hostname, port_nr);
     socket.connect(io::network::Address(hostname), port_nr);
     
     state = State::Connecting;
@@ -109,13 +110,23 @@ void Client::onUpdate(float delta)
             }break;
 
         case PacketIDs::alive:
+            {
+                float ping_delay;
+                float send_timestamp;
+                packet.read(ping_delay, send_timestamp);
+                
+                send(io::DataBuffer(PacketIDs::alive, send_timestamp));
+            }
             break;
         default:
             LOG(Warning, "Received unknown packet:", command_id);
         }
     }
-    if (!socket.isConnected())
+    if (!socket.isConnected() && state != State::Disconnected)
+    {
+        LOG(Info, "Multiplayer client disconnect");
         state = State::Disconnected;
+    }
 
     cleanDeletedNodes();
 }

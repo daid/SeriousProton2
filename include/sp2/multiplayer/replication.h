@@ -100,8 +100,8 @@ struct DeadReckoningConfig
 {
     float min_update_delay = 0.0;
     float max_update_delay = 5.0;
-    double max_position_diviation;
-    double max_angle_diviation;
+    double max_position_diviation = 0.1;
+    double max_angle_diviation = 3.0;
 };
 class ReplicationDeadReckoning : public ReplicationLinkBase
 {

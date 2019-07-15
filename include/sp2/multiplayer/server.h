@@ -25,6 +25,7 @@ private:
     public:
         io::network::TcpSocket* socket;
         uint32_t client_id;
+        float current_ping_delay;
         enum class State
         {
             WaitingForAuthentication,
@@ -43,6 +44,8 @@ private:
     uint64_t next_object_id;
     //List of newly created objects.
     PList<Node> new_nodes;
+    
+    float ping_delay;
 
     std::list<ClientInfo> clients;
     
@@ -50,6 +53,7 @@ private:
     io::network::TcpSocket* new_connection_socket;
     
     void recursiveAddNewNodes(P<Node> node);
+    void recursiveSendCreate(ClientInfo& client, P<Node> node);
     //Add a new object to be replicated. Only put it in a list, we will process it later, as it still might be under construction.
     void addNewObject(P<Node> node);
     

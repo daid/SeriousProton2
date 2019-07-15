@@ -23,7 +23,7 @@ constexpr uint64_t PacketIDs::magic_sp2_value;
 
 Server::Server(int port_nr)
 {
-    if (new_connection_listener.listen(port_nr))
+    if (!new_connection_listener.listen(port_nr))
         LOG(Error, "Failed to listen on port: ", port_nr);
     new_connection_listener.setBlocking(false);
     new_connection_socket = new io::network::TcpSocket();
@@ -48,8 +48,23 @@ void Server::recursiveAddNewNodes(P<Node> node)
     }
 }
 
+void Server::recursiveSendCreate(ClientInfo& client, P<Node> node)
+{
+    if (node->multiplayer.enabled)
+    {
+        io::DataBuffer send_packet;
+        buildCreatePacket(send_packet, node);
+        client.send(send_packet);
+
+        for(P<Node> child : node->getChildren())
+            recursiveSendCreate(client, child);
+    }
+}
+
 void Server::onUpdate(float delta)
 {
+    std::chrono::duration<float> now = std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::steady_clock::now().time_since_epoch());
+
     for(P<Scene> scene : Scene::all())
     {
         recursiveAddNewNodes(scene->getRoot());
@@ -109,6 +124,7 @@ void Server::onUpdate(float delta)
         ClientInfo client;
         client.socket = new_connection_socket;
         client.client_id = next_client_id;
+        client.current_ping_delay = 0.0;
         next_client_id ++;
         client.state = ClientInfo::State::WaitingForAuthentication;
         io::DataBuffer packet(PacketIDs::request_authentication, PacketIDs::magic_sp2_value);
@@ -140,11 +156,9 @@ void Server::onUpdate(float delta)
                         client->send(send_packet);
                     }
 
-                    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+                    for(P<Scene> scene : Scene::all())
                     {
-                        io::DataBuffer send_packet;
-                        buildCreatePacket(send_packet, *it->second);
-                        client->send(send_packet);
+                        recursiveSendCreate(*client, scene->getRoot());
                     }
                     for(auto it = nodeBegin(); it != nodeEnd(); ++it)
                     {
@@ -168,11 +182,24 @@ void Server::onUpdate(float delta)
                 break;
             case ClientInfo::State::CatchingUp:
             case ClientInfo::State::Connected:
+                switch(packet_id)
+                {
+                case PacketIDs::alive:
+                    {
+                        float request_time;
+                        packet.read(request_time);
+                        client->current_ping_delay = now.count() - request_time;
+                    }
+                    break;
+                default:
+                    LOG(Warning, "Unknown packet from client, id:", packet_id);
+                }
                 break;
             }
         }
         if (!client->socket->isConnected())
         {
+            LOG(Info, "Client connection closed on server");
             client = clients.erase(client);
         }
         else
@@ -180,17 +207,29 @@ void Server::onUpdate(float delta)
             client++;
         }
     }
+    
+    ping_delay -= delta;
+    if (ping_delay < 0.0)
+    {
+        ping_delay += 1.0;
+        for(auto client : clients)
+        {
+            io::DataBuffer ping_packet;
+            ping_packet.write(PacketIDs::alive, client.current_ping_delay, now.count());
+            client.socket->send(ping_packet);
+        }
+    }
 }
 
 void Server::buildCreatePacket(io::DataBuffer& packet, P<Node> node)
 {
-    auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*node));
-    sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*node).name()).c_str());
-    
     P<Node> parent = node->getParent();
 
     if (parent)
     {
+        auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(**node));
+        sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(**node).name()).c_str());
+
         packet.write(PacketIDs::create_object, node->multiplayer.getId(), e->second, parent->multiplayer.getId());
     }
     else

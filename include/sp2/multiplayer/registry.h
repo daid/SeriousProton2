@@ -15,7 +15,7 @@ namespace multiplayer {
 //Register a class name to a string for multiplayer replication.
 //TOFIX: This does not work very well in combination with namespaces.
 #define REGISTER_MULTIPLAYER_CLASS(class_name) \
-    ::sp::multiplayer::ClassEntry class_entry_ ## class_name ( # class_name , typeid(class_name), ::sp::multiplayer::__objectCreateFunction<class_name> );
+    ::sp::multiplayer::ClassEntry class_entry_ ## class_name ( # class_name , typeid(class_name), &::sp::multiplayer::__objectCreateFunction<class_name> )
 
 class ClassEntry
 {

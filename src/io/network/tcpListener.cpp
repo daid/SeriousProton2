@@ -112,7 +112,7 @@ bool TcpListener::accept(TcpSocket& socket)
     int result = ::accept(handle, nullptr, nullptr);
     if (result < 0)
     {
-        if (isLastErrorNonBlocking())
+        if (!isLastErrorNonBlocking())
             close();
         return false;
     }
