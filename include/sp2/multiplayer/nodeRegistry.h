@@ -13,12 +13,15 @@ class NodeRegistry
 public:
     P<Node> getNode(uint64_t id);
 
+    float getNetworkDelay() { return network_delay; }
 protected:
     void addNode(P<Node> node);    
     void cleanDeletedNodes();
     
     std::unordered_map<uint64_t, P<Node>>::iterator nodeBegin();
     std::unordered_map<uint64_t, P<Node>>::iterator nodeEnd();
+    
+    float network_delay = 0.0;
 private:
 
     //Called when a node that was added is deleted now and removed from the registry.

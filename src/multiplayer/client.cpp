@@ -111,9 +111,8 @@ void Client::onUpdate(float delta)
 
         case PacketIDs::alive:
             {
-                float ping_delay;
                 float send_timestamp;
-                packet.read(ping_delay, send_timestamp);
+                packet.read(network_delay, send_timestamp);
                 
                 send(io::DataBuffer(PacketIDs::alive, send_timestamp));
             }

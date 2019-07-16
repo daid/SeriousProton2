@@ -64,6 +64,8 @@ void ReplicationDeadReckoning::receive(NodeRegistry& registry, io::DataBuffer& p
     packet.read(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
     packet.read(rotation.x, rotation.y, rotation.z, rotation.w);
     packet.read(angular_velocity.x, angular_velocity.y, angular_velocity.z);
+    
+    pos += velocity * double(registry.getNetworkDelay());
     node.setPosition(pos);
     node.setLinearVelocity(velocity);
     node.setRotation(rotation);
