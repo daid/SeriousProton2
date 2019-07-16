@@ -25,7 +25,7 @@ void Shape3D::create(Node* node) const
     btCollisionShape* shape = createShape();
     
     btScalar mass = 0.0;
-    if (type == Type::Dynamic || type == Type::Kinematic)
+    if (type == Type::Dynamic)
         mass = density;
     
     btVector3 local_inertia(0, 0, 0);
