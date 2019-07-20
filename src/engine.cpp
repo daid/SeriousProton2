@@ -241,6 +241,16 @@ void Engine::update(float time_delta)
             window->render();
     }
     timing.render = timing_clock.restart();
+    
+    //If we are not rendering to any windows, limit the loop speed, so we do not burn CPU cycles to run insane amount of updates per second.
+    if (Window::windows.empty())
+    {
+        int previous_total_time_ms = (last_update_timing.fixed_update + last_update_timing.dynamic_update + last_update_timing.render) * 1000.0f;
+        if (previous_total_time_ms < 16)
+        {
+            SDL_Delay(16 - previous_total_time_ms);
+        }
+    }
     last_update_timing = timing;
 }
 
