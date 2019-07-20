@@ -72,12 +72,12 @@ void Client::onUpdate(float delta)
             }
             }break;
         case PacketIDs::update_object:{
-            uint64_t id;
+            uint64_t id = 0;
             packet.read(id);
             P<Node> node = getNode(id);
             if (node)
             {
-                uint16_t idx;
+                uint16_t idx = 0;
                 while(packet.available() >= sizeof(idx))
                 {
                     packet.read(idx);
@@ -87,14 +87,14 @@ void Client::onUpdate(float delta)
             }
             }break;
         case PacketIDs::delete_object:{
-            uint64_t id;
+            uint64_t id = 0;
             packet.read(id);
             P<Node> node = getNode(id);
             node.destroy();
             }break;
 
         case PacketIDs::setup_scene:{
-            uint64_t id;
+            uint64_t id = 0;
             string scene_name;
             packet.read(id, scene_name);
             sp::P<Scene> scene = Scene::get(scene_name);

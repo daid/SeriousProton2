@@ -73,7 +73,11 @@ void AudioSource::startAudioSystem()
     want.callback = audioCallback;
 
     sdl_audio_device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
-    sp2assert(sdl_audio_device != 0, "SDL_OpenAudio failed");
+    if (sdl_audio_device == 0)
+    {
+        LOG(Warning, "Failed to open audio device, no audio available.");
+        return;
+    }
     LOG(Info, "Opened audio:", have.freq, int(have.channels));
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
     sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");

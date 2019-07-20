@@ -195,8 +195,8 @@ void Server::onUpdate(float delta)
                 {
                 case PacketIDs::call_on_server:
                     {
-                        uint64_t object_id;
-                        uint16_t index;
+                        uint64_t object_id = 0;
+                        uint16_t index = 0;
                         packet.read(object_id, index);
                         P<Node> node = getNode(object_id);
                         if (node && index < node->multiplayer.replication_calls.size())   //Node could have been deleted on the server already.
@@ -205,7 +205,7 @@ void Server::onUpdate(float delta)
                     break;
                 case PacketIDs::alive:
                     {
-                        float request_time;
+                        float request_time = 0;
                         packet.read(request_time);
                         client->current_ping_delay = now.count() - request_time;
                     }
