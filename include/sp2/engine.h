@@ -54,6 +54,7 @@ private:
 
     float current_fps = 0.0;
     bool initialized = false;
+    bool shutdown_flag = false;
 };
 
 };//namespace sp

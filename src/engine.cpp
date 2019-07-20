@@ -120,7 +120,7 @@ void Engine::run()
     Clock fps_counter_clock;
     LOG(Info, "Engine started");
 
-    while(Window::anyWindowOpen())
+    while(!shutdown_flag && (Window::windows.empty() || Window::anyWindowOpen()))
     {
         SDL_Event event;
 
@@ -268,6 +268,7 @@ void Engine::shutdown()
 {
     for(P<Window> window : Window::windows)
         window->close();
+    shutdown_flag = true;
 }
 
 };//namespace sp
