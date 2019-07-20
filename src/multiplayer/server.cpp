@@ -117,7 +117,7 @@ void Server::onUpdate(float delta)
 
         for(auto& prepared_call : it->second->multiplayer.prepared_calls)
         {
-            uint16_t index;
+            uint16_t index = 0;
             prepared_call.read(index);
             it->second->multiplayer.replication_calls[index]->doCall(*it->second, prepared_call);
         }
@@ -148,7 +148,7 @@ void Server::onUpdate(float delta)
         io::DataBuffer packet;
         while(client->socket->receive(packet))
         {
-            uint8_t packet_id;
+            uint8_t packet_id = 0;
             packet.read(packet_id);
             switch(client->state)
             {

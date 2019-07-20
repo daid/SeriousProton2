@@ -47,9 +47,9 @@ void Client::onUpdate(float delta)
             }break;
     
         case PacketIDs::create_object:{
-            uint64_t id;
+            uint64_t id = 0;
             string class_name;
-            uint64_t parent;
+            uint64_t parent = 0;
             packet.read(id, class_name, parent);
             auto it = multiplayer::ClassEntry::name_to_create_mapping.find(class_name);
             if (it == multiplayer::ClassEntry::name_to_create_mapping.end())
