@@ -28,6 +28,9 @@ public:
 
     //Scenes should already exist on the client, this packet is to link an multiplayer ID to a scene.
     static constexpr uint8_t setup_scene = 0x20;
+
+    //Packet send from the client to the server to indicate the client wants to call a function on the server.
+    static constexpr uint8_t call_on_server = 0x80;
     
     //Alive packet. Empty packet that is being send from the server to indicate that the server is still connected to the client.
     //TCP timeouts will handle disconnecting clients from the server. Clients need to have extra timeout handling.

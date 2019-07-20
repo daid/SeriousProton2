@@ -17,6 +17,7 @@ constexpr uint8_t PacketIDs::create_object;
 constexpr uint8_t PacketIDs::update_object;
 constexpr uint8_t PacketIDs::delete_object;
 constexpr uint8_t PacketIDs::setup_scene;
+constexpr uint8_t PacketIDs::call_on_server;
 constexpr uint8_t PacketIDs::alive;
 constexpr uint64_t PacketIDs::magic_sp2_value;
 
@@ -113,6 +114,14 @@ void Server::onUpdate(float delta)
         }
         if (packet.getDataSize() != zero_data_size)
             sendToAllConnectedClients(packet);
+
+        for(auto& prepared_call : it->second->multiplayer.prepared_calls)
+        {
+            uint16_t index;
+            prepared_call.read(index);
+            it->second->multiplayer.replication_calls[index]->doCall(*it->second, prepared_call);
+        }
+        it->second->multiplayer.prepared_calls.clear();
     }
     
     //Check for new connections.
@@ -184,6 +193,16 @@ void Server::onUpdate(float delta)
             case ClientInfo::State::Connected:
                 switch(packet_id)
                 {
+                case PacketIDs::call_on_server:
+                    {
+                        uint64_t object_id;
+                        uint16_t index;
+                        packet.read(object_id, index);
+                        P<Node> node = getNode(object_id);
+                        if (node && index < node->multiplayer.replication_calls.size())   //Node could have been deleted on the server already.
+                            node->multiplayer.replication_calls[index]->doCall(*node, packet);
+                    }
+                    break;
                 case PacketIDs::alive:
                     {
                         float request_time;

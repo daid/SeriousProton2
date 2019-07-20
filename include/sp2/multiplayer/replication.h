@@ -123,6 +123,54 @@ private:
     Quaterniond last_rotation;
 };
 
+class ReplicationCallInfoBase
+{
+public:
+    typedef void (Node::*BaseFuncPtr)();
+
+    virtual void doCall(Node* node, io::DataBuffer& packet) = 0;
+    virtual BaseFuncPtr getPtr() = 0;
+};
+
+template<std::size_t ...> struct sequence{};
+template<std::size_t N, std::size_t ...S> struct sequenceGenerator : sequenceGenerator<N-1, N-1, S...>{};
+template<std::size_t ...S> struct sequenceGenerator<0, S...>{ typedef sequence<S...> type; };
+
+template<typename CLASS, typename... ARGS> class ReplicationCallInfo : public ReplicationCallInfoBase
+{
+public:
+    ReplicationCallInfo(void (CLASS::*func)(ARGS...))
+    : func(func)
+    {
+    }
+    
+    virtual void doCall(Node* node, io::DataBuffer& packet) override
+    {
+        CLASS* obj = static_cast<CLASS*>(node);
+        std::tuple<ARGS...> args{readFromIOBuffer<ARGS>(packet)...};
+        doCall(obj, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    }
+
+    virtual BaseFuncPtr getPtr() override
+    {
+        return BaseFuncPtr(func);
+    }
+private:    
+    template<typename RET> static RET readFromIOBuffer(io::DataBuffer& packet)
+    {
+        RET result;
+        packet.read(result);
+        return result;
+    }
+
+    template<std::size_t... N> void doCall(CLASS* obj, std::tuple<ARGS...>& args, sequence<N...>)
+    {
+        (obj->*(func))(std::get<N>(args)...);
+    }
+
+    void (CLASS::*func)(ARGS...);
+};
+
 };//namespace multiplayer
 };//namespace sp
 

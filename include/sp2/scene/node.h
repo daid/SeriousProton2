@@ -127,13 +127,35 @@ public:
         {
             replication_links.push_back(new multiplayer::ReplicationLink<T>(&var, max_update_interval));
         }
+
+        template<typename CLASS, typename... ARGS> void replicate(void(CLASS::*func)(ARGS...))
+        {
+            replication_calls.push_back(new multiplayer::ReplicationCallInfo<CLASS, ARGS...>(func));
+        }
         
-        uint64_t getId() const { return id; }
+        template<typename CLASS, typename... ARGS> void callOnServer(void(CLASS::*func)(ARGS...), ARGS... args)
+        {
+            for(unsigned int n=0; n<replication_calls.size(); n++)
+            {
+                if (replication_calls[n]->getPtr() == multiplayer::ReplicationCallInfoBase::ReplicationCallInfoBase::BaseFuncPtr(func))
+                {
+                    prepared_calls.emplace_back(uint16_t(n), args...);
+                    return;
+                }
+            }
+        }
+        
+        uint64_t getId() const
+        {
+            return id;
+        }
     private:
         Node* node;
         bool enabled;
         uint64_t id;
         std::vector<multiplayer::ReplicationLinkBase*> replication_links;
+        std::vector<multiplayer::ReplicationCallInfoBase*> replication_calls;
+        std::vector<io::DataBuffer> prepared_calls;
         
         friend class ::sp::multiplayer::Server;
         friend class ::sp::multiplayer::Client;

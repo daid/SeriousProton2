@@ -21,6 +21,11 @@ public:
     {
     }
     
+    DataBuffer(DataBuffer&& b)
+    : buffer(std::move(b.buffer)), read_index(b.read_index)
+    {
+    }
+    
     template<typename... ARGS> DataBuffer(const ARGS&... args)
     : DataBuffer()
     {
@@ -126,6 +131,13 @@ public:
         size_t idx = buffer.size();
         buffer.resize(idx + len);
         memcpy(&buffer[idx], s, len);
+    }
+    
+    void write(const DataBuffer& other)
+    {
+        size_t idx = buffer.size();
+        buffer.resize(idx + other.buffer.size());
+        memcpy(&buffer[idx], other.buffer.data(), other.buffer.size());
     }
     
     template<typename T, typename... ARGS> void read(T& value, ARGS&... args)

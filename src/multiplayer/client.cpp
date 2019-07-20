@@ -121,6 +121,15 @@ void Client::onUpdate(float delta)
             LOG(Warning, "Received unknown packet:", command_id);
         }
     }
+    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+    {
+        for(auto& prepared_call : it->second->multiplayer.prepared_calls)
+        {
+            io::DataBuffer packet(PacketIDs::call_on_server, it->first, prepared_call);
+            send(packet);
+        }
+        it->second->multiplayer.prepared_calls.clear();
+    }
     if (!socket.isConnected() && state != State::Disconnected)
     {
         LOG(Info, "Multiplayer client disconnect");
