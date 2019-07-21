@@ -1,5 +1,6 @@
 #include <sp2/script/environment.h>
 #include <sp2/script/luaBindings.h>
+#include <sp2/assert.h>
 
 static void luaInstructionCountHook(lua_State *L, lua_Debug *ar)
 {
@@ -55,6 +56,7 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     alloc_info.max = sandbox_config.memory_limit;
 
     lua = lua_newstate(luaAlloc, &alloc_info);
+    sp2assert(lua, "Failed to create lua state for sandboxed environment. Not giving enough memory for basic state?");
     lua = script::createLuaState(lua);
     lua_sethook(lua, luaInstructionCountHook, LUA_MASKCOUNT, sandbox_config.instruction_limit);
     //Create a new lua environment.
@@ -164,7 +166,7 @@ void Environment::setGlobal(string name, string value)
     lua_pop(lua, 1);
 }
 
-bool Environment::load(string resource_name)
+bool Environment::load(const string& resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
@@ -180,14 +182,22 @@ bool Environment::load(io::ResourceStreamPtr resource)
     return _load(resource, "[unknown]");
 }
 
-bool Environment::_load(io::ResourceStreamPtr resource, string name)
+bool Environment::run(const string& code)
+{
+    return _run(code, "[string]");
+}
+
+bool Environment::_load(io::ResourceStreamPtr resource, const string& name)
 {
     if (!resource)
         return false;
 
-    string filecontents = resource->readAll();
+    return _run(resource->readAll(), name);
+}
 
-    if (luaL_loadbufferx(lua, filecontents.c_str(), filecontents.length(), name.c_str(), "t"))
+bool Environment::_run(const string& code, const string& name)
+{
+    if (luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t"))
     {
         last_error = string("LUA: load: ") + luaL_checkstring(lua, -1);
         LOG(Error, last_error);
@@ -208,7 +218,7 @@ bool Environment::_load(io::ResourceStreamPtr resource, string name)
         lua_pop(lua, 1);
         return false;
     }
-    return true;
+    return true;    
 }
 
 };//namespace script

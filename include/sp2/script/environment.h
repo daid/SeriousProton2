@@ -50,8 +50,9 @@ public:
         lua_pop(lua, 1);
     }
     
-    bool load(sp::string resource_name);
+    bool load(const string& resource_name);
     bool load(sp::io::ResourceStreamPtr resource);
+    bool run(const string& code);
     
     //Call a script function. Return true if the call was made, false on an error.
     template<typename... ARGS> bool call(string global_function, ARGS... args)
@@ -128,7 +129,8 @@ public:
         size_t max;
     };
 private:
-    bool _load(io::ResourceStreamPtr resource, sp::string name);
+    bool _load(io::ResourceStreamPtr resource, const string& name);
+    bool _run(const string& code, const string& name);
 
     int pushArgs(lua_State* L)
     {
