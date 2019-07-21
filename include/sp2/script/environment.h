@@ -13,7 +13,15 @@ namespace script {
 class Environment : public AutoPointerObject
 {
 public:
+    class SandboxConfig
+    {
+    public:
+        size_t memory_limit;
+        int instruction_limit;
+    };
+
     Environment();
+    Environment(const SandboxConfig& sandbox_config);
     virtual ~Environment();
     
     /** Bind a C function to lua. Use with care, as you need to manage the lua stack yourself */
@@ -113,6 +121,12 @@ public:
     {
         return last_error;
     }
+
+    struct AllocInfo
+    {
+        size_t total;
+        size_t max;
+    };
 private:
     bool _load(io::ResourceStreamPtr resource, sp::string name);
 
@@ -129,6 +143,7 @@ private:
     
     lua_State* lua;
     sp::string last_error;
+    AllocInfo alloc_info;
 };
 
 };//namespace script

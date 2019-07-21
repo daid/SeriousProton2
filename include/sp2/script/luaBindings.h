@@ -11,7 +11,7 @@ namespace sp {
 class ScriptBindingObject;
 namespace script {
 
-lua_State* createLuaState();
+lua_State* createLuaState(lua_State* lua=nullptr);
 
 int lazyLoadingIndex(lua_State* L);
 int lazyLoadingNewIndex(lua_State* L);

@@ -1,6 +1,27 @@
 #include <sp2/script/environment.h>
 #include <sp2/script/luaBindings.h>
 
+static void luaInstructionCountHook(lua_State *L, lua_Debug *ar)
+{
+    luaL_error(L, "Instruction count exceeded.");
+}
+
+static void* luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    sp::script::Environment::AllocInfo* info = (sp::script::Environment::AllocInfo*)ud;
+    if (ptr)
+        info->total -= osize;
+    if (osize < nsize && info->total + nsize > info->max)
+        return nullptr;
+    info->total += nsize;
+    if (nsize == 0)
+    {
+        free(ptr);
+        return nullptr;
+    }
+    return realloc(ptr, nsize);
+}
+
 namespace sp {
 namespace script {
 
@@ -28,12 +49,41 @@ Environment::Environment()
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 }
 
+Environment::Environment(const SandboxConfig& sandbox_config)
+{
+    alloc_info.total = 0;
+    alloc_info.max = sandbox_config.memory_limit;
+
+    lua = lua_newstate(luaAlloc, &alloc_info);
+    lua = script::createLuaState(lua);
+    lua_sethook(lua, luaInstructionCountHook, LUA_MASKCOUNT, sandbox_config.instruction_limit);
+    //Create a new lua environment.
+    //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
+    lua_pushglobaltable(lua); //environment
+    
+    lua_newtable(lua); //environment metatable
+    lua_pushstring(lua, "[environment]");
+    lua_setfield(lua, -2, "__metatable");
+    lua_pushglobaltable(lua);
+    lua_setfield(lua, -2, "__index");
+    //Set the ptr in the metatable.
+    lua_pushlightuserdata(lua, this);
+    lua_setfield(lua, -2, "environment_ptr");
+
+    lua_setmetatable(lua, -2);
+    
+    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+}
+
 Environment::~Environment()
 {
     //Remove our environment from the registry.
     //REGISTRY[this] = nil
     lua_pushnil(lua);
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+    
+    if (lua != script::global_lua_state)
+        lua_close(lua);
 }
 
 void Environment::setGlobal(string name, lua_CFunction function)

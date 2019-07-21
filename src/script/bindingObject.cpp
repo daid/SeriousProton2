@@ -102,7 +102,7 @@ ScriptBindingObject::ScriptBindingObject()
     //REGISTY[this] = {"metatable": { "object_ptr": this, "__index": lazyLoadingIndex, "__newindex": lazyLoadingNewIndex} }
     lua_newtable(script::global_lua_state);
     lua_newtable(script::global_lua_state);
-    lua_pushstring(script::global_lua_state, "[environment]");
+    lua_pushstring(script::global_lua_state, "[object]");
     lua_setfield(script::global_lua_state, -2, "__metatable");
     lua_pushlightuserdata(script::global_lua_state, this);
     lua_setfield(script::global_lua_state, -2, "object_ptr");

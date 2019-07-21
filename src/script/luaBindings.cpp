@@ -38,9 +38,10 @@ static int panic(lua_State *L)
 
 
 void addVectorMetatables(lua_State*);
-lua_State* createLuaState()
+lua_State* createLuaState(lua_State* lua)
 {
-    lua_State* lua = luaL_newstate();
+    if (!lua)
+        lua = luaL_newstate();
     lua_atpanic(lua, &panic);
 
     luaL_requiref(lua, "_G", luaopen_base, true);
@@ -67,6 +68,10 @@ lua_State* createLuaState()
     lua_setglobal(lua, "rawequal");
     lua_pushnil(lua);
     lua_setglobal(lua, "setmetatable");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "pcall");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "xpcall");
 
     //Override the print function from "base" with our own log function.
     lua_register(lua, "print", luaLogFunction);
