@@ -56,6 +56,7 @@ Engine::Engine()
     maximum_frame_time = 0.5f;
     minimum_frame_time = 0.001f;
     fixed_update_accumulator = 0.0;
+    last_update_timing = {0};
 
     in_fixed_update = false;
     
