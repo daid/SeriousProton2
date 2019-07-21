@@ -96,7 +96,7 @@ void lazyLoading(int table_index, lua_State* L)
 ScriptBindingObject::ScriptBindingObject()
 {
     if (!script::global_lua_state)
-        script::createGlobalLuaState();
+        script::global_lua_state = script::createLuaState();
 
     //Add object to Lua registry, and register the lazy loader. This loads the bindings on first use, so we do not bind objects that we never use from the scripts.
     //REGISTY[this] = {"metatable": { "object_ptr": this, "__index": lazyLoadingIndex, "__newindex": lazyLoadingNewIndex} }

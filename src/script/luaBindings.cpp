@@ -31,44 +31,43 @@ static int luaLogFunction(lua_State* L)
 }
 
 void addVectorMetatables(lua_State*);
-void createGlobalLuaState()
+lua_State* createLuaState()
 {
-    sp2assert(global_lua_state == nullptr, "createGlobalLuaState should only be called once");
+    lua_State* lua = luaL_newstate();
 
-    global_lua_state = luaL_newstate();
-
-    luaL_requiref(global_lua_state, "_G", luaopen_base, true);
-    lua_pop(global_lua_state, 1);
-    luaL_requiref(global_lua_state, LUA_TABLIBNAME, luaopen_table, true);
-    lua_pop(global_lua_state, 1);
-    luaL_requiref(global_lua_state, LUA_STRLIBNAME, luaopen_string, true);
-    lua_pop(global_lua_state, 1);
-    luaL_requiref(global_lua_state, LUA_MATHLIBNAME, luaopen_math, true);
-    lua_pop(global_lua_state, 1);
+    luaL_requiref(lua, "_G", luaopen_base, true);
+    lua_pop(lua, 1);
+    luaL_requiref(lua, LUA_TABLIBNAME, luaopen_table, true);
+    lua_pop(lua, 1);
+    luaL_requiref(lua, LUA_STRLIBNAME, luaopen_string, true);
+    lua_pop(lua, 1);
+    luaL_requiref(lua, LUA_MATHLIBNAME, luaopen_math, true);
+    lua_pop(lua, 1);
     
     //Remove unsafe base functions.
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "collectgarbage");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "dofile");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "getmetatable");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "loadfile");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "load");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "rawequal");
-    lua_pushnil(global_lua_state);
-    lua_setglobal(global_lua_state, "setmetatable");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "collectgarbage");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "dofile");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "getmetatable");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "loadfile");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "load");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "rawequal");
+    lua_pushnil(lua);
+    lua_setglobal(lua, "setmetatable");
 
     //Override the print function from "base" with our own log function.
-    lua_register(global_lua_state, "print", luaLogFunction);
-    lua_register(global_lua_state, "log", luaLogFunction);
+    lua_register(lua, "print", luaLogFunction);
+    lua_register(lua, "log", luaLogFunction);
     
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 
-    addVectorMetatables(global_lua_state);
+    addVectorMetatables(lua);
+    return lua;
 }
 
 int pushToLua(lua_State* L, bool b)

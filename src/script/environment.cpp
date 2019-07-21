@@ -7,7 +7,7 @@ namespace script {
 Environment::Environment()
 {
     if (!script::global_lua_state)
-        script::createGlobalLuaState();
+        script::global_lua_state = script::createLuaState();
 
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
