@@ -30,7 +30,7 @@ static int luaLogFunction(lua_State* L)
     return 0;
 }
 
-void addVectorMetatables();
+void addVectorMetatables(lua_State*);
 void createGlobalLuaState()
 {
     sp2assert(global_lua_state == nullptr, "createGlobalLuaState should only be called once");
@@ -45,6 +45,22 @@ void createGlobalLuaState()
     lua_pop(global_lua_state, 1);
     luaL_requiref(global_lua_state, LUA_MATHLIBNAME, luaopen_math, true);
     lua_pop(global_lua_state, 1);
+    
+    //Remove unsafe base functions.
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "collectgarbage");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "dofile");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "getmetatable");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "loadfile");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "load");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "rawequal");
+    lua_pushnil(global_lua_state);
+    lua_setglobal(global_lua_state, "setmetatable");
 
     //Override the print function from "base" with our own log function.
     lua_register(global_lua_state, "print", luaLogFunction);
@@ -52,7 +68,7 @@ void createGlobalLuaState()
     
     lua_pop(global_lua_state, 1);
 
-    addVectorMetatables();
+    addVectorMetatables(global_lua_state);
 }
 
 int pushToLua(lua_State* L, bool b)

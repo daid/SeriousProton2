@@ -14,6 +14,8 @@ Environment::Environment()
     lua_newtable(global_lua_state); //environment
     
     lua_newtable(global_lua_state); //environment metatable
+    lua_pushstring(global_lua_state, "[environment]");
+    lua_setfield(global_lua_state, -2, "__metatable");
     lua_pushglobaltable(global_lua_state);
     lua_setfield(global_lua_state, -2, "__index");
     lua_pushlightuserdata(global_lua_state, this);
@@ -133,7 +135,7 @@ bool Environment::_load(io::ResourceStreamPtr resource, string name)
 
     string filecontents = resource->readAll();
 
-    if (luaL_loadbuffer(global_lua_state, filecontents.c_str(), filecontents.length(), name.c_str()))
+    if (luaL_loadbufferx(global_lua_state, filecontents.c_str(), filecontents.length(), name.c_str(), "t"))
     {
         string error_string = luaL_checkstring(global_lua_state, -1);
         LOG(Error, "LUA: load:", error_string);

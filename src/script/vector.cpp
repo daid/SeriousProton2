@@ -201,21 +201,25 @@ static luaL_Reg vector3_functions[] = {
     {nullptr, nullptr},
 };
 
-void addVectorMetatables()
+void addVectorMetatables(lua_State* lua)
 {
-    luaL_newmetatable(global_lua_state, "vector2");
-    lua_pushvalue(global_lua_state, -1);
-    lua_setfield(global_lua_state, -2, "__index");
-    luaL_setfuncs(global_lua_state, vector2_functions, 0);
-    lua_pop(global_lua_state, 1);
-    luaL_newmetatable(global_lua_state, "vector3");
-    lua_pushvalue(global_lua_state, -1);
-    lua_setfield(global_lua_state, -2, "__index");
-    luaL_setfuncs(global_lua_state, vector3_functions, 0);
-    lua_pop(global_lua_state, 1);
+    luaL_newmetatable(lua, "vector2");
+    lua_pushstring(lua, "[vector2]");
+    lua_setfield(lua, -2, "__metatable");
+    lua_pushvalue(lua, -1);
+    lua_setfield(lua, -2, "__index");
+    luaL_setfuncs(lua, vector2_functions, 0);
+    lua_pop(lua, 1);
+    luaL_newmetatable(lua, "vector3");
+    lua_pushstring(lua, "[vector3]");
+    lua_setfield(lua, -2, "__metatable");
+    lua_pushvalue(lua, -1);
+    lua_setfield(lua, -2, "__index");
+    luaL_setfuncs(lua, vector3_functions, 0);
+    lua_pop(lua, 1);
     
-    lua_register(global_lua_state, "Vector2", vector2Create);
-    lua_register(global_lua_state, "Vector3", vector3Create);
+    lua_register(lua, "Vector2", vector2Create);
+    lua_register(lua, "Vector3", vector3Create);
 }
 
 };//namespace script
