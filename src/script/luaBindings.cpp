@@ -49,12 +49,6 @@ void createGlobalLuaState()
     //Override the print function from "base" with our own log function.
     lua_register(global_lua_state, "print", luaLogFunction);
     lua_register(global_lua_state, "log", luaLogFunction);
-
-    luaL_newmetatable(global_lua_state, "lazyLoading");
-    lua_pushcfunction(global_lua_state, lazyLoadingIndex);
-    lua_setfield(global_lua_state, -2, "__index");
-    lua_pushcfunction(global_lua_state, lazyLoadingNewIndex);
-    lua_setfield(global_lua_state, -2, "__newindex");
     
     lua_pop(global_lua_state, 1);
 

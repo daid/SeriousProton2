@@ -62,12 +62,11 @@ static int luaNewIndexProxy(lua_State* L)
 void lazyLoading(int table_index, lua_State* L)
 {
     //Get the object reference for this object.
-    lua_getfield(L, table_index, "__ptr");
+    lua_getmetatable(L, table_index);
+    lua_getfield(L, -1, "object_ptr");
     sp::ScriptBindingObject* sbc = static_cast<sp::ScriptBindingObject*>(lua_touserdata(L, -1));
     lua_pop(L, 1);
-    
-    //Create a new table as meta table.
-    lua_newtable(L);
+
     //Create a new table to store functions and properties for this object.
     lua_newtable(L);
     int function_table_index = lua_gettop(L);
@@ -87,9 +86,9 @@ void lazyLoading(int table_index, lua_State* L)
     lua_setfield(L, -2, "__index");
     lua_pushcfunction(L, luaNewIndexProxy);
     lua_setfield(L, -2, "__newindex");
-    
-    //Register the metatable on our object table
-    lua_setmetatable(L, table_index);
+
+    //Remove the metatable from the stack, it's already assigned to the object table.
+    lua_pop(L, 1);
 }
 
 };
@@ -100,26 +99,28 @@ ScriptBindingObject::ScriptBindingObject()
         script::createGlobalLuaState();
 
     //Add object to Lua registry, and register the lazy loader. This loads the bindings on first use, so we do not bind objects that we never use from the scripts.
-    //REGISTY[this] = {"__ptr": this}
+    //REGISTY[this] = {"metatable": { "object_ptr": this, "__index": lazyLoadingIndex, "__newindex": lazyLoadingNewIndex} }
+    lua_newtable(script::global_lua_state);
     lua_newtable(script::global_lua_state);
     lua_pushlightuserdata(script::global_lua_state, this);
-    lua_setfield(script::global_lua_state, -2, "__ptr");
-    luaL_setmetatable(script::global_lua_state, "lazyLoading");
+    lua_setfield(script::global_lua_state, -2, "object_ptr");
+    lua_pushcfunction(script::global_lua_state, script::lazyLoadingIndex);
+    lua_setfield(script::global_lua_state, -2, "__index");
+    lua_pushcfunction(script::global_lua_state, script::lazyLoadingNewIndex);
+    lua_setfield(script::global_lua_state, -2, "__newindex");
+    lua_setmetatable(script::global_lua_state, -2);
     lua_rawsetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
 ScriptBindingObject::~ScriptBindingObject()
 {
     //Clear our pointer reference in our object table
-    //REGISTY[this]["__ptr"] = nullptr
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_pushlightuserdata(script::global_lua_state, nullptr);
-    lua_setfield(script::global_lua_state, -2, "__ptr");
     //Clear the metatable of this object.
     lua_pushnil(script::global_lua_state);
     lua_setmetatable(script::global_lua_state, -2);
     lua_pop(script::global_lua_state, 1);
-    
+
     //Remove object from Lua registry
     //REGISTY[this] = nil
     lua_pushnil(script::global_lua_state);

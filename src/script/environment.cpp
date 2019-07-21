@@ -10,17 +10,16 @@ Environment::Environment()
         script::createGlobalLuaState();
 
     //Create a new lua environment.
-    //REGISTY[this] = {"metatable": {"__index": _G}, "__ptr": this}    
+    //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
     lua_newtable(global_lua_state); //environment
     
     lua_newtable(global_lua_state); //environment metatable
     lua_pushglobaltable(global_lua_state);
     lua_setfield(global_lua_state, -2, "__index");
-    lua_setmetatable(global_lua_state, -2);
-    
-    //Create __ptr in this environment.
     lua_pushlightuserdata(global_lua_state, this);
-    lua_setfield(global_lua_state, -2, "__ptr");
+    //Set the ptr in the metatable.
+    lua_setfield(global_lua_state, -2, "environment_ptr");
+    lua_setmetatable(global_lua_state, -2);
     
     lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
 }

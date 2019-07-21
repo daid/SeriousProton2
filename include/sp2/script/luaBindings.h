@@ -164,22 +164,24 @@ template<typename TYPE> int setProperty(lua_State* L)
 template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
-    lua_getfield(L, index, "__ptr");
+    lua_getmetatable(L, index);
+    lua_getfield(L, -1, "object_ptr");
     luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
     T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
-    lua_pop(L, 1);
+    lua_pop(L, 2);
     return obj;
 }
 
 template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
-    lua_getfield(L, index, "__ptr");
+    lua_getmetatable(L, index);
+    lua_getfield(L, -1, "object_ptr");
     luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
     sp::P<T> obj = sp::P<ScriptBindingObject>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
-    lua_pop(L, 1);
+    lua_pop(L, 2);
     return obj;
 }
 

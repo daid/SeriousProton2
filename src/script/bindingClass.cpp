@@ -8,10 +8,10 @@ static int updateCallback(lua_State* L)
     if (!lua_isnil(L, 1))
         luaL_checktype(L, 1, LUA_TFUNCTION);
     
-    lua_pushstring(L, "__ptr");
-    lua_gettable(L, lua_upvalueindex(2));
+    lua_getmetatable(L, lua_upvalueindex(2));
+    lua_getfield(L, -1, "object_ptr");
     void* obj = lua_touserdata(L, -1);
-    lua_pop(L, 1);
+    lua_pop(L, 2);
     if (!obj)   //Object was destroyed.
         return 0;
     
