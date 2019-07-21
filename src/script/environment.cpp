@@ -8,64 +8,66 @@ Environment::Environment()
 {
     if (!script::global_lua_state)
         script::global_lua_state = script::createLuaState();
+    lua = script::global_lua_state;
 
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
-    lua_newtable(global_lua_state); //environment
+    lua_newtable(lua); //environment
     
-    lua_newtable(global_lua_state); //environment metatable
-    lua_pushstring(global_lua_state, "[environment]");
-    lua_setfield(global_lua_state, -2, "__metatable");
-    lua_pushglobaltable(global_lua_state);
-    lua_setfield(global_lua_state, -2, "__index");
-    lua_pushlightuserdata(global_lua_state, this);
+    lua_newtable(lua); //environment metatable
+    lua_pushstring(lua, "[environment]");
+    lua_setfield(lua, -2, "__metatable");
+    lua_pushglobaltable(lua);
+    lua_setfield(lua, -2, "__index");
     //Set the ptr in the metatable.
-    lua_setfield(global_lua_state, -2, "environment_ptr");
-    lua_setmetatable(global_lua_state, -2);
+    lua_pushlightuserdata(lua, this);
+    lua_setfield(lua, -2, "environment_ptr");
+
+    lua_setmetatable(lua, -2);
     
-    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 }
 
 Environment::~Environment()
 {
     //Remove our environment from the registry.
     //REGISTRY[this] = nil
-    lua_pushnil(global_lua_state);
-    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_pushnil(lua);
+    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 }
 
 void Environment::setGlobal(string name, lua_CFunction function)
 {
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table, with our environment as first upvalue.
     if (function)
     {
-        lua_pushvalue(global_lua_state, -1);
-        lua_pushcclosure(global_lua_state, function, 1);
+        lua_pushvalue(lua, -1);
+        lua_pushcclosure(lua, function, 1);
     }
     else
     {
-        lua_pushnil(global_lua_state);
+        lua_pushnil(lua);
     }
-    lua_setfield(global_lua_state, -2, name.c_str());
+    lua_setfield(lua, -2, name.c_str());
     
     //Pop the table
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 }
 
 void Environment::setGlobal(string name, ScriptBindingObject* ptr)
 {
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    pushToLua(global_lua_state, ptr);
-    lua_setfield(global_lua_state, -2, name.c_str());
+    pushToLua(lua, ptr);
+    lua_setfield(lua, -2, name.c_str());
     
     //Pop the table
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 }
 
 void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
@@ -76,40 +78,40 @@ void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
 void Environment::setGlobal(string name, bool value)
 {
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    lua_pushboolean(global_lua_state, value);
-    lua_setfield(global_lua_state, -2, name.c_str());
+    lua_pushboolean(lua, value);
+    lua_setfield(lua, -2, name.c_str());
     
     //Pop the table
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 }
 
 void Environment::setGlobal(string name, int value)
 {
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    lua_pushinteger(global_lua_state, value);
-    lua_setfield(global_lua_state, -2, name.c_str());
+    lua_pushinteger(lua, value);
+    lua_setfield(lua, -2, name.c_str());
     
     //Pop the table
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 }
 
 void Environment::setGlobal(string name, string value)
 {
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     
     //Set our variable in this environment table
-    lua_pushstring(global_lua_state, value.c_str());
-    lua_setfield(global_lua_state, -2, name.c_str());
+    lua_pushstring(lua, value.c_str());
+    lua_setfield(lua, -2, name.c_str());
     
     //Pop the table
-    lua_pop(global_lua_state, 1);
+    lua_pop(lua, 1);
 }
 
 bool Environment::load(string resource_name)
@@ -125,7 +127,7 @@ bool Environment::load(string resource_name)
 
 bool Environment::load(io::ResourceStreamPtr resource)
 {
-    return _load(resource, "?");
+    return _load(resource, "[unknown]");
 }
 
 bool Environment::_load(io::ResourceStreamPtr resource, string name)
@@ -135,25 +137,25 @@ bool Environment::_load(io::ResourceStreamPtr resource, string name)
 
     string filecontents = resource->readAll();
 
-    if (luaL_loadbufferx(global_lua_state, filecontents.c_str(), filecontents.length(), name.c_str(), "t"))
+    if (luaL_loadbufferx(lua, filecontents.c_str(), filecontents.length(), name.c_str(), "t"))
     {
-        string error_string = luaL_checkstring(global_lua_state, -1);
-        LOG(Error, "LUA: load:", error_string);
-        lua_pop(global_lua_state, 1);
+        last_error = string("LUA: load: ") + luaL_checkstring(lua, -1);
+        LOG(Error, last_error);
+        lua_pop(lua, 1);
         return false;
     }
 
     //Get the environment table from the registry.
-    lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     //set the environment table it as 1st upvalue
-    lua_setupvalue(global_lua_state, -2, 1);
+    lua_setupvalue(lua, -2, 1);
     
     //Call the actual code.
-    if (lua_pcall(global_lua_state, 0, 0, 0))
+    if (lua_pcall(lua, 0, 0, 0))
     {
-        string error_string = luaL_checkstring(global_lua_state, -1);
-        LOG(Error, "LUA: run:", error_string);
-        lua_pop(global_lua_state, 1);
+        last_error = string("LUA: run: ") + luaL_checkstring(lua, -1);
+        LOG(Error, last_error);
+        lua_pop(lua, 1);
         return false;
     }
     return true;

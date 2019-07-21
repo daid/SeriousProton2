@@ -30,10 +30,18 @@ static int luaLogFunction(lua_State* L)
     return 0;
 }
 
+static int panic(lua_State *L)
+{
+    LOG(Error, "PANIC: unprotected error in call to Lua API (", lua_tostring(L, -1), ")");
+    return 0;  /* return to Lua to abort */
+}
+
+
 void addVectorMetatables(lua_State*);
 lua_State* createLuaState()
 {
     lua_State* lua = luaL_newstate();
+    lua_atpanic(lua, &panic);
 
     luaL_requiref(lua, "_G", luaopen_base, true);
     lua_pop(lua, 1);

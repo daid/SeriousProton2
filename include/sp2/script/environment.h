@@ -30,16 +30,16 @@ public:
         typedef RET(*FT)(ARGS...);
 
         //Get the environment table from the registry.
-        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+        lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         
-        FT* f = reinterpret_cast<FT*>(lua_newuserdata(sp::script::global_lua_state, sizeof(FT)));
+        FT* f = reinterpret_cast<FT*>(lua_newuserdata(lua, sizeof(FT)));
         *f = func;
         
-        lua_pushcclosure(sp::script::global_lua_state, &script::callFunction<RET, ARGS...>, 1);
-        lua_setfield(sp::script::global_lua_state, -2, name.c_str());
+        lua_pushcclosure(lua, &script::callFunction<RET, ARGS...>, 1);
+        lua_setfield(lua, -2, name.c_str());
         
         //Pop the table
-        lua_pop(global_lua_state, 1);
+        lua_pop(lua, 1);
     }
     
     bool load(sp::string resource_name);
@@ -49,23 +49,24 @@ public:
     template<typename... ARGS> bool call(string global_function, ARGS... args)
     {
         //Get the environment table from the registry.
-        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
+        lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
 
-        lua_getfield(global_lua_state, -1, global_function.c_str());
+        lua_getfield(lua, -1, global_function.c_str());
         
-        if (lua_isfunction(global_lua_state, -1))
+        if (lua_isfunction(lua, -1))
         {
-            int arg_count = pushArgs(global_lua_state, args...);
-            if (lua_pcall(global_lua_state, arg_count, 0, 0))
+            int arg_count = pushArgs(lua, args...);
+            if (lua_pcall(lua, arg_count, 0, 0))
             {
-                LOG(Error, "Function call error:", global_function, ":", lua_tostring(global_lua_state, -1));
-                lua_pop(global_lua_state, 2);
+                last_error = "Function call error:", global_function, ":", lua_tostring(lua, -1);
+                LOG(Error, last_error);
+                lua_pop(lua, 2);
                 return false;
             }
-            lua_pop(global_lua_state, 1);
+            lua_pop(lua, 1);
             return true;
         }
-        lua_pop(global_lua_state, 2);
+        lua_pop(lua, 2);
         return false;
     }
 
@@ -77,36 +78,41 @@ public:
     template<typename... ARGS> CoroutinePtr callCoroutine(string global_function, ARGS... args)
     {
         //Get the environment table from the registry.
-        lua_rawgetp(global_lua_state, LUA_REGISTRYINDEX, this);
-        lua_getfield(global_lua_state, -1, global_function.c_str());
+        lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
+        lua_getfield(lua, -1, global_function.c_str());
         
-        if (!lua_isfunction(global_lua_state, -1))
+        if (!lua_isfunction(lua, -1))
         {
-            lua_pop(global_lua_state, 2);
+            lua_pop(lua, 2);
             return nullptr;
         }
         
-        lua_State* L = lua_newthread(global_lua_state);
-        lua_pushvalue(global_lua_state, -2);
-        lua_xmove(global_lua_state, L, 1);
+        lua_State* L = lua_newthread(lua);
+        lua_pushvalue(lua, -2);
+        lua_xmove(lua, L, 1);
         int arg_count = pushArgs(L, args...);
         int result = lua_resume(L, nullptr, arg_count);
         if (result != LUA_OK && result != LUA_YIELD)
         {
-            LOG(Error, "Function call error:", global_function, ":", lua_tostring(L, -1));
-            lua_pop(global_lua_state, 3); //remove environment, function and coroutine
+            last_error = "Function call error:", global_function, ":", lua_tostring(L, -1);
+            LOG(Error, last_error);
+            lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
         if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
         {
-            lua_pop(global_lua_state, 3); //remove environment, function and coroutine
+            lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
         std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(L);
-        lua_pop(global_lua_state, 2); //remove environment, function, coroutine is removed by constructor of Coroutine object.
+        lua_pop(lua, 2); //remove environment, function, coroutine is removed by constructor of Coroutine object.
         return coroutine;
     }
 
+    const sp::string& getLastError()
+    {
+        return last_error;
+    }
 private:
     bool _load(io::ResourceStreamPtr resource, sp::string name);
 
@@ -120,6 +126,9 @@ private:
         pushToLua(L, arg);
         return 1 + pushArgs(L, args...);
     }
+    
+    lua_State* lua;
+    sp::string last_error;
 };
 
 };//namespace script
