@@ -53,6 +53,7 @@ public:
     bool load(const string& resource_name);
     bool load(sp::io::ResourceStreamPtr resource);
     bool run(const string& code);
+    CoroutinePtr runCoroutine(const string& code);
     
     //Call a script function. Return true if the call was made, false on an error.
     template<typename... ARGS> bool call(string global_function, ARGS... args)
@@ -71,7 +72,7 @@ public:
 
             if (lua_pcall(lua, arg_count, 0, 0))
             {
-                last_error = "Function call error:", global_function, ":", lua_tostring(lua, -1);
+                last_error = string("Function call error:") + global_function + ":" + lua_tostring(lua, -1);
                 LOG(Error, last_error);
                 lua_pop(lua, 2);
                 return false;
@@ -107,7 +108,7 @@ public:
         int result = lua_resume(L, nullptr, arg_count);
         if (result != LUA_OK && result != LUA_YIELD)
         {
-            last_error = "Function call error:", global_function, ":", lua_tostring(L, -1);
+            last_error = string("Function call error:") + global_function + ":" + lua_tostring(L, -1);
             LOG(Error, last_error);
             lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;

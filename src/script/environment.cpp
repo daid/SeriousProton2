@@ -187,6 +187,45 @@ bool Environment::run(const string& code)
     return _run(code, "[string]");
 }
 
+CoroutinePtr Environment::runCoroutine(const string& code)
+{
+    lua_State* L = lua_newthread(lua);
+
+    if (luaL_loadbufferx(L, code.c_str(), code.length(), "[string]", "t"))
+    {
+        last_error = string("LUA: load: ") + luaL_checkstring(lua, -1);
+        LOG(Error, last_error);
+        lua_pop(lua, 1);
+        return nullptr;
+    }
+
+    //Get the environment table from the registry.
+    lua_rawgetp(L, LUA_REGISTRYINDEX, this);
+    //set the environment table it as 1st upvalue
+    lua_setupvalue(L, -2, 1);
+    
+    //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
+    lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
+    
+    int result = lua_resume(L, nullptr, 0);
+    if (result != LUA_OK && result != LUA_YIELD)
+    {
+        last_error = string("LUA: Run:") + lua_tostring(L, -1);
+        LOG(Error, last_error);
+        lua_pop(L, 1); //remove coroutine
+        return nullptr;
+    }
+    if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
+    {
+        lua_pop(L, 1); //remove coroutine
+        return nullptr;
+    }
+    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(L);
+    //coroutine is removed by constructor of Coroutine object.
+    return coroutine;
+}
+
+
 bool Environment::_load(io::ResourceStreamPtr resource, const string& name)
 {
     if (!resource)
