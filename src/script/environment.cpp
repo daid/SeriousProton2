@@ -210,6 +210,8 @@ bool Environment::_run(const string& code, const string& name)
     //set the environment table it as 1st upvalue
     lua_setupvalue(lua, -2, 1);
     
+    //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
+    lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
     //Call the actual code.
     if (lua_pcall(lua, 0, 0, 0))
     {

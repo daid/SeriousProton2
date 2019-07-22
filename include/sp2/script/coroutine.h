@@ -23,6 +23,8 @@ public:
     {
         if (!L)
             return false;
+        //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
+        lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
 
         int arg_count = pushArgs(L, args...);
         int status = lua_resume(L, nullptr, arg_count);

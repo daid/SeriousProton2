@@ -65,6 +65,10 @@ public:
         if (lua_isfunction(lua, -1))
         {
             int arg_count = pushArgs(lua, args...);
+
+            //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
+            lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
+
             if (lua_pcall(lua, arg_count, 0, 0))
             {
                 last_error = "Function call error:", global_function, ":", lua_tostring(lua, -1);
