@@ -21,6 +21,7 @@ public:
      */
     template<typename... ARGS> bool resume(ARGS... args)
     {
+        last_error = "";
         if (!L)
             return false;
         //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
@@ -33,12 +34,21 @@ public:
             return true;
         if (status != LUA_OK)
         {
-            LOG(Error, "Coroutine resume error:", lua_tostring(L, -1));
+            last_error = lua_tostring(L, -1);
+            LOG(Error, "Coroutine resume error:", last_error);
         }
         release();
         return false;
     }
 
+    const sp::string& getLastError()
+    {
+        return last_error;
+    }
+    
+    //Get the current yielded location in the source code. Or -1 if that is not available, or the coroutine is no longer yielded.
+    int getCurrentLineNumber();
+    string getCurrentSource();
 private:
     void release();
     
@@ -54,6 +64,7 @@ private:
     }
 
     lua_State* L;
+    string last_error;
     
     friend class Environment;
 };

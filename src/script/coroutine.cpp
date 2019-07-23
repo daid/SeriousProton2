@@ -26,5 +26,47 @@ void Coroutine::release()
     L = nullptr;
 }
 
+int Coroutine::getCurrentLineNumber()
+{
+    if (!L)
+        return -1;
+
+    lua_Debug debug;
+    int n=0;
+    while(lua_getstack(L, n, &debug) != 0)
+    {
+        if (lua_getinfo(L, "Sl", &debug))
+        {
+            if (debug.what[0] != 'C')
+                return debug.currentline;
+        }
+        n++;
+    }
+    return -1;
+}
+
+sp::string Coroutine::getCurrentSource()
+{
+    if (!L)
+        return "";
+
+    lua_Debug debug;
+    int n=0;
+    while(lua_getstack(L, n, &debug) != 0)
+    {
+        if (lua_getinfo(L, "Sl", &debug))
+        {
+            if (debug.what[0] != 'C')
+            {
+                if (debug.source[0] == '=' || debug.source[0] == '@')
+                    return debug.source + 1;
+                return debug.source;
+            }
+        }
+        n++;
+    }
+    return "";
+}
+
 };//namespace script
 };//namespace sp

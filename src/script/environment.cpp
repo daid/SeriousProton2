@@ -66,8 +66,6 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     lua_newtable(lua); //environment metatable
     lua_pushstring(lua, "[environment]");
     lua_setfield(lua, -2, "__metatable");
-    lua_pushglobaltable(lua);
-    lua_setfield(lua, -2, "__index");
     //Set the ptr in the metatable.
     lua_pushlightuserdata(lua, this);
     lua_setfield(lua, -2, "environment_ptr");
@@ -179,22 +177,23 @@ bool Environment::load(const string& resource_name)
 
 bool Environment::load(io::ResourceStreamPtr resource)
 {
-    return _load(resource, "[unknown]");
+    return _load(resource, "=[resource]");
 }
 
 bool Environment::run(const string& code)
 {
-    return _run(code, "[string]");
+    return _run(code, "=[string]");
 }
 
 CoroutinePtr Environment::runCoroutine(const string& code)
 {
     lua_State* L = lua_newthread(lua);
 
-    if (luaL_loadbufferx(L, code.c_str(), code.length(), "[string]", "t"))
+    last_error = "";
+    if (luaL_loadbufferx(L, code.c_str(), code.length(), "=[string]", "t"))
     {
-        last_error = string("LUA: load: ") + luaL_checkstring(lua, -1);
-        LOG(Error, last_error);
+        last_error = luaL_checkstring(lua, -1);
+        LOG(Error, "LUA: load:", last_error);
         lua_pop(lua, 1);
         return nullptr;
     }
@@ -210,8 +209,8 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     int result = lua_resume(L, nullptr, 0);
     if (result != LUA_OK && result != LUA_YIELD)
     {
-        last_error = string("LUA: Run:") + lua_tostring(L, -1);
-        LOG(Error, last_error);
+        last_error = lua_tostring(L, -1);
+        LOG(Error, "LUA: Run:", last_error);
         lua_pop(L, 1); //remove coroutine
         return nullptr;
     }
@@ -231,15 +230,16 @@ bool Environment::_load(io::ResourceStreamPtr resource, const string& name)
     if (!resource)
         return false;
 
-    return _run(resource->readAll(), name);
+    return _run(resource->readAll(), "@" + name);
 }
 
 bool Environment::_run(const string& code, const string& name)
 {
+    last_error = "";
     if (luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t"))
     {
-        last_error = string("LUA: load: ") + luaL_checkstring(lua, -1);
-        LOG(Error, last_error);
+        last_error = luaL_checkstring(lua, -1);
+        LOG(Error, "LUA: load:", last_error);
         lua_pop(lua, 1);
         return false;
     }
@@ -254,8 +254,8 @@ bool Environment::_run(const string& code, const string& name)
     //Call the actual code.
     if (lua_pcall(lua, 0, 0, 0))
     {
-        last_error = string("LUA: run: ") + luaL_checkstring(lua, -1);
-        LOG(Error, last_error);
+        last_error = luaL_checkstring(lua, -1);
+        LOG(Error, "LUA: run:", last_error);
         lua_pop(lua, 1);
         return false;
     }

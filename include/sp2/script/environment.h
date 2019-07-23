@@ -63,6 +63,7 @@ public:
 
         lua_getfield(lua, -1, global_function.c_str());
         
+        last_error = "";
         if (lua_isfunction(lua, -1))
         {
             int arg_count = pushArgs(lua, args...);
@@ -72,8 +73,8 @@ public:
 
             if (lua_pcall(lua, arg_count, 0, 0))
             {
-                last_error = string("Function call error:") + global_function + ":" + lua_tostring(lua, -1);
-                LOG(Error, last_error);
+                last_error = lua_tostring(lua, -1);
+                LOG(Error, "Function call error:", global_function, ":", last_error);
                 lua_pop(lua, 2);
                 return false;
             }
@@ -95,6 +96,7 @@ public:
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         lua_getfield(lua, -1, global_function.c_str());
         
+        last_error = "";
         if (!lua_isfunction(lua, -1))
         {
             lua_pop(lua, 2);
@@ -108,8 +110,8 @@ public:
         int result = lua_resume(L, nullptr, arg_count);
         if (result != LUA_OK && result != LUA_YIELD)
         {
-            last_error = string("Function call error:") + global_function + ":" + lua_tostring(L, -1);
-            LOG(Error, last_error);
+            last_error = lua_tostring(L, -1);
+            LOG(Error, "Function call error:", global_function, ":", last_error);
             lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
