@@ -179,7 +179,10 @@ void Engine::run()
             double time = fps_counter_clock.restart();
             current_fps = double(fps_count) / time;
             fps_count = 0;
-            LOG(Debug, "FPS:", current_fps);
+            if (Window::windows.empty())
+                LOG(Debug, "UPS:", current_fps);
+            else
+                LOG(Debug, "FPS:", current_fps);
         }
     }
     LOG(Info, "Engine closing down");
