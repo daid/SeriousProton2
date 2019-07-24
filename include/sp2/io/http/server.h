@@ -92,7 +92,7 @@ private:
         bool processIncommingData();
         bool handleTimeout();
         void handleRequest(const Request& request);
-        void startHttpReply(int reply_code);
+        void startHttpReply(int reply_code, const string& mimetype="");
         void httpChunk(const string& data);
         void sendWebsocketTextPacket(const string& data);
         

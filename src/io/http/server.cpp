@@ -411,7 +411,10 @@ void Server::Connection::handleRequest(const Request& request)
     FILE* f = fopen(full_path.c_str(), "rb");
     if (f)
     {
-        startHttpReply(200);
+        if (request.path.endswith(".js"))   //Need to supply javascript mimetype when scripts are loaded on demand.
+            startHttpReply(200, "text/javascript");
+        else
+            startHttpReply(200);
         while(true)
         {
             char buffer[1024];
@@ -436,10 +439,12 @@ void Server::Connection::handleRequest(const Request& request)
     httpChunk("");
 }
 
-void Server::Connection::startHttpReply(int reply_code)
+void Server::Connection::startHttpReply(int reply_code, const string& mimetype)
 {
     string reply = string("HTTP/1.1 ") + string(reply_code) + " OK\r\n";
     reply += "Connection: Keep-Alive\r\n";
+    if (mimetype.length() > 0)
+        reply += "Content-Type: " + mimetype + "\r\n";
     reply += "Transfer-Encoding: chunked\r\n";
     reply += "\r\n";
     socket.send(reply.c_str(), reply.size());
