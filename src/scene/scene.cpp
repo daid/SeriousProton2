@@ -11,7 +11,7 @@ namespace sp {
 std::unordered_map<string, P<Scene>> Scene::scene_mapping;
 PList<Scene> Scene::scenes;
 
-Scene::Scene(string scene_name, int priority)
+Scene::Scene(const string& scene_name, int priority)
 : scene_name(scene_name), priority(priority)
 {
     root = new Node(this);

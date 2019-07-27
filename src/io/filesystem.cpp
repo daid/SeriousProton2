@@ -69,5 +69,36 @@ sp::string basename(const sp::string& path)
     return path.substr(n + 1);
 }
 
+bool saveFileContents(const sp::string& filename, const sp::string& contents)
+{
+    FILE* f = fopen(filename.c_str(), "wb");
+    if (!f)
+        return false;
+    if (fwrite(contents.data(), contents.length(), 1, f) < 1)
+    {
+        fclose(f);
+        remove(filename.c_str());
+        return false;
+    }
+    fclose(f);
+    return true;
+}
+
+sp::string loadFileContents(const sp::string& filename)
+{
+    FILE* f = fopen(filename.c_str(), "rb");
+    if (!f)
+        return "";
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    
+    string result;
+    result.resize(size);
+    fread(&result[0], size, 1, f);
+    fclose(f);
+    return result;
+}
+
 };//namespace io
 };//namespace sp

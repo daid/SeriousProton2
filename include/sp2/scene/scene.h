@@ -26,7 +26,7 @@ class Camera;
 class Scene : public ScriptBindingObject
 {
 public:
-    Scene(string scene_name, int priority=0);
+    Scene(const string& scene_name, int priority=0);
     virtual ~Scene();
 
     P<Node> getRoot() { return root; }
