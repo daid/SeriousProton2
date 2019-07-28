@@ -411,8 +411,10 @@ void Server::Connection::handleRequest(const Request& request)
     FILE* f = fopen(full_path.c_str(), "rb");
     if (f)
     {
-        if (request.path.endswith(".js"))   //Need to supply javascript mimetype when scripts are loaded on demand.
+        if (request.path.endswith(".js"))
             startHttpReply(200, "text/javascript");
+        else if (request.path.endswith(".css"))
+            startHttpReply(200, "text/css");
         else
             startHttpReply(200);
         while(true)

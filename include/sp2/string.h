@@ -386,7 +386,7 @@ public:
         Return a string which is the concatenation of the strings in the
         iterable.  The separator between elements is S.
     */
-    string join(const std::vector<string> list) const
+    string join(const std::vector<string>& list) const
     {
         string ret;
         for(unsigned int n=0; n<list.size(); n++)

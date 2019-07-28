@@ -13,6 +13,7 @@ bool isDirectory(const sp::string& path);
 bool makeDirectory(const sp::string& path);
 sp::string dirname(const sp::string& path);
 sp::string basename(const sp::string& path);
+std::vector<sp::string> listFiles(const sp::string& path);
 
 bool saveFileContents(const sp::string& filename, const sp::string& contents);
 sp::string loadFileContents(const sp::string& filename);

@@ -1,5 +1,6 @@
 #include <sp2/io/filesystem.h>
 
+#include <dirent.h>
 #include <sys/stat.h>
 
 
@@ -67,6 +68,24 @@ sp::string basename(const sp::string& path)
 {
     int n = lastPathSeperator(path);
     return path.substr(n + 1);
+}
+
+std::vector<sp::string> listFiles(const sp::string& path)
+{
+    std::vector<sp::string> result;
+    DIR* dir = opendir(path.c_str());
+    if (!dir)
+        return result;
+    
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != nullptr)
+    {
+        if (entry->d_name[0] == '.')
+            continue;
+        result.push_back(entry->d_name);
+    }
+    closedir(dir);
+    return result;
 }
 
 bool saveFileContents(const sp::string& filename, const sp::string& contents)
