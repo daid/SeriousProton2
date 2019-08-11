@@ -15,7 +15,8 @@ Voxelmap::Voxelmap(P<Node> parent, string texture, float voxel_size, int texture
 : sp::Node(parent), voxel_size(voxel_size), texture_tile_count_x(texture_tile_count_x), texture_tile_count_y(texture_tile_count_y)
 {
     render_data.shader = Shader::get("internal:basic_shaded.shader");
-    render_data.texture = texture_manager.get(texture);
+    if (texture != "")
+        render_data.texture = texture_manager.get(texture);
     render_data.type = RenderData::Type::Normal;
     render_data.order = -1;
 }

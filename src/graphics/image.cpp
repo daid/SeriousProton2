@@ -169,6 +169,37 @@ void Image::draw(Rect2i rect, uint32_t color)
     }
 }
 
+void Image::draw(Vector2i position, const Image& img)
+{
+    if (position.x + img.size.x <= 0 || position.x > size.x)
+        return;
+    if (position.y + img.size.y <= 0 || position.y > size.y)
+        return;
+    int w = std::min(img.size.x, size.x - position.x);
+    const uint32_t* src = img.pixels.data();
+    uint32_t* dst = &pixels[position.x + position.y * size.x];
+    if (position.x < 0)
+    {
+        src -= position.x;
+        dst -= position.x;
+        w += position.x;
+    }
+    int h = std::min(img.size.y, size.y - position.y);
+    if (position.y < 0)
+    {
+        src -= position.y * img.size.x;
+        dst -= position.y * size.x;
+        h += position.y;
+    }
+    
+    for(int y=0; y<h; y++)
+    {
+        memcpy(dst, src, w * sizeof(uint32_t));
+        dst += size.x;
+        src += img.size.x;
+    }
+}
+
 void Image::drawFilled(Rect2i rect, uint32_t color)
 {
     for(int y=0; y<rect.size.y; y++)
