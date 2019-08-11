@@ -202,6 +202,15 @@ void Window::createRenderWindow()
         }
     }
 
+    if (window_aspect_ratio != 0.0)
+    {
+        //For Android, set the orientation depending on if we want a wide or tall window.
+        if (window_aspect_ratio > 1.0)
+            SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeRight LandscapeLeft");
+        else
+            SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait PortraitUpsideDown");
+    }
+
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
