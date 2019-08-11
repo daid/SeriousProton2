@@ -46,6 +46,7 @@ private:
 
     virtual ~Window();
 
+    void initialize();
     void createRenderWindow();
     void render();
     void handleEvent(const SDL_Event& event);

@@ -30,6 +30,44 @@ void* Window::shared_render_context;
 
 Window::Window()
 {
+    initialize();
+    createRenderWindow();
+}
+
+Window::Window(float aspect_ratio)
+{
+    initialize();
+    window_aspect_ratio = aspect_ratio;
+
+    createRenderWindow();
+}
+
+Window::Window(Vector2f size_factor)
+: Window()
+{
+    initialize();
+    max_window_size_ratio = size_factor;
+
+    createRenderWindow();
+}
+
+Window::Window(Vector2f size_factor, float aspect_ratio)
+: Window()
+{
+    initialize();
+    window_aspect_ratio = aspect_ratio;
+    max_window_size_ratio = size_factor;
+
+    createRenderWindow();
+}
+
+Window::~Window()
+{
+    close();
+}
+
+void Window::initialize()
+{
     sp2assert(Engine::getInstance(), "The sp::Engine needs to be created before the sp::Window is created");
 
 #ifdef __WIN32__
@@ -58,38 +96,6 @@ Window::Window()
     clear_color = Color(0.1, 0.1, 0.1);
 
     render_window = nullptr;
-
-    createRenderWindow();
-}
-
-Window::Window(float aspect_ratio)
-: Window()
-{
-    window_aspect_ratio = aspect_ratio;
-
-    createRenderWindow();
-}
-
-Window::Window(Vector2f size_factor)
-: Window()
-{
-    max_window_size_ratio = size_factor;
-
-    createRenderWindow();
-}
-
-Window::Window(Vector2f size_factor, float aspect_ratio)
-: Window()
-{
-    window_aspect_ratio = aspect_ratio;
-    max_window_size_ratio = size_factor;
-
-    createRenderWindow();
-}
-
-Window::~Window()
-{
-    close();
 }
 
 void Window::setFullScreen(bool fullscreen)
