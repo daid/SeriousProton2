@@ -24,7 +24,7 @@ void OpenGLTexture::bind()
     if (image.getSize().x > 0)
     {
         if (type == Type::Static)
-            LOG(Info, "Loaded image:", name, image.getSize().x, "x", image.getSize().y);
+            LOG(Info, "Loaded texture:", name, image.getSize().x, "x", image.getSize().y);
 
         if (handle == 0)
         {

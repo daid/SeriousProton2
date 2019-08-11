@@ -128,7 +128,9 @@ Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector
 {
     const auto project_inv = camera->getProjectionMatrix().inverse();
     const auto transform = camera->getGlobalTransform();
-    return Ray3d(Vector3d(transform * (project_inv * Vector3f(position.x, position.y, 0))), Vector3d(transform * (project_inv * Vector3f(position.x, position.y, -1))));
+    return Ray3d(
+        Vector3d(transform * (project_inv.applyDirection(Vector3f(position.x, position.y, 0)))),
+        Vector3d(transform * (project_inv * Vector3f(position.x, position.y, 0))));
 }
 
 void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, P<Node>& node)
