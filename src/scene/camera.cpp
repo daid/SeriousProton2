@@ -65,8 +65,8 @@ sp::Ray3d Camera::screenToWorldRay(sp::Vector2f position)
     const auto project_inv = projection_matrix.inverse();
     const auto transform = getGlobalTransform();
     return Ray3d(
-        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 0.0f), 0.0f))),
-        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 0.0f), 1.0f))));
+        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 0.0f), 1.0f))),
+        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 1.0f), 1.0f))));
 }
 
 };//namespace sp
