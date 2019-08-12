@@ -78,16 +78,22 @@ Vector3i Voxelmap::getSize()
 
 bool Voxelmap::isSolid(sp::Vector3i position)
 {
-    if (position.x < 0 || position.y < 0 || position.z < 0)
+    int index = getVoxel(position);
+    if (index < 0)
         return false;
+    Data& d = voxel_data[index];
+    return d.solid;
+}
+
+int Voxelmap::getVoxel(sp::Vector3i position)
+{
+    if (position.x < 0 || position.y < 0 || position.z < 0)
+        return -1;
     sp::Vector3i size = getSize();
     if (position.x >= size.x || position.y >= size.y || position.z >= size.z)
-        return false;
+        return -1;
     Voxel& v = voxels[position.z][position.y][position.x];
-    if (v.index < 0)
-        return false;
-    Data& d = voxel_data[v.index];
-    return d.solid;
+    return v.index;
 }
 
 void Voxelmap::onFixedUpdate()
@@ -238,6 +244,99 @@ void Voxelmap::updateMesh()
         render_data.mesh = MeshData::create(std::move(vertices), std::move(indices));
     else
         render_data.mesh->update(std::move(vertices), std::move(indices));
+}
+
+void Voxelmap::trace(const sp::Ray3d& ray, std::function<bool(sp::Vector3i, Face)> callback)
+{
+    sp::Vector3f start = (getGlobalTransform().inverse() * sp::Vector3f(ray.start)) / voxel_size;
+    sp::Vector3f end = (getGlobalTransform().inverse() * sp::Vector3f(ray.end)) / voxel_size;
+
+    float dx = std::abs(end.x - start.x);
+    float dy = std::abs(end.y - start.y);
+    float dz = std::abs(end.z - start.z);
+
+    sp::Vector3i position(std::floor(start.x), std::floor(start.y), std::floor(start.z));
+    float dt_dx = 1.0f / dx;
+    float dt_dy = 1.0f / dy;
+    float dt_dz = 1.0f / dz;
+
+    int inc_x = std::signbit(end.x - start.x) ? -1 : 1;
+    int inc_y = std::signbit(end.y - start.y) ? -1 : 1;
+    int inc_z = std::signbit(end.z - start.z) ? -1 : 1;
+
+    int count = 0;
+
+    float next_x, next_y, next_z;
+    if (dx == 0.0f)
+        next_x = dt_dx;
+    else if (start.x < end.x)
+        next_x = (std::floor(start.x) + 1 - start.x) * dt_dx;
+    else
+        next_x = (start.x - std::floor(start.x)) * dt_dx;
+    count += std::abs(int(end.x) - int(start.x));
+    if (dy == 0.0f)
+        next_y = dt_dy;
+    else if (start.y < end.y)
+        next_y = (std::floor(start.y) + 1 - start.y) * dt_dy;
+    else
+        next_y = (start.y - std::floor(start.y)) * dt_dy;
+    count += std::abs(int(end.y) - int(start.y));
+    if (dz == 0.0f)
+        next_z = dt_dz;
+    else if (start.z < end.z)
+        next_z = (std::floor(start.z) + 1 - start.z) * dt_dz;
+    else
+        next_z = (start.z - std::floor(start.z)) * dt_dz;
+    count += std::abs(int(end.z) - int(start.z));
+
+    for(; count > 0; count--)
+    {
+        if (next_x < next_y && next_x < next_z)
+        {
+            position.x += inc_x;
+            next_x += dt_dx;
+            if (inc_x > 0)
+            {
+                if (!callback(position, Face::Left))
+                    return;
+            }
+            else
+            {
+                if (!callback(position, Face::Right))
+                    return;
+            }
+        }
+        else if (next_y < next_z)
+        {
+            position.y += inc_y;
+            next_y += dt_dy;
+            if (inc_y > 0)
+            {
+                if (!callback(position, Face::Front))
+                    return;
+            }
+            else
+            {
+                if (!callback(position, Face::Back))
+                    return;
+            }
+        }
+        else
+        {
+            position.z += inc_z;
+            next_z += dt_dz;
+            if (inc_z > 0)
+            {
+                if (!callback(position, Face::Down))
+                    return;
+            }
+            else
+            {
+                if (!callback(position, Face::Up))
+                    return;
+            }
+        }
+    }
 }
 
 };//namespace sp
