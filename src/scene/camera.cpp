@@ -46,23 +46,27 @@ void Camera::setAspectRatio(double ratio)
     }
 }
 
+Vector2f Camera::worldToScreen(Vector2d position)
+{
+    Vector2f world_position = getGlobalTransform().inverse() * Vector2f(position);
+    return projection_matrix * world_position;
+}
+
 Vector2d Camera::screenToWorld(Vector2f position)
 {
-    //First transform the screen pixel coordinates into -1 to 1 coordinates to match OpenGL screen space.
-    Vector2f screen_position_normalized = position * 2.0f - Vector2f(1, 1);
-    screen_position_normalized.y = -screen_position_normalized.y;
     //Then apply our inversed projection matrix to go from screen coordinates to world coordinates relative to the camera
-    Vector2f world_position = projection_matrix.inverse() * screen_position_normalized;
+    Vector2f world_position = projection_matrix.inverse() * position;
     //Finally apply our own matrix to transform this into global space.
     return getLocalPoint2D(Vector2d(world_position));
 }
 
-Vector2f Camera::worldToScreen(Vector2d position)
+sp::Ray3d Camera::screenToWorldRay(sp::Vector2f position)
 {
-    Vector2f world_position = getLocalTransform().inverse() * Vector2f(position);
-    Vector2f screen_position_normalized = projection_matrix * world_position;
-    screen_position_normalized.y = -screen_position_normalized.y;
-    return (screen_position_normalized + Vector2f(1, 1)) / 2.0f;
+    const auto project_inv = projection_matrix.inverse();
+    const auto transform = getGlobalTransform();
+    return Ray3d(
+        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 0.0f), 0.0f))),
+        Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 0.0f), 1.0f))));
 }
 
 };//namespace sp

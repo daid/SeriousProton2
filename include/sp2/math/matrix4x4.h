@@ -216,7 +216,16 @@ public:
             this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z
         );
     }
-    
+
+    Vector3<T> multiply(const Vector3<T>& v, T w=1.0) const
+    {
+        return Vector3<T>(
+            this->data[0] * v.x + this->data[4] * v.y + this->data[8] * v.z + this->data[12] * w,
+            this->data[1] * v.x + this->data[5] * v.y + this->data[9] * v.z + this->data[13] * w,
+            this->data[2] * v.x + this->data[6] * v.y + this->data[10] * v.z + this->data[14] * w
+        );
+    }
+
     Matrix4x4 inverse() const
     {
         T inv[16], det;
