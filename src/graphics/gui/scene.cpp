@@ -10,7 +10,7 @@ namespace gui {
 P<Scene> Scene::default_gui_scene;
 
 Scene::Scene(Vector2d size, Direction fixed_direction, string scene_name, int priority)
-: sp::Scene(scene_name, priority)
+: sp::Scene(scene_name, priority),  fixed_direction(fixed_direction)
 {
     if (!default_gui_scene)
         default_gui_scene = this;
@@ -27,6 +27,27 @@ Scene::Scene(Vector2d size, Direction fixed_direction, string scene_name, int pr
         break;
     }
     getCamera()->setPosition(size * 0.5);
+}
+
+void Scene::onUpdate(float delta)
+{
+    if (stretch)
+    {
+        auto projection_matrix = getCamera()->getProjectionMatrix();
+        double aspect_ratio = projection_matrix.data[5] / projection_matrix.data[0];
+        switch(fixed_direction)
+        {
+        case Direction::Horizontal:
+            root_widget->gui_size.y = root_widget->gui_size.x / aspect_ratio;
+            break;
+        case Direction::Vertical:
+            root_widget->gui_size.x = root_widget->gui_size.y * aspect_ratio;
+            break;
+        }
+        LOG(Debug, root_widget->gui_size);
+        getCamera()->setPosition(root_widget->gui_size * 0.5);
+        
+    }
 }
 
 bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
