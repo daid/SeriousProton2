@@ -38,7 +38,6 @@ private:
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
     void recursiveNodeRender(RenderQueue& queue, P<Node> node);
-    Ray3d pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position);
 };
 
 };//namespace sp

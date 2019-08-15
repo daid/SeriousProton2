@@ -62,7 +62,7 @@ bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera,
         camera = scene->getCamera();
     if (!camera)
         return false;
-    if (scene->onPointerDown(button, pointerPositionToRay(camera, position), id))
+    if (scene->onPointerDown(button, camera->screenToWorldRay(Vector2f(position)), id))
     {
         pointer_scene[id] = scene;
         pointer_camera[id] = camera;
@@ -77,7 +77,7 @@ void BasicNodeRenderPass::onPointerDrag(Vector2d position, int id)
     auto it = pointer_scene.find(id);
     if (it != pointer_scene.end() && it->second)
     {
-        it->second->onPointerDrag(pointerPositionToRay(pointer_camera[id], position), id);
+        it->second->onPointerDrag(pointer_camera[id]->screenToWorldRay(Vector2f(position)), id);
     }
 }
 
@@ -86,7 +86,7 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     auto it = pointer_scene.find(id);
     if (it != pointer_scene.end() && it->second)
     {
-        it->second->onPointerUp(pointerPositionToRay(pointer_camera[id], position), id);
+        it->second->onPointerUp(pointer_camera[id]->screenToWorldRay(Vector2f(position)), id);
         pointer_scene.erase(it);
     }
 }
@@ -122,13 +122,6 @@ void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, P<Node> node)
     {
         recursiveNodeRender(queue, child);
     }
-}
-
-Ray3d BasicNodeRenderPass::pointerPositionToRay(sp::P<sp::Camera> camera, Vector2d position)
-{
-    const auto project_inv = camera->getProjectionMatrix().inverse();
-    const auto transform = camera->getGlobalTransform();
-    return Ray3d(Vector3d(transform * (project_inv * Vector3f(position.x, position.y, 0))), Vector3d(transform * (project_inv * Vector3f(position.x, position.y, -1))));
 }
 
 void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, P<Node>& node)

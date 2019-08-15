@@ -8,6 +8,11 @@ namespace sp {
 class Voxelmap : public Node
 {
 public:
+    enum class Face
+    {
+        Up, Down, Left, Right, Front, Back,
+    };
+
     class Data
     {
     public:
@@ -33,7 +38,10 @@ public:
 
     Vector3i getSize();
     bool isSolid(sp::Vector3i position);
+    int getVoxel(sp::Vector3i position);
     
+    void trace(const sp::Ray3d& ray, std::function<bool(sp::Vector3i, Face)> callback);
+
     virtual void onFixedUpdate();
 private:
     class Voxel

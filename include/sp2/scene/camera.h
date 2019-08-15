@@ -22,8 +22,12 @@ public:
     void setAspectRatio(double ratio);
     const sp::Matrix4x4f& getProjectionMatrix() { return projection_matrix; }
 
+    //Convert a 2d world position to a -1.0 to 1.0 screen view position
     sp::Vector2f worldToScreen(sp::Vector2d position);
+    //Convert a 2d screen position (-1.0 to 0.0) to a world position
     sp::Vector2d screenToWorld(sp::Vector2f position);
+    //Convert a 2d screen position (-1.0 to 0.0) to a world ray
+    sp::Ray3d screenToWorldRay(sp::Vector2f position);
 protected:
     void setProjectionMatrix(const sp::Matrix4x4f& matrix) { projection_matrix = matrix; }
 

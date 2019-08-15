@@ -35,6 +35,7 @@ public:
     
     void draw(Ray2i ray, uint32_t color);
     void draw(Rect2i rect, uint32_t color);
+    void draw(Vector2i position, const Image& img);
     void drawFilled(Rect2i rect, uint32_t color);
     void drawCircle(Vector2i position, int radius, uint32_t color);
     void drawFilledCircle(Vector2i position, int radius, uint32_t color);

@@ -8,12 +8,14 @@ namespace gui {
 
 class RootWidget : public Widget
 {
-public:
+private:
     RootWidget(P<Node> parent, Vector2d size);
     
     virtual void onUpdate(float delta) override;
-private:
+
     Vector2d gui_size;
+
+    friend class Scene;
 };
 
 };//namespace gui
