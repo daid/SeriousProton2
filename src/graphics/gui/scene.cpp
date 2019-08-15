@@ -44,9 +44,7 @@ void Scene::onUpdate(float delta)
             root_widget->gui_size.x = root_widget->gui_size.y * aspect_ratio;
             break;
         }
-        LOG(Debug, root_widget->gui_size);
         getCamera()->setPosition(root_widget->gui_size * 0.5);
-        
     }
 }
 
