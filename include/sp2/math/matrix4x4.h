@@ -178,6 +178,16 @@ public:
         return Matrix4x4::frustum(-fW, fW, -fH, fH, near, far);
     }
 
+    static Matrix4x4 perspectiveH(T fov_x, T aspect, T near, T far)
+    {
+        T fW, fH;
+
+        fW = std::tan(fov_x / 360 * pi) * near;
+        fH = fW / aspect;
+
+        return Matrix4x4::frustum(-fW, fW, -fH, fH, near, far);
+    }
+
     Matrix4x4 operator*(const Matrix4x4& m) const
     {
         return Matrix4x4(Matrix<T, 4>::operator*(m));

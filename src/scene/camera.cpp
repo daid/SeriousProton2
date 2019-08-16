@@ -25,7 +25,18 @@ void Camera::setOrtographic(double view_size, Direction direction, double view_d
 
 void Camera::setPerspective(double field_of_view, double view_distance)
 {
-    this->type = Type::Perspective;
+    this->type = Type::PerspectiveVertical;
+    this->field_of_view = field_of_view;
+    this->view_distance = view_distance;
+}
+
+void Camera::setPerspective(double field_of_view, Direction direction, double view_distance)
+{
+    switch(direction)
+    {
+    case Direction::Horizontal: this->type = Type::PerspectiveHorizontal; break;
+    case Direction::Vertical: this->type = Type::PerspectiveVertical; break;
+    }
     this->field_of_view = field_of_view;
     this->view_distance = view_distance;
 }
@@ -40,8 +51,11 @@ void Camera::setAspectRatio(double ratio)
     case Type::OrtographicHorizontal:
         setProjectionMatrix(Matrix4x4f::ortho(-field_of_view, field_of_view, -field_of_view / ratio, field_of_view / ratio, -view_distance, view_distance));
         break;
-    case Type::Perspective:
+    case Type::PerspectiveVertical:
         setProjectionMatrix(Matrix4x4f::perspective(field_of_view, ratio, 1.0f, view_distance));
+        break;
+    case Type::PerspectiveHorizontal:
+        setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view, ratio, 1.0f, view_distance));
         break;
     }
 }
