@@ -17,7 +17,7 @@ public:
     Camera(P<Node> parent);
     
     void setOrtographic(double view_size = 1.0f, Direction direction=Direction::Vertical, double view_distance=0.0);
-    void setPerspective(double field_of_view = 60.0f, Direction direction=Direction::Vertical, double view_distance = 1000.0);
+    void setPerspective(double field_of_view, Direction direction, double view_distance = 1000.0);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
     
     void setAspectRatio(double ratio);
