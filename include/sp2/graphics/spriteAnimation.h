@@ -34,6 +34,11 @@ class AtlasManager;
     
     Minimal required are:
     texture, texture_size, frames, position, size, frame_size
+
+    AtlasManager:
+        An AtlasManager can be set with setAtlasManager, this will place all sprites in a global atlas
+        managed by the atlasmanager. This means less texture swaps need to be done, at the expensive
+        of a bit longer loading times. It also has the effect of "texture_size" no longer being required.
 */
 class SpriteAnimation : public Animation
 {

@@ -75,14 +75,14 @@ void Scene::onPointerUp(Ray3d ray, int id)
 
 void Scene::fixedUpdate()
 {
+    if (root)
+        fixedUpdateNode(*root);
+    onFixedUpdate();
     if (collision_backend)
     {
         collision_backend->step(Engine::fixed_update_delta);
         collision_backend->postUpdate(0);
     }
-    if (root)
-        fixedUpdateNode(*root);
-    onFixedUpdate();
 }
 
 void Scene::postFixedUpdate(float delta)
