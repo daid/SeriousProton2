@@ -3,7 +3,7 @@
 
 #include <sp2/string.h>
 #include <sp2/updatable.h>
-#include <sp2/multiplayer/nodeRegistry.h>
+#include <sp2/multiplayer/base.h>
 #include <sp2/io/dataBuffer.h>
 #include <sp2/io/network/tcpSocket.h>
 
@@ -15,7 +15,7 @@ class Engine;
 class Node;
 namespace multiplayer {
 
-class Client : public Updatable, public NodeRegistry
+class Client : public Updatable, public Base
 {
 public:
     enum State
@@ -31,6 +31,7 @@ public:
     
     State getState() const { return state; }
     
+    virtual uint32_t getClientId() override;
 private:
     io::network::TcpSocket socket;
     std::list<io::DataBuffer> send_queue;

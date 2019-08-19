@@ -1,7 +1,7 @@
 #ifndef SP2_MULTIPLAYER_REPLICATION_H
 #define SP2_MULTIPLAYER_REPLICATION_H
 
-#include <sp2/multiplayer/nodeRegistry.h>
+#include <sp2/multiplayer/base.h>
 #include <sp2/io/dataBuffer.h>
 #include <sp2/math/vector.h>
 #include <sp2/math/quaternion.h>
@@ -15,9 +15,9 @@ class ReplicationLinkBase : NonCopyable
 public:
     virtual ~ReplicationLinkBase() {}
     virtual bool isChanged(float time_delta) = 0;
-    virtual void initialSend(NodeRegistry& registry, io::DataBuffer& packet) { send(registry, packet); }
-    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) = 0;
-    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) = 0;
+    virtual void initialSend(Base& registry, io::DataBuffer& packet) { send(registry, packet); }
+    virtual void send(Base& registry, io::DataBuffer& packet) = 0;
+    virtual void receive(Base& registry, io::DataBuffer& packet) = 0;
 };
 
 template<typename T> class ReplicationLink : public ReplicationLinkBase
@@ -46,12 +46,12 @@ public:
         return true;
     }
 
-    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) override
+    virtual void send(Base& registry, io::DataBuffer& packet) override
     {
         packet.write(value);
     }
 
-    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) override
+    virtual void receive(Base& registry, io::DataBuffer& packet) override
     {
         packet.read(value);
     }
@@ -79,13 +79,13 @@ public:
         return true;
     }
     
-    virtual void send(NodeRegistry& registry, io::DataBuffer& packet) override
+    virtual void send(Base& registry, io::DataBuffer& packet) override
     {
         uint64_t id = object ? object.multiplayer.getId() : 0;
         packet.write(id);
     }
     
-    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet) override
+    virtual void receive(Base& registry, io::DataBuffer& packet) override
     {
         uint64_t id;
         packet.read(id);
@@ -109,9 +109,9 @@ public:
     ReplicationDeadReckoning(Node& node, const DeadReckoningConfig& config);
 
     virtual bool isChanged(float time_delta);
-    virtual void initialSend(NodeRegistry& registry, io::DataBuffer& packet);
-    virtual void send(NodeRegistry& registry, io::DataBuffer& packet);
-    virtual void receive(NodeRegistry& registry, io::DataBuffer& packet);
+    virtual void initialSend(Base& registry, io::DataBuffer& packet);
+    virtual void send(Base& registry, io::DataBuffer& packet);
+    virtual void receive(Base& registry, io::DataBuffer& packet);
 
 private:
     Node& node;

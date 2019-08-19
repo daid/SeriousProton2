@@ -38,6 +38,11 @@ Server::~Server()
     delete new_connection_socket;
 }
 
+uint32_t Server::getClientId()
+{
+    return 0;
+}
+
 void Server::recursiveAddNewNodes(P<Node> node)
 {
     if (node->multiplayer.enabled)

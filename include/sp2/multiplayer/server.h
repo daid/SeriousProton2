@@ -14,11 +14,13 @@
 namespace sp {
 namespace multiplayer {
 
-class Server : public Updatable, public NodeRegistry
+class Server : public Updatable, public Base
 {
 public:
     Server(int port_nr);
     ~Server();
+
+    virtual uint32_t getClientId() override;
 private:
     class ClientInfo
     {

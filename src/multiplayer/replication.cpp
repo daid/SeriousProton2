@@ -39,12 +39,12 @@ bool ReplicationDeadReckoning::isChanged(float time_delta)
     return true;
 }
 
-void ReplicationDeadReckoning::initialSend(NodeRegistry& registry, io::DataBuffer& packet)
+void ReplicationDeadReckoning::initialSend(Base& registry, io::DataBuffer& packet)
 {
     send(registry, packet);
 }
 
-void ReplicationDeadReckoning::send(NodeRegistry& registry, io::DataBuffer& packet)
+void ReplicationDeadReckoning::send(Base& registry, io::DataBuffer& packet)
 {
     Vector3d pos = node.getPosition3D();
     Vector3d velocity = node.getLinearVelocity3D();
@@ -55,7 +55,7 @@ void ReplicationDeadReckoning::send(NodeRegistry& registry, io::DataBuffer& pack
     packet.write(angular_velocity.x, angular_velocity.y, angular_velocity.z);
 }
 
-void ReplicationDeadReckoning::receive(NodeRegistry& registry, io::DataBuffer& packet)
+void ReplicationDeadReckoning::receive(Base& registry, io::DataBuffer& packet)
 {
     Vector3d pos;
     Vector3d velocity;

@@ -1,5 +1,5 @@
-#ifndef SP2_MULTIPLAYER_NODE_REGISTRY_H
-#define SP2_MULTIPLAYER_NODE_REGISTRY_H
+#ifndef SP2_MULTIPLAYER_BASE_H
+#define SP2_MULTIPLAYER_BASE_H
 
 #include <sp2/pointer.h>
 #include <unordered_map>
@@ -8,12 +8,19 @@ namespace sp {
 class Node;
 namespace multiplayer {
 
-class NodeRegistry
+/**
+ * Base class for both client and server of the multiplayer component.
+ *  Manages common functionality and data between client and server implementation.
+ */
+class Base
 {
 public:
     P<Node> getNode(uint64_t id);
 
     float getNetworkDelay() { return network_delay; }
+
+    //Get our client ID assigned by the server. If this is zero, we are the server.
+    virtual uint32_t getClientId() = 0;
 protected:
     void addNode(P<Node> node);    
     void cleanDeletedNodes();

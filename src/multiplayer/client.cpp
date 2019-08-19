@@ -22,7 +22,12 @@ Client::Client(string hostname, int port_nr)
 Client::~Client()
 {
 }
-    
+
+uint32_t Client::getClientId()
+{
+    return client_id;
+}
+
 void Client::onUpdate(float delta)
 {
     io::DataBuffer packet;
