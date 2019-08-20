@@ -128,6 +128,11 @@ public:
             replication_links.push_back(new multiplayer::ReplicationLink<T>(&var, max_update_interval));
         }
 
+        template<typename T, typename... ARGS> void addReplicationLink(ARGS&... args)
+        {
+            replication_links.push_back(new T(args...));
+        }
+
         template<typename CLASS, typename... ARGS> void replicate(void(CLASS::*func)(ARGS...))
         {
             replication_calls.push_back(new multiplayer::ReplicationCallInfo<CLASS, ARGS...>(func));
