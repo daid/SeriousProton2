@@ -70,6 +70,8 @@ void Simple2DBackend::step(float time_delta)
             continue;
         Simple2DBody* body_a = static_cast<Simple2DBody*>(getCollisionBody(pair.node_a));
         Simple2DBody* body_b = static_cast<Simple2DBody*>(getCollisionBody(pair.node_b));
+        if (!body_a || !body_b)
+            continue;
         Rect2d rect_a = body_a->rect;
         Rect2d rect_b = body_b->rect;
         rect_a.position += pair.node_a->getPosition2D();
