@@ -58,6 +58,8 @@ void Simple2DBackend::step(float time_delta)
             return true;
         Simple2DBody* body_a = static_cast<Simple2DBody*>(getCollisionBody(pair.node_a));
         Simple2DBody* body_b = static_cast<Simple2DBody*>(getCollisionBody(pair.node_b));
+        if (!body_a || !body_b)
+            return true;
         return !broadphase->TestOverlap(body_a->broadphase_proxy, body_b->broadphase_proxy);
     });
     

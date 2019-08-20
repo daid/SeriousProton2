@@ -182,7 +182,7 @@ void SpriteAnimation::Data::load(string resource_name)
         }
         int line_length = stringutil::convert::toInt(data["line_length"]);
         if (line_length <= 0)
-            line_length = frames.size();
+            line_length = 2048;
         std::vector<float> delays = stringutil::convert::toFloatArray(data["delay"]);
         Vector2f texture_size = stringutil::convert::toVector2f(data["texture_size"]);
         Vector2f position = stringutil::convert::toVector2f(data["position"]);
