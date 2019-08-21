@@ -2,6 +2,7 @@
 #define SP2_IO_DATABUFFER_H
 
 #include <sp2/string.h>
+#include <sp2/math/vector.h>
 #include <string.h>
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -116,6 +117,19 @@ public:
         memcpy(&buffer[idx], &f, sizeof(f));
     }
 
+    template<typename T> void write(const Vector2<T>& v)
+    {
+        write(v.x);
+        write(v.y);
+    }
+
+    template<typename T> void write(const Vector3<T>& v)
+    {
+        write(v.x);
+        write(v.y);
+        write(v.z);
+    }
+
     void write(const string& s)
     {
         write(uint32_t(s.length()));
@@ -223,6 +237,19 @@ public:
         if (read_index + sizeof(f) > buffer.size()) return;
         memcpy(&f, &buffer[read_index], sizeof(f));
         read_index += sizeof(f);
+    }
+
+    template<typename T> void read(Vector2<T>& v)
+    {
+        read(v.x);
+        read(v.y);
+    }
+
+    template<typename T> void read(Vector3<T>& v)
+    {
+        read(v.x);
+        read(v.y);
+        read(v.z);
     }
     
     void read(string& s)
