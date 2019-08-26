@@ -21,6 +21,8 @@ public:
 
     //Get our client ID assigned by the server. If this is zero, we are the server.
     virtual uint32_t getClientId() = 0;
+
+    bool isServer();
 protected:
     void addNode(P<Node> node);    
     void cleanDeletedNodes();

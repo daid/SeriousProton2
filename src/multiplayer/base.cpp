@@ -5,6 +5,11 @@
 namespace sp {
 namespace multiplayer {
 
+bool Base::isServer()
+{
+    return getClientId() == 0;
+}
+
 P<Node> Base::getNode(uint64_t id)
 {
     auto it = node_by_id.find(id);
