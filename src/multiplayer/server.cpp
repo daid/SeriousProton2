@@ -185,10 +185,10 @@ void Server::onUpdate(float delta)
                         }
                         else
                         {
-                            io::DataBuffer send_packet(PacketIDs::set_client_id, client->client_id);
-                            client->send(send_packet);
-                            io::DataBuffer send_packet(PacketIDs::change_game_speed, Engine::getInstance()->getGameSpeed());
-                            client->send(send_packet);
+                            io::DataBuffer client_id_packet(PacketIDs::set_client_id, client->client_id);
+                            client->send(client_id_packet);
+                            io::DataBuffer gamespeed_packet(PacketIDs::change_game_speed, Engine::getInstance()->getGameSpeed());
+                            client->send(gamespeed_packet);
 
                             for(P<Scene> scene : Scene::all())
                             {
