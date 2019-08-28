@@ -26,7 +26,7 @@ public:
         Disconnected    //Disconnected, server gone missing or never managed to connect at all.
     };
 
-    Client(string hostname, int port_nr);
+    Client(uint32_t game_id, uint32_t game_version, string hostname, int port_nr);
     ~Client();
     
     State getState() const { return state; }
@@ -37,7 +37,9 @@ private:
     std::list<io::DataBuffer> send_queue;
     State state;
     uint32_t client_id;
-    
+    uint32_t game_id;
+    uint32_t game_version;
+
     virtual void onUpdate(float delta) override;
     void send(const io::DataBuffer& buffer);
     

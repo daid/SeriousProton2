@@ -22,7 +22,8 @@ constexpr uint8_t PacketIDs::alive;
 constexpr uint64_t PacketIDs::magic_sp2_value;
 
 
-Server::Server(int port_nr)
+Server::Server(uint32_t game_id, uint32_t game_version, int port_nr)
+: game_id(game_id), game_version(game_version)
 {
     if (!new_connection_listener.listen(port_nr))
         LOG(Error, "Failed to listen on port: ", port_nr);
@@ -162,33 +163,54 @@ void Server::onUpdate(float delta)
                 {
                 case PacketIDs::request_authentication:
                     {
-                        io::DataBuffer send_packet(PacketIDs::set_client_id, client->client_id);
-                        client->send(send_packet);
-                    }
-                    {
-                        io::DataBuffer send_packet(PacketIDs::change_game_speed, Engine::getInstance()->getGameSpeed());
-                        client->send(send_packet);
-                    }
-
-                    for(P<Scene> scene : Scene::all())
-                    {
-                        recursiveSendCreate(*client, scene->getRoot());
-                    }
-                    for(auto it = nodeBegin(); it != nodeEnd(); ++it)
-                    {
-                        if (it->second->multiplayer.replication_links.size() > 0)
+                        uint64_t client_magic;
+                        uint32_t client_game_id;
+                        uint32_t client_game_version;
+                        packet.read(client_magic, client_game_id, client_game_version);
+                        
+                        if (client_magic != PacketIDs::magic_sp2_value)
                         {
-                            io::DataBuffer send_packet(PacketIDs::update_object, it->first);
-                            for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
-                            {
-                                ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
-                                send_packet.write(uint16_t(n));
-                                replication_link->send(*this, send_packet);
-                            }
+                            LOG(Warning, "Client magic value mismatch. Disconnecting...");
+                            client->socket->close();
+                        }
+                        else if (client_game_id != game_id)
+                        {
+                            LOG(Warning, "Client running different game. Disconnecting...");
+                            client->socket->close();
+                        }
+                        else if (client_game_version != game_version)
+                        {
+                            LOG(Warning, "Client running different game version. Disconnecting...");
+                            client->socket->close();
+                        }
+                        else
+                        {
+                            io::DataBuffer send_packet(PacketIDs::set_client_id, client->client_id);
                             client->send(send_packet);
+                            io::DataBuffer send_packet(PacketIDs::change_game_speed, Engine::getInstance()->getGameSpeed());
+                            client->send(send_packet);
+
+                            for(P<Scene> scene : Scene::all())
+                            {
+                                recursiveSendCreate(*client, scene->getRoot());
+                            }
+                            for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+                            {
+                                if (it->second->multiplayer.replication_links.size() > 0)
+                                {
+                                    io::DataBuffer send_packet(PacketIDs::update_object, it->first);
+                                    for(unsigned int n=0; n<it->second->multiplayer.replication_links.size(); n++)
+                                    {
+                                        ReplicationLinkBase* replication_link = it->second->multiplayer.replication_links[n];
+                                        send_packet.write(uint16_t(n));
+                                        replication_link->send(*this, send_packet);
+                                    }
+                                    client->send(send_packet);
+                                }
+                            }
+                            client->state = ClientInfo::State::Connected;
                         }
                     }
-                    client->state = ClientInfo::State::Connected;
                     break;
                 default:
                     LOG(Warning, "Unknown packet during authentication, id:", packet_id);

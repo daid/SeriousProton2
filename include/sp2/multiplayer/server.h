@@ -17,7 +17,7 @@ namespace multiplayer {
 class Server : public Updatable, public Base
 {
 public:
-    Server(int port_nr);
+    Server(uint32_t game_id, uint32_t game_version, int port_nr);
     ~Server();
 
     virtual uint32_t getClientId() override;
@@ -40,6 +40,8 @@ private:
             socket->send(packet);
         }
     };
+    uint32_t game_id;
+    uint32_t game_version;
 
     uint32_t next_client_id;
     //Next id for a new object.

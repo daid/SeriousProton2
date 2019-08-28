@@ -10,7 +10,8 @@
 namespace sp {
 namespace multiplayer {
 
-Client::Client(string hostname, int port_nr)
+Client::Client(uint32_t game_id, uint32_t game_version, string hostname, int port_nr)
+: game_id(game_id), game_version(game_version)
 {
     socket.setBlocking(false);
     LOG(Info, "Multiplayer client connecting:", hostname, port_nr);
@@ -39,7 +40,7 @@ void Client::onUpdate(float delta)
         switch(command_id)
         {
         case PacketIDs::request_authentication:{
-            send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value));
+            send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value, game_id, game_version));
             }break;
         case PacketIDs::set_client_id:{
             packet.read(client_id);
