@@ -381,6 +381,8 @@ void Server::Connection::handleRequest(const Request& request)
                 reply += "Sec-WebSocket-Accept: " + stringutil::SHA1(request.headers.find("sec-websocket-key")->second + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").base64() + "\r\n";
                 if (request.headers.find("sec-websocket-protocol") != request.headers.end())
                     reply += "Sec-WebSocket-Protocol: chat\r\n";
+                reply += "Expires: 0\r\n";
+                reply += "Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate\r\n";
                 reply += "\r\n";
                 socket.send(reply.c_str(), reply.size());
                 

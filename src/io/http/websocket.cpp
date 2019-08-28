@@ -77,6 +77,8 @@ bool Websocket::connect(const string& url)
         "Sec-Websocket-Version: 13\r\n"
         "Sec-Websocket-Key: " + websock_key + "\r\n"
         "Sec-WebSocket-Protocol: chat\r\n"
+        "Pragma: no-cache\r\n"
+        "Cache-Control: no-cache, no-store, must-revalidate\r\n"
         "\r\n";
     socket.send(request.data(), request.length());
     state = State::Connecting;
