@@ -3,6 +3,8 @@
 #include <sp2/scene/camera.h>
 #include <sp2/math/plane.h>
 
+#include <SDL.h>
+
 
 namespace sp {
 namespace gui {
@@ -60,12 +62,16 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
             {
                 focus_widget->focus = false;
                 focus_widget->markRenderDataOutdated();
+                if (focus_widget->enableTextInputOnFocus())
+                    SDL_StopTextInput();
             }
             if (w->focusable)
             {
                 focus_widget = w;
                 focus_widget->focus = true;
                 focus_widget->markRenderDataOutdated();
+                if (focus_widget->enableTextInputOnFocus())
+                    SDL_StartTextInput();
             }
             else
             {
@@ -82,6 +88,8 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
     {
         focus_widget->focus = false;
         focus_widget->markRenderDataOutdated();
+        if (focus_widget->enableTextInputOnFocus())
+            SDL_StopTextInput();
         focus_widget = nullptr;
     }
     return false;

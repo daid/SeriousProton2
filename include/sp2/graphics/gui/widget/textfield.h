@@ -19,6 +19,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual bool enableTextInputOnFocus() const { return true; }
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
 

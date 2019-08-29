@@ -85,7 +85,8 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
 
     if(SP2_ICON)
         if(CMAKE_HOST_WIN32)
-            find_program(IMAGE_CONVERT magick)
+            file(GLOB IMAGE_CONVERT_SEARCH_PATHS "C:/Program Files/ImageMagick-*")
+            find_program(IMAGE_CONVERT magick PATHS ${IMAGE_CONVERT_SEARCH_PATHS})
         else()
             find_program(IMAGE_CONVERT convert)
         endif()
@@ -218,6 +219,7 @@ macro(android_apk NAME ASSETS_FOLDER)
 
     set(APK_ALIGNED "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.apk")
     set(APK "${APK_ALIGNED}.unaligned")
+    file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/assets/")
     file(COPY "${ASSETS_FOLDER}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/assets/")
     file(GLOB_RECURSE ASSETS LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/" "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/assets/*")
     add_custom_command(
