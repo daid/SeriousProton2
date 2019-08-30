@@ -147,7 +147,7 @@ void Tilemap::updateMesh()
             float px = x * tile_width;
             float py = y * tile_height;
             int u = tile_index % texture_tile_count.x;
-            int v = tile_index / texture_tile_count.y;
+            int v = tile_index / texture_tile_count.x;
             float u0 = texture_margin.x + u * uv_step_size.x;
             float v0 = texture_margin.y + v * uv_step_size.y;
             float u1 = u0 + uv_size.x;
