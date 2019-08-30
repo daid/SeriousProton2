@@ -143,7 +143,7 @@ void Tilemap::updateMesh()
             const auto& tile = tiles[y][x];
             if (tile.index < 0)
                 continue;
-            int tile_index = tile.index & ~(flip_horizontal | flip_vertical);
+            int tile_index = tile.index & ~(flip_horizontal | flip_vertical | flip_diagonal);
             float px = x * tile_width;
             float py = y * tile_height;
             int u = tile_index % texture_tile_count.x;
@@ -165,10 +165,20 @@ void Tilemap::updateMesh()
             indices.emplace_back(vertices.size() + 1);
             indices.emplace_back(vertices.size() + 3);
             
-            vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u0, v1));
-            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
-            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
-            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u1, v0));
+            if (tile.index & flip_diagonal)
+            {
+                vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u1, v0));
+                vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
+                vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
+                vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u0, v1));
+            }
+            else
+            {
+                vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u0, v1));
+                vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
+                vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
+                vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u1, v0));
+            }
         }
     }
     
