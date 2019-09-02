@@ -243,6 +243,8 @@ void Window::createRenderWindow()
     int flags = SDL_WINDOW_OPENGL;
     if (fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
+    else if (window_aspect_ratio == 0.0 && (max_window_size_ratio.x == 0.0 || max_window_size_ratio.y == 0.0))
+        flags |= SDL_WINDOW_RESIZABLE;
     if (render_window)
     {
         SDL_SetWindowSize(render_window, window_width, window_height);
