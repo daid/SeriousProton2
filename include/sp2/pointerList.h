@@ -82,6 +82,7 @@ public:
     }
     
     _PListIteratorBase(const _PListIteratorBase& other)
+    : NonCopyable()
     {
         if (other.list)
         {
@@ -174,6 +175,7 @@ public:
     }
     
     _PListReverseIteratorBase(const _PListReverseIteratorBase& other)
+    : NonCopyable()
     {
         if (other.list)
         {

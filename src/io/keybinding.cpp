@@ -186,6 +186,7 @@ string Keybinding::getKey(int index)
             case 2: return "wheel:y+";
             case 3: return "wheel:y-";
             }
+            break;
         case game_controller_button_mask:
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":button:" + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
         case game_controller_axis_mask:
