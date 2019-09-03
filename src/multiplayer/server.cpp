@@ -163,9 +163,9 @@ void Server::onUpdate(float delta)
                 {
                 case PacketIDs::request_authentication:
                     {
-                        uint64_t client_magic;
-                        uint32_t client_game_id;
-                        uint32_t client_game_version;
+                        uint64_t client_magic = 0;
+                        uint32_t client_game_id = 0;
+                        uint32_t client_game_version = 0;
                         packet.read(client_magic, client_game_id, client_game_version);
                         
                         if (client_magic != PacketIDs::magic_sp2_value)
