@@ -1,7 +1,7 @@
 #include <sp2/graphics/mesh/fbx.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/math/matrix4x4.h>
-#include <zlib.h>
+#include "miniz.h"
 
 namespace sp {
 
@@ -58,7 +58,7 @@ public:
             std::vector<T> tmp;
             tmp.resize(element_count);
             unsigned long size = element_count * sizeof(T);
-            uncompress((unsigned char*)tmp.data(), &size, buffer, encoded_size);
+            mz_uncompress((unsigned char*)tmp.data(), &size, buffer, encoded_size);
             for(int n=0; n<element_count; n++)
                 numbers.emplace_back(tmp[n]);
         }

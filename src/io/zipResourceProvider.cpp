@@ -1,8 +1,8 @@
 #include <sp2/io/zipResourceProvider.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <zlib.h>
 #include <string.h>
+#include "miniz.h"
 
 
 namespace sp {
@@ -64,7 +64,7 @@ private:
     uint64_t compressed_size;
     uint64_t uncompressed_size;
 
-    z_stream stream;
+    mz_stream stream;
     uint8_t input_buffer[16 * 1024];
     uint8_t output_buffer[16 * 1024];
     int64_t uncompressed_offset;
@@ -75,12 +75,12 @@ public:
         f = fopen(zip_filename.c_str(), "rb");
         fseek(f, offset, SEEK_SET);
         
-        stream.zalloc = Z_NULL;
-        stream.zfree = Z_NULL;
-        stream.opaque = Z_NULL;
+        stream.zalloc = NULL;
+        stream.zfree = NULL;
+        stream.opaque = NULL;
         stream.avail_in = 0;
-        stream.next_in = Z_NULL;
-        inflateInit2(&stream, -15);
+        stream.next_in = NULL;
+        mz_inflateInit2(&stream, -15);
         
         stream.avail_out = sizeof(output_buffer);
         stream.next_out = output_buffer;
@@ -89,7 +89,7 @@ public:
     }
     virtual ~ZipResourceStream()
     {
-        inflateEnd(&stream);
+        mz_inflateEnd(&stream);
         if (f)
             fclose(f);
     }
@@ -123,7 +123,7 @@ public:
             }
             stream.next_in = input_buffer;
         }
-        inflate(&stream, Z_NO_FLUSH);//TODO: Check result code.
+        mz_inflate(&stream, MZ_NO_FLUSH);//TODO: Check result code.
         return copy + read(data, size);
     }
     
@@ -137,15 +137,15 @@ public:
         else if (position < uncompressed_offset)
         {
             //When we seek backwards, the only thing we can do is restart from the beginning.
-            inflateEnd(&stream);
+            mz_inflateEnd(&stream);
 
             fseek(f, offset, SEEK_SET);
-            stream.zalloc = Z_NULL;
-            stream.zfree = Z_NULL;
-            stream.opaque = Z_NULL;
+            stream.zalloc = NULL;
+            stream.zfree = NULL;
+            stream.opaque = NULL;
             stream.avail_in = 0;
-            stream.next_in = Z_NULL;
-            inflateInit2(&stream, -15);
+            stream.next_in = NULL;
+            mz_inflateInit2(&stream, -15);
         
             stream.avail_out = sizeof(output_buffer);
             stream.next_out = output_buffer;
