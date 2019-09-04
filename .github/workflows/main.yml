@@ -8,6 +8,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: prepare
+      run: apt install libsdl2-dev
     - name: build_native
       run: |
         mkdir _build_native
