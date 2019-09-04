@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C++ CI
 
 on: [push]
 
@@ -8,7 +8,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: configure
-      run: cmake template -DCMAKE_MODULE_PATH=cmake
-    - name: make
-      run: make
+    - name: build_native
+      run: |
+        mkdir _build_native
+        cd _build_native
+        cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/
+        make
