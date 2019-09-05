@@ -4,29 +4,29 @@ enabled = True
 [build-native]
 directory = _build_native
 commands =
-    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/
-    make -j 3
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/
+    cmake --build .
 
 [build-win32]
 directory = _build_win32
 commands =
-    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.win32.toolchain
-    make -j 3
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.win32.toolchain
+    cmake --build .
 
 [build-win64]
 directory = _build_win64
 commands =
-    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.win64.toolchain
-    make -j 3
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.win64.toolchain
+    cmake --build .
 
 [build-pi]
 directory = _build_pi
 commands =
-    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/pi.toolchain
-    make -j 3
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/pi.toolchain
+    cmake --build .
 
 [build-android]
 directory = _build_android
 commands =
-    cmake ../template/ -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.toolchain
-    make -j 3
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.toolchain
+    cmake --build .
