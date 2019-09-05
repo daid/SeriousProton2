@@ -116,9 +116,9 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
         memset(&server_addr, 0, sizeof(server_addr));
         for(auto& addr_info : address.addr_info)
         {
-            if (addr_info.addr.length() == sizeof(server_addr.sin6_addr))
+            if (addr_info.family == AF_INET6 && addr_info.addr.length() == sizeof(server_addr))
             {
-                memcpy(&server_addr.sin6_addr, addr_info.addr.data(), addr_info.addr.length());
+                memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
                 is_set = true;
                 break;
             }
@@ -139,9 +139,9 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
     memset(&server_addr, 0, sizeof(server_addr));
     for(auto& addr_info : address.addr_info)
     {
-        if (addr_info.addr.length() == sizeof(server_addr.sin_addr))
+        if (addr_info.family == AF_INET && addr_info.addr.length() == sizeof(server_addr))
         {
-            memcpy(&server_addr.sin_addr, addr_info.addr.data(), addr_info.addr.length());
+            memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             is_set = true;
             break;
         }
