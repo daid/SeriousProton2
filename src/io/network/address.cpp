@@ -20,6 +20,9 @@ namespace sp {
 namespace io {
 namespace network {
 
+Address::Address()
+{
+}
 
 Address::Address(string hostname)
 {
@@ -28,7 +31,7 @@ Address::Address(string hostname)
     struct addrinfo* result;
     if (::getaddrinfo(hostname.c_str(), nullptr, nullptr, &result))
         return;
-    
+
     for(struct addrinfo* data=result; data != nullptr; data=data->ai_next)
     {
         if (data->ai_family != AF_INET && data->ai_family != AF_INET6)

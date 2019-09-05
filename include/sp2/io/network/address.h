@@ -14,6 +14,7 @@ namespace network {
 class Address
 {
 public:
+    Address();
     Address(string hostname);
     
     static Address getLocalAddress();
