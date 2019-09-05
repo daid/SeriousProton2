@@ -209,8 +209,22 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
     return 0;
 }
 
-//void UdpSocket::send(const DataBuffer& buffer, const Address& address, int port);
-//bool UdpSocket::receive(DataBuffer& buffer, Address& address, int& port);
+bool UdpSocket::send(const DataBuffer& buffer, const Address& address, int port)
+{
+    return send(buffer.getData(), buffer.getDataSize(), address, port);
+}
+
+bool UdpSocket::receive(DataBuffer& buffer, Address& address, int& port)
+{
+    uint8_t receive_buffer[4096];
+    size_t received_size = receive(receive_buffer, sizeof(receive_buffer), address, port);
+
+    if (received_size > 0)
+    {
+        buffer = std::move(std::vector<uint8_t>(receive_buffer, receive_buffer + received_size));
+    }
+    return received_size > 0;
+}
 
 };//namespace network
 };//namespace io

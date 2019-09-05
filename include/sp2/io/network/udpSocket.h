@@ -5,6 +5,7 @@
 #include <sp2/string.h>
 #include <sp2/io/network/address.h>
 #include <sp2/io/network/socketBase.h>
+#include <sp2/io/dataBuffer.h>
 
 
 namespace sp {
@@ -25,8 +26,9 @@ public:
     bool send(const void* data, size_t size, const Address& address, int port);
     size_t receive(void* data, size_t size, Address& address, int& port);
 
-    //bool send(const DataBuffer& buffer, const Address& address, int port);
-    //bool receive(DataBuffer& buffer, Address& address, int& port);
+    bool send(const DataBuffer& buffer, const Address& address, int port);
+    bool receive(DataBuffer& buffer, Address& address, int& port);
+
 private:
     bool socket_is_ipv6;
 };
