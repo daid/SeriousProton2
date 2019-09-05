@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <ifaddrs.h>
@@ -72,9 +73,6 @@ Address Address::getLocalAddress()
                 if (address->OperStatus != IfOperStatusUp)
                     continue;
 
-                //WideCharToMultiByte(CP_ACP, 0, address->FriendlyName, wcslen(address->FriendlyName), buffer, sizeof(buffer), nullptr, nullptr);
-                //LOG(Debug, "FriendlyName", buffer);
-                
                 for (PIP_ADAPTER_UNICAST_ADDRESS ua = address->FirstUnicastAddress; ua != nullptr; ua = ua->Next)
                 {
                     ::getnameinfo(ua->Address.lpSockaddr, ua->Address.iSockaddrLength, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
@@ -82,7 +80,6 @@ Address Address::getLocalAddress()
                         addr_info.emplace_back(AF_INET, buffer, ua->Address.lpSockaddr, ua->Address.iSockaddrLength);
                     if (ua->Address.iSockaddrLength == sizeof(sockaddr_in6))
                         addr_info.emplace_back(AF_INET6, buffer, ua->Address.lpSockaddr, ua->Address.iSockaddrLength);
-                    //LOG(Debug, "Address:", buffer);
                 }
             }
         }
@@ -96,6 +93,10 @@ Address Address::getLocalAddress()
     {
         for(struct ifaddrs* addr = addrs; addr != nullptr; addr = addr->ifa_next)
         {
+            if (addr->ifa_flags & IFF_LOOPBACK)
+            {
+                continue;
+            }
             if (addr->ifa_addr->sa_family == AF_INET)
             {
                 ::getnameinfo(addr->ifa_addr, sizeof(struct sockaddr_in), buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
