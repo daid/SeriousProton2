@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include <SDL.h>
 
 
 namespace sp {
@@ -117,6 +118,27 @@ sp::string loadFileContents(const sp::string& filename)
     fread(&result[0], size, 1, f);
     fclose(f);
     return result;
+}
+
+const sp::string& preferencePath(const sp::string& application_name)
+{
+    static sp::string preference_path;
+
+    if (preference_path.length() == 0)
+    {
+        char* path = SDL_GetPrefPath(nullptr, application_name.c_str());
+        if (!path)
+        {
+            preference_path = "./";
+        }
+        else
+        {
+            preference_path = path;
+            SDL_free(path);
+        }
+    }
+
+    return preference_path;
 }
 
 };//namespace io

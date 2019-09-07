@@ -334,7 +334,7 @@ void Image::drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t col
     }
 }
 
-Image Image::subImage(Rect2i area)
+Image Image::subImage(Rect2i area) const
 {
     area.shrinkToFitWithin(Rect2i(Vector2i(0, 0), size));
     Image result;

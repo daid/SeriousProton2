@@ -42,7 +42,7 @@ public:
     void drawFloodFill(Vector2i position, uint32_t color);
     void drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t color);
     
-    Image subImage(Rect2i area);
+    Image subImage(Rect2i area) const;
 private:
     Vector2i size;
     std::vector<uint32_t> pixels;

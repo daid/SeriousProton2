@@ -334,6 +334,10 @@ void Widget::setAttribute(const string& key, const string& value)
     {
         setVisible(stringutil::convert::toBool(value));
     }
+    else if (key == "enabled")
+    {
+        setEnable(stringutil::convert::toBool(value));
+    }
     else if (key == "order")
     {
         render_order = stringutil::convert::toInt(value);
@@ -435,7 +439,10 @@ void Widget::updateLayout(Vector2d position, Vector2d size)
 void Widget::runCallback(Variant v)
 {
     if (callback)
-        callback(v);
+    {
+        Callback c = callback;
+        c(v);
+    }
 }
 
 std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)
