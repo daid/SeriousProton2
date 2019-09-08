@@ -26,7 +26,8 @@ Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_he
     this->texture_tile_count = Vector2i(texture_tile_count_x, texture_tile_count_y);
 
     render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = texture_manager.get(texture);
+    if (texture != "")
+        render_data.texture = texture_manager.get(texture);
     render_data.type = RenderData::Type::Normal;
     render_data.order = -1;
     

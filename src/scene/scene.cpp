@@ -17,7 +17,7 @@ Scene::Scene(const string& scene_name, int priority)
     root = new Node(this);
     enabled = true;
 
-    sp2assert(scene_mapping.find(scene_name) == scene_mapping.end(), "Cannot create two scenes with the same name.");
+    sp2assert(!get(scene_name), "Cannot create two scenes with the same name.");
     scene_mapping[scene_name] = this;
     
     scenes.add(this);
