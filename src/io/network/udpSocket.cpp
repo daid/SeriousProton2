@@ -40,12 +40,14 @@ UdpSocket::~UdpSocket()
 
 bool UdpSocket::bind(int port)
 {
-    handle = ::socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-    if (handle != -1)
+    close();
+    
+    if (!createSocket())
+        return false;
+
+    if (socket_is_ipv6)
     {
         socket_is_ipv6 = true;
-        int optval = 0;
-        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&optval, sizeof(int));
 
         struct sockaddr_in6 server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
@@ -61,11 +63,6 @@ bool UdpSocket::bind(int port)
     }
     else
     {
-        handle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        if (handle == -1)
-            return false;
-        socket_is_ipv6 = false;
-
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
@@ -79,6 +76,24 @@ bool UdpSocket::bind(int port)
         }
     }
     return true;
+}
+
+bool UdpSocket::joinMulticast(int group_nr)
+{
+    if (handle == -1)
+    {
+        if (!createSocket())
+            return false;
+    }
+    
+    //TODO, add ourself to all interface, not just the default.
+    //      especially windows has the tendency to listen on the wrong interface per default, for example a virtual box virtual network interface might be picked as default.
+
+    struct ip_mreq mreq;
+    mreq.imr_multiaddr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
+    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    
+    return ::setsockopt(handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) == 0;
 }
 
 void UdpSocket::close()
@@ -98,15 +113,8 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
 {
     if (handle == -1)
     {
-        handle = ::socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-        socket_is_ipv6 = true;
-        if (handle == -1)
-        {
-            handle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-            socket_is_ipv6 = false;
-            if (handle == -1)
-                return false;
-        }
+        if (!createSocket())
+            return false;
     }
     
     if (socket_is_ipv6)
@@ -162,6 +170,7 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
 {
     if (handle == -1)
         return 0;
+
     address.addr_info.clear();
     if (socket_is_ipv6)
     {
@@ -224,6 +233,49 @@ bool UdpSocket::receive(DataBuffer& buffer, Address& address, int& port)
         buffer = std::move(std::vector<uint8_t>(receive_buffer, receive_buffer + received_size));
     }
     return received_size > 0;
+}
+
+bool UdpSocket::sendMulticast(const void* data, size_t size, int group_nr, int port)
+{
+    if (handle == -1)
+    {
+        createSocket();
+    }
+    
+    //TODO: We should do this for each network interface, instead of having the OS pick the default.
+    struct in_addr interface_addr;
+    interface_addr.s_addr = htonl(INADDR_ANY);
+    ::setsockopt(handle, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&interface_addr, sizeof(interface_addr));
+
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_addr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
+    
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+
+    int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
+    return result == int(size);
+}
+
+bool UdpSocket::createSocket()
+{
+    close();
+
+    handle = ::socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    socket_is_ipv6 = true;
+    if (handle == -1)
+    {
+        handle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        socket_is_ipv6 = false;
+        
+    }
+    else
+    {
+        int optval = 0;
+        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&optval, sizeof(int));
+    }
+    return handle != -1;
 }
 
 };//namespace network

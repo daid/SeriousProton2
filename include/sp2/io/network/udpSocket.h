@@ -21,6 +21,7 @@ public:
     ~UdpSocket();
 
     bool bind(int port);
+    bool joinMulticast(int group_nr);
     void close();
 
     bool send(const void* data, size_t size, const Address& address, int port);
@@ -29,7 +30,10 @@ public:
     bool send(const DataBuffer& buffer, const Address& address, int port);
     bool receive(DataBuffer& buffer, Address& address, int& port);
 
+    bool sendMulticast(const void* data, size_t size, int group_nr, int port);
 private:
+    bool createSocket();
+
     bool socket_is_ipv6;
 };
 
