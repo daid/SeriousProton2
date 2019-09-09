@@ -258,6 +258,11 @@ bool UdpSocket::sendMulticast(const void* data, size_t size, int group_nr, int p
     return result == int(size);
 }
 
+bool UdpSocket::sendMulticast(const DataBuffer& buffer, int group_nr, int port)
+{
+    return sendMulticast(buffer.getData(), buffer.getDataSize(), group_nr, port);
+}
+
 bool UdpSocket::createSocket()
 {
     close();
