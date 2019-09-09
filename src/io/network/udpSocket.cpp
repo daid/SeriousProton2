@@ -86,14 +86,22 @@ bool UdpSocket::joinMulticast(int group_nr)
             return false;
     }
     
-    //TODO, add ourself to all interface, not just the default.
-    //      especially windows has the tendency to listen on the wrong interface per default, for example a virtual box virtual network interface might be picked as default.
-
-    struct ip_mreq mreq;
-    mreq.imr_multiaddr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-    
-    return ::setsockopt(handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) == 0;
+    bool success = true;
+    struct sockaddr_in server_addr;
+    for(const auto& addr_info : Address::getLocalAddress().addr_info)
+    {
+        if (addr_info.family == AF_INET && addr_info.addr.length() == sizeof(server_addr))
+        {
+            memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
+            
+            struct ip_mreq mreq;
+            mreq.imr_multiaddr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
+            mreq.imr_interface.s_addr = server_addr.sin_addr.s_addr;
+            
+            success = success && ::setsockopt(handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) == 0;
+        }
+    }
+    return success;
 }
 
 void UdpSocket::close()
@@ -241,21 +249,29 @@ bool UdpSocket::sendMulticast(const void* data, size_t size, int group_nr, int p
     {
         createSocket();
     }
-    
-    //TODO: We should do this for each network interface, instead of having the OS pick the default.
-    struct in_addr interface_addr;
-    interface_addr.s_addr = htonl(INADDR_ANY);
-    ::setsockopt(handle, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&interface_addr, sizeof(interface_addr));
 
+    bool success = false;
     struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_addr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
-    
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
+    for(const auto& addr_info : Address::getLocalAddress().addr_info)
+    {
+        if (addr_info.family == AF_INET && addr_info.addr.length() == sizeof(server_addr))
+        {
+            memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
+            
+            ::setsockopt(handle, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&server_addr.sin_addr, sizeof(server_addr.sin_addr));
 
-    int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
-    return result == int(size);
+            memset(&server_addr, 0, sizeof(server_addr));
+            server_addr.sin_addr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
+            
+            server_addr.sin_family = AF_INET;
+            server_addr.sin_port = htons(port);
+
+            int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
+            if (result == int(size))
+                success = true;
+        }
+    }
+    return success;
 }
 
 bool UdpSocket::sendMulticast(const DataBuffer& buffer, int group_nr, int port)
