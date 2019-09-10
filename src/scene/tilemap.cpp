@@ -168,6 +168,8 @@ void Tilemap::updateMesh()
             
             if (tile.index & flip_diagonal)
             {
+                std::swap(u0, u1);
+                std::swap(v0, v1);
                 vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u1, v0));
                 vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
                 vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
