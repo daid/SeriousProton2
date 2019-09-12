@@ -16,7 +16,9 @@ public:
 
     Camera(P<Node> parent);
     
+    void setOrtographic(sp::Vector2d view_size, double view_distance=0.0);
     void setOrtographic(double view_size = 1.0f, Direction direction=Direction::Vertical, double view_distance=0.0);
+    void setPerspective(sp::Vector2d field_of_view, double view_distance = 1000.0);
     void setPerspective(double field_of_view, Direction direction, double view_distance = 1000.0);
     void setPerspective(double field_of_view = 60.0f, double view_distance = 1000.0);
     
@@ -34,14 +36,16 @@ protected:
 
     enum class Type
     {
+        Ortographic,
         OrtographicHorizontal,
         OrtographicVertical,
+        Perspective,
         PerspectiveHorizontal,
         PerspectiveVertical
     };
 private:
     Type type;
-    double field_of_view;
+    sp::Vector2d field_of_view;
     double view_distance;
     sp::Matrix4x4f projection_matrix;
 };

@@ -4,10 +4,20 @@
 namespace sp {
 
 Camera::Camera(P<Node> parent)
-: Node(parent), type(Type::OrtographicVertical)
+: Node(parent), type(Type::Ortographic)
 {
-    field_of_view = 60.0;
+    field_of_view.x = 1.0;
+    field_of_view.y = 1.0;
     view_distance = 1.0;
+}
+
+void Camera::setOrtographic(sp::Vector2d view_size, double view_distance)
+{
+    type = Type::Ortographic;
+    this->field_of_view = view_size;
+    this->view_distance = view_distance;
+    if (this->view_distance < std::max(view_size.x, view_size.y))
+        this->view_distance = std::max(view_size.x, view_size.y);
 }
 
 void Camera::setOrtographic(double view_size, Direction direction, double view_distance)
@@ -17,16 +27,25 @@ void Camera::setOrtographic(double view_size, Direction direction, double view_d
     case Direction::Horizontal: this->type = Type::OrtographicHorizontal; break;
     case Direction::Vertical: this->type = Type::OrtographicVertical; break;
     }
-    this->field_of_view = view_size;
+    this->field_of_view.x = view_size;
+    this->field_of_view.y = view_size;
     this->view_distance = view_distance;
     if (this->view_distance < view_size)
         this->view_distance = view_size;
 }
 
+void Camera::setPerspective(sp::Vector2d field_of_view, double view_distance)
+{
+    this->type = Type::Perspective;
+    this->field_of_view = field_of_view;
+    this->view_distance = view_distance;
+}
+
 void Camera::setPerspective(double field_of_view, double view_distance)
 {
     this->type = Type::PerspectiveVertical;
-    this->field_of_view = field_of_view;
+    this->field_of_view.x = field_of_view;
+    this->field_of_view.y = field_of_view;
     this->view_distance = view_distance;
 }
 
@@ -37,7 +56,8 @@ void Camera::setPerspective(double field_of_view, Direction direction, double vi
     case Direction::Horizontal: this->type = Type::PerspectiveHorizontal; break;
     case Direction::Vertical: this->type = Type::PerspectiveVertical; break;
     }
-    this->field_of_view = field_of_view;
+    this->field_of_view.x = field_of_view;
+    this->field_of_view.y = field_of_view;
     this->view_distance = view_distance;
 }
 
@@ -45,17 +65,28 @@ void Camera::setAspectRatio(double ratio)
 {
     switch(type)
     {
+    case Type::Ortographic:
+        if (ratio > field_of_view.x / field_of_view.y)
+            setProjectionMatrix(Matrix4x4f::ortho(-ratio * field_of_view.y, ratio * field_of_view.y, -field_of_view.y, field_of_view.y, -view_distance, view_distance));
+        else
+            setProjectionMatrix(Matrix4x4f::ortho(-field_of_view.x, field_of_view.x, -field_of_view.x / ratio, field_of_view.x / ratio, -view_distance, view_distance));
+        break;
     case Type::OrtographicVertical:
-        setProjectionMatrix(Matrix4x4f::ortho(-ratio * field_of_view, ratio * field_of_view, -field_of_view, field_of_view, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-ratio * field_of_view.y, ratio * field_of_view.y, -field_of_view.y, field_of_view.y, -view_distance, view_distance));
         break;
     case Type::OrtographicHorizontal:
-        setProjectionMatrix(Matrix4x4f::ortho(-field_of_view, field_of_view, -field_of_view / ratio, field_of_view / ratio, -view_distance, view_distance));
+        setProjectionMatrix(Matrix4x4f::ortho(-field_of_view.x, field_of_view.x, -field_of_view.x / ratio, field_of_view.x / ratio, -view_distance, view_distance));
         break;
+    case Type::Perspective:
+        if (ratio > field_of_view.x / field_of_view.y)
+            setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
+        else
+            setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 1.0f, view_distance));        
     case Type::PerspectiveVertical:
-        setProjectionMatrix(Matrix4x4f::perspective(field_of_view, ratio, 1.0f, view_distance));
+        setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
         break;
     case Type::PerspectiveHorizontal:
-        setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view, ratio, 1.0f, view_distance));
+        setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 1.0f, view_distance));
         break;
     }
 }
