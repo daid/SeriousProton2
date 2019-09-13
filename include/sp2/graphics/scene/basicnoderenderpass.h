@@ -29,8 +29,8 @@ public:
 protected:
     virtual void addNodeToRenderQueue(RenderQueue& queue, P<Node>& node);
 
-private:
     PList<Camera> cameras;
+private:
     std::map<int, P<Scene>> pointer_scene;
     std::map<int, P<Camera>> pointer_camera;
     P<Scene> focus_scene;

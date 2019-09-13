@@ -115,7 +115,7 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
         int glyph_index = FT_Get_Char_Index(face, unicode);
         if (glyph_index == 0 || FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
         {
-            LOG(Warning, "Failed to find glyph in font:", string::hex(unicode));
+            LOG(Warning, "Failed to find glyph in font:", "0x" + string::hex(unicode));
         }
         else
         {

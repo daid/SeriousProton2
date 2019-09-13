@@ -175,7 +175,7 @@ void SpriteAnimation::Data::load(string resource_name)
             for(int n=0; n<frame_count; n++)
                 frames.push_back(n);
         }
-        std::vector<sp::string> flip = data["flip"].split(",");
+        std::vector<sp::string> flip = data["flip"].upper().split(",");
         while(flip.size() < frames.size())
         {
             flip.push_back(flip[0]);
@@ -243,29 +243,44 @@ void SpriteAnimation::Data::load(string resource_name)
                 frame.texture = main_texture;
             }
 
-            if (flip[n].strip().upper() == "H")
+            if (flip[n].find("H") >= 0)
                 std::swap(u0, u1);
-            if (flip[n].strip().upper() == "V")
+            if (flip[n].find("V") >= 0)
                 std::swap(v0, v1);
-            if (flip[n].strip().upper() == "HV")
-            {
-                std::swap(u0, u1);
-                std::swap(v0, v1);
-            }
 
             sp::MeshData::Vertices vertices;
             sp::MeshData::Indices indices{0,1,2, 2,1,3};
-            vertices.emplace_back(p0, sp::Vector2f(u0, v1));
-            vertices.emplace_back(p1, sp::Vector2f(u1, v1));
-            vertices.emplace_back(p2, sp::Vector2f(u0, v0));
-            vertices.emplace_back(p3, sp::Vector2f(u1, v0));
+            if (flip[n].find("D") >= 0)
+            {
+                vertices.emplace_back(p2, sp::Vector2f(u1, v1));
+                vertices.emplace_back(p0, sp::Vector2f(u0, v1));
+                vertices.emplace_back(p3, sp::Vector2f(u1, v0));
+                vertices.emplace_back(p1, sp::Vector2f(u0, v0));
+            }
+            else
+            {
+                vertices.emplace_back(p0, sp::Vector2f(u0, v1));
+                vertices.emplace_back(p1, sp::Vector2f(u1, v1));
+                vertices.emplace_back(p2, sp::Vector2f(u0, v0));
+                vertices.emplace_back(p3, sp::Vector2f(u1, v0));
+            }
             frame.normal_mesh = MeshData::create(std::move(vertices), std::move(indices));
             vertices.clear();
             sp::MeshData::Indices indices2{0,1,2, 2,1,3};
-            vertices.emplace_back(p0, sp::Vector2f(u1, v1));
-            vertices.emplace_back(p1, sp::Vector2f(u0, v1));
-            vertices.emplace_back(p2, sp::Vector2f(u1, v0));
-            vertices.emplace_back(p3, sp::Vector2f(u0, v0));
+            if (flip[n].find("D") >= 0)
+            {
+                vertices.emplace_back(p2, sp::Vector2f(u0, v1));
+                vertices.emplace_back(p0, sp::Vector2f(u1, v1));
+                vertices.emplace_back(p3, sp::Vector2f(u0, v0));
+                vertices.emplace_back(p1, sp::Vector2f(u1, v0));
+            }
+            else
+            {
+                vertices.emplace_back(p0, sp::Vector2f(u1, v1));
+                vertices.emplace_back(p1, sp::Vector2f(u0, v1));
+                vertices.emplace_back(p2, sp::Vector2f(u1, v0));
+                vertices.emplace_back(p3, sp::Vector2f(u0, v0));
+            }
             frame.mirrored_mesh = MeshData::create(std::move(vertices), std::move(indices2));
             vertices.clear();
             
