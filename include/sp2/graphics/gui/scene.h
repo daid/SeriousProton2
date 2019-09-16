@@ -11,13 +11,7 @@ class RootWidget;
 class Scene : public sp::Scene
 {
 public:
-    enum class Direction
-    {
-        Horizontal,
-        Vertical
-    };
-
-    Scene(Vector2d size, Direction fixed_direction=Direction::Vertical, string scene_name="GUI", int priority=100);
+    Scene(Vector2d size, string scene_name="GUI", int priority=100);
 
     virtual void onUpdate(float delta) override;
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id) override;
@@ -35,7 +29,7 @@ private:
     P<Widget> focus_widget;
 
     bool stretch = true;
-    Direction fixed_direction;
+    Vector2d size;
 
     friend class Loader;
 };

@@ -11,23 +11,15 @@ namespace gui {
 
 P<Scene> Scene::default_gui_scene;
 
-Scene::Scene(Vector2d size, Direction fixed_direction, string scene_name, int priority)
-: sp::Scene(scene_name, priority),  fixed_direction(fixed_direction)
+Scene::Scene(Vector2d size, string scene_name, int priority)
+: sp::Scene(scene_name, priority), size(size)
 {
     if (!default_gui_scene)
         default_gui_scene = this;
 
     root_widget = new gui::RootWidget(getRoot(), size);
     setDefaultCamera(new Camera(getRoot()));
-    switch(fixed_direction)
-    {
-    case Direction::Horizontal:
-        getCamera()->setOrtographic(size.x / 2, Camera::Direction::Horizontal);
-        break;
-    case Direction::Vertical:
-        getCamera()->setOrtographic(size.y / 2, Camera::Direction::Vertical);
-        break;
-    }
+    getCamera()->setOrtographic(size);
     getCamera()->setPosition(size * 0.5);
 }
 
@@ -36,16 +28,14 @@ void Scene::onUpdate(float delta)
     if (stretch)
     {
         auto projection_matrix = getCamera()->getProjectionMatrix();
-        double aspect_ratio = projection_matrix.data[5] / projection_matrix.data[0];
-        switch(fixed_direction)
-        {
-        case Direction::Horizontal:
-            root_widget->gui_size.y = root_widget->gui_size.x / aspect_ratio;
-            break;
-        case Direction::Vertical:
-            root_widget->gui_size.x = root_widget->gui_size.y * aspect_ratio;
-            break;
-        }
+        double render_aspect_ratio = projection_matrix.data[5] / projection_matrix.data[0];
+        double requested_aspect_radio = size.x / size.y;
+        
+        root_widget->gui_size = size;
+        if (render_aspect_ratio > requested_aspect_radio)
+            root_widget->gui_size.x = size.y * render_aspect_ratio;
+        else
+            root_widget->gui_size.y = size.x / render_aspect_ratio;
         getCamera()->setPosition(root_widget->gui_size * 0.5);
     }
 }
