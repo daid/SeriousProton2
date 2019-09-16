@@ -47,7 +47,7 @@ class TweakScene : public sp::gui::Scene
 {
 public:
     TweakScene()
-    : gui::Scene(sp::Vector2d(640, 480), gui::Scene::Direction::Vertical, "TWEAK_GUI", 101)
+    : gui::Scene(sp::Vector2d(640, 480), "TWEAK_GUI", 101)
     {
         getRootWidget()->setAttribute("layout", "vertical");
         getRootWidget()->setAttribute("stretch", "true");
