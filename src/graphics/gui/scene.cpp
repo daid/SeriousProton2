@@ -19,7 +19,7 @@ Scene::Scene(Vector2d size, string scene_name, int priority)
 
     root_widget = new gui::RootWidget(getRoot(), size);
     setDefaultCamera(new Camera(getRoot()));
-    getCamera()->setOrtographic(size);
+    getCamera()->setOrtographic(size * 0.5);
     getCamera()->setPosition(size * 0.5);
 }
 
