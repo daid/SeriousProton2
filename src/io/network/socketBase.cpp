@@ -43,7 +43,7 @@ void SocketBase::setBlocking(bool blocking)
 void SocketBase::setTimeout(int milliseconds)
 {
 #ifdef __WIN32
-    DWORD timeout = timeout_in_seconds * 1000;
+    DWORD timeout = milliseconds;
     ::setsockopt(handle, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
 #else
     struct timeval timeout;
