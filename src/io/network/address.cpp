@@ -101,7 +101,7 @@ Address Address::getLocalAddress()
     {
         for(struct ifaddrs* addr = addrs; addr != nullptr; addr = addr->ifa_next)
         {
-            if (addr->ifa_flags & IFF_LOOPBACK)
+            if ((addr->ifa_flags & IFF_LOOPBACK) || !(addr->ifa_flags & IFF_UP))
             {
                 continue;
             }
