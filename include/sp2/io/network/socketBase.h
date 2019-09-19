@@ -14,6 +14,7 @@ class SocketBase : NonCopyable
 {
 public:
     void setBlocking(bool blocking);
+    void setTimeout(int milliseconds);
 
 protected:
     bool isLastErrorNonBlocking();

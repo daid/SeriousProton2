@@ -40,6 +40,19 @@ void SocketBase::setBlocking(bool blocking)
 #endif
 }
 
+void SocketBase::setTimeout(int milliseconds)
+{
+#ifdef __WIN32
+    DWORD timeout = timeout_in_seconds * 1000;
+    ::setsockopt(handle, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
+#else
+    struct timeval timeout;
+    timeout.tv_sec = milliseconds / 1000;
+    timeout.tv_usec = milliseconds * 1000;
+    ::setsockopt(handle, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+#endif
+}
+
 bool SocketBase::isLastErrorNonBlocking()
 {
 #ifdef __WIN32
