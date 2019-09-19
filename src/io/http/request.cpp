@@ -6,15 +6,16 @@ namespace io {
 namespace http {
 
 Request::Request(const string& host, int port, Scheme scheme)
+: port(port), scheme(scheme)
 {
-    if (scheme == Scheme::Auto)
-        scheme = ((port == 443) ? Scheme::Https : Scheme::Http);
-    if (scheme == Scheme::Http)
-        socket.connect(sp::io::network::Address(host), port);
-    else
-        socket.connectSSL(sp::io::network::Address(host), port);
-    socket.setTimeout(5000);
     headers["Host"] = host;
+}
+
+void Request::setHeader(const string& key, const string& value)
+{
+    headers[key] = value;
+    if (key == "Host")
+        socket.close();
 }
 
 Request::Response Request::get(const string& path)
@@ -29,6 +30,16 @@ Request::Response Request::post(const string& path, const string& data)
 
 Request::Response Request::request(const string& method, const string& path, const string& data)
 {
+    if (!socket.isConnected())
+    {
+        if (scheme == Scheme::Auto)
+            scheme = ((port == 443) ? Scheme::Https : Scheme::Http);
+        if (scheme == Scheme::Http)
+            socket.connect(sp::io::network::Address(headers["Host"]), port);
+        else
+            socket.connectSSL(sp::io::network::Address(headers["Host"]), port);
+        socket.setTimeout(5000);
+    }
     Response response;
 
     string request = method + " " + path + " HTTP/1.1\r\n";
@@ -105,6 +116,7 @@ Request::Response Request::request(const string& method, const string& path, con
         } while(chunk_size > 0);
     }
 
+    response.success = true;
     return response;
 }
 

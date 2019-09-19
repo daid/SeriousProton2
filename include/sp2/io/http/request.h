@@ -14,6 +14,7 @@ public:
     class Response
     {
     public:
+        bool success = false;
         int status = -1;
         std::unordered_map<string, string> headers;
         string body;
@@ -35,6 +36,8 @@ public:
 
     Response request(const string& method, const string& path, const string& data);
 private:
+    int port;
+    Scheme scheme;
     std::unordered_map<string, string> headers;
     sp::io::network::TcpSocket socket;
 };
