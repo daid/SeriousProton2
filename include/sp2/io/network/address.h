@@ -16,7 +16,9 @@ class Address
 public:
     Address();
     Address(string hostname);
-    
+
+    std::vector<string> getHumanReadable();
+
     static Address getLocalAddress();
 private:
     static void initSocketLib();

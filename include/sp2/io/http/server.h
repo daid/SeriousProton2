@@ -16,14 +16,6 @@ namespace sp {
 namespace io {
 namespace http {
 
-class Request
-{
-public:
-    string method;
-    string path;
-    string post_data;
-    std::unordered_map<string, string> headers;
-};
 class WebsocketHandler;
 /**
     Basic HTTP webserver.
@@ -36,6 +28,15 @@ class WebsocketHandler;
 class Server : public Updatable
 {
 public:
+    class Request
+    {
+    public:
+        string method;
+        string path;
+        string post_data;
+        std::unordered_map<string, string> headers;
+    };
+
     Server(int port_nr=80);
     ~Server();
     

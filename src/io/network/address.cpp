@@ -51,6 +51,14 @@ Address::Address(std::list<AddrInfo>&& addr_info)
 {
 }
 
+std::vector<string> Address::getHumanReadable()
+{
+    std::vector<string> result;
+    for(auto& info : addr_info)
+        result.push_back(info.human_readable);
+    return result;
+}
+
 Address Address::getLocalAddress()
 {
     initSocketLib();
