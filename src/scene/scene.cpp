@@ -49,7 +49,7 @@ void Scene::setEnabled(bool enabled)
 
 void Scene::setDefaultCamera(P<Camera> camera)
 {
-    sp2assert(camera->getScene() == this, "Trying to set camera from different scene as default for scene.");
+    sp2assert(!camera || camera->getScene() == this, "Trying to set camera from different scene as default for scene.");
     this->camera = camera;
 }
 

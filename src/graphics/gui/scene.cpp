@@ -25,7 +25,7 @@ Scene::Scene(Vector2d size, string scene_name, int priority)
 
 void Scene::onUpdate(float delta)
 {
-    if (stretch)
+    if (stretch && getCamera())
     {
         auto projection_matrix = getCamera()->getProjectionMatrix();
         double render_aspect_ratio = projection_matrix.data[5] / projection_matrix.data[0];
