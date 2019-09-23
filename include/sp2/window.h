@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 
+#include <sp2/threading/queue.h>
 
 struct SDL_Window;
 union SDL_Event;
@@ -18,6 +19,7 @@ union SDL_Event;
 namespace sp {
 namespace io { class Clipboard; }
 
+class ScreenRecorder;
 class GraphicsLayer;
 class Texture;
 class MeshData;
@@ -71,6 +73,8 @@ private:
     int mouse_button_down_mask;
     std::map<int, P<GraphicsLayer>> pointer_focus_layer; //Layer on which a pointer that is down has focus, cleared on pointer up event.
     P<GraphicsLayer> focus_layer;   //Last layer that gained focus, for text input related events.
+
+    std::shared_ptr<ScreenRecorder> recorder;
 
     static PList<Window> windows;
     static bool anyWindowOpen();

@@ -8,7 +8,8 @@
 #include <sp2/graphics/opengl.h>
 
 #include <SDL.h>
-
+#define GIF_FLIP_VERT
+#include <stb/gif.h>
 #ifdef __WIN32__
 #include <windows.h>
 #endif
@@ -24,6 +25,64 @@ extern "C"
 */
 
 namespace sp {
+
+class ScreenRecorder : sp::NonCopyable
+{
+public:
+    ScreenRecorder(Vector2i window_size)
+    {
+        writer = std::move(std::thread([this]() {writerThread(); }));
+        gif_writer = {0};
+        char filename[64];
+        std::time_t t = std::time(nullptr);
+        std::strftime(filename, sizeof(filename), "record_%H%M%S_%d%m%Y.gif", std::localtime(&t));
+        GifBegin(&gif_writer, filename, window_size.x, window_size.y, 1);
+        LOG(Info, "Screen recording started:", filename);
+
+        last_frame_time = std::chrono::steady_clock::now();
+    }
+
+    ~ScreenRecorder()
+    {
+        frames.put(nullptr);
+        writer.join();
+        GifEnd(&gif_writer);
+        LOG(Info, "Screen recording stopped");
+    }
+
+    void grabFrame(Vector2i window_size)
+    {
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = now - last_frame_time;
+        if (diff > std::chrono::milliseconds(50))
+        {
+            Image* img = new Image(window_size);
+            glReadPixels(0, 0, window_size.x, window_size.y, GL_RGBA, GL_UNSIGNED_BYTE, (void*)img->getPtr());
+            frames.put(img);
+            last_frame_time += std::chrono::milliseconds(50);
+        }
+    }
+
+private:
+    void writerThread()
+    {
+        while(true)
+        {
+            Image* img = frames.get();
+            if (!img)
+                break;
+            GifWriteFrame(&gif_writer, (const uint8_t*)img->getPtr(), img->getSize().x, img->getSize().y, 5);
+            delete img;
+        }
+    }
+
+    GifWriter gif_writer;
+
+    std::thread writer;
+    threading::Queue<Image*> frames;
+    std::chrono::steady_clock::time_point last_frame_time;
+};
+
 
 PList<Window> Window::windows;
 void* Window::shared_render_context;
@@ -43,7 +102,6 @@ Window::Window(float aspect_ratio)
 }
 
 Window::Window(Vector2f size_factor)
-: Window()
 {
     initialize();
     max_window_size_ratio = size_factor;
@@ -52,7 +110,6 @@ Window::Window(Vector2f size_factor)
 }
 
 Window::Window(Vector2f size_factor, float aspect_ratio)
-: Window()
 {
     initialize();
     window_aspect_ratio = aspect_ratio;
@@ -345,8 +402,10 @@ void Window::render()
         rd.texture = cursor_texture;
         queue.add(Matrix4x4f::translate(position.x, position.y, 0), rd);
     }
-    queue.add([this]()
+    queue.add([this, window_size]()
     {
+        if (recorder)
+            recorder->grabFrame(window_size);
         SDL_GL_SwapWindow(render_window);
     });
 
@@ -394,6 +453,21 @@ void Window::handleEvent(const SDL_Event& event)
             focus_layer->onTextInput(event.text.text);
         break;
     case SDL_KEYDOWN:
+#ifdef DEBUG
+        if (event.key.keysym.sym == SDLK_F3)
+        {
+            if (recorder)
+            {
+                recorder = nullptr;
+            }
+            else
+            {
+                Vector2i size;
+                SDL_GetWindowSize(render_window, &size.x, &size.y);
+                recorder = std::make_shared<ScreenRecorder>(size);
+            }
+        }
+#endif
         if (focus_layer)
         {
             switch(event.key.keysym.sym)
