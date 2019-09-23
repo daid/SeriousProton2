@@ -39,7 +39,7 @@ public:
     }
 
 protected:
-    virtual void onMixSamples(float* stream, int sample_count)
+    virtual void onMixSamples(float* stream, int sample_count) override
     {
         float buffer[sample_count];
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);

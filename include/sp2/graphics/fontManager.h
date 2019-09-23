@@ -10,7 +10,7 @@ namespace sp {
 class FontManager : public io::DirectLoader<Font*>
 {
 protected:
-    virtual Font* load(string name);
+    virtual Font* load(string name) override;
 };
 
 extern FontManager font_manager;

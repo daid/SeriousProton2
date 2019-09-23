@@ -3,7 +3,7 @@
 #include <sp2/graphics/meshdata.h>
 
 #include <private/collision/box2dVector.h>
-#include <Box2D/Box2D.h>
+#include <private/collision/box2d.h>
 
 namespace sp {
 namespace collision {
@@ -108,7 +108,7 @@ public:
 class ContactListener : public b2ContactListener
 {
 public:
-	virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
+	virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 	{
         checkContact(contact, contact->GetFixtureA(), contact->GetChildIndexA(), contact->GetFixtureB(), 1.0);
         checkContact(contact, contact->GetFixtureB(), contact->GetChildIndexB(), contact->GetFixtureA(), -1.0);
@@ -139,7 +139,7 @@ private:
 
 class DestructionListener : public b2DestructionListener
 {
-	virtual void SayGoodbye(b2Joint* joint)
+	virtual void SayGoodbye(b2Joint* joint) override
 	{
         Joint2D* my_joint = (Joint2D*)joint->GetUserData();
         if (my_joint)
@@ -149,7 +149,7 @@ class DestructionListener : public b2DestructionListener
         }
 	}
 	
-	virtual void SayGoodbye(b2Fixture* fixture)
+	virtual void SayGoodbye(b2Fixture* fixture) override
 	{
 	}
 };
@@ -342,7 +342,7 @@ public:
     
 	/// Called for each fixture found in the query AABB.
 	/// @return false to terminate the query.
-	virtual bool ReportFixture(b2Fixture* fixture)
+	virtual bool ReportFixture(b2Fixture* fixture) override
 	{
         Node* node = (Node*)fixture->GetUserData();
         return callback(node);
@@ -394,7 +394,7 @@ class Box2DRayCastCallbackAny : public b2RayCastCallback
 public:
     std::function<bool(Node* node, Vector2d hit_location, Vector2d hit_normal)> callback;
     
-	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
+	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) override
 	{
         Node* node = (Node*)fixture->GetUserData();
         if (callback(node, toVector<double>(point), toVector<double>(normal)))
@@ -434,7 +434,7 @@ public:
     
     std::vector<Hit> hits;
 
-	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
+	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) override
 	{
         hits.emplace_back((Node*)fixture->GetUserData(), toVector<double>(point), toVector<double>(normal), fraction);
         return -1.0;

@@ -5,10 +5,6 @@
 #include <sp2/assert.h>
 #include <sp2/multiplayer/server.h>
 #include <sp2/multiplayer/registry.h>
-#include <Box2D/Box2D.h>
-#include <btBulletDynamicsCommon.h>
-#include <private/collision/box2dVector.h>
-#include <private/collision/bulletVector.h>
 #include <cmath>
 #include <typeindex>
 

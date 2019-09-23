@@ -1,6 +1,7 @@
 #include <sp2/collision/3d/capsule.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <private/collision/bullet.h>
+
 
 namespace sp {
 namespace collision {

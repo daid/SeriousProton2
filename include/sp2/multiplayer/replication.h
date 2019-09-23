@@ -108,10 +108,10 @@ class ReplicationDeadReckoning : public ReplicationLinkBase
 public:
     ReplicationDeadReckoning(Node& node, const DeadReckoningConfig& config);
 
-    virtual bool isChanged(float time_delta);
-    virtual void initialSend(Base& registry, io::DataBuffer& packet);
-    virtual void send(Base& registry, io::DataBuffer& packet);
-    virtual void receive(Base& registry, io::DataBuffer& packet);
+    virtual bool isChanged(float time_delta) override;
+    virtual void initialSend(Base& registry, io::DataBuffer& packet) override;
+    virtual void send(Base& registry, io::DataBuffer& packet) override;
+    virtual void receive(Base& registry, io::DataBuffer& packet) override;
 
 private:
     Node& node;

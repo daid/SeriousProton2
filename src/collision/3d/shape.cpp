@@ -5,8 +5,8 @@
 #include <sp2/assert.h>
 
 #include <private/collision/bulletVector.h>
+#include <private/collision/bullet.h>
 
-#include <btBulletDynamicsCommon.h>
 
 namespace sp {
 namespace collision {

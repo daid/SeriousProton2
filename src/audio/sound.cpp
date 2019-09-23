@@ -17,7 +17,7 @@ static int mix_volume = SDL_MIX_MAXVOLUME;
 class SoundSource : public AudioSource
 {
 public:
-    virtual void onMixSamples(float* stream, int sample_count)
+    virtual void onMixSamples(float* stream, int sample_count) override
     {
         sample_count = std::min(sample_count, int(buffer->size() - index));
         mix(stream, &(buffer->data()[index]), sample_count, mix_volume);

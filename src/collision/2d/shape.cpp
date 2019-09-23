@@ -5,7 +5,8 @@
 #include <sp2/assert.h>
 
 #include <private/collision/box2dVector.h>
-#include <Box2D/Box2D.h>
+#include <private/collision/box2d.h>
+
 
 namespace sp {
 namespace collision {

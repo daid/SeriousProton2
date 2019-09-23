@@ -9,10 +9,10 @@
 #include <sp2/collision/2d/box2dBackend.h>
 #include <sp2/collision/3d/bullet3dBackend.h>
 
-#include <Box2D/Box2D.h>
+#include <private/collision/box2d.h>
 #include <private/collision/box2dVector.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <private/collision/bullet.h>
 #include <private/collision/bulletVector.h>
 
 #include <SDL_keyboard.h>

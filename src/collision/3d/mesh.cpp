@@ -1,7 +1,8 @@
 #include <sp2/collision/3d/mesh.h>
 #include <sp2/logging.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <private/collision/bullet.h>
+
 
 namespace sp {
 namespace collision {

@@ -20,8 +20,8 @@ public:
     //Note that the loading still happens in the background, and the old texture will be shown till load is done.
     void forceRefresh(string name);
 protected:
-    virtual Texture* prepare(string name);
-    virtual void backgroundLoader(Texture* texture, io::ResourceStreamPtr stream);
+    virtual Texture* prepare(string name) override;
+    virtual void backgroundLoader(Texture* texture, io::ResourceStreamPtr stream) override;
 private:
     sp::Color fallback_primary_color;
     sp::Color fallback_secondary_color;

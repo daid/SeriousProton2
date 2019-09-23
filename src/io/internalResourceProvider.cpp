@@ -20,7 +20,7 @@ public:
     {
     }
     
-    virtual int64_t read(void* data, int64_t size)
+    virtual int64_t read(void* data, int64_t size) override
     {
         size = std::min(int(resource.size() - offset), int(size));
         memcpy(data, resource.data() + offset, size);
@@ -28,18 +28,18 @@ public:
         return size;
     }
     
-    virtual int64_t seek(int64_t position)
+    virtual int64_t seek(int64_t position) override
     {
         offset = std::max(0, std::min(int(resource.size()), int(position)));
         return offset;
     }
     
-    virtual int64_t tell()
+    virtual int64_t tell() override
     {
         return offset;
     }
     
-    virtual int64_t getSize()
+    virtual int64_t getSize() override
     {
         return resource.size();
     }

@@ -39,7 +39,7 @@ public:
     {
     }
     
-    virtual int64_t read(void* data, int64_t size)
+    virtual int64_t read(void* data, int64_t size) override
     {
         size = std::min(int(buffer_length - offset), int(size));
         memcpy(data, ((char*)buffer) + offset, size);
@@ -47,18 +47,18 @@ public:
         return size;
     }
     
-    virtual int64_t seek(int64_t position)
+    virtual int64_t seek(int64_t position) override
     {
         offset = std::max(0, std::min(int(buffer_length), int(position)));
         return offset;
     }
     
-    virtual int64_t tell()
+    virtual int64_t tell() override
     {
         return offset;
     }
     
-    virtual int64_t getSize()
+    virtual int64_t getSize() override
     {
         return buffer_length;
     }

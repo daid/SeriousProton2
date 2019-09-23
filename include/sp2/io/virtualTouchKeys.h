@@ -51,9 +51,9 @@ private:
     public:
         VirtualButton(Rect2f area, int key_index);
 
-        virtual bool onDown(Vector2f position);
-        virtual bool onDrag(Vector2f position);
-        virtual void onUp(Vector2f position);
+        virtual bool onDown(Vector2f position) override;
+        virtual bool onDrag(Vector2f position) override;
+        virtual void onUp(Vector2f position) override;
     private:
         Rect2f area;
         int key_index;

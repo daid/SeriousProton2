@@ -42,7 +42,7 @@ public:
     
     void trace(const sp::Ray3d& ray, std::function<bool(sp::Vector3i, Face)> callback);
 
-    virtual void onFixedUpdate();
+    virtual void onFixedUpdate() override;
 private:
     class Voxel
     {

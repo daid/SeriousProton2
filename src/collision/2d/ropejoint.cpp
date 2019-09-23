@@ -1,7 +1,8 @@
 #include <sp2/collision/2d/ropejoint.h>
 
 #include <private/collision/box2dVector.h>
-#include <Box2D/Box2D.h>
+#include <private/collision/box2d.h>
+
 
 namespace sp {
 namespace collision {

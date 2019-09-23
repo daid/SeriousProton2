@@ -11,13 +11,13 @@ class BitmapFont : public Font
 public:
     BitmapFont(string name, io::ResourceStreamPtr stream);
 
-    virtual Texture* getTexture(int pixel_size);
+    virtual Texture* getTexture(int pixel_size) override;
 
 protected:
-    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info);
-    virtual float getLineSpacing(int pixel_size);
-    virtual float getBaseline(int pixel_size);
-    virtual float getKerning(const char* previous, const char* current);
+    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info) override;
+    virtual float getLineSpacing(int pixel_size) override;
+    virtual float getBaseline(int pixel_size) override;
+    virtual float getKerning(const char* previous, const char* current) override;
 
 private:
     string name;
