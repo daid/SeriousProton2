@@ -8,6 +8,10 @@ sp::threading::Queue<std::function<void()>> LazyLoaderManager::queue;
 
 void LazyLoaderManager::addWork(std::function<void()> f)
 {
+#ifdef __EMSCRIPTEN__
+    //emscripten has very limited threading support, so do not lazy load with emscripten.
+    f();
+#else
     queue.put(f);
 
     if (!thread)
@@ -21,6 +25,7 @@ void LazyLoaderManager::addWork(std::function<void()> f)
             }
         });
     }
+#endif
 }
 
 };//namespace io

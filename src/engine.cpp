@@ -12,6 +12,9 @@
 #include <sp2/io/keybinding.h>
 
 #include <SDL.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif//__EMPSCRIPTEN__
 
 #include <signal.h>
 
@@ -111,10 +114,25 @@ private:
     std::chrono::steady_clock::time_point start_time;
 };
 
+#ifdef __EMSCRIPTEN__
+static void engineUpdateFunction()
+{
+    static Clock frame_time_clock;
+
+    float delta = frame_time_clock.restart();
+
+    Engine* engine = Engine::getInstance();
+    engine->processEvents();
+    engine->update(delta);
+}
+#endif//__EMSCRIPTEN__
+
 void Engine::run()
 {
     initialize();
-
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(engineUpdateFunction, 0, 1);
+#else
     Clock frame_time_clock;
     int fps_count = 0;
     Clock fps_counter_clock;
@@ -122,50 +140,7 @@ void Engine::run()
 
     while(!shutdown_flag && (Window::windows.empty() || Window::anyWindowOpen()))
     {
-        SDL_Event event;
-
-        while (SDL_PollEvent(&event))
-        {
-            unsigned int window_id = 0;
-            switch(event.type)
-            {
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-                window_id = event.key.windowID;
-                break;
-            case SDL_MOUSEMOTION:
-                window_id = event.motion.windowID;
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-                window_id = event.button.windowID;
-                break;
-            case SDL_MOUSEWHEEL:
-                window_id = event.wheel.windowID;
-                break;
-            case SDL_WINDOWEVENT:
-                window_id = event.window.windowID;
-                break;
-            case SDL_FINGERDOWN:
-            case SDL_FINGERUP:
-            case SDL_FINGERMOTION:
-                window_id = SDL_GetWindowID(SDL_GetMouseFocus());
-                break;
-            case SDL_TEXTEDITING:
-                window_id = event.edit.windowID;
-                break;
-            case SDL_TEXTINPUT:
-                window_id = event.text.windowID;
-                break;
-            }
-            if (window_id != 0)
-            {
-                for(auto window : Window::windows)
-                    if (window->render_window && SDL_GetWindowID(window->render_window) == window_id)
-                        window->handleEvent(event);
-            }
-            io::Keybinding::handleEvent(event);
-        }
+        processEvents();
 
         float delta = frame_time_clock.restart();
         delta = std::min(maximum_frame_time, delta);
@@ -185,6 +160,55 @@ void Engine::run()
         }
     }
     LOG(Info, "Engine closing down");
+#endif//!__EMSCRIPTEN__
+}
+
+void Engine::processEvents()
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event))
+    {
+        unsigned int window_id = 0;
+        switch(event.type)
+        {
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            window_id = event.key.windowID;
+            break;
+        case SDL_MOUSEMOTION:
+            window_id = event.motion.windowID;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            window_id = event.button.windowID;
+            break;
+        case SDL_MOUSEWHEEL:
+            window_id = event.wheel.windowID;
+            break;
+        case SDL_WINDOWEVENT:
+            window_id = event.window.windowID;
+            break;
+        case SDL_FINGERDOWN:
+        case SDL_FINGERUP:
+        case SDL_FINGERMOTION:
+            window_id = SDL_GetWindowID(SDL_GetMouseFocus());
+            break;
+        case SDL_TEXTEDITING:
+            window_id = event.edit.windowID;
+            break;
+        case SDL_TEXTINPUT:
+            window_id = event.text.windowID;
+            break;
+        }
+        if (window_id != 0)
+        {
+            for(auto window : Window::windows)
+                if (window->render_window && SDL_GetWindowID(window->render_window) == window_id)
+                    window->handleEvent(event);
+        }
+        io::Keybinding::handleEvent(event);
+    }
 }
 
 void Engine::update(float time_delta)
@@ -282,6 +306,9 @@ void Engine::shutdown()
     for(P<Window> window : Window::windows)
         window->close();
     shutdown_flag = true;
+#ifdef __EMSCRIPTEN__
+    emscripten_cancel_main_loop();
+#endif//__EMSCRIPTEN__
 }
 
 };//namespace sp

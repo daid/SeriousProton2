@@ -26,6 +26,7 @@ public:
     void run();
 
     void initialize();
+    void processEvents();
     void update(float time_delta);
     
     void setGameSpeed(float speed);

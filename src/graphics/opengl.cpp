@@ -317,7 +317,7 @@ namespace sp {
 void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, sp::string parameters)
 {
     int error = glGetError();
-#ifdef ANDROID
+#if defined(ANDROID) || defined(__EMSCRIPTEN__)
     LOG(Debug, "GL_TRACE", source_file, source_line_number, source_function, function_name, parameters);
     if (error)
         LOG(Error, "GL_TRACE ERROR", error);

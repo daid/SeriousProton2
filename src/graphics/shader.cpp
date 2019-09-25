@@ -25,7 +25,7 @@ Shader* Shader::get(string name)
     if (stream)
     {
         LOG(Info, "Loading shader:", name);
-#ifdef ANDROID
+#if defined(ANDROID) || defined(__EMSCRIPTEN__)
         string vertex_shader = "#version 100\n";
         string fragment_shader = "#version 100\nprecision mediump float;\n";
 #else
