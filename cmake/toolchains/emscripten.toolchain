@@ -1,0 +1,42 @@
+# Emscripten toolchain file.
+# This toolchain file differs from most others and should not be seen as an example.
+# This is because the emscripten SDK has a perfectly usable toolchain file already,
+# and thus we use that.
+# This file just facilitates in setting up the SDK if we do not have it yet.
+
+
+# This toolchain file is designed to setup everything if it's not supplied by the user
+
+set(EMSCRIPTEN_SDK_PATH "" CACHE PATH "Location of the emscripten SDK installation.")
+
+
+#################################################################################
+
+find_package(Git REQUIRED)
+
+function(execute_process_ex)
+    execute_process(${ARGV} RESULT_VARIABLE RES)
+    if(RES)
+        message(FATAL_ERROR "Failed to execute: ${ARGV}")
+    endif()
+endfunction()
+
+if(EMSCRIPTEN_SDK_PATH STREQUAL "")
+    set(EMSCRIPTEN_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}/emsdk/")
+    if(NOT EXISTS "${EMSCRIPTEN_SDK_PATH}")
+        execute_process_ex(
+            COMMAND "${GIT_EXECUTABLE}" "clone" "https://github.com/emscripten-core/emsdk.git" "emsdk"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+        )
+        execute_process_ex(
+            COMMAND "${EMSCRIPTEN_SDK_PATH}/emsdk" "install" "latest"
+            WORKING_DIRECTORY "${EMSCRIPTEN_SDK_PATH}"
+        )
+        execute_process_ex(
+            COMMAND "${EMSCRIPTEN_SDK_PATH}/emsdk" "activate" "latest"
+            WORKING_DIRECTORY "${EMSCRIPTEN_SDK_PATH}"
+        )
+    endif()
+endif()
+
+include("${EMSCRIPTEN_SDK_PATH}/fastcomp/emscripten/cmake/Modules/Platform/Emscripten.cmake")
