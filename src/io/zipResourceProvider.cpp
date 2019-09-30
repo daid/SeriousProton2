@@ -223,12 +223,18 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
 
         sp::string filename;
         filename.resize(central_directory.filename_length);
-        fread(&filename[0], central_directory.filename_length, 1, f);
+        if (fread(&filename[0], central_directory.filename_length, 1, f) != 1)
+        {
+            fclose(f);
+            LOG(Warning, "Corrupt zip file, failed to read filename in central directory record:", zip_filename);
+            contents.clear();
+            return;
+        }
 
         //TODO: Read extra field data for ZIP64 support.
         fseek(f, central_directory.extra_field_length, SEEK_CUR);
         fseek(f, central_directory.comment_length, SEEK_CUR);
-        
+
         contents[filename].offset = central_directory.offset_local_file_header;
         contents[filename].compressed_size = central_directory.compressed_size;
         contents[filename].uncompressed_size = central_directory.uncompressed_size;

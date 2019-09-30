@@ -115,7 +115,8 @@ sp::string loadFileContents(const sp::string& filename)
     
     string result;
     result.resize(size);
-    fread(&result[0], size, 1, f);
+    size = fread(&result[0], 1, size, f);
+    result.resize(size);
     fclose(f);
     return result;
 }
