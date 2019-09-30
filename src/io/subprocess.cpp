@@ -71,8 +71,11 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
     {
         //closefrom(3);
         if (working_directory.length() > 0)
-            chdir(working_directory.c_str());
-        
+        {
+            if (chdir(working_directory.c_str()))
+                LOG(Warning, "Failed to change to directory:", working_directory);
+        }
+
         char* parameters[command.size() + 1];
         for(unsigned int n=0; n<command.size(); n++)
             parameters[n] = (char*)command[n].c_str();
