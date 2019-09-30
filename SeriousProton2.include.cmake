@@ -57,17 +57,18 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(OPTIMIZER_FLAGS "")
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         # On gcc, we want some general optimalizations that improve speed a lot.
-        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -funsafe-math-optimizations")
+        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math")
 
         # If we are compiling for a rasberry pi, we want to aggressively optimize for the CPU we are running on.
         # Note that this check only works if we are compiling directly on the pi, as it is a dirty way of checkif if we are on the pi.
         if(EXISTS /opt/vc/include/bcm_host.h OR COMPILE_FOR_PI)
             set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -mcpu=native -mfpu=neon-vfpv4 -mfloat-abi=hard -DRASBERRY_PI=1 -DNO_ASSERT=1")
         endif()
+    elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math")
     endif()
 
     set(WARNING_FLAGS -Wall)
-
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
         set(WARNING_FLAGS ${WARNING_FLAGS} -Wno-psabi -Wno-strict-aliasing -Werror=suggest-override)
     endif()

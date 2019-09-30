@@ -14,11 +14,11 @@ class Image
 {
 public:
     Image();
-    Image(Image&& other);
+    Image(Image&& other) noexcept;
     Image(Vector2i size);
     Image(Vector2i size, uint32_t color);
     
-    void operator=(Image&& other);
+    void operator=(Image&& other) noexcept;
     
     void update(Vector2i size, const uint32_t* ptr);
     void update(Vector2i size, const uint32_t* ptr, int pitch);

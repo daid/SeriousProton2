@@ -35,7 +35,7 @@ Server::Server(int port_nr)
         return;
     }
 
-    handler_thread = std::move(std::thread([this]() { handlerThread(); }));
+    handler_thread = std::thread([this]() { handlerThread(); });
 }
 
 Server::~Server()

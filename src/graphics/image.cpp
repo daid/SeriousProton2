@@ -19,7 +19,7 @@ Image::Image()
 {
 }
 
-Image::Image(Image&& other)
+Image::Image(Image&& other) noexcept
 {
     pixels = std::move(other.pixels);
     size = other.size;
@@ -38,7 +38,7 @@ Image::Image(Vector2i size, uint32_t color)
     pixels.resize(size.x * size.y, color);
 }
 
-void Image::operator=(Image&& other)
+void Image::operator=(Image&& other) noexcept
 {
     pixels = std::move(other.pixels);
     size = other.size;

@@ -238,7 +238,7 @@ bool UdpSocket::receive(DataBuffer& buffer, Address& address, int& port)
 
     if (received_size > 0)
     {
-        buffer = std::move(std::vector<uint8_t>(receive_buffer, receive_buffer + received_size));
+        buffer = std::vector<uint8_t>(receive_buffer, receive_buffer + received_size);
     }
     return received_size > 0;
 }

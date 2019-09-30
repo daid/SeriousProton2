@@ -31,7 +31,7 @@ class ScreenRecorder : sp::NonCopyable
 public:
     ScreenRecorder(Vector2i window_size)
     {
-        writer = std::move(std::thread([this]() {writerThread(); }));
+        writer = std::thread([this]() {writerThread(); });
         gif_writer = {0};
         char filename[64];
         std::time_t t = std::time(nullptr);

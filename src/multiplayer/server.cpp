@@ -273,8 +273,9 @@ void Server::buildCreatePacket(io::DataBuffer& packet, P<Node> node)
 
     if (parent)
     {
-        auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(**node));
-        sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(**node).name()).c_str());
+        auto ptr = *node;
+        auto e = multiplayer::ClassEntry::type_to_name_mapping.find(typeid(*ptr));
+        sp2assert(e != multiplayer::ClassEntry::type_to_name_mapping.end(), (string("No multiplayer class registry for ") + typeid(*ptr).name()).c_str());
 
         packet.write(PacketIDs::create_object, node->multiplayer.getId(), e->second, parent->multiplayer.getId());
     }

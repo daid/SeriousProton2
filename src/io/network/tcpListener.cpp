@@ -4,7 +4,6 @@
 #ifdef __WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
-static constexpr int flags = 0;
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,7 +11,6 @@ static constexpr int flags = 0;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
-static constexpr int flags = MSG_NOSIGNAL;
 #endif
 
 
