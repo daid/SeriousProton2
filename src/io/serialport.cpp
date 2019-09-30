@@ -63,6 +63,7 @@ SerialPort::SerialPort(string name)
         name = "/dev/" + name;
     handle = open(name.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 #endif
+    (void)handle;
 
     if (!isOpen())
         LOG(Warning, "Failed to open serial port:", name);

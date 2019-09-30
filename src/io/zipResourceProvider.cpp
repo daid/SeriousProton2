@@ -61,7 +61,6 @@ class ZipResourceStream : public ResourceStream
 private:
     FILE* f;
     uint64_t offset;
-    uint64_t compressed_size;
     uint64_t uncompressed_size;
 
     mz_stream stream;
@@ -69,8 +68,8 @@ private:
     uint8_t output_buffer[16 * 1024];
     int64_t uncompressed_offset;
 public:
-    ZipResourceStream(string zip_filename, uint64_t offset, uint64_t compressed_size, uint64_t uncompressed_size)
-    : offset(offset), compressed_size(compressed_size), uncompressed_size(uncompressed_size)
+    ZipResourceStream(string zip_filename, uint64_t offset, uint64_t uncompressed_size)
+    : offset(offset), uncompressed_size(uncompressed_size)
     {
         f = fopen(zip_filename.c_str(), "rb");
         fseek(f, offset, SEEK_SET);
@@ -119,14 +118,19 @@ public:
             if (stream.avail_in <= 0)
             {
                 stream.avail_in = 0;
-                return 0;
+                return copy;
             }
             stream.next_in = input_buffer;
         }
-        mz_inflate(&stream, MZ_NO_FLUSH);//TODO: Check result code.
+        int result = mz_inflate(&stream, MZ_NO_FLUSH);
+        if ( (result != MZ_OK && result != MZ_STREAM_END) || (stream.next_out == output_buffer) )
+        {
+            //Stream decode error, no data available while we expect it.
+            return copy;
+        }
         return copy + read(data, size);
     }
-    
+
     virtual int64_t seek(int64_t position) override
     {
         if (position > uncompressed_offset)
@@ -267,7 +271,7 @@ ResourceStreamPtr ZipResourceProvider::getStream(const string filename)
     auto it = contents.find(filename);
     if (it != contents.end())
     {
-        return std::make_shared<ZipResourceStream>(zip_filename, it->second.offset, it->second.compressed_size, it->second.uncompressed_size);
+        return std::make_shared<ZipResourceStream>(zip_filename, it->second.offset, it->second.uncompressed_size);
     }
     return nullptr;
 }
