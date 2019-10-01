@@ -153,16 +153,13 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         endif()
     else()
         if(ANDROID)
-            if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND")
-                message(FATAL_ERROR "ImageMagick not found, cannot build icon. Which is required for android.")
-            else()
-                file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi")
-                add_custom_command(
-                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png"
-                    COMMAND "${IMAGE_CONVERT}" ARGS -size 48x48 "xc:white" "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png"
-                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-                list(APPEND ANDROID_RESOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png")
-            endif()
+            message(WARNING "No icon specified, using SDL2 default icon. As android requires an icon.")
+            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi")
+            file(COPY
+                "${SDL_SRC_PATH}/android-project/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+                "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png"
+            )
+            list(APPEND ANDROID_RESOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png")
         endif()
     endif()
 
