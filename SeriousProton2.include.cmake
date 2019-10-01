@@ -203,8 +203,8 @@ endmacro()
 
 # Macro to build the android apk
 macro(android_apk NAME ASSETS_FOLDER)
-    configure_file("${SP2_DIR}/android/AndroidManifest.xml.in" "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml")
-    configure_file("${SP2_DIR}/android/SDLActivity.java.in" "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
+    configure_file("${SP2_DIR}/cmake/android/AndroidManifest.xml.in" "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml")
+    configure_file("${SP2_DIR}/cmake/android/SDLActivity.java.in" "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
     # Generate the R.java file
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/R.java"
