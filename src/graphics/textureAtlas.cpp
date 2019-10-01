@@ -84,11 +84,14 @@ Rect2f AtlasTexture::add(Image&& image, int margin)
                 addArea(Rect2i(full_area.position.x, full_area.position.y + size.y, size.x, full_area.size.y - size.y));
             }
             
-            add_list.emplace_back();
-            add_list.back().image = std::move(image);
-            add_list.back().position.x = full_area.position.x + margin;
-            add_list.back().position.y = full_area.position.y + margin;
-            
+            if (image.getSize().x > 0 && image.getSize().y > 0)
+            {
+                add_list.emplace_back();
+                add_list.back().image = std::move(image);
+                add_list.back().position.x = full_area.position.x + margin;
+                add_list.back().position.y = full_area.position.y + margin;
+            }
+
             return Rect2f(
                 float(full_area.position.x + margin) / float(texture_size.x), float(full_area.position.y + margin) / float(texture_size.y),
                 float(size.x - margin * 2) / float(texture_size.x), float(size.y - margin * 2) / float(texture_size.y));
