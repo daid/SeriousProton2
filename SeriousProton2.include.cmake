@@ -155,10 +155,8 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         if(ANDROID)
             message(WARNING "No icon specified, using SDL2 default icon. As android requires an icon.")
             file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi")
-            file(COPY
-                "${SDL_SRC_PATH}/android-project/app/src/main/res/mipmap-mdpi/ic_launcher.png"
-                "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png"
-            )
+            file(COPY "${SDL_SRC_PATH}/android-project/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+                DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/")
             list(APPEND ANDROID_RESOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/ic_launcher.png")
         endif()
     endif()
