@@ -1,4 +1,5 @@
 #include <sp2/script/coroutine.h>
+#include <sp2/assert.h>
 
 namespace sp {
 namespace script {
@@ -8,7 +9,8 @@ Coroutine::Coroutine(lua_State* L)
 {
     //When we enter this constructor, the coroutine is still on the stack of the global_lua_state.
     //So use that to store it in the registry, else the garbage collector will collect the coroutine.
-    lua_rawsetp(L, LUA_REGISTRYINDEX, this);
+    sp2assert(lua_isthread(global_lua_state, -1), "Something is wrong with setting up the coroutine, coroutine not on stack?");
+    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
 Coroutine::~Coroutine()

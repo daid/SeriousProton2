@@ -8,7 +8,7 @@
 namespace sp {
 namespace script {
 
-class Coroutine
+class Coroutine : NonCopyable
 {
 public:
     Coroutine(lua_State* L);
