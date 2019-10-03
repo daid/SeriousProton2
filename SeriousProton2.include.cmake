@@ -1,9 +1,17 @@
 cmake_minimum_required(VERSION 3.6.0)
 
+set(SP2_SINGLE_EXECUTABLE OFF CACHE BOOL "Pack the result as a single executable, which is staticly linked and contains resources files appended as zip format.")
+
+
+if(NOT SP2_RESOURCE_PATHS)
+    # Default resource path, main cmake file can customize this to include one or more paths.
+    set(SP2_RESOURCE_PATHS "${CMAKE_SOURCE_DIR}/resources")
+endif()
+
 set(SERIOUS_PROTON2_BASE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 if(WIN32)
-    set(CPACK_GENERATOR NSIS ZIP)
+    set(CPACK_GENERATOR ZIP)
 else()
     set(CPACK_GENERATOR TGZ)
 endif()
@@ -28,12 +36,18 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         set(EMSCRIPTEN_FLAGS "-s USE_SDL=2 -s DISABLE_EXCEPTION_CATCHING=0 -s DEMANGLE_SUPPORT=1 -s ALLOW_MEMORY_GROWTH=1")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EMSCRIPTEN_FLAGS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FLAGS}")
-        #set(CMAKE_EXECUTABLE_SUFFIX ".html")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/resources@resources")
+        foreach(RESOURCE_PATH ${SP2_RESOURCE_PATHS})
+            get_filename_component(RESOURCE_NAME "${RESOURCE_PATH}" NAME)
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${RESOURCE_PATH}@${RESOURCE_NAME}")
+        endforeach()
     else()
         find_package(SDL2 REQUIRED)
         if(NOT DEFINED SDL2_LIBRARIES)
             set(SDL2_LIBRARIES SDL2::SDL2)
+        endif()
+
+        if (WIN32 AND SP2_SINGLE_EXECUTABLE)
+            set(SDL2_LIBRARIES -Wl,-Bstatic ${SDL2_LIBRARIES} -lstdc++ -lpthread -Wl,-Bdynamic -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -lsetupapi)
         endif()
     endif()
 
@@ -170,7 +184,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         set(SP2_TARGET_NAME main)
         add_library(${SP2_TARGET_NAME} SHARED ${ARGN} ${SP2_SOURCES})
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -frtti")
-        android_apk(${EXECUTABLE_NAME} resources)
+        android_apk(${EXECUTABLE_NAME} ${SP2_RESOURCE_PATHS})
     else()
         add_executable(${SP2_TARGET_NAME} ${ARGN} ${SP2_SOURCES})
         if (EMSCRIPTEN)
@@ -194,11 +208,31 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
 
 
     if(WIN32)
-        install(TARGETS ${SP2_TARGET_NAME} RUNTIME DESTINATION .)
-
-        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread-1.dll OUTPUT_VARIABLE MINGW_PTHREAD_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
-        install(FILES ${MINGW_STDCPP_DLL} ${MINGW_LIBGCC_DLL} ${MINGW_PTHREAD_DLL} DESTINATION .)
-        install(FILES ${SDL2_PREFIX}/bin/SDL2.dll DESTINATION .)
+        if (SP2_SINGLE_EXECUTABLE)
+            set(SINGLE_EXECUTABLE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.single.exe")
+            add_custom_command(
+                OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
+                COMMAND "rm" ARGS "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
+                COMMAND "zip" ARGS "-r" "-D" "-9" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip" .
+                WORKING_DIRECTORY "${SP2_RESOURCE_PATHS}"
+                DEPENDS "$<TARGET_FILE:${SP2_TARGET_NAME}>"
+            )
+            add_custom_command(
+                OUTPUT "${SINGLE_EXECUTABLE_NAME}"
+                COMMAND "cat" ARGS "$<TARGET_FILE:${SP2_TARGET_NAME}>" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip" ">" "${SINGLE_EXECUTABLE_NAME}"
+                COMMAND "zip" ARGS "-A" "${SINGLE_EXECUTABLE_NAME}"
+                DEPENDS "$<TARGET_FILE:${SP2_TARGET_NAME}>" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
+            )
+            add_custom_target("${SP2_TARGET_NAME}.single" ALL DEPENDS "${SINGLE_EXECUTABLE_NAME}")
+        else()
+            install(TARGETS ${SP2_TARGET_NAME} RUNTIME DESTINATION .)
+            execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread-1.dll OUTPUT_VARIABLE MINGW_PTHREAD_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
+            install(FILES ${MINGW_PTHREAD_DLL} DESTINATION .)
+            install(FILES ${SDL2_PREFIX}/bin/SDL2.dll DESTINATION .)
+            foreach(RESOURCE_PATH ${SP2_RESOURCE_PATHS})
+                install(DIRECTORY "${RESOURCE_PATH}" DESTINATION ./)
+            endforeach()
+        endif()
     elseif(EMSCRIPTEN)
         install(TARGETS ${SP2_TARGET_NAME} RUNTIME DESTINATION .)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.data DESTINATION .)
