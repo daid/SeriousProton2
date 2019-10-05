@@ -21,6 +21,7 @@ private:
     class ZipInfo
     {
     public:
+        int method;
         uint64_t offset;
         uint64_t compressed_size;
         uint64_t uncompressed_size;

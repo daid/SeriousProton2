@@ -1,4 +1,5 @@
 #include <sp2/io/zipResourceProvider.h>
+#include <sp2/attributes.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -18,7 +19,7 @@ struct ZipEOCD
     uint32_t central_directory_size;
     uint32_t central_directory_offset;
     uint16_t comment_length;
-} __attribute__((__packed__));
+} SP2_PACKED;
 
 struct ZipCentralDirectory
 {
@@ -39,7 +40,7 @@ struct ZipCentralDirectory
     uint16_t internal_file_attributes;
     uint32_t external_file_attributes;
     uint32_t offset_local_file_header;
-} __attribute__((__packed__));
+} SP2_PACKED;
 
 struct ZipLocalHeader
 {
@@ -54,9 +55,65 @@ struct ZipLocalHeader
     uint32_t uncompressed_size;
     uint16_t filename_length;
     uint16_t extra_field_length;
-} __attribute__((__packed__));
+} SP2_PACKED;
+static_assert(sizeof(ZipLocalHeader) == 30, "");
 
-class ZipResourceStream : public ResourceStream
+class ZipStoredResourceStream : public ResourceStream
+{
+private:
+    FILE* f;
+    uint64_t offset;
+    uint64_t size;
+
+    uint64_t current_offset;
+
+public:
+    ZipStoredResourceStream(string zip_filename, uint64_t offset, uint64_t size)
+    : offset(offset), size(size), current_offset(0)
+    {
+        f = fopen(zip_filename.c_str(), "rb");
+        fseek(f, offset, SEEK_SET);
+    }
+    ~ZipStoredResourceStream()
+    {
+        if (f)
+            fclose(f);
+    }
+
+    virtual int64_t read(void* data, int64_t size) override
+    {
+        if (current_offset + size > this->size)
+            size = this->size - current_offset;
+        int64_t result = fread(data, 1, size, f);
+        if (result < 0)
+            result = 0;
+        current_offset += result;
+        return result;
+    }
+
+    virtual int64_t seek(int64_t position) override
+    {
+        if (position < 0)
+            position = 0;
+        if (position > int64_t(size))
+            position = size;
+        fseek(f, offset + position, SEEK_SET);
+        current_offset = position;
+        return current_offset;
+    }
+
+    virtual int64_t tell() override
+    {
+        return current_offset;
+    }
+
+    virtual int64_t getSize() override
+    {
+        return size;
+    }
+};
+
+class ZipDeflateResourceStream : public ResourceStream
 {
 private:
     FILE* f;
@@ -68,7 +125,7 @@ private:
     uint8_t output_buffer[16 * 1024];
     int64_t uncompressed_offset;
 public:
-    ZipResourceStream(string zip_filename, uint64_t offset, uint64_t uncompressed_size)
+    ZipDeflateResourceStream(string zip_filename, uint64_t offset, uint64_t uncompressed_size)
     : offset(offset), uncompressed_size(uncompressed_size)
     {
         f = fopen(zip_filename.c_str(), "rb");
@@ -86,7 +143,7 @@ public:
         
         uncompressed_offset = 0;
     }
-    virtual ~ZipResourceStream()
+    virtual ~ZipDeflateResourceStream()
     {
         mz_inflateEnd(&stream);
         if (f)
@@ -102,8 +159,8 @@ public:
             uncompressed_offset += copy;
             if (data)
                 memcpy(data, output_buffer, copy);
-            stream.avail_out -= copy;
-            memmove(output_buffer, output_buffer + copy, stream.avail_out);
+            stream.avail_out += copy;
+            memmove(output_buffer, output_buffer + copy, available - copy);
             stream.next_out -= copy;
             if (copy == size)
                 return size;
@@ -214,10 +271,10 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
             contents.clear();
             return;
         }
-        if (central_directory.method != 8)
+        if (central_directory.method != 0 && central_directory.method != 8)
         {
             fclose(f);
-            LOG(Warning, "Zip file contains compressed files not using DEFLATE compression. Only DEFLATE is supported:", zip_filename);
+            LOG(Warning, "Zip file contains compressed files not using STORE or DEFLATE compression. Only STORE or DEFLATE is supported:", zip_filename, "Method:", central_directory.method);
             contents.clear();
             return;
         }
@@ -239,6 +296,7 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
         fseek(f, central_directory.extra_field_length, SEEK_CUR);
         fseek(f, central_directory.comment_length, SEEK_CUR);
 
+        contents[filename].method = central_directory.method;
         contents[filename].offset = central_directory.offset_local_file_header;
         contents[filename].compressed_size = central_directory.compressed_size;
         contents[filename].uncompressed_size = central_directory.uncompressed_size;
@@ -250,14 +308,14 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
         if (fread(&local_header, 30, 1, f) != 1)
         {
             fclose(f);
-            LOG(Warning, "Corrupt zip file, failed to read local header:", zip_filename);
+            LOG(Warning, "Corrupt zip file, failed to read local header:", zip_filename, it.first, "@", it.second.offset);
             contents.clear();
             return;
         }
         if (local_header.signature != 0x04034b50)
         {
             fclose(f);
-            LOG(Warning, "Corrupt zip file, failed to parse local header:", zip_filename);
+            LOG(Warning, "Corrupt zip file, failed to parse local header:", zip_filename, it.first, "@", it.second.offset);
             contents.clear();
             return;
         }
@@ -271,7 +329,10 @@ ResourceStreamPtr ZipResourceProvider::getStream(const string filename)
     auto it = contents.find(filename);
     if (it != contents.end())
     {
-        return std::make_shared<ZipResourceStream>(zip_filename, it->second.offset, it->second.uncompressed_size);
+        if (it->second.method == 0)
+            return std::make_shared<ZipStoredResourceStream>(zip_filename, it->second.offset, it->second.uncompressed_size);
+        else
+            return std::make_shared<ZipDeflateResourceStream>(zip_filename, it->second.offset, it->second.uncompressed_size);
     }
     return nullptr;
 }
