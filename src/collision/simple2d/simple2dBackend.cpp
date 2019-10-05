@@ -50,6 +50,13 @@ Simple2DBackend::~Simple2DBackend()
 
 void Simple2DBackend::step(float time_delta)
 {
+    for(auto body : delete_list)
+    {
+        broadphase->DestroyProxy(body->broadphase_proxy);
+        delete body;
+    }
+    delete_list.clear();
+
     broadphase->UpdatePairs(this);
 
     collision_pairs.remove_if([this](CollisionPair& pair)
@@ -125,8 +132,9 @@ void Simple2DBackend::postUpdate(float delta)
 void Simple2DBackend::destroyBody(void* _body)
 {
     Simple2DBody* body = static_cast<Simple2DBody*>(_body);
-    broadphase->DestroyProxy(body->broadphase_proxy);
-    delete body;
+    body->owner = nullptr;
+
+    delete_list.push_back(body);
 }
 
 void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
@@ -217,7 +225,10 @@ void Simple2DBackend::query(Vector2d position, std::function<bool(P<Node> object
     bounds.lowerBound.y = bounds.upperBound.y = position.y;
     query_callback = [&callback_function](void* _body)
     {
-        return callback_function(static_cast<Simple2DBody*>(_body)->owner);
+        Node* owner = static_cast<Simple2DBody*>(_body)->owner;
+        if (owner)
+            return callback_function(owner);
+        return true;
     };
     broadphase->Query(this, bounds);
     query_callback = nullptr;
@@ -233,7 +244,7 @@ void Simple2DBackend::query(Vector2d position, double range, std::function<bool(
     query_callback = [&callback_function, position, range](void* _body)
     {
         Node* owner = static_cast<Simple2DBody*>(_body)->owner;
-        if ((owner->getPosition2D() - position).length() <= range)
+        if (owner && (owner->getPosition2D() - position).length() <= range)
             return callback_function(owner);
         return true;
     };
@@ -250,7 +261,10 @@ void Simple2DBackend::query(Rect2d area, std::function<bool(P<Node> object)> cal
     bounds.upperBound.y = area.position.y + area.size.y;
     query_callback = [&callback_function](void* _body)
     {
-        return callback_function(static_cast<Simple2DBody*>(_body)->owner);
+        Node* owner = static_cast<Simple2DBody*>(_body)->owner;
+        if (owner)
+            return callback_function(owner);
+        return true;
     };
     broadphase->Query(this, bounds);
     query_callback = nullptr;

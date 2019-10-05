@@ -3,7 +3,7 @@
 
 #include <sp2/collision/backend.h>
 #include <list>
-
+#include <vector>
 
 
 class b2BroadPhase;
@@ -11,6 +11,7 @@ class b2DynamicTree;
 namespace sp {
 namespace collision {
 class Simple2DShape;
+class Simple2DBody;
 class CollisionPair;
 
 class Simple2DBackend : public Backend
@@ -47,6 +48,7 @@ private:
     
     b2BroadPhase* broadphase;
     std::list<CollisionPair> collision_pairs;
+    std::vector<Simple2DBody*> delete_list;
     
     std::function<bool(void*)> query_callback;
     
