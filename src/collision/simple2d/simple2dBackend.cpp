@@ -147,6 +147,8 @@ void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
     query_callback = [&vertices, &indices](void* _body)
     {
         Simple2DBody* body = static_cast<Simple2DBody*>(_body);
+        if (!body->owner)
+            return true;
 
         Vector2d p0 = body->owner->getPosition2D() + body->rect.position;
         Vector2d p1 = p0 + body->rect.size;
