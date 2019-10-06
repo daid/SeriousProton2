@@ -146,7 +146,10 @@ public:
         buffer.resize(idx + len);
         memcpy(&buffer[idx], s, len);
     }
-    
+
+    template<class T, class=typename std::enable_if<std::is_enum<T>::value>::type>
+    void write(T enum_value) { write(uint16_t(enum_value)); }
+
     void write(const DataBuffer& other)
     {
         size_t idx = buffer.size();
@@ -260,7 +263,10 @@ public:
         s.assign((char*)&buffer[read_index], len);
         read_index += len;
     }
-    
+
+    template<class T, class=typename std::enable_if<std::is_enum<T>::value>::type>
+    void read(T& enum_value) { uint16_t v=0; read(v); enum_value = T(v); }
+
     size_t available()
     {
         return buffer.size() - read_index;

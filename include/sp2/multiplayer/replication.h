@@ -66,13 +66,13 @@ template<class T> class ReplicationLink<P<T>> : public ReplicationLinkBase
 {
 public:
     ReplicationLink(P<T>& object)
-    : object(object), previous_id(object ? object.multiplayer.getId() : 0)
+    : object(object), previous_id(object ? object->multiplayer.getId() : 0)
     {
     }
 
     virtual bool isChanged(float time_delta) override
     {
-        uint64_t id = object ? object.multiplayer.getId() : 0;
+        uint64_t id = object ? object->multiplayer.getId() : 0;
         if (id == previous_id)
             return false;
         previous_id = id;
@@ -81,7 +81,7 @@ public:
     
     virtual void send(Base& registry, io::DataBuffer& packet) override
     {
-        uint64_t id = object ? object.multiplayer.getId() : 0;
+        uint64_t id = object ? object->multiplayer.getId() : 0;
         packet.write(id);
     }
     
