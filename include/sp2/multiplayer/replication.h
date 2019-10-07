@@ -87,7 +87,7 @@ public:
     
     virtual void receive(Base& registry, io::DataBuffer& packet) override
     {
-        uint64_t id;
+        uint64_t id = 0;
         packet.read(id);
         object = registry.getNode(id);
     }
