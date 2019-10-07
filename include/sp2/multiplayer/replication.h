@@ -6,6 +6,7 @@
 #include <sp2/math/vector.h>
 #include <sp2/math/quaternion.h>
 
+#include <functional>
 
 namespace sp {
 namespace multiplayer {
@@ -94,6 +95,27 @@ public:
 private:
     P<T>& object;
     uint64_t previous_id;
+};
+template<typename T> class ReplicationLinkCallback : public ReplicationLink<T>
+{
+public:
+    ReplicationLinkCallback(T& value, std::function<void()> callback)
+    : ReplicationLink<T>(value), callback(callback)
+    {
+    }
+
+    ReplicationLinkCallback(T& value, float max_update_interval, std::function<void()> callback)
+    : ReplicationLink<T>(value, max_update_interval), callback(callback)
+    {
+    }
+
+    virtual void receive(Base& registry, io::DataBuffer& packet) override
+    {
+        ReplicationLink<T>::receive(registry, packet);
+        callback();
+    }
+private:
+    std::function<void()> callback;
 };
 
 struct DeadReckoningConfig

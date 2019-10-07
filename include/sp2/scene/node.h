@@ -128,6 +128,16 @@ public:
             replication_links.push_back(new multiplayer::ReplicationLink<T>(var, max_update_interval));
         }
 
+        template<typename T> void replicate(T& var, std::function<void()> callback)
+        {
+            replication_links.push_back(new multiplayer::ReplicationLinkCallback<T>(var, callback));
+        }
+
+        template<typename T> void replicate(T& var, float max_update_interval, std::function<void()> callback)
+        {
+            replication_links.push_back(new multiplayer::ReplicationLinkCallback<T>(var, max_update_interval, callback));
+        }
+
         template<typename T, typename... ARGS> void addReplicationLink(ARGS&... args)
         {
             replication_links.push_back(new T(args...));
