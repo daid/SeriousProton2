@@ -7,6 +7,10 @@
 
 #define SP2_DEPRECATED(msg) __attribute__((deprecated(msg)))
 
+#if defined(__clang__)
+#define SP2_PACKED __attribute__((__packed__))
+#else
 #define SP2_PACKED __attribute__((__packed__, __gcc_struct__))
+#endif
 
 #endif//ATTRIBUTES_H
