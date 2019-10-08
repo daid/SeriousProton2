@@ -14,24 +14,20 @@ public:
 
 KeyValueTreePtr KeyValueTreeLoader::load(string resource_name)
 {
-    try
-    {
-        KeyValueTreeLoader loader(resource_name);
-        return loader.result;
-    }catch(ParsingException& e)
-    {
-        LOG(Error, "Error loading", resource_name, e.message);
-        return nullptr;
-    }
+    KeyValueTreeLoader loader(resource_name);
+    return loader.result;
 }
 
 KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
 {
-    result = std::make_shared<KeyValueTree>();
-
     stream = ResourceProvider::get(resource_name);
     if (!stream)
-        throw ParsingException("Failed to open " + resource_name + " for tree loading");
+    {
+        LOG(Error, "Failed to open " + resource_name + " for tree loading");
+        return;
+    }
+    result = std::make_shared<KeyValueTree>();
+
     LOG(Info, "Loading tree", resource_name);
 
     while(stream->tell() < stream->getSize())
@@ -56,7 +52,9 @@ KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
         }
         else if (line == "}")
         {
-            throw ParsingException("Node close while no node open.");
+            LOG(Error, "Failed to parse key value tree: Node close while no node open.", resource_name);
+            result = nullptr;
+            return;
         }
         else if (line.startswith("#"))
         {
@@ -112,7 +110,7 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
         }
         else if (line.length() > 0)
         {
-            throw ParsingException("Failed to parse line: " + line);
+            LOG(Error, "Failed to parse line in key value tree: " + line);
         }
     }
 }

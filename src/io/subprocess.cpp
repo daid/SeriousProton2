@@ -113,14 +113,15 @@ int Subprocess::wait()
     delete data;
     data = nullptr;
     return exit_status;
-#endif//__WIN32__
-#ifdef __linux__
+#elif defined(__linux__)
     int exit_status;
     waitpid(data->pid, &exit_status, 0);
     delete data;
     data = nullptr;
     return WEXITSTATUS(exit_status);
-#endif//__linux__
+#else
+    return std::numeric_limits<int>::min();
+#endif
 }
 
 #ifdef __WIN32__

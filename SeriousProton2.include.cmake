@@ -33,7 +33,7 @@ endif()
 macro(serious_proton2_executable EXECUTABLE_NAME)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
     if (EMSCRIPTEN)
-        set(EMSCRIPTEN_FLAGS "-s USE_SDL=2 -s DISABLE_EXCEPTION_CATCHING=0 -s DEMANGLE_SUPPORT=1 -s ALLOW_MEMORY_GROWTH=1")
+        set(EMSCRIPTEN_FLAGS "-s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -fno-exceptions")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EMSCRIPTEN_FLAGS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FLAGS}")
         foreach(RESOURCE_PATH ${SP2_RESOURCE_PATHS})
@@ -74,7 +74,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(OPTIMIZER_FLAGS "")
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         # On gcc, we want some general optimalizations that improve speed a lot.
-        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math")
+        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions")
 
         # If we are compiling for a rasberry pi, we want to aggressively optimize for the CPU we are running on.
         # Note that this check only works if we are compiling directly on the pi, as it is a dirty way of checkif if we are on the pi.
@@ -82,7 +82,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
             set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -mcpu=native -mfpu=neon-vfpv4 -mfloat-abi=hard -DRASBERRY_PI=1 -DNO_ASSERT=1")
         endif()
     elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math")
+        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions")
     endif()
 
     set(WARNING_FLAGS -Wall)
