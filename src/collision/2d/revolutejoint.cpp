@@ -15,5 +15,5 @@ RevoluteJoint2D::RevoluteJoint2D(sp::P<sp::Node> node_a, sp::Vector2d local_poin
     create(&joint_def, node_a, node_b);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

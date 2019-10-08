@@ -113,5 +113,5 @@ int pushToLua(lua_State* L, const string& str)
     return 1;
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp

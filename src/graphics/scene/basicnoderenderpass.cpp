@@ -130,4 +130,4 @@ void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, P<Node>& node
         queue.add(node->getGlobalTransform(), node->render_data);
 }
 
-};//namespace sp
+}//namespace sp

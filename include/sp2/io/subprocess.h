@@ -24,7 +24,7 @@ private:
     Data* data;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_SUBPROCESS_H

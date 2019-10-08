@@ -19,7 +19,7 @@ private:
     void saveNode(const KeyValueTreeNode& node, int indent);
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_KEYVALUETREE_LOADER_H

@@ -59,7 +59,7 @@ private:
     friend class sp::Node;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_SHAPE_H

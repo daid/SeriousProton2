@@ -203,6 +203,6 @@ private:
     friend class collision::Joint2D;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_SCENE_NODE_H

@@ -100,4 +100,4 @@ void TextureManager::forceRefresh(string name)
     addToWorkqueue(get(name), name);
 }
 
-};//namespace sp
+}//namespace sp

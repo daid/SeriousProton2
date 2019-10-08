@@ -29,6 +29,6 @@ private:
     std::shared_ptr<MeshData> mesh;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_COLLISIONRENDERPASS_H

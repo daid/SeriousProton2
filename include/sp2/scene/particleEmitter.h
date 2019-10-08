@@ -63,6 +63,6 @@ private:
     std::vector<Parameters> particles;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_SCENE_PARTICLE_EMITTER_H

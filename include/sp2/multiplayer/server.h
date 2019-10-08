@@ -70,7 +70,7 @@ private:
     friend class Node::Multiplayer;
 };
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp
 
 #endif//SP2_MULTIPLAYER_SERVER_H

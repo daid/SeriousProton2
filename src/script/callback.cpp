@@ -13,5 +13,5 @@ Callback::~Callback()
     lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp

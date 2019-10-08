@@ -145,5 +145,5 @@ KeyValueTreeNode* Loader::SubLoader::findRef(const string& reference_name)
     return ref;
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

@@ -47,7 +47,7 @@ int decodeSingle(const char* str, int* consumed_characters)
     return str[0];
 }
 
-};//namespace base64
-};//namespace stringutil
-};//namespace sp
+}//namespace base64
+}//namespace stringutil
+}//namespace sp
 

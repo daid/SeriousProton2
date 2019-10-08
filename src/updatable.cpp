@@ -9,4 +9,4 @@ Updatable::Updatable()
     updatables.add(this);
 }
 
-};//namespace sp
+}//namespace sp

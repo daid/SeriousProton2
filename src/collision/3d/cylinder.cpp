@@ -25,5 +25,5 @@ btCollisionShape* Cylinder3D::createShape() const
     }
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

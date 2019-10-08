@@ -145,5 +145,5 @@ void DirectoryResourceProvider::findResources(std::vector<string>& found_files, 
     closedir(dir);
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

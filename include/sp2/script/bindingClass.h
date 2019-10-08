@@ -72,7 +72,7 @@ private:
     friend void script::lazyLoading(int table_index, lua_State* L);
 };
 
-};//namespace sp
+}//namespace sp
 
 #include <sp2/script/callback.h>
 

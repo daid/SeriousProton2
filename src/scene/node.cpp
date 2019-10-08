@@ -345,4 +345,4 @@ bool Node::Multiplayer::isEnabled()
     return enabled;
 }
 
-};//namespace sp
+}//namespace sp

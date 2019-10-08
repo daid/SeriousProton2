@@ -37,4 +37,4 @@ bool RenderData::operator<(const RenderData& other) const
     return false;
 }
 
-};//namespace sp
+}//namespace sp

@@ -147,5 +147,5 @@ void Win32StackWalkContext::fillAddressInfo(AddressInfo& info)
     }
 }
 
-};//namespace exception
-};//namespace sp
+}//namespace exception
+}//namespace sp

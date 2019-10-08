@@ -348,5 +348,5 @@ std::vector<string> ZipResourceProvider::findResources(string search_pattern)
     return found_files;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

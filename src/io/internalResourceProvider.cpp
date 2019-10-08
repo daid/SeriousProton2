@@ -68,5 +68,5 @@ std::vector<string> InternalResourceProvider::findResources(string search_patter
     return found_files;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

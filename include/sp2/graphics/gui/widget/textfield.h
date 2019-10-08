@@ -38,8 +38,8 @@ private:
     P<Widget> cursor_widget;
 };
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_TEXTFIELD_H
 

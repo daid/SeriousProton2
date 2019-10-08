@@ -31,6 +31,6 @@ public:
     }
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//MATRIX_IMPL_H

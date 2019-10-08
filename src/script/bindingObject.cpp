@@ -190,4 +190,4 @@ void ScriptBindingObject::onRegisterScriptBindings(ScriptBindingClass& script_bi
 {
 }
 
-};//namespace sp
+}//namespace sp

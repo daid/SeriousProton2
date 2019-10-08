@@ -148,4 +148,4 @@ void RenderQueue::render(std::vector<Item>& list)
     list.clear();
 }
 
-};//namespace sp
+}//namespace sp

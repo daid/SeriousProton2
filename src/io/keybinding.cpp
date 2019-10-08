@@ -502,5 +502,5 @@ void Keybinding::updateKeys(int key_number, float value)
                 key->setValue(value);
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

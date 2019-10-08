@@ -276,8 +276,8 @@ private:
     size_t read_index;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #undef IF_LITTLE_ENDIAN
 

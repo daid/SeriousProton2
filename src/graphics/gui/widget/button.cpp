@@ -72,5 +72,5 @@ void Button::onPointerUp(Vector2d position, int id)
         runCallback(Variant());
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

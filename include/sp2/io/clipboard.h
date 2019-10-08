@@ -16,7 +16,7 @@ private:
     static string virtual_clipboard;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//CLIPBOARD_H

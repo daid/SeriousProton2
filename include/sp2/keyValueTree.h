@@ -35,6 +35,6 @@ private:
 };
 typedef std::shared_ptr<KeyValueTree> KeyValueTreePtr;
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_KEY_VALUE_TREE_H

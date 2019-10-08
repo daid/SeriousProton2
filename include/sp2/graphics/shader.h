@@ -50,7 +50,7 @@ private:
     friend class MeshData;
 };
 
-};//namespace sp
+}//namespace sp
 
 
 #endif//SP2_GRAPHICS_SHADER_H

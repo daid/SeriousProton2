@@ -40,6 +40,6 @@ private:
     void recursiveNodeRender(RenderQueue& queue, P<Node> node);
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_BASICNODERENDERPASS_H

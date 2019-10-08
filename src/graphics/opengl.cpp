@@ -309,7 +309,7 @@ void initOpenGL()
         exit(1);
 }
 
-};//namespace sp
+}//namespace sp
 
 
 #ifdef SP2_ENABLE_OPENGL_TRACING
@@ -330,5 +330,5 @@ void traceOpenGLCall(const char* function_name, const char* source_file, const c
         fprintf(f, "ERROR: %d\n", error);
 #endif
 }
-};//namespace sp
+}//namespace sp
 #endif//SP2_ENABLE_OPENGL_TRACING

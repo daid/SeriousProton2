@@ -18,7 +18,7 @@ private:
     std::map<string, string> resources;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_INTERNALRESOURCEPROVIDER_H

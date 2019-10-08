@@ -28,5 +28,5 @@ void HorizontalFlowLayout::update(P<Widget> container, Rect2d rect)
     }
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

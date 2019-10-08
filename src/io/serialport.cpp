@@ -545,5 +545,5 @@ std::vector<string> SerialPort::portsByPseudoDriverName(string driver_name)
     return names;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

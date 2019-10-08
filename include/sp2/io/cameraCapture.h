@@ -27,7 +27,7 @@ private:
     sp::Vector2i size;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_CAMERA_CAPTURE_H

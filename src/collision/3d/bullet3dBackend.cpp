@@ -218,5 +218,5 @@ void BulletBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vecto
 {
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

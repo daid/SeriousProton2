@@ -18,5 +18,5 @@ btCollisionShape* Mesh3D::createShape() const
     return new btBvhTriangleMeshShape(triangle_index_array, false);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

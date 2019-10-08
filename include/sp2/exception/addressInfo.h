@@ -27,7 +27,7 @@ public:
     int source_line;
 };
 
-};//namespace exception
-};//namespace sp
+}//namespace exception
+}//namespace sp
 
 #endif//SP2_EXCEPTION_ADDRESSINFO_H

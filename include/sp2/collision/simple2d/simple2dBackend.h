@@ -57,7 +57,7 @@ private:
     friend class ::b2DynamicTree;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_SIMPLE2D_SIMPLE2D_BACKEND_H

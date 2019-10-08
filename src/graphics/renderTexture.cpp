@@ -104,4 +104,4 @@ void RenderTexture::activateRenderTarget()
     }
 }
 
-};//namespace sp
+}//namespace sp

@@ -85,7 +85,7 @@ private:
     friend class sp::Engine;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_KEYBINDING_H

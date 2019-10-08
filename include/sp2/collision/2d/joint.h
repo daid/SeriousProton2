@@ -25,7 +25,7 @@ protected:
     friend class DestructionListener;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_2D_JOINT_H

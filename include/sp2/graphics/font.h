@@ -64,6 +64,6 @@ protected:
     virtual float getKerning(const char* previous, const char* current) = 0;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_FONT_H

@@ -68,5 +68,5 @@ void Shape3D::create(Node* node) const
     setCollisionBody(node, body);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

@@ -107,5 +107,5 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
     widget->updateLayout(result_position, result_size);
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

@@ -51,4 +51,4 @@ Vector2d GraphicsLayer::screenToViewportPosition(Vector2d position)
     return position;
 }
 
-};//namespace sp
+}//namespace sp

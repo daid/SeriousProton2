@@ -31,4 +31,4 @@ void ScriptBindingClass::bind(sp::string name, sp::script::Callback& callback)
     lua_setfield(L, function_table_index, name.c_str());
 }
 
-};//namespace sp
+}//namespace sp

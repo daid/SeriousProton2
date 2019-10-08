@@ -36,7 +36,7 @@ private:
     friend void audioCallback(void* userdata, uint8_t* stream, int length);
 };
 
-};//namespace audio
-};//namespace sp
+}//namespace audio
+}//namespace sp
 
 #endif//SP2_AUDIO_AUDIOSOURCE_H

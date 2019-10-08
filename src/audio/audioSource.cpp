@@ -96,5 +96,5 @@ void AudioSource::mix(float* stream, const float* source, int sample_count, int 
     SDL_MixAudioFormat((uint8_t*)stream, (const uint8_t*)source, AUDIO_F32, sample_count * sizeof(float), volume);
 }
 
-};//namespace audio
-};//namespace sp
+}//namespace audio
+}//namespace sp

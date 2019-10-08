@@ -25,6 +25,6 @@ template<typename T> Vector3<T> tweak(string name, Vector3<T> value, T min, T ma
     return value;
 }
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_TWEAK_H

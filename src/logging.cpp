@@ -95,4 +95,4 @@ void Logger::logEnd()
 #endif
 }
 
-};//namespace sp
+}//namespace sp

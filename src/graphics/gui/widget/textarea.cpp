@@ -182,5 +182,5 @@ void TextArea::onTextInput(TextInputEvent e)
     markRenderDataOutdated();
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

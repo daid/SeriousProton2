@@ -222,5 +222,5 @@ void addVectorMetatables(lua_State* lua)
     lua_register(lua, "Vector3", vector3Create);
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp

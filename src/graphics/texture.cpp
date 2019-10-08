@@ -58,4 +58,4 @@ void OpenGLTexture::setImage(Image&& image)
     this->image = std::move(image);
 }
 
-};//namespace sp
+}//namespace sp

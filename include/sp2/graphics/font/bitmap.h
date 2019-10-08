@@ -29,6 +29,6 @@ private:
     std::unordered_map<string, Rect2f> specials;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_FONT_BITMAP_H

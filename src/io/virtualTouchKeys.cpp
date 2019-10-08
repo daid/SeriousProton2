@@ -111,5 +111,5 @@ void VirtualTouchKeyLayer::VirtualButton::onUp(Vector2f position)
 }
 
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

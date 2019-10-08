@@ -29,7 +29,7 @@ private:
     std::vector<int> indices;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_3D_MESH_H

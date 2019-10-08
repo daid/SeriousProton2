@@ -65,5 +65,5 @@ void setupUnhandledExceptionHandler()
     next_unhandled_exception_filter = SetUnhandledExceptionFilter(win32UnhandledExceptionHandler);
 }
 
-};//namespace exception
-};//namespace sp
+}//namespace exception
+}//namespace sp

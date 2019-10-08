@@ -50,6 +50,6 @@ private:
     unsigned int handle;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_TEXTUREMANAGER_H

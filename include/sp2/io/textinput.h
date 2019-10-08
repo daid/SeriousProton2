@@ -18,6 +18,6 @@ enum class TextInputEvent
     Return
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_IO_TEXTINPUT_H

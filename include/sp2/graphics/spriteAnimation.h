@@ -104,6 +104,6 @@ private:
     static AtlasManager* atlas_manager;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_SPRITE_ANIMATION_H

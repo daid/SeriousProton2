@@ -27,4 +27,4 @@ void RenderPass::onTextInput(TextInputEvent e)
 {
 }
 
-};//namespace sp
+}//namespace sp

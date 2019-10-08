@@ -30,6 +30,6 @@ private:
 };
 extern TextureManager texture_manager;
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_TEXTUREMANAGER_H

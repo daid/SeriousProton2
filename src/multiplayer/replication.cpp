@@ -72,5 +72,5 @@ void ReplicationDeadReckoning::receive(Base& registry, io::DataBuffer& packet)
     node.setAngularVelocity(angular_velocity);
 }
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp

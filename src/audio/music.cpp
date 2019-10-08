@@ -84,5 +84,5 @@ void Music::setVolume(float volume)
     mix_volume = volume * SDL_MIX_MAXVOLUME / 100.0f;
 }
 
-};//namespace audio
-};//namespace sp
+}//namespace audio
+}//namespace sp

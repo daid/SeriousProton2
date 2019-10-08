@@ -26,5 +26,5 @@ void Shape::setCollisionBody(Node* node, void* body) const
     node->collision_body = body;
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

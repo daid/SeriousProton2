@@ -30,5 +30,5 @@ bool Panel::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
     return true;
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

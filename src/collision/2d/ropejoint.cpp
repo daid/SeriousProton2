@@ -23,5 +23,5 @@ void RopeJoint2D::setMaxLength(float max_length)
         ((b2RopeJoint*)joint)->SetMaxLength(max_length);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

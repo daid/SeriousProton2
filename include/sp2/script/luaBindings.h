@@ -264,7 +264,7 @@ template<typename T> Vector3<T> convertFromLua(lua_State* L, typeIdentifier<Vect
     return Vector3<T>(x, y, z);
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp
 
 #endif//SP2_SCRIPT_LUA_BINDINGS_H

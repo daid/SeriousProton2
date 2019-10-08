@@ -12,7 +12,7 @@
 
 namespace sp {
 void initOpenGL();
-};//namespace sp
+}//namespace sp
 
 
 //#define SP2_ENABLE_OPENGL_TRACING
@@ -25,7 +25,7 @@ static inline sp::string traceOpenGLCallParam(int n) { return sp::string(n); }
 static inline sp::string traceOpenGLCallParam(const void* ptr) { return "[ptr]"; }
 template<typename A1> sp::string traceOpenGLCallParams(const A1& a) { return traceOpenGLCallParam(a); }
 template<typename A1, typename... ARGS> sp::string traceOpenGLCallParams(const A1& a, const ARGS&... args) { return traceOpenGLCallParam(a) + ", " + traceOpenGLCallParams(args...); }
-};//namespace sp
+}//namespace sp
 
 #define glActiveTexture(...) do { glActiveTexture(__VA_ARGS__); sp::traceOpenGLCall("glActiveTexture", __FILE__, __PRETTY_FUNCTION__, __LINE__, sp::traceOpenGLCallParams(__VA_ARGS__)); } while(0)
 #define glAttachShader(...) do { glAttachShader(__VA_ARGS__); sp::traceOpenGLCall("glAttachShader", __FILE__, __PRETTY_FUNCTION__, __LINE__, sp::traceOpenGLCallParams(__VA_ARGS__)); } while(0)

@@ -22,5 +22,5 @@ void Simple2DShape::create(Node* node) const
     setCollisionBody(node, backend->createBody(node, *this));
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

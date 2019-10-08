@@ -191,4 +191,4 @@ bool AtlasManager::has(string resource_name)
     return cached_items.find(resource_name) != cached_items.end();
 }
 
-};//namespace sp
+}//namespace sp

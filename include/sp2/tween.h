@@ -68,6 +68,6 @@ template<> Color Tween<Color>::tweenApply(float f, const Color& value0, const Co
 template<> Vector2d Tween<Vector2d>::tweenApply(float f, const Vector2d& value0, const Vector2d& value1);
 template<> Vector3d Tween<Vector3d>::tweenApply(float f, const Vector3d& value0, const Vector3d& value1);
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_TWEEN_H

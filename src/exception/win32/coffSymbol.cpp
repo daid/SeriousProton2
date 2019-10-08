@@ -84,6 +84,6 @@ void fillAddressInfoFromCoffSymbols(Win32ExceptionContext& exception_context, Ad
     CloseHandle(file);
 }
 
-};//namespace exception
-};//namespace sp
+}//namespace exception
+}//namespace sp
 

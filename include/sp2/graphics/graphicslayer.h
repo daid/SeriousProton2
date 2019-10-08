@@ -46,6 +46,6 @@ private:
     friend class Engine;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_CONTAINER_H

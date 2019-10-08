@@ -90,5 +90,5 @@ void Shape2D::createFixtureOnBody(b2Body* body, b2Shape* shape) const
     body->CreateFixture(&shapeDef);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

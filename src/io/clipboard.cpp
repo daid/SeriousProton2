@@ -16,5 +16,5 @@ void Clipboard::set(string value)
     SDL_SetClipboardText(value.c_str());
 }
 
-};//namespace sp
-};//namespace io
+}//namespace sp
+}//namespace io

@@ -194,4 +194,4 @@ float FreetypeFont::getKerning(const char* previous, const char* current)
     return 0;
 }
 
-};//namespace sp
+}//namespace sp

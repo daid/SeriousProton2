@@ -37,6 +37,6 @@ private:
     std::unordered_map<int, std::unordered_map<int, GlyphInfo>> loaded_glyphs;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_FONT_FREETYPE_H

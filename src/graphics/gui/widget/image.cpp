@@ -80,5 +80,5 @@ void Image::updateRenderData()
     }
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

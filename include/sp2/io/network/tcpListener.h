@@ -25,8 +25,8 @@ public:
     bool accept(TcpSocket& socket);
 };
 
-};//namespace network
-};//namespace io
-};//namespace sp
+}//namespace network
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_NETWORK_TCP_LISTENER_H

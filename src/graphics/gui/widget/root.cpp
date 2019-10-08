@@ -14,5 +14,5 @@ void RootWidget::onUpdate(float delta)
     updateLayout(Vector2d(0, 0), gui_size);
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

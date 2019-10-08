@@ -193,7 +193,7 @@ private:
     void (CLASS::*func)(ARGS...);
 };
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp
 
 #endif//SP2_MULTIPLAYER_REPLICATION_H

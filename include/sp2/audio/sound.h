@@ -16,7 +16,7 @@ public:
     static void setVolume(float volume);
 };
 
-};//namespace audio
-};//namespace sp
+}//namespace audio
+}//namespace sp
 
 #endif//SP2_AUDIO_MUSIC_H

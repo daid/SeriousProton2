@@ -9,8 +9,8 @@ namespace utf8 {
 
 int decodeSingle(const char* str, int* consumed_characters);
 
-};//namespace utf8
-};//namespace stringutil
-};//namespace sp
+}//namespace utf8
+}//namespace stringutil
+}//namespace sp
 
 #endif//SP2_STRINGUTIL_UTF8_H

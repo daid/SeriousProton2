@@ -142,5 +142,5 @@ const sp::string& preferencePath(const sp::string& application_name)
     return preference_path;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

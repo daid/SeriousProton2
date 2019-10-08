@@ -367,4 +367,4 @@ void Tilemap::updateCollision()
         removeCollisionShape();
 }
 
-};//namespace sp
+}//namespace sp

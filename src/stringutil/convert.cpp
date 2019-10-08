@@ -73,6 +73,6 @@ Alignment toAlignment(const string& s)
     return Alignment::Center;
 }
 
-};//namespace convert
-};//namespace stringutil
-};//namespace sp
+}//namespace convert
+}//namespace stringutil
+}//namespace sp

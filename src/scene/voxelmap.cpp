@@ -339,4 +339,4 @@ void Voxelmap::trace(const sp::Ray3d& ray, std::function<bool(sp::Vector3i, Face
     }
 }
 
-};//namespace sp
+}//namespace sp

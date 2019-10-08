@@ -29,7 +29,7 @@ private:
     std::unordered_map<string, ZipInfo> contents;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_ZIPRESOURCEPROVIDER_H

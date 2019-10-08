@@ -11706,5 +11706,5 @@ void hq2xTiles(sp::Image& image, sp::Vector2i tile_size, HQ2xConfig config)
     delete[] target_buffer;
 }
 
-};//namespace image
-};//namespace sp
+}//namespace image
+}//namespace sp

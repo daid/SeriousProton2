@@ -15,7 +15,7 @@ private:
     virtual btCollisionShape* createShape() const = 0;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_3D_SHAPE_H

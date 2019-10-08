@@ -40,8 +40,8 @@ sp::Vector2i toVector2i(const string& s);
 
 Alignment toAlignment(const string& s);
 
-};//namespace convert
-};//namespace stringutil
-};//namespace sp
+}//namespace convert
+}//namespace stringutil
+}//namespace sp
 
 #endif//SP2_STRINGUTIL_CONVERT_H

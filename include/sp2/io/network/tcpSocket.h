@@ -42,8 +42,8 @@ private:
     friend class TcpListener;
 };
 
-};//namespace network
-};//namespace io
-};//namespace sp
+}//namespace network
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_NETWORK_TCP_SOCKET_H

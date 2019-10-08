@@ -93,4 +93,4 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, P<Scene> scene)
     }
 }
 
-};//namespace sp
+}//namespace sp

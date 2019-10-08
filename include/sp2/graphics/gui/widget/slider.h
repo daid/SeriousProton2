@@ -29,8 +29,8 @@ private:
     P<ThemeImage> dial;
 };
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_SLIDER_H
 

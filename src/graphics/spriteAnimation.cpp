@@ -300,4 +300,4 @@ void SpriteAnimation::setAtlasManager(AtlasManager* atlas_manager)
     SpriteAnimation::atlas_manager = atlas_manager;
 }
 
-};//namespace sp
+}//namespace sp

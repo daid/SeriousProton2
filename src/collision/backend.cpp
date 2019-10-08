@@ -25,5 +25,5 @@ void Backend::modifyPositionByPhysics(Node* node, sp::Vector3d position, Quatern
     node->modifyPositionByPhysics(position, rotation);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

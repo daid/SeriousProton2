@@ -58,7 +58,7 @@ private:
     bool shutdown_flag = false;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_ENGINE_H
 

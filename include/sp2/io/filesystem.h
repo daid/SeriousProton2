@@ -22,7 +22,7 @@ sp::string loadFileContents(const sp::string& filename);
 //  Note that this caches the first call, if you change the application name mid run, it will still return the same path.
 const sp::string& preferencePath(const sp::string& application_name);
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_FILESYSTEM_H

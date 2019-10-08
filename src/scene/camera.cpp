@@ -114,4 +114,4 @@ sp::Ray3d Camera::screenToWorldRay(sp::Vector2f position)
         Vector3d(transform * (project_inv.multiply(Vector3f(position.x, position.y, 1.0f), 1.0f))));
 }
 
-};//namespace sp
+}//namespace sp

@@ -18,7 +18,7 @@ protected:
     void createFixtureOnBody(b2Body* body, b2Shape* shape) const;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_2D_SHAPE_H

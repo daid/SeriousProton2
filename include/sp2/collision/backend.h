@@ -52,7 +52,7 @@ protected:
     void modifyPositionByPhysics(Node* node, sp::Vector3d position, Quaterniond rotation);
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_SHAPE_H

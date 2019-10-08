@@ -62,6 +62,6 @@ private:
     void updateMesh();
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_SCENE_VOXELMAP_NODE_H

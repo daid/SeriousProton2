@@ -148,6 +148,6 @@ template<typename T, class = typename std::enable_if<std::is_base_of<AutoPointer
     return os;
 }
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_POINTER_H

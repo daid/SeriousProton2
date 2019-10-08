@@ -48,5 +48,5 @@ Joint2D::~Joint2D()
     }
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

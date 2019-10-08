@@ -311,4 +311,4 @@ void Engine::shutdown()
 #endif//__EMSCRIPTEN__
 }
 
-};//namespace sp
+}//namespace sp

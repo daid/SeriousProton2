@@ -320,5 +320,5 @@ bool Simple2DBackend::QueryCallback(int proxy_id)
     return query_callback(broadphase->GetUserData(proxy_id));
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

@@ -50,7 +50,7 @@ public:
     static std::vector<string> portsByPseudoDriverName(string driver_name);
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SERIAL_DRIVER_H

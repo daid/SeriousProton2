@@ -130,4 +130,4 @@ Texture* BitmapFont::getTexture(int pixel_size)
     return texture;
 }
 
-};//namespace sp
+}//namespace sp

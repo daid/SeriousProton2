@@ -55,5 +55,5 @@ void Base::onDeleted(uint64_t id)
 {
 }
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp

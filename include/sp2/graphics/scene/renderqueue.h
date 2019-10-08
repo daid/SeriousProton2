@@ -85,6 +85,6 @@ private:
 #endif
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_SCENE_RENDERPASS_H

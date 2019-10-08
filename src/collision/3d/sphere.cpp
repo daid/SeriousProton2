@@ -16,5 +16,5 @@ btCollisionShape* Sphere3D::createShape() const
     return new btSphereShape(radius);
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

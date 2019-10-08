@@ -22,6 +22,6 @@ public:
     virtual void update(float delta, RenderData& render_data) = 0;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_SPRITE_MANAGER_H

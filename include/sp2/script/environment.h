@@ -155,7 +155,7 @@ private:
     AllocInfo alloc_info;
 };
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp
 
 #endif//SP2_SCRIPT_ENVIRONMENT_H

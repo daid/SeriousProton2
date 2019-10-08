@@ -70,5 +70,5 @@ sp::string Coroutine::getCurrentSource()
     return "";
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp

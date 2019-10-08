@@ -452,5 +452,5 @@ bool CameraCapture::isOpen()
     return data != nullptr;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

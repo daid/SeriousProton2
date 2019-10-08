@@ -455,6 +455,6 @@ void Box2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector
     }
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 

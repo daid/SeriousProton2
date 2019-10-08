@@ -262,5 +262,5 @@ bool Environment::_run(const string& code, const string& name)
     return true;    
 }
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp

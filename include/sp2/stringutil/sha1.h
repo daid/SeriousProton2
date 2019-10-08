@@ -16,8 +16,8 @@ private:
     string result;
 };
 
-};//namespace stringutil
-};//namespace sp
+}//namespace stringutil
+}//namespace sp
 
 #endif//SP2_STRINGUTIL_SHA1_H
 

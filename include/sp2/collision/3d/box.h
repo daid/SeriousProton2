@@ -17,7 +17,7 @@ private:
     virtual btCollisionShape* createShape() const override;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_3D_BOX_H

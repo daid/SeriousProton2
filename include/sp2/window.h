@@ -85,6 +85,6 @@ private:
     friend class io::Clipboard;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_WINDOW_H

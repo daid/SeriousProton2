@@ -45,5 +45,5 @@ void ThemeImage::updateRenderData()
     render_data.color = t.color;
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

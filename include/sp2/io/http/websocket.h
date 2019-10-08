@@ -44,8 +44,8 @@ private:
     std::function<void(const string&)> callback;
 };
 
-};//namespace http
-};//namespace io
-};//namespace sp
+}//namespace http
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_HTTP_WEBSOCKET_H

@@ -22,7 +22,7 @@ private:
     virtual void create(Node* node) const override;
 };
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp
 
 #endif//SP2_COLLISION_SIMPLE2D_SHAPE_H

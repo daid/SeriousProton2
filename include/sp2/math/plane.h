@@ -44,6 +44,6 @@ public:
 typedef Plane3<float> Plane3f;
 typedef Plane3<double> Plane3d;
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_MATH_RAY_H

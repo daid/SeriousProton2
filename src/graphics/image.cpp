@@ -342,4 +342,4 @@ Image Image::subImage(Rect2i area) const
     return result;
 }
 
-};//namespace sp
+}//namespace sp

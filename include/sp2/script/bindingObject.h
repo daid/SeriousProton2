@@ -25,6 +25,6 @@ protected:
     friend void script::lazyLoading(int table_index, lua_State* L);
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_SCRIPT_BINDING_OBJECT_H

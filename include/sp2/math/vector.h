@@ -17,7 +17,7 @@ template <typename T> T angleDifference(const T& angle_a, const T& angle_b)
     return ret;
 }
 
-};//namespace sp
+}//namespace sp
 
 #include "vector2.h"
 #include "vector3.h"

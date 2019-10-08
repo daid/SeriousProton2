@@ -309,5 +309,5 @@ void Server::sendToAllConnectedClients(const io::DataBuffer& packet)
     }
 }
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp

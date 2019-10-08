@@ -103,4 +103,4 @@ Color tweak(string name, Color color)
         tweak(name + ".a", color.a, 0.0, 1.0));
 }
 
-};//namespace sp
+}//namespace sp

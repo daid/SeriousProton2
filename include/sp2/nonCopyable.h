@@ -27,6 +27,6 @@ private:
     void operator=(const NonCopyable&) = delete;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_NON_COPYABLE_H

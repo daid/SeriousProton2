@@ -176,5 +176,5 @@ bool Subprocess::isRunning()
     return false;
 }
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp

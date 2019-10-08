@@ -42,8 +42,8 @@ private:
     sp::io::network::TcpSocket socket;
 };
 
-};//namespace http
-};//namespace io
-};//namespace sp
+}//namespace http
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_HTTP_WEBSOCKET_H

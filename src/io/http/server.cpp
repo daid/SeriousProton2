@@ -506,6 +506,6 @@ void WebsocketHandler::send(const string& message)
         connection->sendWebsocketTextPacket(message);
 }
 
-};//namespace http
-};//namespace io
-};//namespace sp
+}//namespace http
+}//namespace io
+}//namespace sp

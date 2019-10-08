@@ -274,4 +274,4 @@ void Font::PreparedFontString::alignLine(unsigned int line_start_result_index, f
     }
 }
 
-};//namespace sp
+}//namespace sp

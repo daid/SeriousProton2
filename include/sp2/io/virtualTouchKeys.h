@@ -63,8 +63,8 @@ private:
     std::unordered_map<int, int> active_pointers;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 
 #endif//SP2_IO_VIRTUAL_TOUCH_KEYS_H

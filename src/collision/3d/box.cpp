@@ -16,5 +16,5 @@ btCollisionShape* Box3D::createShape() const
     return new btBoxShape(btVector3(size.x / 2.0, size.y / 2.0, size.z / 2.0));
 }
 
-};//namespace collision
-};//namespace sp
+}//namespace collision
+}//namespace sp

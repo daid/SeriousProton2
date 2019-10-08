@@ -45,7 +45,7 @@ private:
     static PList<ResourceProvider> providers;
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_RESOURCEPROVIDER_H

@@ -71,7 +71,7 @@ private:
 
 typedef std::shared_ptr<Coroutine> CoroutinePtr;
 
-};//namespace script
-};//namespace sp
+}//namespace script
+}//namespace sp
 
 #endif//SP2_SCRIPT_COROUTINE_H

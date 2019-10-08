@@ -46,7 +46,7 @@ template<class T, class = typename std::enable_if<std::is_base_of<Node, T>::valu
     return new T(parent);
 }
 
-};//namespace multiplayer
-};//namespace sp
+}//namespace multiplayer
+}//namespace sp
 
 #endif//SP2_MULTIPLAYER_CLIENT_H

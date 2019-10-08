@@ -39,6 +39,6 @@ private:
     string str;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_VARIANT_H

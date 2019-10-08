@@ -76,6 +76,6 @@ private:
     std::unordered_map<string, Result> cached_items;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_GRAPHICS_TEXTURE_ATLAS_H

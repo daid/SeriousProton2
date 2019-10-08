@@ -172,6 +172,6 @@ template <typename T> static inline std::ostream& operator<<(std::ostream& strea
     return stream;
 }
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_MATH_QUATERNION_H

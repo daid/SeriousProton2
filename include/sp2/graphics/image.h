@@ -48,7 +48,7 @@ private:
     std::vector<uint32_t> pixels;
 };
 
-};//namespace sp
+}//namespace sp
 
 
 #endif//SP2_GRAPHICS_SHADER_H

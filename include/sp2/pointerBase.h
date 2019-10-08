@@ -29,6 +29,6 @@ protected:
     friend class AutoPointerObject;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_POINTER_H

@@ -95,6 +95,6 @@ private:
     static PList<Scene> scenes;
 };
 
-};//namespace sp
+}//namespace sp
 
 #endif//SP2_SCENE_SCENE_H

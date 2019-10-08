@@ -29,4 +29,4 @@ template<> Vector3d Tween<Vector3d>::tweenApply(float f, const Vector3d& value0,
     );
 }
 
-};//namespace sp
+}//namespace sp

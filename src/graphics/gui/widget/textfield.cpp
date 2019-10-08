@@ -170,5 +170,5 @@ int TextField::getTextOffsetForPosition(Vector2d position)
     return result_offset;
 }
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp

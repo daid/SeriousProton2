@@ -22,7 +22,7 @@ public:
 private:
 };
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//CLIPBOARD_H

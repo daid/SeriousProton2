@@ -97,4 +97,4 @@ void SceneGraphicsLayer::addRenderPass(P<RenderPass> render_pass)
     render_passes.add(render_pass);
 }
 
-};//namespace sp
+}//namespace sp

@@ -127,7 +127,7 @@ public:
 };
 
 
-};//namespace io
-};//namespace sp
+}//namespace io
+}//namespace sp
 
 #endif//SP2_IO_SERIALIZER_H

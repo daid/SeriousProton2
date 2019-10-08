@@ -20,8 +20,8 @@ private:
     Rect2d uv;
 };
 
-};//namespace gui
-};//namespace sp
+}//namespace gui
+}//namespace sp
 
 #endif//SP2_GRAPHICS_GUI_IMAGE_H
 
