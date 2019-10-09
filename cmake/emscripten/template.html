@@ -111,7 +111,17 @@
           if (text) Module.printErr('[post-exception status] ' + text);
         };
       };
+      if (typeof WebAssembly == 'undefined')
+      {
+        Module.setStatus('No webassembly support, most likely you need to upgrade your browser.');
+      }
+      else
+      {
+        var script = document.createElement('script');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('src', '${SP2_TARGET_NAME}.js');
+        document.getElementsByTagName("head")[0].appendChild(script);
+      }
     </script>
-    <script src="${SP2_TARGET_NAME}.js"></script>
   </body>
 </html>
