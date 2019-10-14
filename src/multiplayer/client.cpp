@@ -43,6 +43,8 @@ void Client::onUpdate(float delta)
             send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value, game_id, game_version));
             }break;
         case PacketIDs::set_client_id:{
+            if (state == State::Connecting)
+                state = State::Running;
             packet.read(client_id);
             }break;
             
@@ -140,6 +142,11 @@ void Client::onUpdate(float delta)
     {
         LOG(Info, "Multiplayer client disconnect");
         state = State::Disconnected;
+        for(auto it = nodeBegin(); it != nodeEnd(); ++it)
+        {
+            if (it->second->getParent())
+                it->second.destroy();
+        }
     }
 
     cleanDeletedNodes();
