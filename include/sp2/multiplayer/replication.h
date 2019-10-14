@@ -177,7 +177,8 @@ public:
     {
         return BaseFuncPtr(func);
     }
-private:    
+
+private:
     template<typename RET> static RET readFromIOBuffer(io::DataBuffer& packet)
     {
         RET result;
