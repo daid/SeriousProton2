@@ -28,15 +28,13 @@ Server::Server(uint32_t game_id, uint32_t game_version, int port_nr)
     if (!new_connection_listener.listen(port_nr))
         LOG(Error, "Failed to listen on port: ", port_nr);
     new_connection_listener.setBlocking(false);
-    new_connection_socket = new io::network::TcpSocket();
-    
+
     next_client_id = 1;
     next_object_id = 1;
 }
 
 Server::~Server()
 {
-    delete new_connection_socket;
 }
 
 uint32_t Server::getClientId()
@@ -131,28 +129,27 @@ void Server::onUpdate(float delta)
     }
     
     //Check for new connections.
-    if (new_connection_listener.accept(*new_connection_socket))
+    io::network::TcpSocket new_connection_socket;
+    if (new_connection_listener.accept(new_connection_socket))
     {
         LOG(Info, "Accepted new connection on server");
-        new_connection_socket->setBlocking(false);
+        new_connection_socket.setBlocking(false);
         
-        ClientInfo client;
-        client.socket = new_connection_socket;
+        clients.emplace_back();
+        ClientInfo& client = clients.back();
+        client.socket = std::move(new_connection_socket);
         client.client_id = next_client_id;
         client.current_ping_delay = 0.0;
         next_client_id ++;
         client.state = ClientInfo::State::WaitingForAuthentication;
         io::DataBuffer packet(PacketIDs::request_authentication, PacketIDs::magic_sp2_value);
-        client.socket->send(packet);
-        clients.push_back(client);
-
-        new_connection_socket = new io::network::TcpSocket();
+        client.socket.send(packet);
     }
-    
+
     for(auto client = clients.begin(); client != clients.end(); )
     {
         io::DataBuffer packet;
-        while(client->socket->receive(packet))
+        while(client->socket.receive(packet))
         {
             uint8_t packet_id = 0;
             packet.read(packet_id);
@@ -171,17 +168,17 @@ void Server::onUpdate(float delta)
                         if (client_magic != PacketIDs::magic_sp2_value)
                         {
                             LOG(Warning, "Client magic value mismatch. Disconnecting...");
-                            client->socket->close();
+                            client->socket.close();
                         }
                         else if (client_game_id != game_id)
                         {
                             LOG(Warning, "Client running different game. Disconnecting...");
-                            client->socket->close();
+                            client->socket.close();
                         }
                         else if (client_game_version != game_version)
                         {
                             LOG(Warning, "Client running different game version. Disconnecting...");
-                            client->socket->close();
+                            client->socket.close();
                         }
                         else
                         {
@@ -250,7 +247,7 @@ void Server::onUpdate(float delta)
                 break;
             }
         }
-        if (!client->socket->isConnected())
+        if (!client->socket.isConnected())
         {
             LOG(Info, "Client connection closed on server");
             client = clients.erase(client);
@@ -265,11 +262,11 @@ void Server::onUpdate(float delta)
     if (ping_delay < 0.0)
     {
         ping_delay += 1.0;
-        for(auto client : clients)
+        for(auto& client : clients)
         {
             io::DataBuffer ping_packet;
             ping_packet.write(PacketIDs::alive, client.current_ping_delay, now.count());
-            client.socket->send(ping_packet);
+            client.socket.send(ping_packet);
         }
     }
 }
@@ -308,7 +305,7 @@ void Server::addNewObject(P<Node> node)
 
 void Server::sendToAllConnectedClients(const io::DataBuffer& packet)
 {
-    for(auto client : clients)
+    for(auto& client : clients)
     {
         if (client.state != ClientInfo::State::Connected)
             continue;

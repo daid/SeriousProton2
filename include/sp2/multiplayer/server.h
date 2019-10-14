@@ -25,7 +25,7 @@ private:
     class ClientInfo
     {
     public:
-        io::network::TcpSocket* socket;
+        io::network::TcpSocket socket;
         uint32_t client_id;
         float current_ping_delay;
         enum class State
@@ -37,7 +37,7 @@ private:
         
         void send(const io::DataBuffer& packet)
         {
-            socket->send(packet);
+            socket.send(packet);
         }
     };
     uint32_t game_id;
@@ -54,7 +54,6 @@ private:
     std::list<ClientInfo> clients;
     
     io::network::TcpListener new_connection_listener;
-    io::network::TcpSocket* new_connection_socket;
     
     void recursiveAddNewNodes(P<Node> node);
     void recursiveSendCreate(ClientInfo& client, P<Node> node);
