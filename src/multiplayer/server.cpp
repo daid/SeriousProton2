@@ -212,6 +212,13 @@ void Server::onUpdate(float delta)
                         }
                     }
                     break;
+                case PacketIDs::alive:
+                    {
+                        float request_time = 0;
+                        packet.read(request_time);
+                        client->current_ping_delay = now.count() - request_time;
+                    }
+                    break;
                 default:
                     LOG(Warning, "Unknown packet during authentication, id:", packet_id);
                 }
