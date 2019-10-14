@@ -128,6 +128,18 @@ TcpSocket::TcpSocket()
 
 TcpSocket::TcpSocket(TcpSocket&& socket)
 {
+    *this = std::move(socket);
+}
+
+TcpSocket::~TcpSocket()
+{
+    close();
+}
+
+TcpSocket& TcpSocket::operator=(TcpSocket&& socket)
+{
+    close();
+
     handle = socket.handle;
     ssl_handle = socket.ssl_handle;
     send_queue = std::move(socket.send_queue);
@@ -139,11 +151,8 @@ TcpSocket::TcpSocket(TcpSocket&& socket)
     socket.send_queue.clear();
     socket.receive_buffer.clear();
     socket.ssl_handle = nullptr;
-}
 
-TcpSocket::~TcpSocket()
-{
-    close();
+    return *this;
 }
 
 bool TcpSocket::connect(const Address& host, int port)

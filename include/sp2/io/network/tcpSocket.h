@@ -18,6 +18,8 @@ public:
     TcpSocket(TcpSocket&& socket);
     ~TcpSocket();
 
+    TcpSocket& operator=(TcpSocket&& other);
+
     bool connect(const Address& host, int port);
     bool connectSSL(const Address& host, int port);
     void close();

@@ -31,8 +31,23 @@ Websocket::Websocket()
 {
 }
 
+Websocket::Websocket(Websocket&& other)
+{
+    *this = std::move(other);
+}
+
 Websocket::~Websocket()
 {
+}
+
+Websocket& Websocket::operator=(Websocket&& other)
+{
+    state = other.state;
+    websock_key = std::move(other.websock_key);
+    socket = std::move(other.socket);
+    buffer = std::move(other.buffer);
+    received_fragment = std::move(other.received_fragment);
+    return *this;
 }
 
 bool Websocket::connect(const string& url)

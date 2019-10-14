@@ -12,7 +12,10 @@ class Websocket : public sp::NonCopyable
 {
 public:
     Websocket();
+    Websocket(Websocket&& other);
     ~Websocket();
+
+    Websocket& operator=(Websocket&& other);
 
     ///Connect to a http server with the websocket protocol. The URL should be composed like:
     /// ws://server.com/path
