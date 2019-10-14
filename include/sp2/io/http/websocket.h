@@ -1,21 +1,19 @@
 #ifndef SP2_IO_HTTP_WEBSOCKET_H
 #define SP2_IO_HTTP_WEBSOCKET_H
 
-#include <sp2/updatable.h>
+#include <sp2/nonCopyable.h>
 #include <sp2/io/network/tcpSocket.h>
 
 namespace sp {
 namespace io {
 namespace http {
 
-class Websocket : public sp::Updatable
+class Websocket : public sp::NonCopyable
 {
 public:
     Websocket();
     ~Websocket();
 
-    void setMessageCallback(std::function<void(const string&)> callback);
-    
     ///Connect to a http server with the websocket protocol. The URL should be composed like:
     /// ws://server.com/path
     ///     Returns true when the initial connection is done. But actual protocol negotiation is still happening.
@@ -27,21 +25,22 @@ public:
     bool isConnecting();
 
     void send(const string& message);
-    
-    virtual void onUpdate(float delta) override;
+    bool receive(string& message);
+
+    void send(const io::DataBuffer& data_buffer);
+    bool receive(io::DataBuffer& data_buffer);
 private:
     enum class State
     {
         Disconnected,
         Connecting,
         Operational,
-    } state;
-    
+    } state = State::Disconnected;
+
     string websock_key;
     sp::io::network::TcpSocket socket;
-    string buffer;
-    string received_fragment;
-    std::function<void(const string&)> callback;
+    std::vector<uint8_t> buffer;
+    std::vector<uint8_t> received_fragment;
 };
 
 }//namespace http

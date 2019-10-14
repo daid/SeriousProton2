@@ -3,6 +3,7 @@
 #include <sp2/stringutil/base64.h>
 #include <sp2/stringutil/sha1.h>
 #include <sp2/random.h>
+#include <sp2/logging.h>
 
 
 namespace sp {
@@ -34,15 +35,10 @@ Websocket::~Websocket()
 {
 }
 
-void Websocket::setMessageCallback(std::function<void(const string&)> callback)
-{
-    this->callback = callback;
-}
-
 bool Websocket::connect(const string& url)
 {
     state = State::Disconnected;
-    
+
     int scheme_length = 5;
     if (!url.startswith("ws://") && !url.startswith("wss://"))
         return false;
@@ -102,26 +98,26 @@ bool Websocket::isConnecting()
     return state == State::Connecting && socket.isConnected();
 }
 
-void Websocket::send(const string& message)
+void Websocket::send(const io::DataBuffer& data_buffer)
 {
     if (state != State::Operational)
         return;
-    
-    if (message.length() < websocket::payload_length_16bit)
+
+    if (data_buffer.getDataSize() < websocket::payload_length_16bit)
     {
         uint8_t header[] = {
             websocket::fin_mask | websocket::opcode_text,
-            uint8_t(message.length()),
+            uint8_t(data_buffer.getDataSize()),
         };
         socket.send(header, sizeof(header));
     }
-    else if (message.length() < (1 << 16))
+    else if (data_buffer.getDataSize() < (1 << 16))
     {
         uint8_t header[] = {
             websocket::fin_mask | websocket::opcode_text,
             websocket::payload_length_16bit,
-            uint8_t((message.length() >> 8) & 0xFF),
-            uint8_t(message.length() & 0xFF),
+            uint8_t((data_buffer.getDataSize() >> 8) & 0xFF),
+            uint8_t(data_buffer.getDataSize() & 0xFF),
         };
         socket.send(header, sizeof(header));
     }
@@ -131,49 +127,51 @@ void Websocket::send(const string& message)
             websocket::fin_mask | websocket::opcode_text,
             websocket::payload_length_64bit,
             0, 0, 0, 0,
-            uint8_t((message.length() >> 24) & 0xFF),
-            uint8_t((message.length() >> 16) & 0xFF),
-            uint8_t((message.length() >> 8) & 0xFF),
-            uint8_t(message.length() & 0xFF),
+            uint8_t((data_buffer.getDataSize() >> 24) & 0xFF),
+            uint8_t((data_buffer.getDataSize() >> 16) & 0xFF),
+            uint8_t((data_buffer.getDataSize() >> 8) & 0xFF),
+            uint8_t(data_buffer.getDataSize() & 0xFF),
         };
         socket.send(header, sizeof(header));
     }
-    
-    socket.send(message.data(), message.length());
+
+    socket.send(data_buffer.getData(), data_buffer.getDataSize());
 }
 
-void Websocket::onUpdate(float delta)
+bool Websocket::receive(io::DataBuffer& data_buffer)
 {
     char receive_buffer[4096];
     size_t received_size;
     received_size = socket.receive(receive_buffer, sizeof(receive_buffer));
-    if (received_size < 1)
-        return;
-    buffer.resize(buffer.size() + received_size);
-    memcpy(&buffer[buffer.size()] - received_size, receive_buffer, received_size);
+    if (received_size > 0)
+    {
+        buffer.resize(buffer.size() + received_size);
+        memcpy(&buffer[buffer.size()] - received_size, receive_buffer, received_size);
+    }
 
     switch(state)
     {
     case State::Disconnected:
         break;
     case State::Connecting:{
-        int headers_end = buffer.find("\r\n\r\n");
+        string buffer_str = string((const char*)buffer.data(), buffer.size());
+        int headers_end = buffer_str.find("\r\n\r\n");
         if (headers_end)
         {
-            std::vector<string> header_data = buffer.substr(0, headers_end).split("\r\n");
-            buffer = buffer.substr(headers_end + 4);
+            std::vector<string> header_data = buffer_str.substr(0, headers_end).split("\r\n");
+            buffer.erase(buffer.begin(), buffer.begin() + headers_end + 4);
             std::vector<string> parts = header_data[0].split(" ", 2);
             if (parts.size() != 3)
             {
                 LOG(Warning, "Connecting to websocket failed, incorrect reply on HTTP upgrade request");
                 close();
-                return;
+                return false;
             }
             if (parts[1] != "101")
             {
                 LOG(Warning, "Connecting to websocket failed, incorrect reply on HTTP upgrade request");
                 close();
-                return;
+                return false;
             }
 
             std::unordered_map<string, string> headers;
@@ -187,19 +185,19 @@ void Websocket::onUpdate(float delta)
             {
                 LOG(Warning, "Connecting to websocket failed, incorrect reply on HTTP upgrade request");
                 close();
-                return;
+                return false;
             }
             if (headers["upgrade"].lower() != "websocket" || headers["connection"].lower() != "upgrade")
             {
                 LOG(Warning, "Connecting to websocket failed, incorrect reply on HTTP upgrade request");
                 close();
-                return;
+                return false;
             }
             if (headers["sec-websocket-accept"] != stringutil::SHA1(websock_key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").base64())
             {
                 LOG(Warning, "Connecting to websocket failed, incorrect reply on HTTP upgrade request");
                 close();
-                return;
+                return false;
             }
             state = State::Operational;
         }
@@ -208,7 +206,7 @@ void Websocket::onUpdate(float delta)
         while(true)
         {
             if (buffer.size() < 2)
-                return;
+                return false;
             unsigned int payload_length = buffer[1] & websocket::payload_length_mask;
             int opcode = buffer[0] & websocket::opcode_mask;
             bool fin = buffer[0] & websocket::fin_mask;
@@ -220,19 +218,19 @@ void Websocket::onUpdate(float delta)
             {
                 LOG(Warning, "Closing client websocket due to RSV bits, we do not support extensions.");
                 close();
-                return;
+                return false;
             }
 
             if (payload_length == websocket::payload_length_16bit)
             {
                 if (buffer.size() < index + 2)
-                    return;
+                    return false;
                 payload_length = uint8_t(buffer[index++]) << 8;
                 payload_length |= uint8_t(buffer[index++]);
             }else if (payload_length == websocket::payload_length_64bit)
             {
                 if (buffer.size() < index + 8)
-                    return;
+                    return false;
                 index += 4;
                 payload_length = uint8_t(buffer[index++]) << 24;
                 payload_length |= uint8_t(buffer[index++]) << 16;
@@ -244,37 +242,37 @@ void Websocket::onUpdate(float delta)
             if (mask)
             {
                 if (buffer.size() < index + 4)
-                    return;
+                    return false;
                 for(unsigned int n=0; n<4; n++)
                     mask_values[n] = buffer[index++];
                 if (buffer.size() < index + payload_length)
-                    return;
+                    return false;
                 for(unsigned int n=0; n<payload_length; n++)
                     buffer[index + n] ^= mask_values[n % 4];
             }
             if (buffer.size() < index + payload_length)
-                return;
-            
-            string message = buffer.substr(index, index + payload_length);
-            buffer = buffer.substr(index + payload_length);
+                return false;
+
+            std::vector<uint8_t> message(buffer.begin() + index, buffer.begin() + index + payload_length);
+            buffer.erase(buffer.begin(), buffer.begin() + index + payload_length);
 
             switch(opcode)
             {
             case websocket::opcode_continuation:
-                received_fragment += message;
+                received_fragment.insert(received_fragment.end(), message.begin(), message.end());
                 if (fin)
                 {
-                    if (callback)
-                        callback(received_fragment);
-                    received_fragment = "";
+                    data_buffer = std::move(received_fragment);
+                    received_fragment.clear();
+                    return true;
                 }
                 break;
             case websocket::opcode_text:
             case websocket::opcode_binary:
                 if (fin)
                 {
-                    if (callback)
-                        callback(message);
+                    data_buffer = std::move(message);
+                    return true;
                 }
                 else
                 {
@@ -287,7 +285,7 @@ void Websocket::onUpdate(float delta)
                     socket.send(reply, sizeof(reply));
                 }
                 close();
-                return;
+                return false;
             case websocket::opcode_ping:
                 {
                     //Note: The standard says that we need to include the payload of the ping packet as payload in the pong packet.
@@ -302,6 +300,23 @@ void Websocket::onUpdate(float delta)
             }
         }
     }
+    return false;
+}
+
+void Websocket::send(const string& message)
+{
+    io::DataBuffer data_buffer;
+    data_buffer.appendRaw(message.data(), message.size());
+    send(data_buffer);
+}
+
+bool Websocket::receive(string& output)
+{
+    io::DataBuffer data_buffer;
+    if (!receive(data_buffer))
+        return false;
+    output = string((const char*)data_buffer.getData(), data_buffer.getDataSize());
+    return true;
 }
 
 }//namespace http

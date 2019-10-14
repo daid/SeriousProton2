@@ -27,7 +27,7 @@ public:
     {
     }
     
-    template<typename... ARGS> DataBuffer(const ARGS&... args)
+    template<typename... ARGS> explicit DataBuffer(const ARGS&... args)
     : DataBuffer()
     {
         write(args...);
@@ -53,6 +53,12 @@ public:
     unsigned int getDataSize() const
     {
         return buffer.size();
+    }
+
+    void appendRaw(const void* ptr, size_t size)
+    {
+        buffer.resize(buffer.size() + size);
+        memcpy(buffer.data() + buffer.size() - size, ptr, size);
     }
     
     template<typename T, typename... ARGS> void write(const T& value, const ARGS&... args)
