@@ -118,7 +118,7 @@ private:
     {
         if (fixture->GetType() == b2Shape::Type::e_chain)
         {
-            b2ChainShape* chain = (b2ChainShape*)fixture->GetShape();
+            b2ChainShape* chain = static_cast<b2ChainShape*>(fixture->GetShape());
             b2EdgeShape edge;
             chain->GetChildEdge(&edge, child_index);
             
@@ -141,7 +141,7 @@ class DestructionListener : public b2DestructionListener
 {
 	virtual void SayGoodbye(b2Joint* joint) override
 	{
-        Joint2D* my_joint = (Joint2D*)joint->GetUserData();
+        Joint2D* my_joint = static_cast<Joint2D*>(joint->GetUserData());
         if (my_joint)
         {
             my_joint->joint = nullptr;
@@ -189,8 +189,8 @@ void Box2DBackend::step(float time_delta)
     {
         if (contact->IsTouching() && contact->IsEnabled())
         {
-            Node* node_a = (Node*)contact->GetFixtureA()->GetUserData();
-            Node* node_b = (Node*)contact->GetFixtureB()->GetUserData();
+            Node* node_a = static_cast<Node*>(contact->GetFixtureA()->GetUserData());
+            Node* node_b = static_cast<Node*>(contact->GetFixtureB()->GetUserData());
             b2WorldManifold world_manifold;
             contact->GetWorldManifold(&world_manifold);
 
@@ -245,7 +245,7 @@ void Box2DBackend::postUpdate(float delta)
 {
     for(b2Body* body = world->GetBodyList(); body; body = body->GetNext())
     {
-        Node* node = (Node*)body->GetUserData();
+        Node* node = static_cast<Node*>(body->GetUserData());
         modifyPositionByPhysics(node, toVector<double>(body->GetPosition() + delta * body->GetLinearVelocity()), (body->GetAngle() + body->GetAngularVelocity() * delta) / pi * 180.0);
     }
 }
@@ -344,7 +344,7 @@ public:
 	/// @return false to terminate the query.
 	virtual bool ReportFixture(b2Fixture* fixture) override
 	{
-        Node* node = (Node*)fixture->GetUserData();
+        Node* node = static_cast<Node*>(fixture->GetUserData());
         return callback(node);
 	}
 };
@@ -396,7 +396,7 @@ public:
     
 	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) override
 	{
-        Node* node = (Node*)fixture->GetUserData();
+        Node* node = static_cast<Node*>(fixture->GetUserData());
         if (callback(node, toVector<double>(point), toVector<double>(normal)))
             return -1.0;
         return 0.0;
@@ -436,7 +436,7 @@ public:
 
 	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) override
 	{
-        hits.emplace_back((Node*)fixture->GetUserData(), toVector<double>(point), toVector<double>(normal), fraction);
+        hits.emplace_back(static_cast<Node*>(fixture->GetUserData()), toVector<double>(point), toVector<double>(normal), fraction);
         return -1.0;
 	}
 };

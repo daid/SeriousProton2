@@ -3,8 +3,7 @@
 
 #include <sp2/math/vector.h>
 #include <sp2/math/quaternion.h>
-#include <LinearMath/btVector3.h>
-#include <LinearMath/btQuaternion.h>
+#include "bullet.h"
 
 template<typename T> static inline btVector3 toVector(const sp::Vector3<T>& v)
 {

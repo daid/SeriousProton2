@@ -9,7 +9,7 @@ static void luaInstructionCountHook(lua_State *L, lua_Debug *ar)
 
 static void* luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 {
-    sp::script::Environment::AllocInfo* info = (sp::script::Environment::AllocInfo*)ud;
+    sp::script::Environment::AllocInfo* info = static_cast<sp::script::Environment::AllocInfo*>(ud);
     if (ptr)
         info->total -= osize;
     if (osize < nsize && info->total + nsize > info->max)

@@ -42,7 +42,7 @@ SerialPort::SerialPort(string name)
         name = ports[0];
     }
 #ifdef __WIN32__
-    handle = (uintptr_t)CreateFile(("\\\\.\\" + name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    handle = reinterpret_cast<uintptr_t>(CreateFile(("\\\\.\\" + name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if (isOpen())
     {
         COMMTIMEOUTS timeouts;
@@ -52,7 +52,7 @@ SerialPort::SerialPort(string name)
         timeouts.WriteTotalTimeoutMultiplier = 0;
         timeouts.WriteTotalTimeoutConstant = 0;
 
-        if (!SetCommTimeouts((HANDLE)handle, &timeouts))
+        if (!SetCommTimeouts(reinterpret_cast<HANDLE>(handle), &timeouts))
         {
             LOG(Error, "SetCommTimeouts failed!");
         }
@@ -75,8 +75,8 @@ SerialPort::~SerialPort()
         return;
 
 #ifdef __WIN32__
-    CloseHandle((HANDLE)handle);
-    handle = (uintptr_t)INVALID_HANDLE_VALUE;
+    CloseHandle(reinterpret_cast<HANDLE>(handle));
+    handle = reinterpret_cast<uintptr_t>(INVALID_HANDLE_VALUE);
 #endif
 #if (defined(__gnu_linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && defined(__MACH__))
     close(handle);
@@ -87,7 +87,7 @@ SerialPort::~SerialPort()
 bool SerialPort::isOpen()
 {
 #ifdef __WIN32__
-    return handle != (uintptr_t)INVALID_HANDLE_VALUE;
+    return handle != reinterpret_cast<uintptr_t>(INVALID_HANDLE_VALUE);
 #endif
 #if (defined(__gnu_linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && defined(__MACH__))
     return handle;
@@ -100,14 +100,14 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
     if (!isOpen())
         return;
 #ifdef __WIN32__
-    FlushFileBuffers((HANDLE)handle);
+    FlushFileBuffers(reinterpret_cast<HANDLE>(handle));
 
     DCB dcb;
     memset(&dcb, 0, sizeof(DCB));
-    if (!GetCommState((HANDLE)handle, &dcb))
+    if (!GetCommState(reinterpret_cast<HANDLE>(handle), &dcb))
     {
         DWORD error;
-        ClearCommError((HANDLE)handle, &error, nullptr);
+        ClearCommError(reinterpret_cast<HANDLE>(handle), &error, nullptr);
         LOG(Error, "GetCommState failed!", error);
         return;
     }
@@ -158,10 +158,10 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
     dcb.fDtrControl = DTR_CONTROL_DISABLE;
     dcb.fTXContinueOnXoff = false;
 
-    if(!SetCommState((HANDLE)handle, &dcb))
+    if(!SetCommState(reinterpret_cast<HANDLE>(handle), &dcb))
     {
         DWORD error;
-        ClearCommError((HANDLE)handle, &error, nullptr);
+        ClearCommError(reinterpret_cast<HANDLE>(handle), &error, nullptr);
         LOG(Error, "SetCommState failed!", error);
     }
 #endif
@@ -308,14 +308,14 @@ void SerialPort::send(void* data, int data_size)
     while(data_size > 0)
     {
         DWORD written = 0;
-        if (!WriteFile((HANDLE)handle, data, data_size, &written, NULL))
+        if (!WriteFile(reinterpret_cast<HANDLE>(handle), data, data_size, &written, NULL))
         {
             COMSTAT comStat;
             DWORD   dwErrors;
-            ClearCommError((HANDLE)handle, &dwErrors, &comStat);
+            ClearCommError(reinterpret_cast<HANDLE>(handle), &dwErrors, &comStat);
             return;
         }
-        data = ((char*)data) + written;
+        data = static_cast<char*>(data) + written;
         data_size -= written;
     }
 #endif
@@ -325,7 +325,7 @@ void SerialPort::send(void* data, int data_size)
         int written = write(handle, data, data_size);
         if (written < 1)
             return;
-        data = ((char*)data) + written;
+        data = static_cast<char*>(data) + written;
         data_size -= written;
     }
 #endif
@@ -338,11 +338,11 @@ int SerialPort::recv(void* data, int data_size)
 
 #ifdef __WIN32__
     DWORD read_size = 0;
-    if (!ReadFile((HANDLE)handle, data, data_size, &read_size, NULL))
+    if (!ReadFile(reinterpret_cast<HANDLE>(handle), data, data_size, &read_size, NULL))
     {
         COMSTAT comStat;
         DWORD   dwErrors;
-        ClearCommError((HANDLE)handle, &dwErrors, &comStat);
+        ClearCommError(reinterpret_cast<HANDLE>(handle), &dwErrors, &comStat);
         return 0;
     }
     return read_size;
@@ -361,7 +361,7 @@ void SerialPort::setDTR()
     if (!isOpen())
         return;
 #ifdef __WIN32__
-    EscapeCommFunction((HANDLE)handle, SETDTR);
+    EscapeCommFunction(reinterpret_cast<HANDLE>(handle), SETDTR);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
     int bit = TIOCM_DTR;
@@ -377,7 +377,7 @@ void SerialPort::clearDTR()
     if (!isOpen())
         return;
 #ifdef __WIN32__
-    EscapeCommFunction((HANDLE)handle, CLRDTR);
+    EscapeCommFunction(reinterpret_cast<HANDLE>(handle), CLRDTR);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
     int bit = TIOCM_DTR;
@@ -393,7 +393,7 @@ void SerialPort::setRTS()
     if (!isOpen())
         return;
 #ifdef __WIN32__
-    EscapeCommFunction((HANDLE)handle, SETRTS);
+    EscapeCommFunction(reinterpret_cast<HANDLE>(handle), SETRTS);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
     int bit = TIOCM_RTS;
@@ -409,7 +409,7 @@ void SerialPort::clearRTS()
     if (!isOpen())
         return;
 #ifdef __WIN32__
-    EscapeCommFunction((HANDLE)handle, CLRRTS);
+    EscapeCommFunction(reinterpret_cast<HANDLE>(handle), CLRRTS);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
     int bit = TIOCM_RTS;
@@ -423,9 +423,9 @@ void SerialPort::clearRTS()
 void SerialPort::sendBreak()
 {
 #ifdef __WIN32__
-    SetCommBreak((HANDLE)handle);
+    SetCommBreak(reinterpret_cast<HANDLE>(handle));
     Sleep(1);
-    ClearCommBreak((HANDLE)handle);
+    ClearCommBreak(reinterpret_cast<HANDLE>(handle));
 #endif
 #if (defined(__gnu_linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && defined(__MACH__))
     tcsendbreak(handle, 0);
@@ -447,7 +447,7 @@ std::vector<string> SerialPort::getAvailablePorts()
 
         while(RegEnumValue(key, index, value, &value_size, NULL, NULL, data, &data_size) == ERROR_SUCCESS)
         {
-            names.push_back(string((char*)data));
+            names.push_back(string(reinterpret_cast<char*>(data)));
 
             index++;
             value_size = sizeof(value);
@@ -494,7 +494,7 @@ string SerialPort::getPseudoDriverName(string port)
 
         while(RegEnumValue(key, index, value, &value_size, NULL, NULL, data, &data_size) == ERROR_SUCCESS)
         {
-            if (string((char*)data) == port)
+            if (string(reinterpret_cast<char*>(data)) == port)
             {
                 //Replace numbers by underscores so matching drivers is easier. As these device names are numbered.
                 for(unsigned int n=0; n<value_size; n++)

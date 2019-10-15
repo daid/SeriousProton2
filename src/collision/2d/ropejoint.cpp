@@ -20,7 +20,7 @@ RopeJoint2D::RopeJoint2D(sp::P<sp::Node> node_a, sp::Vector2d local_point_a, sp:
 void RopeJoint2D::setMaxLength(float max_length)
 {
     if (joint)
-        ((b2RopeJoint*)joint)->SetMaxLength(max_length);
+        static_cast<b2RopeJoint*>(joint)->SetMaxLength(max_length);
 }
 
 }//namespace collision

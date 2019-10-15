@@ -42,7 +42,7 @@ public:
     virtual int64_t read(void* data, int64_t size) override
     {
         size = std::min(int(buffer_length - offset), int(size));
-        memcpy(data, ((char*)buffer) + offset, size);
+        memcpy(data, static_cast<char*>(buffer) + offset, size);
         offset += size;
         return size;
     }
@@ -251,7 +251,7 @@ bool CameraCapture::init(int index)
     ICreateDevEnum* create_dev_enum = nullptr;
     HRESULT res;
     
-    if (CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC, IID_ICreateDevEnum, (LPVOID*)&create_dev_enum))
+    if (CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC, IID_ICreateDevEnum, reinterpret_cast<LPVOID*>(&create_dev_enum)))
         return false;
     
     IEnumMoniker *enum_moniker = nullptr;
@@ -279,38 +279,38 @@ bool CameraCapture::init(int index)
     if (!data->moniker)
         return false;
     
-    if (CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (LPVOID*)&data->capture_graph_builder))
+    if (CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, reinterpret_cast<LPVOID*>(&data->capture_graph_builder)))
         return false;
-    if (CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, IID_IGraphBuilder, (LPVOID*)&data->graph_builder))
+    if (CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, IID_IGraphBuilder, reinterpret_cast<LPVOID*>(&data->graph_builder)))
         return false;
-    if (data->graph_builder->QueryInterface(IID_IMediaControl, (LPVOID*)&data->media_control))
+    if (data->graph_builder->QueryInterface(IID_IMediaControl, reinterpret_cast<LPVOID*>(&data->media_control)))
         return false;
-    if (data->graph_builder->QueryInterface(IID_IMediaEventEx, (LPVOID*)&data->media_event))
+    if (data->graph_builder->QueryInterface(IID_IMediaEventEx, reinterpret_cast<LPVOID*>(&data->media_event)))
         return false;
 
     if (data->capture_graph_builder->SetFiltergraph(data->graph_builder))
         return false;
-    if (data->moniker->BindToObject(NULL, NULL, IID_IBaseFilter, (LPVOID*)&data->base_filter_cam))
+    if (data->moniker->BindToObject(NULL, NULL, IID_IBaseFilter, reinterpret_cast<LPVOID*>(&data->base_filter_cam)))
         return false;
     if (data->graph_builder->AddFilter(data->base_filter_cam, L"VideoCam"))
         return false;
 
-    CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (LPVOID*)&data->base_filter_sample_grabber);
+    CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, reinterpret_cast<LPVOID*>(&data->base_filter_sample_grabber));
     data->graph_builder->AddFilter(data->base_filter_sample_grabber, L"Sample Grabber");
     
-    CoCreateInstance(CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (LPVOID*)&data->base_filter_null_renderer);
+    CoCreateInstance(CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, reinterpret_cast<LPVOID*>(&data->base_filter_null_renderer));
     data->graph_builder->AddFilter(data->base_filter_null_renderer, L"NullRenderer");
 
     data->capture_graph_builder->RenderStream(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, data->base_filter_cam, data->base_filter_sample_grabber, data->base_filter_null_renderer);
     
-    data->base_filter_sample_grabber->QueryInterface(IID_ISampleGrabber, (LPVOID*)&data->sample_grabber);
+    data->base_filter_sample_grabber->QueryInterface(IID_ISampleGrabber, reinterpret_cast<LPVOID*>(&data->sample_grabber));
     data->sample_grabber->SetBufferSamples(true);
     
-    data->capture_graph_builder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, data->base_filter_cam, IID_IAMStreamConfig, (LPVOID*)&data->AM_stream_config);
+    data->capture_graph_builder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, data->base_filter_cam, IID_IAMStreamConfig, reinterpret_cast<LPVOID*>(&data->AM_stream_config));
     AM_MEDIA_TYPE* pAmMediaType = nullptr;
     data->AM_stream_config->GetFormat(&pAmMediaType);
-    size.x = ((VIDEOINFOHEADER*)pAmMediaType->pbFormat)->bmiHeader.biWidth;
-    size.y = ((VIDEOINFOHEADER*)pAmMediaType->pbFormat)->bmiHeader.biHeight;
+    size.x = reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biWidth;
+    size.y = reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biHeight;
 
     {
         if (pAmMediaType->pbFormat) CoTaskMemFree(pAmMediaType->pbFormat);
@@ -319,7 +319,7 @@ bool CameraCapture::init(int index)
     }
 
     AM_MEDIA_TYPE mt;
-    ZeroMemory(&mt,sizeof(AM_MEDIA_TYPE));
+    ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
     mt.majortype = MEDIATYPE_Video;
     mt.subtype = MEDIASUBTYPE_RGB24;
     mt.formattype = FORMAT_VideoInfo;
@@ -364,10 +364,10 @@ Image CameraCapture::getFrame()
     if (data->buffer_size != buffer_size)
     {
         if (data->buffer) free(data->buffer);
-        data->buffer = (uint8_t*)malloc(buffer_size);
+        data->buffer = static_cast<uint8_t*>(malloc(buffer_size));
         data->buffer_size = buffer_size;
     }
-    if (data->sample_grabber->GetCurrentBuffer(&buffer_size, (LONG*)data->buffer))
+    if (data->sample_grabber->GetCurrentBuffer(&buffer_size, reinterpret_cast<LONG*>(data->buffer)))
         return result;
     
     if (data->is_mjpg)
@@ -385,7 +385,7 @@ Image CameraCapture::getFrame()
 
         //In place convert 24bit BGR into 24bit RGBA.
         uint8_t* src = data->buffer + (size.x * size.y) * 3;
-        uint32_t* dst = (uint32_t*)(data->buffer) + (size.x * size.y);
+        uint32_t* dst = reinterpret_cast<uint32_t*>(data->buffer) + (size.x * size.y);
         for(int n=0; n<size.x*size.y; n++)
         {
             src -= 3;
@@ -401,7 +401,7 @@ Image CameraCapture::getFrame()
             memcpy(data->buffer + size.x * n * 4, data->buffer + size.x * (size.y - 1 - n) * 4, size.x * 4);
             memcpy(data->buffer + size.x * (size.y - 1 - n) * 4, tmp, size.x * 4);
         }
-        result.update(size, (uint32_t*)data->buffer);
+        result.update(size, reinterpret_cast<uint32_t*>(data->buffer));
     }
     return result;
 }

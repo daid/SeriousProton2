@@ -3,9 +3,16 @@
 #include <sp2/stringutil/utf8.h>
 #include <sp2/assert.h>
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif//__GNUC__
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#if defined(__GNUC__) && !defined(__clang__)
+//#pragma GCC diagnostic pop
+#endif//__GNUC__
 
 static unsigned long ft_stream_read(FT_Stream rec, unsigned long offset, unsigned char* buffer, unsigned long count)
 {
@@ -82,9 +89,9 @@ FreetypeFont::FreetypeFont(string name, io::ResourceStreamPtr stream)
 
 FreetypeFont::~FreetypeFont()
 {
-    if (ft_face) FT_Done_Face((FT_Face)ft_face);
-    if (ft_stream_rec) delete (FT_StreamRec*)ft_stream_rec;
-    if (ft_library) FT_Done_FreeType((FT_Library)ft_library);
+    if (ft_face) FT_Done_Face(static_cast<FT_Face>(ft_face));
+    if (ft_stream_rec) delete static_cast<FT_StreamRec*>(ft_stream_rec);
+    if (ft_library) FT_Done_FreeType(static_cast<FT_Library>(ft_library));
 }
 
 Texture* FreetypeFont::getTexture(int pixel_size)
@@ -104,7 +111,7 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
 
     if (known_glyphs.find(unicode) == known_glyphs.end())
     {
-        FT_Face face = FT_Face(ft_face);
+        FT_Face face = static_cast<FT_Face>(ft_face);
         
         GlyphInfo info;
         info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
@@ -133,14 +140,15 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
                 
                 const uint8_t* src_pixels = bitmap.buffer;
                 //We make a full white image, and then copy the alpha from the freetype render
-                Image image(Vector2i(bitmap.width, bitmap.rows), 0xFFFFFFFF);
+                std::vector<uint32_t> image_pixels;
+                image_pixels.resize(bitmap.width * bitmap.rows);
                 if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
                 {
                     sp2assert(false, "TODO");
                 }
                 else
                 {
-                    uint8_t* dst_pixels = (uint8_t*)image.getPtr();
+                    uint8_t* dst_pixels = reinterpret_cast<uint8_t*>(image_pixels.data());
                     for(unsigned int y=0; y<bitmap.rows; y++)
                     {
                         for(unsigned int x=0; x<bitmap.width; x++)
@@ -148,9 +156,10 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
                         src_pixels += bitmap.pitch - bitmap.width;
                     }
                 }
+                Image image(Vector2i(bitmap.width, bitmap.rows), std::move(image_pixels));
 
                 info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
-                
+
                 FT_Done_Glyph(glyph);
             }
         }
@@ -163,15 +172,15 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
 
 float FreetypeFont::getLineSpacing(int pixel_size)
 {
-    if (((FT_Face)ft_face)->size->metrics.x_ppem != pixel_size)
+    if (static_cast<FT_Face>(ft_face)->size->metrics.x_ppem != pixel_size)
     {
-        FT_Set_Pixel_Sizes((FT_Face)ft_face, 0, pixel_size);
+        FT_Set_Pixel_Sizes(static_cast<FT_Face>(ft_face), 0, pixel_size);
     }
     if (texture_cache.find(pixel_size) == texture_cache.end())
     {
         texture_cache[pixel_size] = new AtlasTexture(name, Vector2i(pixel_size * 16, pixel_size * 16));
     }
-    return float(((FT_Face)ft_face)->size->metrics.height) / float(1 << 6);
+    return float(static_cast<FT_Face>(ft_face)->size->metrics.height) / float(1 << 6);
 }
 
 float FreetypeFont::getBaseline(int pixel_size)
@@ -182,11 +191,12 @@ float FreetypeFont::getBaseline(int pixel_size)
 float FreetypeFont::getKerning(const char* previous, const char* current)
 {
     // Apply the kerning offset
-    if (FT_HAS_KERNING((FT_Face)ft_face))
+    FT_Face face = static_cast<FT_Face>(ft_face);
+    if (FT_HAS_KERNING(face))
     {
         FT_Vector kerning;
-        FT_Get_Kerning((FT_Face)ft_face, FT_Get_Char_Index((FT_Face)ft_face, *previous), FT_Get_Char_Index((FT_Face)ft_face, *current), FT_KERNING_DEFAULT, &kerning);
-        if (!FT_IS_SCALABLE((FT_Face)ft_face))
+        FT_Get_Kerning(face, FT_Get_Char_Index(face, *previous), FT_Get_Char_Index(face, *current), FT_KERNING_DEFAULT, &kerning);
+        if (!FT_IS_SCALABLE(face))
             return float(kerning.x);
         else
             return float(kerning.x) / float(1 << 6);

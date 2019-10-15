@@ -58,7 +58,7 @@ public:
             std::vector<T> tmp;
             tmp.resize(element_count);
             unsigned long size = element_count * sizeof(T);
-            mz_uncompress((unsigned char*)tmp.data(), &size, buffer, encoded_size);
+            mz_uncompress(reinterpret_cast<unsigned char*>(tmp.data()), &size, buffer, encoded_size);
             for(int n=0; n<element_count; n++)
                 numbers.emplace_back(tmp[n]);
         }

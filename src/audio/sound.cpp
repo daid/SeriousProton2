@@ -39,13 +39,13 @@ static SoundSource slot[slot_count];
 
 static Sint64 SDLCALL sdl_to_stream_size(struct SDL_RWops * context)
 {
-    sp::io::ResourceStream* stream = (sp::io::ResourceStream*)context->hidden.unknown.data1;
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
     return stream->getSize();
 }
 
 static Sint64 SDLCALL sdl_to_stream_seek(struct SDL_RWops * context, Sint64 offset, int whence)
 {
-    sp::io::ResourceStream* stream = (sp::io::ResourceStream*)context->hidden.unknown.data1;
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
     switch(whence)
     {
     case RW_SEEK_SET: stream->seek(offset); break;
@@ -57,7 +57,7 @@ static Sint64 SDLCALL sdl_to_stream_seek(struct SDL_RWops * context, Sint64 offs
 
 static size_t SDLCALL sdl_to_stream_read(struct SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 {
-    sp::io::ResourceStream* stream = (sp::io::ResourceStream*)context->hidden.unknown.data1;
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
     return stream->read(ptr, size * maxnum) / size;
 }
 
@@ -98,7 +98,7 @@ void Sound::play(string resource_name)
             {
                 cvt.len = buffer_size;
                 data->resize(cvt.len * cvt.len_mult / sizeof(float));
-                cvt.buf = (uint8_t*)data->data();
+                cvt.buf = reinterpret_cast<uint8_t*>(data->data());
                 memcpy(cvt.buf, buffer, buffer_size);
                 SDL_ConvertAudio(&cvt);
                 data->resize(cvt.len_cvt / sizeof(float));

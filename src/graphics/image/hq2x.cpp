@@ -29,7 +29,7 @@ static bool diff(uint32_t color0, uint32_t color1)
     return (abs((yuv0 & 0xff0000) - (yuv1 & 0xff0000)) > trY)
         || (abs((yuv0 & 0x00ff00) - (yuv1 & 0x00ff00)) > trU)
         || (abs((yuv0 & 0x0000ff) - (yuv1 & 0x0000ff)) > trV)
-        || (std::abs((int)((color0 >> 24) - (color1 >> 24))) > trA);
+        || (std::abs(static_cast<int>((color0 >> 24) - (color1 >> 24))) > trA);
 }
 
 static inline uint32_t mix(uint32_t w1, uint32_t w2, uint32_t c1, uint32_t c2)

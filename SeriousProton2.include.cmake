@@ -87,7 +87,8 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
 
     set(WARNING_FLAGS -Wall)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        set(WARNING_FLAGS ${WARNING_FLAGS} -Wno-psabi -Wno-strict-aliasing -Werror=suggest-override)
+        set(WARNING_FLAGS ${WARNING_FLAGS} -Wno-psabi -Wstrict-aliasing -Wold-style-cast)
+        set(WARNING_FLAGS ${WARNING_FLAGS} -Werror=suggest-override -Werror=return-type)
     endif()
 
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OPTIMIZER_FLAGS}")

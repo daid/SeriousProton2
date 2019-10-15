@@ -40,7 +40,7 @@ Win32StackWalkContext::Win32StackWalkContext(Win32ExceptionContext& exception_co
         wow64context.ContextFlags = WOW64_CONTEXT_FULL;
         if (!Wow64GetThreadContext(exception_context.thread, &wow64context))
             return;
-        context_ptr = (PCONTEXT)&wow64context;
+        context_ptr = reinterpret_cast<PCONTEXT>(&wow64context);
         stack_frame.AddrPC.Offset = wow64context.Eip;
         stack_frame.AddrPC.Mode = AddrModeFlat;
         stack_frame.AddrStack.Offset = wow64context.Esp;
@@ -111,21 +111,21 @@ void Win32StackWalkContext::fillAddressInfo(AddressInfo& info)
 {
     char buffer[MAX_PATH];
     
-    info.address = (void*)stack_frame.AddrPC.Offset;
+    info.address = reinterpret_cast<void*>(stack_frame.AddrPC.Offset);
     
-    HMODULE module = (HMODULE)(INT_PTR)SymGetModuleBase64(exception_context.process, (DWORD64)(INT_PTR)info.address);
+    HMODULE module = reinterpret_cast<HMODULE>(static_cast<INT_PTR>(SymGetModuleBase64(exception_context.process, static_cast<DWORD64>(reinterpret_cast<INT_PTR>(info.address)))));
     if (module)
     {
-        info.module_offset = (DWORD64)info.address - (DWORD64)module;
+        info.module_offset = reinterpret_cast<DWORD64>(info.address) - reinterpret_cast<DWORD64>(module);
         if (GetModuleFileNameExA(exception_context.process, module, buffer, sizeof(buffer)))
         {
             info.module = buffer;
             
             DWORD64 displacement = 0;
-            PSYMBOL_INFO symbol_info = (PSYMBOL_INFO)buffer;
+            PSYMBOL_INFO symbol_info = reinterpret_cast<PSYMBOL_INFO>(buffer);
             symbol_info->SizeOfStruct = sizeof(SYMBOL_INFO);
             symbol_info->MaxNameLen = MAX_PATH - sizeof(SYMBOL_INFO);
-            if (SymFromAddr(exception_context.process, (DWORD64)info.address, &displacement, symbol_info))
+            if (SymFromAddr(exception_context.process, reinterpret_cast<DWORD64>(info.address), &displacement, symbol_info))
             {
                 info.symbol = symbol_info->Name;
                 info.symbol_offset = displacement;
@@ -133,7 +133,7 @@ void Win32StackWalkContext::fillAddressInfo(AddressInfo& info)
                 DWORD displacement = 0;
                 IMAGEHLP_LINE64 line_info;
                 memset(&line_info, 0, sizeof(line_info));
-                if (SymGetLineFromAddr64(exception_context.process, (DWORD64)info.address, &displacement, &line_info))
+                if (SymGetLineFromAddr64(exception_context.process, reinterpret_cast<DWORD64>(info.address), &displacement, &line_info))
                 {
                     info.source_file = line_info.FileName;
                     info.source_line = line_info.LineNumber;

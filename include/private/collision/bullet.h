@@ -4,6 +4,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif//__GNUC__
 #include <btBulletDynamicsCommon.h>
 #if defined(__GNUC__) && !defined(__clang__)

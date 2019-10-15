@@ -165,7 +165,7 @@ public:
             if (copy == size)
                 return size;
             if (data)
-                data = ((uint8_t*)data) + copy;
+                data = static_cast<uint8_t*>(data) + copy;
             size -= copy;
         }
         //Not enough data in output_buffer, inflate some more data.

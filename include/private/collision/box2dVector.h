@@ -2,7 +2,7 @@
 #define SP2_PRIVATE_COLLISION_BOX2D_VECTOR_H
 
 #include <sp2/math/vector.h>
-#include <Box2D/Common/b2Math.h>
+#include "box2d.h"
 
 template<typename T> static inline b2Vec2 toVector(const sp::Vector2<T>& v)
 {

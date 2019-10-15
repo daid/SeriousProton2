@@ -58,7 +58,7 @@ void AudioSource::stop()
 
 void audioCallback(void* userdata, uint8_t* stream, int length)
 {
-    AudioSource::onAudioCallback((float*)stream, length / sizeof(float));
+    AudioSource::onAudioCallback(reinterpret_cast<float*>(stream), length / sizeof(float));
 }
 
 void AudioSource::startAudioSystem()
@@ -93,7 +93,7 @@ void AudioSource::onAudioCallback(float* stream, int sample_count)
 
 void AudioSource::mix(float* stream, const float* source, int sample_count, int volume)
 {
-    SDL_MixAudioFormat((uint8_t*)stream, (const uint8_t*)source, AUDIO_F32, sample_count * sizeof(float), volume);
+    SDL_MixAudioFormat(reinterpret_cast<uint8_t*>(stream), reinterpret_cast<const uint8_t*>(source), AUDIO_F32, sample_count * sizeof(float), volume);
 }
 
 }//namespace audio

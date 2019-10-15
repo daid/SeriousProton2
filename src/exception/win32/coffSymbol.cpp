@@ -13,26 +13,26 @@ void fillAddressInfoFromCoffSymbols(Win32ExceptionContext& exception_context, Ad
     strcpy(buffer, info.module.c_str());
     HANDLE file  = CreateFileA(buffer, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     HANDLE mapping = CreateFileMapping(file, NULL, PAGE_READONLY, 0, 0, NULL);
-    const char* file_contents = (const char*)MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+    char* file_contents = static_cast<char*>(MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0));
     unsigned long filesize_hi;
     uint64_t filesize = GetFileSize(file, &filesize_hi);
     filesize |= uint64_t(filesize_hi) << 32;
 
-    PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)file_contents;
-    PIMAGE_NT_HEADERS nt_headers = (PIMAGE_NT_HEADERS)(file_contents + dos_header->e_lfanew);
+    PIMAGE_DOS_HEADER dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>(file_contents);
+    PIMAGE_NT_HEADERS nt_headers = reinterpret_cast<PIMAGE_NT_HEADERS>(file_contents + dos_header->e_lfanew);
 
-    PIMAGE_SECTION_HEADER sections = (PIMAGE_SECTION_HEADER)((const char*)nt_headers + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + nt_headers->FileHeader.SizeOfOptionalHeader);
-    PIMAGE_SYMBOL symbol_table = (PIMAGE_SYMBOL)(file_contents + nt_headers->FileHeader.PointerToSymbolTable);
-    const char* string_table = (const char*)&symbol_table[nt_headers->FileHeader.NumberOfSymbols];
+    PIMAGE_SECTION_HEADER sections = reinterpret_cast<PIMAGE_SECTION_HEADER>(reinterpret_cast<char*>(nt_headers) + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + nt_headers->FileHeader.SizeOfOptionalHeader);
+    PIMAGE_SYMBOL symbol_table = reinterpret_cast<PIMAGE_SYMBOL>(file_contents + nt_headers->FileHeader.PointerToSymbolTable);
+    const char* string_table = reinterpret_cast<const char*>(&symbol_table[nt_headers->FileHeader.NumberOfSymbols]);
 
     DWORD64 offset = 0;
 
     int text_section = -1;
     for(unsigned int section_index = 0; section_index < nt_headers->FileHeader.NumberOfSections; section_index++)
     {
-        const char* section_name = (const char*)sections[section_index].Name;
+        const char* section_name = reinterpret_cast<const char*>(sections[section_index].Name);
         if (section_name[0] == '/')
-            section_name = string_table + atoi((const char*)sections[section_index].Name + 1);
+            section_name = string_table + atoi(reinterpret_cast<const char*>(sections[section_index].Name) + 1);
         if (strcmp(section_name, ".text") == 0)
         {
             text_section = section_index + 1;
@@ -50,7 +50,7 @@ void fillAddressInfoFromCoffSymbols(Win32ExceptionContext& exception_context, Ad
         {
             if (ISFCN(symbol.Type))
             {
-                if (my_symbol.Value < symbol.Value && symbol.Value + offset < (DWORD64)info.module_offset)
+                if (my_symbol.Value < symbol.Value && symbol.Value + offset < static_cast<DWORD64>(info.module_offset))
                     my_symbol = symbol;
             }
         }

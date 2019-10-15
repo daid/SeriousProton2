@@ -7,11 +7,18 @@
 #define STBI_NO_STDIO
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif//__GNUC__
 #include "stb/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
 #define STBIWDEF static inline
 #include "stb/stb_image_write.h"
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif//__GNUC__
 
 namespace sp {
 
@@ -36,6 +43,13 @@ Image::Image(Vector2i size, uint32_t color)
 : size(size)
 {
     pixels.resize(size.x * size.y, color);
+}
+
+Image::Image(Vector2i size, std::vector<uint32_t>&& pixels)
+: size(size)
+{
+    sp2assert(static_cast<size_t>(size.x * size.y) == pixels.size(), "Given pixel buffer to image constructor must match image size.");
+    this->pixels = std::move(pixels);
 }
 
 void Image::operator=(Image&& other) noexcept
@@ -68,19 +82,19 @@ void Image::clear()
 
 static int stream_read(void *user, char *data, int size)
 {
-    io::ResourceStream* stream = (io::ResourceStream*)user;
+    io::ResourceStream* stream = static_cast<io::ResourceStream*>(user);
     return stream->read(data, size);
 }
 
 static void stream_skip(void *user, int n)
 {
-    io::ResourceStream* stream = (io::ResourceStream*)user;
+    io::ResourceStream* stream = static_cast<io::ResourceStream*>(user);
     stream->seek(stream->tell() + n);
 }
 
 static int stream_eof(void *user)
 {
-    io::ResourceStream* stream = (io::ResourceStream*)user;
+    io::ResourceStream* stream = static_cast<io::ResourceStream*>(user);
     return stream->tell() == stream->getSize();
 }
 
@@ -95,7 +109,7 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
     if (!stream)
         return false;
     int x, y, channels;
-    uint32_t* buffer = (uint32_t*)stbi_load_from_callbacks(&stream_callbacks, stream.get(), &x, &y, &channels, 4);
+    uint32_t* buffer = reinterpret_cast<uint32_t*>(stbi_load_from_callbacks(&stream_callbacks, stream.get(), &x, &y, &channels, 4));
     if (buffer)
     {
         update(Vector2i(x, y), buffer);

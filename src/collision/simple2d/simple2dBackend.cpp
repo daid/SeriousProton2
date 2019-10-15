@@ -3,7 +3,7 @@
 #include <sp2/graphics/meshdata.h>
 #include <sp2/scene/node.h>
 
-#include <Box2D/Collision/b2BroadPhase.h>
+#include <private/collision/box2d.h>
 #include <private/collision/box2dVector.h>
 
 

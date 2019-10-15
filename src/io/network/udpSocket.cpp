@@ -55,7 +55,7 @@ bool UdpSocket::bind(int port)
         server_addr.sin6_addr = in6addr_any;
         server_addr.sin6_port = htons(port);
 
-        if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        if (::bind(handle, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0)
         {
             close();
             return false;
@@ -69,7 +69,7 @@ bool UdpSocket::bind(int port)
         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
         server_addr.sin_port = htons(port);
 
-        if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        if (::bind(handle, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0)
         {
             close();
             return false;
@@ -98,7 +98,7 @@ bool UdpSocket::joinMulticast(int group_nr)
             mreq.imr_multiaddr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
             mreq.imr_interface.s_addr = server_addr.sin_addr.s_addr;
             
-            success = success && ::setsockopt(handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) == 0;
+            success = success && ::setsockopt(handle, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<const char*>(&mreq), sizeof(mreq)) == 0;
         }
     }
     return success;
@@ -145,7 +145,7 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
             server_addr.sin6_family = AF_INET6;
             server_addr.sin6_port = htons(port);
 
-            int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
+            int result = ::sendto(handle, static_cast<const char*>(data), size, flags, reinterpret_cast<const sockaddr*>(&server_addr), sizeof(server_addr));
             return result == int(size);
         }
     }
@@ -168,7 +168,7 @@ bool UdpSocket::send(const void* data, size_t size, const Address& address, int 
         server_addr.sin_family = AF_INET;
         server_addr.sin_port = htons(port);
 
-        int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
+        int result = ::sendto(handle, static_cast<const char*>(data), size, flags, reinterpret_cast<const sockaddr*>(&server_addr), sizeof(server_addr));
         return result == int(size);
     }
     return false;
@@ -185,22 +185,22 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
         struct sockaddr_in6 from_addr;
         memset(&from_addr, 0, sizeof(from_addr));
         socklen_t from_addr_len = sizeof(from_addr);
-        int result = ::recvfrom(handle, (char*)data, size, flags, (sockaddr*)&from_addr, &from_addr_len);
+        int result = ::recvfrom(handle, static_cast<char*>(data), size, flags, reinterpret_cast<sockaddr*>(&from_addr), &from_addr_len);
         if (result >= 0)
         {
             if (from_addr_len == sizeof(from_addr))
             {
                 char buffer[128];
-                ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
+                ::getnameinfo(reinterpret_cast<const sockaddr*>(&from_addr), from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET6, buffer, &from_addr, from_addr_len);
                 port = ntohs(from_addr.sin6_port);
             }
             else if (from_addr_len == sizeof(struct sockaddr_in))
             {
                 char buffer[128];
-                ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
+                ::getnameinfo(reinterpret_cast<const sockaddr*>(&from_addr), from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET, buffer, &from_addr, from_addr_len);
-                port = ntohs(((struct sockaddr_in*)&from_addr)->sin_port);
+                port = ntohs(reinterpret_cast<struct sockaddr_in*>(&from_addr)->sin_port);
             }
             return result;
         }
@@ -210,13 +210,13 @@ size_t UdpSocket::receive(void* data, size_t size, Address& address, int& port)
         struct sockaddr_in from_addr;
         memset(&from_addr, 0, sizeof(from_addr));
         socklen_t from_addr_len = sizeof(from_addr);
-        int result = ::recvfrom(handle, (char*)data, size, flags, (sockaddr*)&from_addr, &from_addr_len);
+        int result = ::recvfrom(handle, static_cast<char*>(data), size, flags, reinterpret_cast<sockaddr*>(&from_addr), &from_addr_len);
         if (result >= 0)
         {
             if (from_addr_len == sizeof(from_addr))
             {
                 char buffer[128];
-                ::getnameinfo((const sockaddr*)&from_addr, from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
+                ::getnameinfo(reinterpret_cast<const sockaddr*>(&from_addr), from_addr_len, buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
                 address.addr_info.emplace_back(AF_INET, buffer, &from_addr, from_addr_len);
                 port = ntohs(from_addr.sin_port);
             }
@@ -258,7 +258,7 @@ bool UdpSocket::sendMulticast(const void* data, size_t size, int group_nr, int p
         {
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             
-            ::setsockopt(handle, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&server_addr.sin_addr, sizeof(server_addr.sin_addr));
+            ::setsockopt(handle, IPPROTO_IP, IP_MULTICAST_IF, reinterpret_cast<const char*>(&server_addr.sin_addr), sizeof(server_addr.sin_addr));
 
             memset(&server_addr, 0, sizeof(server_addr));
             server_addr.sin_addr.s_addr = htonl((239 << 24) | (192 << 16) | (group_nr));
@@ -266,7 +266,7 @@ bool UdpSocket::sendMulticast(const void* data, size_t size, int group_nr, int p
             server_addr.sin_family = AF_INET;
             server_addr.sin_port = htons(port);
 
-            int result = ::sendto(handle, (const char*)data, size, flags, (const sockaddr*)&server_addr, sizeof(server_addr));
+            int result = ::sendto(handle, static_cast<const char*>(data), size, flags, reinterpret_cast<const sockaddr*>(&server_addr), sizeof(server_addr));
             if (result == int(size))
                 success = true;
         }
@@ -294,7 +294,7 @@ bool UdpSocket::createSocket()
     else
     {
         int optval = 0;
-        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&optval, sizeof(int));
+        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&optval), sizeof(int));
     }
     return handle != -1;
 }

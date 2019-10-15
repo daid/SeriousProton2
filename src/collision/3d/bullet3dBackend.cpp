@@ -112,7 +112,7 @@ void BulletBackend::postUpdate(float delta)
     for(int index=0; index<world->getNumCollisionObjects(); index++)
     {
         btCollisionObject* obj = world->getCollisionObjectArray()[index];
-        Node* node = (Node*)obj->getUserPointer();
+        Node* node = static_cast<Node*>(obj->getUserPointer());
         btTransform transform = obj->getWorldTransform();
         modifyPositionByPhysics(node, toVector<double>(transform.getOrigin()), toQuadernion<double>(transform.getRotation()));
     }

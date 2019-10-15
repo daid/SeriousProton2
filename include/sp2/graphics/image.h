@@ -17,6 +17,7 @@ public:
     Image(Image&& other) noexcept;
     Image(Vector2i size);
     Image(Vector2i size, uint32_t color);
+    Image(Vector2i size, std::vector<uint32_t>&& pixels);
     
     void operator=(Image&& other) noexcept;
     

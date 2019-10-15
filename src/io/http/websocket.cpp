@@ -169,7 +169,7 @@ bool Websocket::receive(io::DataBuffer& data_buffer)
     case State::Disconnected:
         break;
     case State::Connecting:{
-        string buffer_str = string((const char*)buffer.data(), buffer.size());
+        string buffer_str = string(reinterpret_cast<const char*>(buffer.data()), buffer.size());
         int headers_end = buffer_str.find("\r\n\r\n");
         if (headers_end)
         {
@@ -330,7 +330,7 @@ bool Websocket::receive(string& output)
     io::DataBuffer data_buffer;
     if (!receive(data_buffer))
         return false;
-    output = string((const char*)data_buffer.getData(), data_buffer.getDataSize());
+    output = string(reinterpret_cast<const char*>(data_buffer.getData()), data_buffer.getDataSize());
     return true;
 }
 

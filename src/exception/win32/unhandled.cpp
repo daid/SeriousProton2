@@ -33,7 +33,7 @@ static LONG WINAPI win32UnhandledExceptionHandler(PEXCEPTION_POINTERS ex_info)
     info.base_report = "Exception: ";
     info.base_report += exceptionCodeToString(ex_info->ExceptionRecord->ExceptionCode);
     info.base_report += " at 0x";
-    info.base_report += string::hex((uintptr_t)ex_info->ExceptionRecord->ExceptionAddress);
+    info.base_report += string::hex(reinterpret_cast<uintptr_t>(ex_info->ExceptionRecord->ExceptionAddress));
     if (ex_info->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION || ex_info->ExceptionRecord->ExceptionCode == EXCEPTION_IN_PAGE_ERROR)
     {
         if (ex_info->ExceptionRecord->NumberParameters >= 2)

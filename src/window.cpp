@@ -8,8 +8,16 @@
 #include <sp2/graphics/opengl.h>
 
 #include <SDL.h>
+
 #define GIF_FLIP_VERT
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif//__GNUC__
 #include <stb/gif.h>
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif//__GNUC__
 #ifdef __WIN32__
 #include <windows.h>
 #endif
@@ -56,8 +64,10 @@ public:
         std::chrono::duration<double> diff = now - last_frame_time;
         if (diff > std::chrono::milliseconds(50))
         {
-            Image* img = new Image(window_size);
-            glReadPixels(0, 0, window_size.x, window_size.y, GL_RGBA, GL_UNSIGNED_BYTE, (void*)img->getPtr());
+            std::vector<uint32_t> pixels;
+            pixels.resize(window_size.x * window_size.y);
+            glReadPixels(0, 0, window_size.x, window_size.y, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<void*>(pixels.data()));
+            Image* img = new Image(window_size, std::move(pixels));
             frames.put(img);
             last_frame_time += std::chrono::milliseconds(50);
         }
@@ -71,7 +81,7 @@ private:
             Image* img = frames.get();
             if (!img)
                 break;
-            GifWriteFrame(&gif_writer, (const uint8_t*)img->getPtr(), img->getSize().x, img->getSize().y, 5);
+            GifWriteFrame(&gif_writer, reinterpret_cast<const uint8_t*>(img->getPtr()), img->getSize().x, img->getSize().y, 5);
             delete img;
         }
     }
@@ -133,7 +143,7 @@ void Window::initialize()
     if (user_dll)
     {
         BOOL(WINAPI *SetProcessDPIAware)(void);
-        SetProcessDPIAware = (BOOL(WINAPI *)(void)) SDL_LoadFunction(user_dll, "SetProcessDPIAware");
+        SetProcessDPIAware = reinterpret_cast<BOOL(WINAPI *)(void)>(SDL_LoadFunction(user_dll, "SetProcessDPIAware"));
         if (SetProcessDPIAware)
             SetProcessDPIAware();
     }

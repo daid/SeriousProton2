@@ -38,9 +38,9 @@ bool TcpListener::listen(int port)
     if (handle != -1)
     {
         int optval = 1;
-        ::setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof(int));
+        ::setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&optval), sizeof(int));
         optval = 0;
-        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&optval, sizeof(int));
+        ::setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&optval), sizeof(int));
 
         struct sockaddr_in6 server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
@@ -48,7 +48,7 @@ bool TcpListener::listen(int port)
         server_addr.sin6_addr = in6addr_any;
         server_addr.sin6_port = htons(port);
 
-        if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        if (::bind(handle, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0)
         {
             close();
             return false;
@@ -61,7 +61,7 @@ bool TcpListener::listen(int port)
             return false;
 
         int optval = 1;
-        ::setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, (const char*)&optval, sizeof(int));
+        ::setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&optval), sizeof(int));
 
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
@@ -69,7 +69,7 @@ bool TcpListener::listen(int port)
         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
         server_addr.sin_port = htons(port);
 
-        if (::bind(handle, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        if (::bind(handle, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0)
         {
             close();
             return false;

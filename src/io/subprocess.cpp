@@ -78,7 +78,7 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
 
         char* parameters[command.size() + 1];
         for(unsigned int n=0; n<command.size(); n++)
-            parameters[n] = (char*)command[n].c_str();
+            parameters[n] = const_cast<char*>(command[n].c_str());
         parameters[command.size()] = nullptr;
         execvp(command[0].c_str(), parameters);
         LOG(Warning, "Failed to start:", command);
@@ -129,7 +129,7 @@ static BOOL CALLBACK terminateApplicationWindows(HWND hwnd, LPARAM param)
 {
     DWORD id;
     GetWindowThreadProcessId(hwnd, &id);
-    if(id == (DWORD)param)
+    if(id == static_cast<DWORD>(param))
         PostMessage(hwnd, WM_CLOSE, 0, 0) ;
     return true;
 }
@@ -143,7 +143,7 @@ int Subprocess::kill(bool forcefuly)
     if (forcefuly)
         TerminateProcess(data->handle, -1);
     else
-        EnumWindows(terminateApplicationWindows, (LPARAM)data->pid);
+        EnumWindows(terminateApplicationWindows, static_cast<LPARAM>(data->pid));
 #endif//__WIN32__
 #ifdef __linux__
     if (forcefuly)

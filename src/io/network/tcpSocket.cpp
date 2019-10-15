@@ -67,24 +67,24 @@ static void initializeLibSSL()
     if (!libcrypto || !libssl)
         return;
 
-    X509_STORE_new = (X509_STORE*(*)())SDL_LoadFunction(libcrypto, "X509_STORE_new");
-    d2i_X509 = (X509* (*)(X509**, const unsigned char **, long))SDL_LoadFunction(libcrypto, "d2i_X509");
-    X509_STORE_add_cert = (int (*)(X509_STORE*, X509*))SDL_LoadFunction(libcrypto, "X509_STORE_add_cert");
-    X509_free = (void (*)(X509*))SDL_LoadFunction(libcrypto, "X509_free");
+    X509_STORE_new = reinterpret_cast<X509_STORE*(*)()>(SDL_LoadFunction(libcrypto, "X509_STORE_new"));
+    d2i_X509 = reinterpret_cast<X509* (*)(X509**, const unsigned char **, long)>(SDL_LoadFunction(libcrypto, "d2i_X509"));
+    X509_STORE_add_cert = reinterpret_cast<int (*)(X509_STORE*, X509*)>(SDL_LoadFunction(libcrypto, "X509_STORE_add_cert"));
+    X509_free = reinterpret_cast<void (*)(X509*)>(SDL_LoadFunction(libcrypto, "X509_free"));
 
-    SSL_CTX_new = (SSL_CTX*(*)(const SSL_METHOD*))SDL_LoadFunction(libssl, "SSL_CTX_new");
-    TLSv1_2_client_method = (const SSL_METHOD* (*)())SDL_LoadFunction(libssl, "TLSv1_2_client_method");
-    SSL_CTX_set_options = (long (*)(SSL_CTX*, long))SDL_LoadFunction(libssl, "SSL_CTX_set_options");
-    SSL_CTX_set_default_verify_paths = (int (*)(SSL_CTX*))SDL_LoadFunction(libssl, "SSL_CTX_set_default_verify_paths");
-    SSL_CTX_set_cert_store = (void (*)(SSL_CTX*, X509_STORE*))SDL_LoadFunction(libssl, "SSL_CTX_set_cert_store");
-    SSL_new = (SSL* (*)(SSL_CTX*))SDL_LoadFunction(libssl, "SSL_new");
-    SSL_set_fd = (int (*)(SSL *ssl, int fd))SDL_LoadFunction(libssl, "SSL_set_fd");
-    SSL_connect = (int (*)(SSL *ssl))SDL_LoadFunction(libssl, "SSL_connect");
-    SSL_get_verify_result = (long (*)(const SSL *ssl))SDL_LoadFunction(libssl, "SSL_get_verify_result");
-    SSL_read = (int (*)(SSL *ssl, void *buf, int num))SDL_LoadFunction(libssl, "SSL_read");
-    SSL_write = (int (*)(SSL *ssl, const void *buf, int num))SDL_LoadFunction(libssl, "SSL_write");
-    SSL_free = (void (*)(SSL *ssl))SDL_LoadFunction(libssl, "SSL_free");
-    
+    SSL_CTX_new = reinterpret_cast<SSL_CTX*(*)(const SSL_METHOD*)>(SDL_LoadFunction(libssl, "SSL_CTX_new"));
+    TLSv1_2_client_method = reinterpret_cast<const SSL_METHOD* (*)()>(SDL_LoadFunction(libssl, "TLSv1_2_client_method"));
+    SSL_CTX_set_options = reinterpret_cast<long (*)(SSL_CTX*, long)>(SDL_LoadFunction(libssl, "SSL_CTX_set_options"));
+    SSL_CTX_set_default_verify_paths = reinterpret_cast<int (*)(SSL_CTX*)>(SDL_LoadFunction(libssl, "SSL_CTX_set_default_verify_paths"));
+    SSL_CTX_set_cert_store = reinterpret_cast<void (*)(SSL_CTX*, X509_STORE*)>(SDL_LoadFunction(libssl, "SSL_CTX_set_cert_store"));
+    SSL_new = reinterpret_cast<SSL* (*)(SSL_CTX*)>(SDL_LoadFunction(libssl, "SSL_new"));
+    SSL_set_fd = reinterpret_cast<int (*)(SSL *ssl, int fd)>(SDL_LoadFunction(libssl, "SSL_set_fd"));
+    SSL_connect = reinterpret_cast<int (*)(SSL *ssl)>(SDL_LoadFunction(libssl, "SSL_connect"));
+    SSL_get_verify_result = reinterpret_cast<long (*)(const SSL *ssl)>(SDL_LoadFunction(libssl, "SSL_get_verify_result"));
+    SSL_read = reinterpret_cast<int (*)(SSL *ssl, void *buf, int num)>(SDL_LoadFunction(libssl, "SSL_read"));
+    SSL_write = reinterpret_cast<int (*)(SSL *ssl, const void *buf, int num)>(SDL_LoadFunction(libssl, "SSL_write"));
+    SSL_free = reinterpret_cast<void (*)(SSL *ssl)>(SDL_LoadFunction(libssl, "SSL_free"));
+
 #ifdef __WIN32
     HCERTSTORE hStore;
     PCCERT_CONTEXT pContext = NULL;
@@ -105,7 +105,7 @@ static void initializeLibSSL()
     CertFreeCertificateContext(pContext);
     CertCloseStore(hStore, 0);
 #endif
-    
+
     ssl_context = SSL_CTX_new(TLSv1_2_client_method());
     SSL_CTX_set_options(ssl_context, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
 #ifdef __WIN32
@@ -159,7 +159,7 @@ bool TcpSocket::connect(const Address& host, int port)
 {
     if (isConnected())
         close();
-    
+
     for(const auto& addr_info : host.addr_info)
     {
         handle = ::socket(addr_info.family, SOCK_STREAM, 0);
@@ -171,7 +171,7 @@ bool TcpSocket::connect(const Address& host, int port)
             memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             server_addr.sin_port = htons(port);
-            if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
+            if (::connect(handle, reinterpret_cast<const sockaddr*>(&server_addr), sizeof(server_addr)) == 0)
             {
                 setBlocking(blocking);
                 return true;
@@ -183,7 +183,7 @@ bool TcpSocket::connect(const Address& host, int port)
             memset(&server_addr, 0, sizeof(server_addr));
             memcpy(&server_addr, addr_info.addr.data(), addr_info.addr.length());
             server_addr.sin6_port = htons(port);
-            if (::connect(handle, (const sockaddr*)&server_addr, sizeof(server_addr)) == 0)
+            if (::connect(handle, reinterpret_cast<const sockaddr*>(&server_addr), sizeof(server_addr)) == 0)
             {
                 setBlocking(blocking);
                 return true;
@@ -206,14 +206,14 @@ bool TcpSocket::connectSSL(const Address& host, int port)
     }
     
     ssl_handle = SSL_new(ssl_context);
-    SSL_set_fd((SSL*)ssl_handle, handle);
-    if (!SSL_connect((SSL*)ssl_handle))
+    SSL_set_fd(static_cast<SSL*>(ssl_handle), handle);
+    if (!SSL_connect(static_cast<SSL*>(ssl_handle)))
     {
         LOG(Warning, "Failed to connect SSL socket due to SSL negotiation failure.");
         close();
         return false;
     }
-    if (SSL_get_verify_result((SSL*)ssl_handle) != 0)
+    if (SSL_get_verify_result(static_cast<SSL*>(ssl_handle)) != 0)
     {
         LOG(Warning, "Failed to connect SSL socket due to certificate verfication failure.");
         close();
@@ -234,7 +234,7 @@ void TcpSocket::close()
         handle = -1;
         send_queue.clear();
         if (ssl_handle)
-            SSL_free((SSL*)ssl_handle);
+            SSL_free(static_cast<SSL*>(ssl_handle));
         ssl_handle = nullptr;
     }
 }
@@ -250,7 +250,7 @@ void TcpSocket::send(const void* data, size_t size)
         return;
     if (sendSendQueue())
     {
-        send_queue += std::string((const char*)data, size);
+        send_queue += std::string(static_cast<const char*>(data), size);
         return;
     }
 
@@ -258,15 +258,15 @@ void TcpSocket::send(const void* data, size_t size)
     {
         int result;
         if (ssl_handle)
-            result = SSL_write((SSL*)ssl_handle, ((const char*)data) + done, size - done);
+            result = SSL_write(static_cast<SSL*>(ssl_handle), static_cast<const char*>(data) + done, size - done);
         else
-            result = ::send(handle, ((const char*)data) + done, size - done, flags);
+            result = ::send(handle, static_cast<const char*>(data) + done, size - done, flags);
         if (result < 0)
         {
             if (!isLastErrorNonBlocking())
                 close();
             else
-                send_queue += std::string(((const char*)data) + done, size - done);
+                send_queue += std::string(static_cast<const char*>(data) + done, size - done);
             return;
         }
         done += result;
@@ -282,9 +282,9 @@ size_t TcpSocket::receive(void* data, size_t size)
     
     int result;
     if (ssl_handle)
-        result = SSL_read((SSL*)ssl_handle, (char*)data, size);
+        result = SSL_read(static_cast<SSL*>(ssl_handle), static_cast<char*>(data), size);
     else
-        result = ::recv(handle, (char*)data, size, flags);
+        result = ::recv(handle, static_cast<char*>(data), size, flags);
     if (result < 0)
     {
         result = 0;
@@ -315,9 +315,9 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
             //TOFIX: This blocks if we receive less then 4 bytes. Allows denial of service attack.
             int result;
             if (ssl_handle)
-                result = SSL_read((SSL*)ssl_handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx);
+                result = SSL_read(static_cast<SSL*>(ssl_handle), reinterpret_cast<char*>(&size_buffer[idx]), sizeof(uint32_t) - idx);
             else
-                result = ::recv(handle, (char*)&size_buffer[idx], sizeof(uint32_t) - idx, flags);
+                result = ::recv(handle, reinterpret_cast<char*>(&size_buffer[idx]), sizeof(uint32_t) - idx, flags);
             if (result < 0)
             {
                 result = 0;
@@ -331,7 +331,7 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
                 return false;
             idx += result;
         }
-        uint32_t size = *(uint32_t*)size_buffer;
+        uint32_t size = *reinterpret_cast<uint32_t*>(size_buffer);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
         size = __builtin_bswap32(size);
 #endif
@@ -343,9 +343,9 @@ bool TcpSocket::receive(io::DataBuffer& buffer)
     {
         int result;
         if (ssl_handle)
-            result = SSL_read((SSL*)ssl_handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size);
+            result = SSL_read(static_cast<SSL*>(ssl_handle), reinterpret_cast<char*>(&receive_buffer[received_size]), receive_buffer.size() - received_size);
         else
-            result = ::recv(handle, (char*)&receive_buffer[received_size], receive_buffer.size() - received_size, flags);
+            result = ::recv(handle, reinterpret_cast<char*>(&receive_buffer[received_size]), receive_buffer.size() - received_size, flags);
         if (result < 0)
         {
             result = 0;
@@ -378,9 +378,9 @@ bool TcpSocket::sendSendQueue()
     do
     {
         if (ssl_handle)
-            result = SSL_write((SSL*)ssl_handle, (const char*)send_queue.data(), send_queue.size());
+            result = SSL_write(static_cast<SSL*>(ssl_handle), static_cast<const char*>(send_queue.data()), send_queue.size());
         else
-            result = ::send(handle, (const char*)send_queue.data(), send_queue.size(), flags);
+            result = ::send(handle, static_cast<const char*>(send_queue.data()), send_queue.size(), flags);
         if (result < 0)
         {
             result = 0;
