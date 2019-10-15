@@ -13,12 +13,12 @@ public:
     ScriptBindingObject();
     virtual ~ScriptBindingObject();
 
-    void setScriptMember(string name, int value);
-    void setScriptMember(string name, double value);
-    void setScriptMember(string name, string value);
-    int getScriptMemberInteger(string name);
-    double getScriptMemberDouble(string name);
-    string getScriptMemberString(string name);
+    void setScriptMember(const string& name, int value);
+    void setScriptMember(const string& name, double value);
+    void setScriptMember(const string& name, const string& value);
+    int getScriptMemberInteger(const string& name);
+    double getScriptMemberDouble(const string& name);
+    string getScriptMemberString(const string& name);
 protected:
     virtual void onRegisterScriptBindings(ScriptBindingClass& script_binding_class);
     

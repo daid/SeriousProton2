@@ -11,8 +11,8 @@ class InternalResourceProvider : public ResourceProvider
 public:
     InternalResourceProvider(std::map<string, string>&& resources);
     
-    virtual ResourceStreamPtr getStream(const string filename) override;
-    virtual std::vector<string> findResources(const string search_pattern) override;
+    virtual ResourceStreamPtr getStream(const string& filename) override;
+    virtual std::vector<string> findResources(const string& search_pattern) override;
 
 private:
     std::map<string, string> resources;

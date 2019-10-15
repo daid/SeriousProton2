@@ -9,7 +9,7 @@ namespace sp {
 class BitmapFont : public Font
 {
 public:
-    BitmapFont(string name, io::ResourceStreamPtr stream);
+    BitmapFont(const string& name, io::ResourceStreamPtr stream);
 
     virtual Texture* getTexture(int pixel_size) override;
 

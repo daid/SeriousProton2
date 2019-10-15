@@ -30,8 +30,8 @@ public:
         bool solid = true;
     };
 
-    Voxelmap(P<Node> parent, string texture, float voxel_size, int texture_tile_count);
-    Voxelmap(P<Node> parent, string texture, float voxel_size, int texture_tile_count_x, int texture_tile_count_y);
+    Voxelmap(P<Node> parent, const string& texture, float voxel_size, int texture_tile_count);
+    Voxelmap(P<Node> parent, const string& texture, float voxel_size, int texture_tile_count_x, int texture_tile_count_y);
 
     void setVoxel(sp::Vector3i position, int index);
     void setVoxelData(int index, const Data& data);

@@ -11,7 +11,7 @@ TextureManager texture_manager;
 class TextureManagerTexture : public OpenGLTexture
 {
 public:
-    TextureManagerTexture(string name)
+    TextureManagerTexture(const string& name)
     : OpenGLTexture(Type::Static, name)
     {
         LOG(Info, "Loading texture:", name);
@@ -73,7 +73,7 @@ bool TextureManager::isDefaultSmoothFiltering()
     return default_smooth;
 }
 
-Texture* TextureManager::prepare(string name)
+Texture* TextureManager::prepare(const string& name)
 {
     return new TextureManagerTexture(name);
 }
@@ -95,7 +95,7 @@ void TextureManager::setFallbackColors(sp::Color primary_color, sp::Color second
     fallback_secondary_color = secondary_color;
 }
 
-void TextureManager::forceRefresh(string name)
+void TextureManager::forceRefresh(const string& name)
 {
     addToWorkqueue(get(name), name);
 }

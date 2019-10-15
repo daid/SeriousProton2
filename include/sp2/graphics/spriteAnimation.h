@@ -43,7 +43,7 @@ class AtlasManager;
 class SpriteAnimation : public Animation
 {
 public:
-    virtual void play(string key, float speed=1.0) override;
+    virtual void play(const string& key, float speed=1.0) override;
     virtual void setFlags(int flags) override;
     virtual int getFlags() override;
     virtual bool finished() override;
@@ -78,7 +78,7 @@ private:
         int revision;
 #endif
 
-        void load(string resource_name);
+        void load(const string& resource_name);
     };
 
     SpriteAnimation(const Data& data);
@@ -94,7 +94,7 @@ private:
     int revision;
 #endif
 public:
-    static std::unique_ptr<Animation> load(string resource_name);
+    static std::unique_ptr<Animation> load(const string& resource_name);
     static constexpr int FlipFlag = 0x0001;
 
     //Set a global atlas manager, newly loaded animations will be added to the atlas manager,

@@ -13,13 +13,13 @@ class Widget;
 class Loader : NonCopyable
 {
 public:
-    static P<Widget> load(string resource_name, string root_id, P<Widget> root=nullptr, bool auto_reload=false);
+    static P<Widget> load(const string& resource_name, const string& root_id, P<Widget> root=nullptr, bool auto_reload=false);
 
 private:
     class SubLoader
     {
     public:
-        SubLoader(Loader& loader, string resource_name);
+        SubLoader(Loader& loader, const string& resource_name);
         
         P<Widget> createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters);
         void loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& node, std::map<string, string>& parameters);

@@ -6,12 +6,12 @@
 
 namespace sp {
 
-Voxelmap::Voxelmap(P<Node> parent, string texture, float voxel_size, int texture_tile_count)
+Voxelmap::Voxelmap(P<Node> parent, const string& texture, float voxel_size, int texture_tile_count)
 : Voxelmap(parent, texture, voxel_size, texture_tile_count, texture_tile_count)
 {
 }
 
-Voxelmap::Voxelmap(P<Node> parent, string texture, float voxel_size, int texture_tile_count_x, int texture_tile_count_y)
+Voxelmap::Voxelmap(P<Node> parent, const string& texture, float voxel_size, int texture_tile_count_x, int texture_tile_count_y)
 : sp::Node(parent), voxel_size(voxel_size), texture_tile_count_x(texture_tile_count_x), texture_tile_count_y(texture_tile_count_y)
 {
     render_data.shader = Shader::get("internal:basic_shaded.shader");

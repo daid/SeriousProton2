@@ -22,7 +22,7 @@ public:
     int getRevision() { return revision; }
     const string& getName() { return name; }
 protected:
-    Texture(Type type, string name)
+    Texture(Type type, const string& name)
     : type(type), name(name), revision(0) {}
     virtual ~Texture() {}
 
@@ -34,7 +34,7 @@ protected:
 class OpenGLTexture : public Texture
 {
 public:
-    OpenGLTexture(Type type, string name);
+    OpenGLTexture(Type type, const string& name);
     
     virtual ~OpenGLTexture();
     

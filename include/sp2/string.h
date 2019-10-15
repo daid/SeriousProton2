@@ -129,7 +129,7 @@ public:
         string S[start:end].  Optional arguments start and end are interpreted
         as in slice notation.
     */
-    int count(const string sub) const
+    int count(const string& sub) const
     {
         if (length() < sub.length())
             return 0;
@@ -147,7 +147,7 @@ public:
         With optional start, test S beginning at that position.
         With optional end, stop comparing S at that position.
     */
-    bool endswith(const string suffix) const
+    bool endswith(const string& suffix) const
     {
         if (suffix.length() == 0)
             return true;
@@ -188,7 +188,7 @@ public:
         such that sub is contained within s[start:end].  Optional
         arguments start and end are interpreted as in slice notation.
     */
-    int find(const string sub, int start=0) const
+    int find(const string& sub, int start=0) const
     {
         if (start < 0)
             start = length() + start;
@@ -424,7 +424,7 @@ public:
         Return a copy of the string S with leading whitespace removed.
         If chars is given and not None, remove characters in chars instead.
     */
-    string lstrip(const string chars=_WHITESPACE) const
+    string lstrip(const string& chars=_WHITESPACE) const
     {
         int start=0;
         while(chars.find(substr(start, start+1)) > -1)
@@ -437,14 +437,14 @@ public:
         the separator itand the part after it.  If the separator is not
         found, return S and two empty strings.
     */
-    std::vector<string> partition(const string sep) const;
+    std::vector<string> partition(const string& sep) const;
 
     /*
         Return a copy of string S with all occurrences of substring
         old replaced by new.  If the optional argument count is
         given, only the first count occurrences are replaced.
     */
-    string replace(const string old, const string _new, const int count=-1) const
+    string replace(const string& old, const string& _new, const int count=-1) const
     {
         if (old.length() < 1)
             return *this;
@@ -470,7 +470,7 @@ public:
         such that sub is contained within s[start:end].  Optional
         arguments start and end are interpreted as in slice notation.
     */
-    int rfind(const string sub, int start=0) const
+    int rfind(const string& sub, int start=0) const
     {
         if (sub.length() + start > length())
             return -1;
@@ -498,7 +498,7 @@ public:
         the part before it, the separator itand the part after it.  If the
         separator is not found, return two empty strings and S.
     */
-    std::vector<string> rpartition(const string sep) const;
+    std::vector<string> rpartition(const string& sep) const;
 
     /*
         Return a list of the words in the string S, using sep as the
@@ -507,13 +507,13 @@ public:
         done. If sep is not specified or is None, any whitespace string
         is a separator.
     */
-    std::vector<string> rsplit(const string sep=_WHITESPACE, const int maxsplit=-1) const;
+    std::vector<string> rsplit(const string& sep=_WHITESPACE, const int maxsplit=-1) const;
 
     /*
         Return a copy of the string S with trailing whitespace removed.
         If chars is given and not None, remove characters in chars instead.
     */
-    string rstrip(const string chars=_WHITESPACE) const
+    string rstrip(const string& chars=_WHITESPACE) const
     {
         int end=length()-1;
         while(chars.find(substr(end, end+1)) > -1)
@@ -528,7 +528,7 @@ public:
         whitespace string is a separator and empty strings are removed
         from the result.
     */
-    std::vector<string> split(const string sep="", int maxsplit=-1) const
+    std::vector<string> split(const string& sep="", int maxsplit=-1) const
     {
         std::vector<string> res;
         int start = 0;
@@ -574,7 +574,7 @@ public:
         With optional start, test S beginning at that position.
         With optional end, stop comparing S at that position.
     */
-    bool startswith(const string prefix) const
+    bool startswith(const string& prefix) const
     {
         return substr(0, prefix.length()) == prefix;
     }
@@ -584,7 +584,7 @@ public:
         whitespace removed.
         If chars is given and not None, remove characters in chars instead.
     */
-    string strip(const string chars=_WHITESPACE) const
+    string strip(const string& chars=_WHITESPACE) const
     {
         return lstrip(chars).rstrip(chars);
     }
@@ -634,7 +634,7 @@ public:
         remaining characters have been mapped through the given
         translation table, which must be a string of length 256.
     */
-    string translate(const string table, const string deletechars="") const;
+    string translate(const string& table, const string& deletechars="") const;
     /*
         Return a copy of the string S converted to uppercase.
     */

@@ -28,7 +28,7 @@ public:
     string name;
     std::function<Layout*()> creation_function;
     
-    LayoutClassRegistry(string name, std::function<Layout*()> creation_function)
+    LayoutClassRegistry(const string& name, std::function<Layout*()> creation_function)
     : name(name), creation_function(creation_function)
     {
         next = first;

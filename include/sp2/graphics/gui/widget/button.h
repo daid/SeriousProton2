@@ -13,7 +13,7 @@ class Button : public Widget
 public:
     Button(P<Widget> parent);
 
-    void setLabel(string label);
+    void setLabel(const string& label);
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void updateRenderData() override;

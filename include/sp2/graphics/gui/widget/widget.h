@@ -85,7 +85,7 @@ public:
     void disable();
     bool isEnabled();
     bool isFocused();
-    void setID(string id);
+    void setID(const string& id);
 
     sp::Vector2d getRenderSize() { return render_size; }
     
@@ -124,7 +124,7 @@ protected:
     const ThemeData* theme;
     sp::P<Widget> slave_widget;
     
-    void loadThemeData(string name);
+    void loadThemeData(const string& name);
     void setFocusable(bool value);
 
     void runCallback(Variant v);
@@ -193,7 +193,7 @@ public:
     string name;
     std::function<P<Widget>(P<Widget>)> creation_function;
     
-    WidgetClassRegistry(string name, std::function<P<Widget>(P<Widget> parent)> creation_function)
+    WidgetClassRegistry(const string& name, std::function<P<Widget>(P<Widget> parent)> creation_function)
     : name(name), creation_function(creation_function)
     {
         next = first;

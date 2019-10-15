@@ -86,7 +86,7 @@ Environment::~Environment()
         lua_close(lua);
 }
 
-void Environment::setGlobal(string name, lua_CFunction function)
+void Environment::setGlobal(const string& name, lua_CFunction function)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -107,7 +107,7 @@ void Environment::setGlobal(string name, lua_CFunction function)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(string name, ScriptBindingObject* ptr)
+void Environment::setGlobal(const string& name, ScriptBindingObject* ptr)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -120,12 +120,12 @@ void Environment::setGlobal(string name, ScriptBindingObject* ptr)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(string name, P<ScriptBindingObject> ptr)
+void Environment::setGlobal(const string& name, P<ScriptBindingObject> ptr)
 {
     setGlobal(name, *ptr);
 }
 
-void Environment::setGlobal(string name, bool value)
+void Environment::setGlobal(const string& name, bool value)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -138,7 +138,7 @@ void Environment::setGlobal(string name, bool value)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(string name, int value)
+void Environment::setGlobal(const string& name, int value)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -151,7 +151,7 @@ void Environment::setGlobal(string name, int value)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(string name, string value)
+void Environment::setGlobal(const string& name, const string& value)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);

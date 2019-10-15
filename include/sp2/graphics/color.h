@@ -100,7 +100,7 @@ public:
         a = 1.0;
     }
 
-    static Color fromString(string s)
+    static Color fromString(const string& s)
     {
         if (s.startswith("#"))
         {

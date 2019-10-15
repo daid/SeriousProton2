@@ -8,7 +8,7 @@ namespace sp {
 class FbxLoader : NonCopyable
 {
 public:
-    static std::shared_ptr<MeshData> load(string resource_name);
+    static std::shared_ptr<MeshData> load(const string& resource_name);
 };
 
 }//namespace sp

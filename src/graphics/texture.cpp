@@ -6,7 +6,7 @@
 
 namespace sp {
 
-OpenGLTexture::OpenGLTexture(Type type, string name)
+OpenGLTexture::OpenGLTexture(Type type, const string& name)
 : Texture(type, name)
 {
     handle = 0;

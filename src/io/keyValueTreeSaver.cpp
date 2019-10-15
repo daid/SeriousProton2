@@ -4,7 +4,7 @@
 namespace sp {
 namespace io {
 
-void KeyValueTreeSaver::save(string filename, KeyValueTreePtr tree)
+void KeyValueTreeSaver::save(const string& filename, KeyValueTreePtr tree)
 {
     KeyValueTreeSaver saver(filename);
     
@@ -14,7 +14,7 @@ void KeyValueTreeSaver::save(string filename, KeyValueTreePtr tree)
     }
 }
 
-KeyValueTreeSaver::KeyValueTreeSaver(string filename)
+KeyValueTreeSaver::KeyValueTreeSaver(const string& filename)
 {
     f = fopen(filename.c_str(), "wb");
 }

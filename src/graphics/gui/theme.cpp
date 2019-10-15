@@ -9,7 +9,7 @@ namespace gui {
 
 std::map<string, P<Theme>> Theme::themes;
 
-const ThemeData* Theme::getData(string element)
+const ThemeData* Theme::getData(const string& element)
 {
     auto it = data.find(element);
     if (it != data.end())
@@ -23,7 +23,7 @@ const ThemeData* Theme::getData(string element)
     return getData(element.substr(0, n));
 }
 
-P<Theme> Theme::getTheme(string name)
+P<Theme> Theme::getTheme(const string& name)
 {
     auto it = themes.find(name);
     if (it != themes.end())
@@ -37,7 +37,7 @@ P<Theme> Theme::getTheme(string name)
     return getTheme("default");
 }
 
-void Theme::loadTheme(string name, string resource_name)
+void Theme::loadTheme(const string& name, const string& resource_name)
 {
     P<Theme> theme = new Theme(name);
 
@@ -101,7 +101,7 @@ void Theme::loadTheme(string name, string resource_name)
     }
 }
 
-Theme::Theme(string name)
+Theme::Theme(const string& name)
 : name(name)
 {
     themes[name] = this;

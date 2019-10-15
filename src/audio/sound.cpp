@@ -71,7 +71,7 @@ static int SDLCALL sdl_to_stream_close(struct SDL_RWops * context)
     return 0;
 }
 
-void Sound::play(string resource_name)
+void Sound::play(const string& resource_name)
 {
     AudioBuffer* data = sound_cache[resource_name];
     if (data == nullptr)

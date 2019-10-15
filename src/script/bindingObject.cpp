@@ -129,7 +129,7 @@ ScriptBindingObject::~ScriptBindingObject()
     lua_rawsetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
 }
 
-void ScriptBindingObject::setScriptMember(string name, int value)
+void ScriptBindingObject::setScriptMember(const string& name, int value)
 {
     //REGISTY[this][name] = value
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
@@ -138,7 +138,7 @@ void ScriptBindingObject::setScriptMember(string name, int value)
     lua_pop(script::global_lua_state, 1);
 }
 
-void ScriptBindingObject::setScriptMember(string name, double value)
+void ScriptBindingObject::setScriptMember(const string& name, double value)
 {
     //REGISTY[this][name] = value
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
@@ -147,7 +147,7 @@ void ScriptBindingObject::setScriptMember(string name, double value)
     lua_pop(script::global_lua_state, 1);
 }
 
-void ScriptBindingObject::setScriptMember(string name, string value)
+void ScriptBindingObject::setScriptMember(const string& name, const string& value)
 {
     //REGISTY[this][name] = value
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
@@ -156,7 +156,7 @@ void ScriptBindingObject::setScriptMember(string name, string value)
     lua_pop(script::global_lua_state, 1);
 }
 
-int ScriptBindingObject::getScriptMemberInteger(string name)
+int ScriptBindingObject::getScriptMemberInteger(const string& name)
 {
     //return REGISTY[this][name]
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
@@ -166,7 +166,7 @@ int ScriptBindingObject::getScriptMemberInteger(string name)
     return result;
 }
 
-double ScriptBindingObject::getScriptMemberDouble(string name)
+double ScriptBindingObject::getScriptMemberDouble(const string& name)
 {
     //return REGISTY[this][name]
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
@@ -176,7 +176,7 @@ double ScriptBindingObject::getScriptMemberDouble(string name)
     return result;
 }
 
-string ScriptBindingObject::getScriptMemberString(string name)
+string ScriptBindingObject::getScriptMemberString(const string& name)
 {
     //return REGISTY[this][name]
     lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);

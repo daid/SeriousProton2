@@ -18,8 +18,8 @@ public:
     static constexpr int flip_vertical = 0x200000;
     static constexpr int flip_diagonal = 0x400000;
 
-    Tilemap(P<Node> parent, string texture, float tile_size, int texture_tile_count);
-    Tilemap(P<Node> parent, string texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y);
+    Tilemap(P<Node> parent, const string& texture, float tile_size, int texture_tile_count);
+    Tilemap(P<Node> parent, const string& texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y);
     
     void setTilemapSpacingMargin(float spacing, float margin);
     

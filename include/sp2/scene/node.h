@@ -88,7 +88,7 @@ public:
     bool isSolid();
     
     void setAnimation(std::unique_ptr<Animation> animation);
-    void animationPlay(string key, float speed=1.0);
+    void animationPlay(const string& key, float speed=1.0);
     void animationSetFlags(int flags);
     int animationGetFlags();
     bool animationIsFinished();

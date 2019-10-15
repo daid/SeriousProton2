@@ -18,9 +18,9 @@ public:
     
     //In case a texture is changed on disk, you can call this function to forcefully reload the texture.
     //Note that the loading still happens in the background, and the old texture will be shown till load is done.
-    void forceRefresh(string name);
+    void forceRefresh(const string& name);
 protected:
-    virtual Texture* prepare(string name) override;
+    virtual Texture* prepare(const string& name) override;
     virtual void backgroundLoader(Texture* texture, io::ResourceStreamPtr stream) override;
 private:
     sp::Color fallback_primary_color;

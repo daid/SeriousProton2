@@ -7,7 +7,7 @@ namespace sp {
 
 FontManager font_manager;
 
-Font* FontManager::load(string name)
+Font* FontManager::load(const string& name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(name);
     if (!stream)

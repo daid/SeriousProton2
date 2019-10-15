@@ -7,7 +7,7 @@
 
 namespace sp {
 
-AtlasTexture::AtlasTexture(string name, Vector2i size)
+AtlasTexture::AtlasTexture(const string& name, Vector2i size)
 : Texture(Texture::Type::Dynamic, name)
 {
     texture_size = size;
@@ -133,7 +133,7 @@ AtlasManager::~AtlasManager()
         delete t;
 }
 
-AtlasManager::Result AtlasManager::get(string resource_name)
+AtlasManager::Result AtlasManager::get(const string& resource_name)
 {
     auto it = cached_items.find(resource_name);
     if (it != cached_items.end())
@@ -158,7 +158,7 @@ AtlasManager::Result AtlasManager::get(string resource_name)
     return add(resource_name, std::move(image));
 }
 
-AtlasManager::Result AtlasManager::add(string resource_name, Image&& image)
+AtlasManager::Result AtlasManager::add(const string& resource_name, Image&& image)
 {
     Result result;
     result.texture = nullptr;
@@ -186,7 +186,7 @@ AtlasManager::Result AtlasManager::add(string resource_name, Image&& image)
     return result;
 }
 
-bool AtlasManager::has(string resource_name)
+bool AtlasManager::has(const string& resource_name)
 {
     return cached_items.find(resource_name) != cached_items.end();
 }

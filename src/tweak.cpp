@@ -10,7 +10,7 @@ namespace sp {
 template<typename T> class TweakEntry : public sp::gui::Widget
 {
 public:
-    TweakEntry(P<Widget> parent, string name, T value, T min, T max)
+    TweakEntry(P<Widget> parent, const string& name, T value, T min, T max)
     : Widget(parent), name(name)
     {
         layout.match_content_size = true;
@@ -60,7 +60,7 @@ public:
         return instance;
     }
 
-    template<typename T> T update(string name, T value, T min, T max)
+    template<typename T> T update(const string& name, T value, T min, T max)
     {
         auto it = entries.find(name);
         if (it == entries.end())
@@ -84,17 +84,17 @@ private:
 
 P<TweakScene> TweakScene::instance;
 
-int tweak(string name, int value, int min, int max)
+int tweak(const string& name, int value, int min, int max)
 {
     return TweakScene::get()->update(name, value, min, max);
 }
 
-double tweak(string name, double value, double min, double max)
+double tweak(const string& name, double value, double min, double max)
 {
     return TweakScene::get()->update(name, value, min, max);
 }
 
-Color tweak(string name, Color color)
+Color tweak(const string& name, Color color)
 {
     return Color(
         tweak(name + ".r", color.r, 0.0, 1.0), 

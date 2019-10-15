@@ -35,7 +35,7 @@ Widget::~Widget()
         delete layout_manager;
 }
 
-void Widget::loadThemeData(string name)
+void Widget::loadThemeData(const string& name)
 {
     theme_data_name = name;
     theme = Theme::getTheme(theme_name)->getData(theme_data_name);
@@ -192,7 +192,7 @@ bool Widget::isFocused()
     return focus;
 }
 
-void Widget::setID(string id)
+void Widget::setID(const string& id)
 {
     this->id = id;
 }

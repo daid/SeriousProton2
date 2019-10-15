@@ -22,7 +22,7 @@ class ClassEntry
 public:
     typedef Node* (*create_object_function_t)(P<Node> parent);
     
-    ClassEntry(string class_name, std::type_index type_index, create_object_function_t create_function);
+    ClassEntry(const string& class_name, std::type_index type_index, create_object_function_t create_function);
 private:
     string class_name;
     std::type_index type_index;

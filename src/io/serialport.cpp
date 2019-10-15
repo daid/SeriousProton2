@@ -33,16 +33,17 @@
 namespace sp {
 namespace io {
 
-SerialPort::SerialPort(string name)
+SerialPort::SerialPort(const string& name)
 {
+    string my_name = name;
     std::vector<string> ports = portsByPseudoDriverName(name);
     if (ports.size() > 0)
     {
         LOG(Info, "Selected port:", ports[0], "for pseudo name:", name);
-        name = ports[0];
+        my_name = ports[0];
     }
 #ifdef __WIN32__
-    handle = reinterpret_cast<uintptr_t>(CreateFile(("\\\\.\\" + name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+    handle = reinterpret_cast<uintptr_t>(CreateFile(("\\\\.\\" + my_name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if (isOpen())
     {
         COMMTIMEOUTS timeouts;
@@ -59,9 +60,9 @@ SerialPort::SerialPort(string name)
     }
 #endif
 #if (defined(__gnu_linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && defined(__MACH__))
-    if (!name.startswith("/dev/"))
-        name = "/dev/" + name;
-    handle = open(name.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    if (!my_name.startswith("/dev/"))
+        my_name = "/dev/" + my_name;
+    handle = open(my_name.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 #endif
     (void)handle;
 
@@ -479,7 +480,7 @@ std::vector<string> SerialPort::getAvailablePorts()
     return names;
 }
 
-string SerialPort::getPseudoDriverName(string port)
+string SerialPort::getPseudoDriverName(const string& port)
 {
 #ifdef __WIN32__
     string ret;
@@ -524,13 +525,14 @@ string SerialPort::getPseudoDriverName(string port)
     fclose(f);
     return string(buffer);
 #endif
-    for(char& c : port)
+    string result = port;
+    for(char& c : result)
         if (c >= '0' && c <= '9')
             c = '@';
-    return port;
+    return result;
 }
 
-std::vector<string> SerialPort::portsByPseudoDriverName(string driver_name)
+std::vector<string> SerialPort::portsByPseudoDriverName(const string& driver_name)
 {
     std::vector<string> driver_names = driver_name.split(";");
     std::vector<string> names;

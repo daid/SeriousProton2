@@ -29,7 +29,7 @@ public:
         TwoStopbits
     };
 
-    SerialPort(string name);
+    SerialPort(const string& name);
     ~SerialPort();
     
     bool isOpen();
@@ -46,8 +46,8 @@ public:
     void sendBreak();
     
     static std::vector<string> getAvailablePorts();
-    static string getPseudoDriverName(string port);
-    static std::vector<string> portsByPseudoDriverName(string driver_name);
+    static string getPseudoDriverName(const string& port);
+    static std::vector<string> portsByPseudoDriverName(const string& driver_name);
 };
 
 }//namespace io

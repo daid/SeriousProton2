@@ -8,7 +8,7 @@
 namespace sp {
 namespace gui {
 
-P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widget, bool auto_reload)
+P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Widget> root_widget, bool auto_reload)
 {
     Loader loader;
     loader.subs.emplace(resource_name, SubLoader(loader, resource_name));
@@ -39,7 +39,7 @@ P<Widget> Loader::load(string resource_name, string root_id, P<Widget> root_widg
     return nullptr;
 }
 
-Loader::SubLoader::SubLoader(Loader& loader, string resource_name)
+Loader::SubLoader::SubLoader(Loader& loader, const string& resource_name)
 : loader(loader)
 {
     tree = io::KeyValueTreeLoader::load(resource_name);

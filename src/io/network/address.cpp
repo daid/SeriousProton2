@@ -25,7 +25,7 @@ Address::Address()
 {
 }
 
-Address::Address(string hostname)
+Address::Address(const string& hostname)
 {
     initSocketLib();
 

@@ -12,7 +12,7 @@ namespace sp {
 std::map<string, Shader*> Shader::cached_shaders;
 Shader* Shader::bound_shader;
 
-Shader* Shader::get(string name)
+Shader* Shader::get(const string& name)
 {
     auto it = cached_shaders.find(name);
     if (it != cached_shaders.end())
@@ -56,13 +56,13 @@ Shader* Shader::get(string name)
     return new_shader;
 }
 
-Shader::Shader(string name)
+Shader::Shader(const string& name)
 : name(name)
 {
     program = 0;
 }
 
-Shader::Shader(string name, string&& vertex_shader, string&& fragment_shader)
+Shader::Shader(const string& name, string&& vertex_shader, string&& fragment_shader)
 : name(name), vertex_shader(std::move(vertex_shader)), fragment_shader(std::move(fragment_shader))
 {
     program = 0xffffffff;

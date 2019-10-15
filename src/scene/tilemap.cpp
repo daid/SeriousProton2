@@ -7,12 +7,12 @@
 
 namespace sp {
 
-Tilemap::Tilemap(P<Node> parent, string texture, float tile_size, int texture_tile_count)
+Tilemap::Tilemap(P<Node> parent, const string& texture, float tile_size, int texture_tile_count)
 : Tilemap(parent, texture, tile_size, tile_size, texture_tile_count, texture_tile_count)
 {
 }
 
-Tilemap::Tilemap(P<Node> parent, string texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y)
+Tilemap::Tilemap(P<Node> parent, const string& texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y)
 : Node(parent)
 {
     sp2assert(tile_width > 0, "Tile width must be larger then zero");

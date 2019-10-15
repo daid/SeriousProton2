@@ -2,7 +2,7 @@
 
 namespace sp {
 
-const KeyValueTreeNode* KeyValueTreeNode::findId(string id) const
+const KeyValueTreeNode* KeyValueTreeNode::findId(const string& id) const
 {
     if (id == this->id)
         return this;
@@ -15,7 +15,7 @@ const KeyValueTreeNode* KeyValueTreeNode::findId(string id) const
     return nullptr;
 }
 
-KeyValueTreeNode* KeyValueTreeNode::findId(string id)
+KeyValueTreeNode* KeyValueTreeNode::findId(const string& id)
 {
     if (id == this->id)
         return this;
@@ -28,7 +28,7 @@ KeyValueTreeNode* KeyValueTreeNode::findId(string id)
     return nullptr;
 }
 
-KeyValueTreeNode* KeyValueTree::findId(string id)
+KeyValueTreeNode* KeyValueTree::findId(const string& id)
 {
     for(KeyValueTreeNode& node : root_nodes)
     {

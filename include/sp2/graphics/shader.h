@@ -23,8 +23,8 @@ public:
     void setUniform(const string& s, Texture* v);
 
 private:
-    Shader(string name);
-    Shader(string name, string&& vertex_shader, string&& fragment_shader);
+    Shader(const string& name);
+    Shader(const string& name, string&& vertex_shader, string&& fragment_shader);
     ~Shader();
     
     unsigned int compileShader(const char* code, int type);
@@ -40,7 +40,7 @@ private:
     string vertex_shader;
     string fragment_shader;
 public:
-    static Shader* get(string name);
+    static Shader* get(const string& name);
     static void unbind();
     
 private:

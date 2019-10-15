@@ -12,10 +12,10 @@ class ISerializable;
 class Serializer
 {
 public:
-    Serializer(string filename);
+    Serializer(const string& filename);
     
-    bool read(string name, ISerializable& object);
-    void write(string name, ISerializable& object);
+    bool read(const string& name, ISerializable& object);
+    void write(const string& name, ISerializable& object);
 
     class Handler
     {
@@ -39,11 +39,11 @@ public:
                 processValue(it);
         }
     private:
-        Handler(string filename);
+        Handler(const string& filename);
         ~Handler();
 
-        bool read(string name, ISerializable& object);
-        void write(string name, ISerializable& object);
+        bool read(const string& name, ISerializable& object);
+        void write(const string& name, ISerializable& object);
         bool buildKeyLookup();
         bool readFile();
         
@@ -79,7 +79,7 @@ public:
         void addSignedInt(int number);
         int readSignedInt();
         void processDataBlock(void* data, int size);
-        int addToStringTable(string str);
+        int addToStringTable(const string& str);
 
         enum class Mode
         {

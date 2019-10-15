@@ -11,7 +11,7 @@ class RootWidget;
 class Scene : public sp::Scene
 {
 public:
-    Scene(Vector2d size, string scene_name="GUI", int priority=100);
+    Scene(Vector2d size, const string& scene_name="GUI", int priority=100);
 
     virtual void onUpdate(float delta) override;
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id) override;

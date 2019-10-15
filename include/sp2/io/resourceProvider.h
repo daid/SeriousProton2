@@ -31,15 +31,15 @@ class ResourceProvider : public AutoPointerObject
 public:
     ResourceProvider();
     
-    virtual ResourceStreamPtr getStream(const string filename) = 0;
-    virtual std::chrono::system_clock::time_point getResourceModifyTime(const string filename) { return std::chrono::system_clock::time_point(); }
-    virtual std::vector<string> findResources(const string search_pattern) = 0;
+    virtual ResourceStreamPtr getStream(const string& filename) = 0;
+    virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) { return std::chrono::system_clock::time_point(); }
+    virtual std::vector<string> findResources(const string& search_pattern) = 0;
 
-    static ResourceStreamPtr get(const string filename);
-    static std::chrono::system_clock::time_point getModifyTime(const string filename);
-    static std::vector<string> find(const string search_pattern);
+    static ResourceStreamPtr get(const string& filename);
+    static std::chrono::system_clock::time_point getModifyTime(const string& filename);
+    static std::vector<string> find(const string& search_pattern);
 protected:
-    bool searchMatch(const string name, const string search_pattern);
+    bool searchMatch(const string& name, const string& search_pattern);
 
 private:
     static PList<ResourceProvider> providers;

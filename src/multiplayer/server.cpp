@@ -33,11 +33,20 @@ Server::~Server()
 {
 }
 
-void Server::listen(int port_nr)
+bool Server::listen(int port_nr)
 {
     if (!new_connection_listener.listen(port_nr))
+    {
         LOG(Error, "Failed to listen on port: ", port_nr);
+        return false;
+    }
     new_connection_listener.setBlocking(false);
+    return true;
+}
+
+bool Server::listenOnSwitchboard(const string& hostname, int port)
+{
+    return false;
 }
 
 uint32_t Server::getClientId()

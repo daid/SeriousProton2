@@ -27,7 +27,7 @@ static unsigned char decode_table[] = {
      0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-string encode(string data)
+string encode(const string& data)
 {
     string result;
     result.reserve(((data.length() + 2) / 3) * 4);
@@ -59,7 +59,7 @@ string encode(string data)
     return result;
 }
 
-string decode(string data)
+string decode(const string& data)
 {
     string result;
     result.reserve(data.length() / 4 * 3 + 2);

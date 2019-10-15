@@ -11,7 +11,7 @@ ResourceProvider::ResourceProvider()
     providers.add(this);
 }
 
-bool ResourceProvider::searchMatch(const string name, const string search_pattern)
+bool ResourceProvider::searchMatch(const string& name, const string& search_pattern)
 {
     std::vector<string> parts = search_pattern.split("*");
     int pos = 0;
@@ -55,7 +55,7 @@ string ResourceStream::readAll()
     return result;
 }
 
-ResourceStreamPtr ResourceProvider::get(const string filename)
+ResourceStreamPtr ResourceProvider::get(const string& filename)
 {
     for(P<ResourceProvider> rp : providers)
     {
@@ -66,7 +66,7 @@ ResourceStreamPtr ResourceProvider::get(const string filename)
     return nullptr;
 }
 
-std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const string filename)
+std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const string& filename)
 {
     for(P<ResourceProvider> rp : providers)
     {
@@ -77,7 +77,7 @@ std::chrono::system_clock::time_point ResourceProvider::getModifyTime(const stri
     return std::chrono::system_clock::time_point();
 }
 
-std::vector<string> ResourceProvider::find(string search_pattern)
+std::vector<string> ResourceProvider::find(const string& search_pattern)
 {
     std::vector<string> found_files;
     for(P<ResourceProvider> rp : providers)

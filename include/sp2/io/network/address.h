@@ -15,7 +15,7 @@ class Address
 {
 public:
     Address();
-    Address(string hostname);
+    Address(const string& hostname);
 
     std::vector<string> getHumanReadable();
 

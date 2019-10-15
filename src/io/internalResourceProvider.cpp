@@ -51,7 +51,7 @@ InternalResourceProvider::InternalResourceProvider(std::map<string, string>&& re
 {
 }
 
-ResourceStreamPtr InternalResourceProvider::getStream(const string filename)
+ResourceStreamPtr InternalResourceProvider::getStream(const string& filename)
 {
     if (!filename.startswith("internal:"))
         return nullptr;
@@ -62,7 +62,7 @@ ResourceStreamPtr InternalResourceProvider::getStream(const string filename)
     return std::make_shared<InternalResourceStream>(it->second);
 }
 
-std::vector<string> InternalResourceProvider::findResources(string search_pattern)
+std::vector<string> InternalResourceProvider::findResources(const string& search_pattern)
 {
     std::vector<string> found_files;
     return found_files;

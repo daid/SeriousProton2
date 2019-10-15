@@ -10,7 +10,7 @@ class Clipboard
 {
 public:
     static string get();
-    static void set(string value);
+    static void set(const string& value);
 
 private:
     static string virtual_clipboard;

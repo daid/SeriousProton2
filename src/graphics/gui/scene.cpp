@@ -11,7 +11,7 @@ namespace gui {
 
 P<Scene> Scene::default_gui_scene;
 
-Scene::Scene(Vector2d size, string scene_name, int priority)
+Scene::Scene(Vector2d size, const string& scene_name, int priority)
 : sp::Scene(scene_name, priority), size(size)
 {
     if (!default_gui_scene)

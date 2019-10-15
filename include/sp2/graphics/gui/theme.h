@@ -44,12 +44,12 @@ public:
 class Theme : public AutoPointerObject
 {
 public:
-    const ThemeData* getData(string element);
+    const ThemeData* getData(const string& element);
 
-    static P<Theme> getTheme(string name);
-    static void loadTheme(string name, string resource_name);
+    static P<Theme> getTheme(const string& name);
+    static void loadTheme(const string& name, const string& resource_name);
 private:
-    Theme(string name);
+    Theme(const string& name);
     virtual ~Theme();
 
     string name;

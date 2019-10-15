@@ -20,7 +20,8 @@ public:
     Server(const string& game_name, uint32_t game_version);
     ~Server();
 
-    void listen(int port_nr);
+    bool listen(int port_nr);
+    bool listenOnSwitchboard(const string& hostname, int port);
 
     virtual uint32_t getClientId() override;
 private:

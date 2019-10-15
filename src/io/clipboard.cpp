@@ -11,7 +11,7 @@ string Clipboard::get()
     return SDL_GetClipboardText();
 }
 
-void Clipboard::set(string value)
+void Clipboard::set(const string& value)
 {
     SDL_SetClipboardText(value.c_str());
 }

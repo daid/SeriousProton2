@@ -16,7 +16,7 @@ SpriteAnimation::SpriteAnimation(const Data& data)
 #endif
 }
 
-void SpriteAnimation::play(string key, float speed)
+void SpriteAnimation::play(const string& key, float speed)
 {
     auto it = data.animations.find(key);
     if (it == data.animations.end())
@@ -119,7 +119,7 @@ void SpriteAnimation::update(float delta, RenderData& render_data)
 std::map<string, SpriteAnimation::Data*> SpriteAnimation::cache;
 AtlasManager* SpriteAnimation::atlas_manager;
 
-std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
+std::unique_ptr<Animation> SpriteAnimation::load(const string& resource_name)
 {
     auto it = cache.find(resource_name);
     if (it != cache.end())
@@ -133,7 +133,7 @@ std::unique_ptr<Animation> SpriteAnimation::load(string resource_name)
     return std::unique_ptr<Animation>(new SpriteAnimation(*result));
 }
 
-void SpriteAnimation::Data::load(string resource_name)
+void SpriteAnimation::Data::load(const string& resource_name)
 {
 #ifdef DEBUG
     revision++;

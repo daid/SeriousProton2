@@ -4,21 +4,13 @@
 namespace sp {
 namespace io {
 
-class ParsingException : public std::exception
-{
-public:
-    string message;
-
-    ParsingException(string message) : message(message) {}
-};
-
-KeyValueTreePtr KeyValueTreeLoader::load(string resource_name)
+KeyValueTreePtr KeyValueTreeLoader::load(const string& resource_name)
 {
     KeyValueTreeLoader loader(resource_name);
     return loader.result;
 }
 
-KeyValueTreeLoader::KeyValueTreeLoader(string resource_name)
+KeyValueTreeLoader::KeyValueTreeLoader(const string& resource_name)
 {
     stream = ResourceProvider::get(resource_name);
     if (!stream)

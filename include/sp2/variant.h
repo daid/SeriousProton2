@@ -11,7 +11,7 @@ public:
     Variant() { type = Type::None; }
     Variant(int i) { type = Type::Integer; data.i = i; }
     Variant(double d) { type = Type::Double; data.d = d; }
-    Variant(string s) { type = Type::String; str = s; }
+    Variant(const string& s) { type = Type::String; str = s; }
 
     inline bool isNone() { return type == Type::None; }
     inline bool isInteger() { return type == Type::Integer; }

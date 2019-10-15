@@ -9,16 +9,16 @@ namespace io {
 class DirectoryResourceProvider : public ResourceProvider
 {
 public:
-    DirectoryResourceProvider(string base_path);
+    DirectoryResourceProvider(const string& base_path);
     
-    virtual ResourceStreamPtr getStream(const string filename) override;
-    virtual std::chrono::system_clock::time_point getResourceModifyTime(const string filename) override;
-    virtual std::vector<string> findResources(const string search_pattern) override;
+    virtual ResourceStreamPtr getStream(const string& filename) override;
+    virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) override;
+    virtual std::vector<string> findResources(const string& search_pattern) override;
 
 private:
     string base_path;
     
-    void findResources(std::vector<string>& found_files, const string path, const string search_pattern);
+    void findResources(std::vector<string>& found_files, const string& path, const string& search_pattern);
 };
 
 }//namespace io

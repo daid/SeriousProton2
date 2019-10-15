@@ -18,9 +18,9 @@ public:
     };
 
     void setMode(Mode mode) { ObjLoader::mode = mode; }
-    Texture* getTextureFor(string name);
+    Texture* getTextureFor(const string& name);
 protected:
-    virtual std::shared_ptr<MeshData> load(string name) override;
+    virtual std::shared_ptr<MeshData> load(const string& name) override;
 
 private:
     Mode mode;

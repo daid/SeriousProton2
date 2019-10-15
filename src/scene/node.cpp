@@ -260,7 +260,7 @@ void Node::setAnimation(std::unique_ptr<Animation> animation)
         this->animation->prepare(render_data);
 }
 
-void Node::animationPlay(string key, float speed)
+void Node::animationPlay(const string& key, float speed)
 {
     if (animation)
         animation->play(key, speed);

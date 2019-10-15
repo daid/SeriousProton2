@@ -8,22 +8,22 @@
 namespace sp {
 namespace io {
 
-Serializer::Serializer(string filename)
+Serializer::Serializer(const string& filename)
 : handler(filename)
 {
 }
 
-bool Serializer::read(string name, ISerializable& object)
+bool Serializer::read(const string& name, ISerializable& object)
 {
     return handler.read(name, object);
 }
 
-void Serializer::write(string name, ISerializable& object)
+void Serializer::write(const string& name, ISerializable& object)
 {
     handler.write(name, object);
 }
 
-Serializer::Handler::Handler(string filename)
+Serializer::Handler::Handler(const string& filename)
 : filename(filename)
 {
 }
@@ -86,7 +86,7 @@ static int readUnsignedIntFromStream(FILE* f)
     }
 }
 
-bool Serializer::Handler::read(string name, ISerializable& object)
+bool Serializer::Handler::read(const string& name, ISerializable& object)
 {
     if (mode == Mode::Unknown)
     {
@@ -177,7 +177,7 @@ bool Serializer::Handler::readFile()
     return true;
 }
 
-void Serializer::Handler::write(string name, ISerializable& object)
+void Serializer::Handler::write(const string& name, ISerializable& object)
 {
     if (mode == Mode::Unknown) mode = Mode::Write;
     sp2assert(mode == Mode::Write, "Cannot mix writting and reading in a single serializer instance");
@@ -396,7 +396,7 @@ void Serializer::Handler::processDataBlock(void* data, int size)
     }
 }
 
-int Serializer::Handler::addToStringTable(string str)
+int Serializer::Handler::addToStringTable(const string& str)
 {
     const auto& it = string_table_lookup.find(str);
     if (it == string_table_lookup.end())

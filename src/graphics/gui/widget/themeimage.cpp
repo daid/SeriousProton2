@@ -7,7 +7,7 @@
 namespace sp {
 namespace gui {
 
-ThemeImage::ThemeImage(P<Widget> parent, string theme_data_name)
+ThemeImage::ThemeImage(P<Widget> parent, const string& theme_data_name)
 : Widget(parent)
 {
     loadThemeData(theme_data_name);

@@ -13,7 +13,7 @@ namespace io {
 template<class T> class DirectLoader : NonCopyable
 {
 public:
-    T get(string name)
+    T get(const string& name)
     {
         auto it = cached_items.find(name);
         if (it != cached_items.end())
@@ -27,7 +27,7 @@ public:
     }
 
 protected:
-    virtual T load(string name) = 0;
+    virtual T load(const string& name) = 0;
 private:
     std::unordered_map<string, T> cached_items;
 };

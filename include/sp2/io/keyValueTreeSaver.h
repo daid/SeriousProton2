@@ -9,12 +9,12 @@ namespace io {
 class KeyValueTreeSaver
 {
 public:
-    static void save(string filename, KeyValueTreePtr tree);
+    static void save(const string& filename, KeyValueTreePtr tree);
 
 private:
     FILE* f;
     
-    KeyValueTreeSaver(string filename);
+    KeyValueTreeSaver(const string& filename);
     ~KeyValueTreeSaver();
     void saveNode(const KeyValueTreeNode& node, int indent);
 };

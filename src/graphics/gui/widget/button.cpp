@@ -22,7 +22,7 @@ Button::Button(P<Widget> parent)
     slave_widget = label;
 }
 
-void Button::setLabel(string value)
+void Button::setLabel(const string& value)
 {
     label->setLabel(value);
 }

@@ -4,7 +4,7 @@
 
 namespace sp {
 
-BitmapFont::BitmapFont(string name, io::ResourceStreamPtr stream)
+BitmapFont::BitmapFont(const string& name, io::ResourceStreamPtr stream)
 : name(name)
 {
     Vector2f texture_size, pixel_glyph_size;

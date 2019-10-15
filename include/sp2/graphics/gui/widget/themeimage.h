@@ -16,7 +16,7 @@ public:
         Vertical
     };
 
-    ThemeImage(P<Widget> parent, string theme_data_name);
+    ThemeImage(P<Widget> parent, const string& theme_data_name);
     
     void setOrientation(Orientation orientation);
     

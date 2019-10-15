@@ -25,15 +25,15 @@ public:
     virtual ~Environment();
     
     /** Bind a C function to lua. Use with care, as you need to manage the lua stack yourself */
-    void setGlobal(string name, lua_CFunction function);
+    void setGlobal(const string& name, lua_CFunction function);
     /** Bind an object to this lua environment. */
-    void setGlobal(string name, ScriptBindingObject* ptr);
-    void setGlobal(string name, P<ScriptBindingObject> ptr);
-    void setGlobal(string name, bool value);
-    void setGlobal(string name, int value);
-    void setGlobal(string name, string value);
+    void setGlobal(const string& name, ScriptBindingObject* ptr);
+    void setGlobal(const string& name, P<ScriptBindingObject> ptr);
+    void setGlobal(const string& name, bool value);
+    void setGlobal(const string& name, int value);
+    void setGlobal(const string& name, const string& value);
     
-    template<typename RET, typename... ARGS> void setGlobal(string name, RET(*func)(ARGS...))
+    template<typename RET, typename... ARGS> void setGlobal(const string& name, RET(*func)(ARGS...))
     {
         typedef RET(*FT)(ARGS...);
 
@@ -56,7 +56,7 @@ public:
     CoroutinePtr runCoroutine(const string& code);
     
     //Call a script function. Return true if the call was made, false on an error.
-    template<typename... ARGS> bool call(string global_function, ARGS... args)
+    template<typename... ARGS> bool call(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -90,7 +90,7 @@ public:
         While they are yielded, other lua functions can run.
         This makes coroutines perfect for scripted sequences.
      */
-    template<typename... ARGS> CoroutinePtr callCoroutine(string global_function, ARGS... args)
+    template<typename... ARGS> CoroutinePtr callCoroutine(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);

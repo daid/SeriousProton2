@@ -16,17 +16,17 @@ namespace io {
 class Keybinding : public AutoPointerObject
 {
 public:
-    Keybinding(string name);
-    Keybinding(string name, string default_key);
-    Keybinding(string name, const std::initializer_list<const string>& default_keys);
+    Keybinding(const string& name);
+    Keybinding(const string& name, const string& default_key);
+    Keybinding(const string& name, const std::initializer_list<const string>& default_keys);
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
     
-    void setKey(string key);
+    void setKey(const string& key);
     void setKeys(const std::initializer_list<const string>& keys);
     string getKey(int index);
-    void addKey(string key);
+    void addKey(const string& key);
     void clearKeys();
     
     bool isBound();

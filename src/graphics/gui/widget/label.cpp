@@ -8,7 +8,7 @@ namespace gui {
 
 SP_REGISTER_WIDGET("label", Label);
 
-Label::Label(P<Widget> parent, string theme_data_name)
+Label::Label(P<Widget> parent, const string& theme_data_name)
 : Widget(parent)
 {
     loadThemeData(theme_data_name);
@@ -20,7 +20,7 @@ Label::Label(P<Widget> parent, string theme_data_name)
     setAttribute("order", "-1");
 }
 
-void Label::setLabel(string label)
+void Label::setLabel(const string& label)
 {
     if (this->label != label)
     {

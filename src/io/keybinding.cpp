@@ -14,7 +14,7 @@ namespace io {
 PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 P<Keybinding> Keybinding::rebinding_key SP2_INIT_EARLY;
 
-Keybinding::Keybinding(string name)
+Keybinding::Keybinding(const string& name)
 : name(name), label(name)
 {
     value = 0.0;
@@ -28,20 +28,20 @@ Keybinding::Keybinding(string name)
     keybindings.add(this);
 }
 
-Keybinding::Keybinding(string name, string default_key)
+Keybinding::Keybinding(const string& name, const string& default_key)
 : Keybinding(name)
 {
     addKey(default_key);
 }
 
-Keybinding::Keybinding(string name, const std::initializer_list<const string>& default_keys)
+Keybinding::Keybinding(const string& name, const std::initializer_list<const string>& default_keys)
 : Keybinding(name)
 {
     for(const string& key : default_keys)
         addKey(key);
 }
 
-void Keybinding::setKey(string key)
+void Keybinding::setKey(const string& key)
 {
     key_number.clear();
     addKey(key);
@@ -54,7 +54,7 @@ void Keybinding::setKeys(const std::initializer_list<const string>& keys)
         addKey(key);
 }
 
-void Keybinding::addKey(string key)
+void Keybinding::addKey(const string& key)
 {
     //Format for joystick keys:
     //joy:[joystick_id]:axis:[axis_id]

@@ -14,7 +14,7 @@ private:
     SDL_RWops* rw_ops;
 
 public:
-    FileResourceStream(string filename)
+    FileResourceStream(const string& filename)
     {
         rw_ops = SDL_RWFromFile(filename.c_str(), "rb");
     }
@@ -54,7 +54,7 @@ private:
     FILE* f;
     int64_t size;
 public:
-    FileResourceStream(string filename)
+    FileResourceStream(const string& filename)
     {
         f = fopen(filename.c_str(), "rb");
         size = -1;
@@ -98,12 +98,12 @@ public:
 #endif//ANDROID
 
 
-DirectoryResourceProvider::DirectoryResourceProvider(string base_path)
+DirectoryResourceProvider::DirectoryResourceProvider(const string& base_path)
 : base_path(base_path)
 {
 }
 
-ResourceStreamPtr DirectoryResourceProvider::getStream(const string filename)
+ResourceStreamPtr DirectoryResourceProvider::getStream(const string& filename)
 {
     std::shared_ptr<FileResourceStream> stream = std::make_shared<FileResourceStream>(base_path + "/" + filename);
     if (stream->isOpen())
@@ -111,7 +111,7 @@ ResourceStreamPtr DirectoryResourceProvider::getStream(const string filename)
     return nullptr;
 }
 
-std::chrono::system_clock::time_point DirectoryResourceProvider::getResourceModifyTime(const string filename)
+std::chrono::system_clock::time_point DirectoryResourceProvider::getResourceModifyTime(const string& filename)
 {
     struct stat stat_info;
     if (stat((base_path + "/" + filename).c_str(), &stat_info) != 0)
@@ -119,14 +119,14 @@ std::chrono::system_clock::time_point DirectoryResourceProvider::getResourceModi
     return std::chrono::system_clock::from_time_t(stat_info.st_mtime);
 }
 
-std::vector<string> DirectoryResourceProvider::findResources(string search_pattern)
+std::vector<string> DirectoryResourceProvider::findResources(const string& search_pattern)
 {
     std::vector<string> found_files;
     findResources(found_files, "", search_pattern);
     return found_files;
 }
 
-void DirectoryResourceProvider::findResources(std::vector<string>& found_files, const string path, const string search_pattern)
+void DirectoryResourceProvider::findResources(std::vector<string>& found_files, const string& path, const string& search_pattern)
 {
     DIR* dir = opendir((base_path + "/" + path).c_str());
     if (!dir)

@@ -88,7 +88,7 @@ private:
     static std::unordered_map<string, P<Scene>> scene_mapping;
 
 public:
-    static P<Scene> get(string name) { return scene_mapping[name]; }
+    static P<Scene> get(const string& name) { return scene_mapping[name]; }
 
     static const PList<Scene>& all() { return scenes; }
 private:

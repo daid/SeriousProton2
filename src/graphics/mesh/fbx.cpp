@@ -81,7 +81,7 @@ public:
     std::vector<FbxProperty> properties;
     std::vector<FbxNode> children;
     
-    FbxNode* find(string name)
+    FbxNode* find(const string& name)
     {
         for(auto& child : children)
             if (child.name == name)
@@ -89,7 +89,7 @@ public:
         return nullptr;
     }
     
-    std::vector<FbxNode*> findAll(string name)
+    std::vector<FbxNode*> findAll(const string& name)
     {
         std::vector<FbxNode*> result;
         for(auto& child : children)
@@ -98,7 +98,7 @@ public:
         return result;
     }
     
-    FbxNode* getProperty70(string name)
+    FbxNode* getProperty70(const string& name)
     {
         FbxNode* properties_root = find("Properties70");
         if (!properties_root)
@@ -113,7 +113,7 @@ public:
         return nullptr;
     }
     
-    sp::Vector3d getProperty70asVector3d(string name, sp::Vector3d default_value=sp::Vector3d(0,0,0))
+    sp::Vector3d getProperty70asVector3d(const string& name, sp::Vector3d default_value=sp::Vector3d(0,0,0))
     {
         FbxNode* node = getProperty70(name);
         if (!node)
@@ -126,7 +126,7 @@ public:
 class BinaryFbxReader
 {
 public:
-    BinaryFbxReader(string resource_name)
+    BinaryFbxReader(const string& resource_name)
     {
         stream = io::ResourceProvider::get(resource_name);
         
@@ -197,7 +197,7 @@ private:
     uint32_t version;
 };
 
-std::shared_ptr<MeshData> FbxLoader::load(string resource_name)
+std::shared_ptr<MeshData> FbxLoader::load(const string& resource_name)
 {
     MeshData::Vertices vertices;
     MeshData::Indices indices;

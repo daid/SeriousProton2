@@ -9,7 +9,7 @@ class AtlasTexture;
 class FreetypeFont : public Font
 {
 public:
-    FreetypeFont(string name, io::ResourceStreamPtr stream);
+    FreetypeFont(const string& name, io::ResourceStreamPtr stream);
     ~FreetypeFont();
 
     virtual Texture* getTexture(int pixel_size) override;

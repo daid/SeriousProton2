@@ -61,7 +61,7 @@ private:
 
 static MusicSource music_source;
 
-bool Music::play(string resource_name)
+bool Music::play(const string& resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)

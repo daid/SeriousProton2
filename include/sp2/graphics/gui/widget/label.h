@@ -10,9 +10,9 @@ namespace gui {
 class Label : public Widget
 {
 public:
-    Label(P<Widget> parent, string theme_data_name="label");
+    Label(P<Widget> parent, const string& theme_data_name="label");
 
-    void setLabel(string label);
+    void setLabel(const string& label);
     
     Alignment getTextAlignment() { return text_alignment; }
     void setTextAlignment(Alignment alignment) { text_alignment = alignment; }

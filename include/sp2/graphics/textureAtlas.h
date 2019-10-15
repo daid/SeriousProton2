@@ -13,7 +13,7 @@ namespace sp {
 class AtlasTexture : public Texture
 {
 public:
-    AtlasTexture(string name, Vector2i size);
+    AtlasTexture(const string& name, Vector2i size);
     virtual ~AtlasTexture();
     
     virtual void bind() override;
@@ -65,9 +65,9 @@ public:
         Rect2f rect;
     };
     
-    Result get(string resource_name);
-    Result add(string resource_name, Image&& image);
-    bool has(string resource_name);
+    Result get(const string& resource_name);
+    Result add(const string& resource_name, Image&& image);
+    bool has(const string& resource_name);
 private:
     Vector2i texture_size;
     int default_margin;

@@ -34,7 +34,7 @@ void ft_stream_close(FT_Stream)
 
 namespace sp {
 
-FreetypeFont::FreetypeFont(string name, io::ResourceStreamPtr stream)
+FreetypeFont::FreetypeFont(const string& name, io::ResourceStreamPtr stream)
 {
     ft_library = nullptr;
     ft_face = nullptr;

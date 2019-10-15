@@ -22,14 +22,14 @@ public:
 class ObjTexture : public OpenGLTexture
 {
 public:
-    ObjTexture(string name, sp::Image&& image)
+    ObjTexture(const string& name, sp::Image&& image)
     : OpenGLTexture(Type::Static, name)
     {
         setImage(std::move(image));
     }
 };
 
-std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
+std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
@@ -208,7 +208,7 @@ std::shared_ptr<MeshData> ObjLoader::load(string resource_name)
 }
 
 
-Texture* ObjLoader::getTextureFor(string name)
+Texture* ObjLoader::getTextureFor(const string& name)
 {
     auto it = texture_cache.find(name);
     if (it == texture_cache.end())

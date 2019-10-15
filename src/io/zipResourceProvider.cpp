@@ -68,7 +68,7 @@ private:
     uint64_t current_offset;
 
 public:
-    ZipStoredResourceStream(string zip_filename, uint64_t offset, uint64_t size)
+    ZipStoredResourceStream(const string& zip_filename, uint64_t offset, uint64_t size)
     : offset(offset), size(size), current_offset(0)
     {
         f = fopen(zip_filename.c_str(), "rb");
@@ -125,7 +125,7 @@ private:
     uint8_t output_buffer[16 * 1024];
     int64_t uncompressed_offset;
 public:
-    ZipDeflateResourceStream(string zip_filename, uint64_t offset, uint64_t uncompressed_size)
+    ZipDeflateResourceStream(const string& zip_filename, uint64_t offset, uint64_t uncompressed_size)
     : offset(offset), uncompressed_size(uncompressed_size)
     {
         f = fopen(zip_filename.c_str(), "rb");
@@ -228,7 +228,7 @@ public:
 };
 
 
-ZipResourceProvider::ZipResourceProvider(string zip_filename)
+ZipResourceProvider::ZipResourceProvider(const string& zip_filename)
 : zip_filename(zip_filename)
 {
     FILE* f = fopen(zip_filename.c_str(), "rb");
@@ -324,7 +324,7 @@ ZipResourceProvider::ZipResourceProvider(string zip_filename)
     fclose(f);
 }
 
-ResourceStreamPtr ZipResourceProvider::getStream(const string filename)
+ResourceStreamPtr ZipResourceProvider::getStream(const string& filename)
 {
     auto it = contents.find(filename);
     if (it != contents.end())
@@ -337,12 +337,12 @@ ResourceStreamPtr ZipResourceProvider::getStream(const string filename)
     return nullptr;
 }
 
-std::chrono::system_clock::time_point ZipResourceProvider::getResourceModifyTime(const string filename)
+std::chrono::system_clock::time_point ZipResourceProvider::getResourceModifyTime(const string& filename)
 {
     return std::chrono::system_clock::time_point();
 }
 
-std::vector<string> ZipResourceProvider::findResources(string search_pattern)
+std::vector<string> ZipResourceProvider::findResources(const string& search_pattern)
 {
     std::vector<string> found_files;
     return found_files;

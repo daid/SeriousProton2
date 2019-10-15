@@ -23,7 +23,7 @@ private:
 template<class T> class LazyLoader : NonCopyable
 {
 public:
-    T get(string name)
+    T get(const string& name)
     {
         auto it = cached_items.find(name);
         if (it != cached_items.end())
@@ -58,7 +58,7 @@ protected:
         }
     }
 
-    virtual T prepare(string name) = 0;
+    virtual T prepare(const string& name) = 0;
     virtual void backgroundLoader(T ptr, io::ResourceStreamPtr stream) = 0;
 private:
     std::unordered_map<string, T> cached_items;
