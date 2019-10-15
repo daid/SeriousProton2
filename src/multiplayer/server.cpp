@@ -22,19 +22,22 @@ constexpr uint8_t PacketIDs::alive;
 constexpr uint64_t PacketIDs::magic_sp2_value;
 
 
-Server::Server(uint32_t game_id, uint32_t game_version, int port_nr)
-: game_id(game_id), game_version(game_version)
+Server::Server(const string& game_name, uint32_t game_version)
+: game_name(game_name), game_version(game_version)
 {
-    if (!new_connection_listener.listen(port_nr))
-        LOG(Error, "Failed to listen on port: ", port_nr);
-    new_connection_listener.setBlocking(false);
-
     next_client_id = 1;
     next_object_id = 1;
 }
 
 Server::~Server()
 {
+}
+
+void Server::listen(int port_nr)
+{
+    if (!new_connection_listener.listen(port_nr))
+        LOG(Error, "Failed to listen on port: ", port_nr);
+    new_connection_listener.setBlocking(false);
 }
 
 uint32_t Server::getClientId()
@@ -134,7 +137,7 @@ void Server::onUpdate(float delta)
     {
         LOG(Info, "Accepted new connection on server");
         new_connection_socket.setBlocking(false);
-        
+
         clients.emplace_back();
         ClientInfo& client = clients.back();
         client.socket = std::move(new_connection_socket);
@@ -161,16 +164,16 @@ void Server::onUpdate(float delta)
                 case PacketIDs::request_authentication:
                     {
                         uint64_t client_magic = 0;
-                        uint32_t client_game_id = 0;
+                        string client_game_name = 0;
                         uint32_t client_game_version = 0;
-                        packet.read(client_magic, client_game_id, client_game_version);
-                        
+                        packet.read(client_magic, client_game_name, client_game_version);
+
                         if (client_magic != PacketIDs::magic_sp2_value)
                         {
                             LOG(Warning, "Client magic value mismatch. Disconnecting...");
                             client->socket.close();
                         }
-                        else if (client_game_id != game_id)
+                        else if (client_game_name != game_name)
                         {
                             LOG(Warning, "Client running different game. Disconnecting...");
                             client->socket.close();

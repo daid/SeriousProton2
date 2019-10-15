@@ -10,18 +10,22 @@
 namespace sp {
 namespace multiplayer {
 
-Client::Client(uint32_t game_id, uint32_t game_version, string hostname, int port_nr)
-: game_id(game_id), game_version(game_version)
+Client::Client(const string& game_name, uint32_t game_version)
+: game_name(game_name), game_version(game_version)
 {
     socket.setBlocking(false);
-    LOG(Info, "Multiplayer client connecting:", hostname, port_nr);
-    socket.connect(io::network::Address(hostname), port_nr);
-    
-    state = State::Connecting;
 }
 
 Client::~Client()
 {
+}
+
+void Client::connect(const string& hostname, int port_nr)
+{
+    LOG(Info, "Multiplayer client connecting:", hostname, port_nr);
+    socket.connect(io::network::Address(hostname), port_nr);
+
+    state = State::Connecting;
 }
 
 uint32_t Client::getClientId()
@@ -32,7 +36,7 @@ uint32_t Client::getClientId()
 void Client::onUpdate(float delta)
 {
     io::DataBuffer packet;
-    
+
     while(socket.receive(packet))
     {
         uint8_t command_id;
@@ -40,20 +44,20 @@ void Client::onUpdate(float delta)
         switch(command_id)
         {
         case PacketIDs::request_authentication:{
-            send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value, game_id, game_version));
+            send(io::DataBuffer(PacketIDs::request_authentication, PacketIDs::magic_sp2_value, game_name, game_version));
             }break;
         case PacketIDs::set_client_id:{
             if (state == State::Connecting)
                 state = State::Running;
             packet.read(client_id);
             }break;
-            
+
         case PacketIDs::change_game_speed:{
             float new_gamespeed;
             packet.read(new_gamespeed);
             sp::Engine::getInstance()->setGameSpeed(new_gamespeed);
             }break;
-    
+
         case PacketIDs::create_object:{
             uint64_t id = 0;
             string class_name;

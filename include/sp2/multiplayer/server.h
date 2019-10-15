@@ -17,8 +17,10 @@ namespace multiplayer {
 class Server : public Updatable, public Base
 {
 public:
-    Server(uint32_t game_id, uint32_t game_version, int port_nr);
+    Server(const string& game_name, uint32_t game_version);
     ~Server();
+
+    void listen(int port_nr);
 
     virtual uint32_t getClientId() override;
 private:
@@ -40,7 +42,7 @@ private:
             socket.send(packet);
         }
     };
-    uint32_t game_id;
+    string game_name;
     uint32_t game_version;
 
     uint32_t next_client_id;
