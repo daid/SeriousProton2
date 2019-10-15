@@ -7,6 +7,7 @@
 #include <sp2/io/dataBuffer.h>
 #include <sp2/io/network/tcpListener.h>
 #include <sp2/io/network/tcpSocket.h>
+#include <sp2/io/http/websocket.h>
 
 #include <list>
 #include <unordered_map>
@@ -46,6 +47,9 @@ private:
     string game_name;
     uint32_t game_version;
 
+    string switchboard_key;
+    string switchboard_secret;
+
     uint32_t next_client_id;
     //Next id for a new object.
     uint64_t next_object_id;
@@ -57,6 +61,7 @@ private:
     std::list<ClientInfo> clients;
     
     io::network::TcpListener new_connection_listener;
+    io::http::Websocket switchboard_connection;
     
     void recursiveAddNewNodes(P<Node> node);
     void recursiveSendCreate(ClientInfo& client, P<Node> node);

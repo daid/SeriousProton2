@@ -50,6 +50,11 @@ Websocket& Websocket::operator=(Websocket&& other)
     return *this;
 }
 
+void Websocket::setHeader(const string& key, const string& value)
+{
+    headers[key] = value;
+}
+
 bool Websocket::connect(const string& url)
 {
     state = State::Disconnected;
@@ -88,7 +93,10 @@ bool Websocket::connect(const string& url)
         "Sec-Websocket-Version: 13\r\n"
         "Sec-Websocket-Key: " + websock_key + "\r\n"
         "Sec-WebSocket-Protocol: chat\r\n"
-        "Pragma: no-cache\r\n"
+        "Pragma: no-cache\r\n";
+    for(auto& it : headers)
+        request += it.first + ": " + it.second + "\r\n";
+    request +=
         "Cache-Control: no-cache, no-store, must-revalidate\r\n"
         "\r\n";
     socket.send(request.data(), request.length());

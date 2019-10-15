@@ -1,9 +1,12 @@
 #include <sp2/multiplayer/server.h>
 #include <sp2/multiplayer/registry.h>
+#include <sp2/io/http/request.h>
 #include <private/multiplayer/packetIDs.h>
 #include <sp2/scene/scene.h>
 #include <sp2/engine.h>
 #include <sp2/assert.h>
+
+#include <json11/json11.hpp>
 
 
 namespace sp {
@@ -46,7 +49,35 @@ bool Server::listen(int port_nr)
 
 bool Server::listenOnSwitchboard(const string& hostname, int port)
 {
-    return false;
+    json11::Json json = json11::Json::object{{
+        {"name", "server_name"},
+        {"game_name", game_name.c_str()},
+        {"game_version", int(game_version)},
+        {"secret_hash", "NO"},
+        {"public", true},
+        {"address", json11::Json::array{}},
+        {"port", 0},
+    }};
+    io::http::Request request(hostname, port);
+    request.setHeader("Content-Type", "application/json");
+    auto response = request.post("/game/register", json.dump());
+    if (response.status != 200)
+        return false;
+    std::string err;
+    json11::Json response_json = json11::Json::parse(response.body, err);
+    if (err != "")
+        return false;
+    switchboard_key = response_json["key"].string_value();
+    switchboard_secret = response_json["secret"].string_value();
+    if (switchboard_key == "" || switchboard_secret == "")
+        return false;
+    
+    switchboard_connection.setHeader("Game-Key", switchboard_key);
+    switchboard_connection.setHeader("Game-Secret", switchboard_secret);
+    if (!switchboard_connection.connect("ws://" + hostname + ":" + string(port) + "/game/master"))
+        return false;
+    LOG(Debug, "Registered on switchboard, key:", switchboard_key);
+    return true;
 }
 
 uint32_t Server::getClientId()
@@ -156,6 +187,15 @@ void Server::onUpdate(float delta)
         client.state = ClientInfo::State::WaitingForAuthentication;
         io::DataBuffer packet(PacketIDs::request_authentication, PacketIDs::magic_sp2_value);
         client.socket.send(packet);
+    }
+    
+    if (switchboard_connection.isConnecting() || switchboard_connection.isConnected())
+    {
+        sp::string msg;
+        if (switchboard_connection.receive(msg))
+        {
+            //TODO: New connection trough the switchboard
+        }
     }
 
     for(auto client = clients.begin(); client != clients.end(); )

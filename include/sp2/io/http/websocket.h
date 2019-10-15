@@ -3,6 +3,8 @@
 
 #include <sp2/nonCopyable.h>
 #include <sp2/io/network/tcpSocket.h>
+#include <unordered_map>
+
 
 namespace sp {
 namespace io {
@@ -24,6 +26,8 @@ public:
     bool connect(const string& url);
     void close();
 
+    void setHeader(const string& key, const string& value);
+
     bool isConnected();
     bool isConnecting();
 
@@ -44,6 +48,7 @@ private:
     sp::io::network::TcpSocket socket;
     std::vector<uint8_t> buffer;
     std::vector<uint8_t> received_fragment;
+    std::unordered_map<string, string> headers;
 };
 
 }//namespace http
