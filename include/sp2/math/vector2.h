@@ -53,7 +53,7 @@ public:
 
     T angle()
     {
-        return std::atan2(y, x) / pi * 180.0f;
+        return std::atan2(y, x) / pi * 180.0;
     }
 
     inline Vector2<T> rotate(T angle)

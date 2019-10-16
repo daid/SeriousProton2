@@ -25,20 +25,20 @@ template<typename T> class ReplicationLink : public ReplicationLinkBase
 {
 public:
     ReplicationLink(T& value)
-    : value(value), previous_value(value), timeout(0.0), max_update_interval(0.0)
+    : value(value), previous_value(value), timeout(0.0f), max_update_interval(0.0f)
     {
     }
 
     ReplicationLink(T& value, float max_update_interval)
-    : value(value), previous_value(value), timeout(0.0), max_update_interval(max_update_interval)
+    : value(value), previous_value(value), timeout(0.0f), max_update_interval(max_update_interval)
     {
     }
 
     virtual bool isChanged(float time_delta) override
     {
-        if (timeout > 0.0)
+        if (timeout > 0.0f)
             timeout -= time_delta;
-        if (timeout > 0.0)
+        if (timeout > 0.0f)
             return false;
         if (value == previous_value)
             return false;

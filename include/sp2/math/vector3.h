@@ -34,7 +34,7 @@ public:
     inline Vector3<T> normalized() const
     {
         T f = length();
-        if (f < 0.000001)
+        if (f < static_cast<T>(0.000001))
             return Vector3<T>(1, 0, 0);
         return *this / f;
     }
