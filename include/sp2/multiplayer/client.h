@@ -6,6 +6,7 @@
 #include <sp2/multiplayer/base.h>
 #include <sp2/io/dataBuffer.h>
 #include <sp2/io/network/tcpSocket.h>
+#include <sp2/io/http/websocket.h>
 
 
 #include <list>
@@ -29,13 +30,20 @@ public:
     Client(const string& game_name, uint32_t game_version);
     ~Client();
 
-    void connect(const string& hostname, int port_nr);
+    // Connect directly to a server with a tcp IP connection.
+    bool connect(const string& hostname, int port_nr);
+    // Connect to a server by using a switchboard.
+    // The hotname and port_nr are the hostname and port of the switchboard server.
+    // The given key is the game key given to the server that we want to connect to,
+    //      generally entered by the user.
+    bool connectBySwitchboard(const string& hostname, int port_nr, const string& key);
 
     State getState() const { return state; }
 
     virtual uint32_t getClientId() override;
 private:
     io::network::TcpSocket socket;
+    io::http::Websocket websocket;
     std::list<io::DataBuffer> send_queue;
     State state = State::Disconnected;
     uint32_t client_id = 0;

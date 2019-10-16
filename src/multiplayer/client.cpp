@@ -1,11 +1,14 @@
 #include <sp2/multiplayer/client.h>
 #include <sp2/multiplayer/registry.h>
+#include <sp2/io/http/request.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <sp2/engine.h>
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
 #include <private/multiplayer/packetIDs.h>
+
+#include <json11/json11.hpp>
 
 namespace sp {
 namespace multiplayer {
@@ -20,12 +23,48 @@ Client::~Client()
 {
 }
 
-void Client::connect(const string& hostname, int port_nr)
+bool Client::connect(const string& hostname, int port_nr)
 {
+    if (state != State::Disconnected)
+        return false;
+
     LOG(Info, "Multiplayer client connecting:", hostname, port_nr);
-    socket.connect(io::network::Address(hostname), port_nr);
+    if (!socket.connect(io::network::Address(hostname), port_nr))
+        return false;
 
     state = State::Connecting;
+    return true;
+}
+
+bool Client::connectBySwitchboard(const string& hostname, int port_nr, const string& key)
+{
+    if (state != State::Disconnected)
+        return false;
+
+    // First, request the json game information from the switchboard.
+    //  As we might just be able to do a direct connection.
+    io::http::Request request(hostname, port_nr);
+    auto response = request.get("/game/connect/" + key);
+    if (response.status != 200)
+        return false;
+    std::string err;
+    auto json = json11::Json::parse(response.body, err);
+    if (!err.empty())
+        return false;
+    int server_port = json["port"].int_value();
+    for(auto json_address : json["address"].array_items())
+    {
+        LOG(Info, "Attempting to direct connect to", json_address.string_value(), "address aquired by switchboard");
+        if (socket.connect(io::network::Address(json_address.string_value()), server_port))
+        {
+            state = State::Connecting;
+            return true;
+        }
+    }
+    LOG(Info, "No suitable address from switchboard archieved. Using switchboard websocket connection");
+    if (!websocket.connect(hostname, port_nr, "/game/connect/" + key))
+        return false;
+    return true;
 }
 
 uint32_t Client::getClientId()
@@ -37,7 +76,7 @@ void Client::onUpdate(float delta)
 {
     io::DataBuffer packet;
 
-    while(socket.receive(packet))
+    while(socket.receive(packet) || websocket.receive(packet))
     {
         uint8_t command_id;
         packet.read(command_id);
@@ -142,7 +181,7 @@ void Client::onUpdate(float delta)
         }
         it->second->multiplayer.prepared_calls.clear();
     }
-    if (!socket.isConnected() && state != State::Disconnected)
+    if (!socket.isConnected() && !websocket.isConnected() && !websocket.isConnecting() && state != State::Disconnected)
     {
         LOG(Info, "Multiplayer client disconnect");
         state = State::Disconnected;
@@ -159,6 +198,7 @@ void Client::onUpdate(float delta)
 void Client::send(const io::DataBuffer& packet)
 {
     socket.send(packet);
+    websocket.send(packet);
 }
 
 
