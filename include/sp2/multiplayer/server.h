@@ -22,7 +22,7 @@ public:
     ~Server();
 
     bool listen(int port_nr);
-    bool listenOnSwitchboard(const string& hostname, int port, const string& server_name);
+    bool listenOnSwitchboard(const string& hostname, int port, const string& server_name, bool list_as_public_server);
 
     virtual uint32_t getClientId() override;
 private:

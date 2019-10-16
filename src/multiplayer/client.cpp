@@ -57,13 +57,21 @@ bool Client::connectBySwitchboard(const string& hostname, int port_nr, const str
         LOG(Info, "Attempting to direct connect to", json_address.string_value(), "address aquired by switchboard");
         if (socket.connect(io::network::Address(json_address.string_value()), server_port))
         {
+            LOG(Info, "Direct connection worked.");
             state = State::Connecting;
             return true;
         }
     }
     if (!websocket.connect(hostname, port_nr, "/game/connect/" + key))
+    {
+        LOG(Warning, "Got all data from switchboard server, but failed to setup websocket connection.");
         return false;
-    LOG(Info, "No suitable address from switchboard archieved. Using switchboard websocket connection");
+    }
+
+    if (json["address"].array_items().size() > 0)
+        LOG(Info, "No suitable address from switchboard. Using switchboard websocket connection");
+    else
+        LOG(Info, "Using switchboard websocket connection to connect to server.");
     return true;
 }
 

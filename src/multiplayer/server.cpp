@@ -48,7 +48,7 @@ bool Server::listen(int port_nr)
     return true;
 }
 
-bool Server::listenOnSwitchboard(const string& hostname, int port, const string& server_name)
+bool Server::listenOnSwitchboard(const string& hostname, int port, const string& server_name, bool list_as_public_server)
 {
     json11::Json::array address;
     if (new_connection_listener.isListening())
@@ -61,7 +61,7 @@ bool Server::listenOnSwitchboard(const string& hostname, int port, const string&
         {"game_name", game_name.c_str()},
         {"game_version", int(game_version)},
         {"secret_hash", "NO"},
-        {"public", true},
+        {"public", list_as_public_server},
         {"address", address},
         {"port", local_port},
     }};
