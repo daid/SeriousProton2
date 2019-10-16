@@ -54,10 +54,10 @@ bool Server::listenOnSwitchboard(const string& hostname, int port, const string&
     if (new_connection_listener.isListening())
     {
         for(auto a : io::network::Address::getLocalAddress().getHumanReadable())
-            address.push_back(a);
+            address.push_back(a.c_str());
     }
     json11::Json json = json11::Json::object{{
-        {"name", server_name},
+        {"name", server_name.c_str()},
         {"game_name", game_name.c_str()},
         {"game_version", int(game_version)},
         {"secret_hash", "NO"},
@@ -69,23 +69,35 @@ bool Server::listenOnSwitchboard(const string& hostname, int port, const string&
     request.setHeader("Content-Type", "application/json");
     auto response = request.post("/game/register", json.dump());
     if (response.status != 200)
+    {
+        LOG(Warning, "Error contacting switchboard server:", response.status);
         return false;
+    }
     std::string err;
     json11::Json response_json = json11::Json::parse(response.body, err);
     if (err != "")
+    {
+        LOG(Warning, "Failed to decode json response from switchboard server:", err);
         return false;
+    }
     switchboard_key = response_json["key"].string_value();
     switchboard_secret = response_json["secret"].string_value();
     if (switchboard_key == "" || switchboard_secret == "")
+    {
+        LOG(Warning, "No key/secret from switchboard.");
         return false;
+    }
 
     switchboard_connection.setHeader("Game-Key", switchboard_key);
     switchboard_connection.setHeader("Game-Secret", switchboard_secret);
     if (!switchboard_connection.connect(hostname, port, "/game/master"))
+    {
+        LOG(Warning, "Failed to make initial switchboard websocket connection...");
         return false;
+    }
     switchboard_hostname = hostname;
     switchboard_port = port;
-    LOG(Debug, "Registered on switchboard, key:", switchboard_key);
+    LOG(Info, "Registered on switchboard, key:", switchboard_key);
     return true;
 }
 
@@ -242,7 +254,7 @@ void Server::onUpdate(float delta)
                 case PacketIDs::request_authentication:
                     {
                         uint64_t client_magic = 0;
-                        string client_game_name = 0;
+                        string client_game_name;
                         uint32_t client_game_version = 0;
                         packet.read(client_magic, client_game_name, client_game_version);
 

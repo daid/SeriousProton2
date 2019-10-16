@@ -191,6 +191,8 @@ bool Websocket::receive(io::DataBuffer& data_buffer)
         buffer.resize(buffer.size() + received_size);
         memcpy(&buffer[buffer.size()] - received_size, receive_buffer, received_size);
     }
+    if (!socket.isConnected())
+        state = State::Disconnected;
 
     switch(state)
     {
@@ -199,7 +201,7 @@ bool Websocket::receive(io::DataBuffer& data_buffer)
     case State::Connecting:{
         string buffer_str = string(reinterpret_cast<const char*>(buffer.data()), buffer.size());
         int headers_end = buffer_str.find("\r\n\r\n");
-        if (headers_end)
+        if (headers_end > -1)
         {
             std::vector<string> header_data = buffer_str.substr(0, headers_end).split("\r\n");
             buffer.erase(buffer.begin(), buffer.begin() + headers_end + 4);

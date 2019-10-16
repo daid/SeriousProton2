@@ -150,6 +150,7 @@ TcpSocket& TcpSocket::operator=(TcpSocket&& socket)
     socket.handle = -1;
     socket.send_queue.clear();
     socket.receive_buffer.clear();
+    socket.received_size = 0;
     socket.ssl_handle = nullptr;
 
     return *this;

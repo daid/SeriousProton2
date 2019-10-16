@@ -61,9 +61,9 @@ bool Client::connectBySwitchboard(const string& hostname, int port_nr, const str
             return true;
         }
     }
-    LOG(Info, "No suitable address from switchboard archieved. Using switchboard websocket connection");
     if (!websocket.connect(hostname, port_nr, "/game/connect/" + key))
         return false;
+    LOG(Info, "No suitable address from switchboard archieved. Using switchboard websocket connection");
     return true;
 }
 
