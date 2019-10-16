@@ -43,20 +43,27 @@ bool Server::listen(int port_nr)
         LOG(Error, "Failed to listen on port: ", port_nr);
         return false;
     }
+    local_port = port_nr;
     new_connection_listener.setBlocking(false);
     return true;
 }
 
-bool Server::listenOnSwitchboard(const string& hostname, int port)
+bool Server::listenOnSwitchboard(const string& hostname, int port, const string& server_name)
 {
+    json11::Json::array address;
+    if (new_connection_listener.isListening())
+    {
+        for(auto a : io::network::Address::getLocalAddress().getHumanReadable())
+            address.push_back(a);
+    }
     json11::Json json = json11::Json::object{{
-        {"name", "server_name"},
+        {"name", server_name},
         {"game_name", game_name.c_str()},
         {"game_version", int(game_version)},
         {"secret_hash", "NO"},
         {"public", true},
-        {"address", json11::Json::array{}},
-        {"port", 0},
+        {"address", address},
+        {"port", local_port},
     }};
     io::http::Request request(hostname, port);
     request.setHeader("Content-Type", "application/json");

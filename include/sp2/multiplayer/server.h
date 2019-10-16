@@ -22,7 +22,7 @@ public:
     ~Server();
 
     bool listen(int port_nr);
-    bool listenOnSwitchboard(const string& hostname, int port);
+    bool listenOnSwitchboard(const string& hostname, int port, const string& server_name);
 
     virtual uint32_t getClientId() override;
 private:
@@ -52,11 +52,12 @@ private:
             websocket.close();
         }
     };
+    int local_port = 0;
     string game_name;
     uint32_t game_version;
 
     string switchboard_hostname;
-    int switchboard_port;
+    int switchboard_port = 0;
     string switchboard_key;
     string switchboard_secret;
 
