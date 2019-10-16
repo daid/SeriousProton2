@@ -202,6 +202,7 @@ bool TcpSocket::connectSSL(const Address& host, int port)
     if (!SSL_new)
     {
         LOG(Warning, "Failed to connect SSL socket due to missing libssl/libcrypto v1.1");
+        close();
         return false;
     }
     
