@@ -76,6 +76,8 @@ bool Server::listenOnSwitchboard(const string& hostname, int port)
     switchboard_connection.setHeader("Game-Secret", switchboard_secret);
     if (!switchboard_connection.connect(hostname, port, "/game/master"))
         return false;
+    switchboard_hostname = hostname;
+    switchboard_port = port;
     LOG(Debug, "Registered on switchboard, key:", switchboard_key);
     return true;
 }
@@ -186,7 +188,7 @@ void Server::onUpdate(float delta)
         next_client_id ++;
         client.state = ClientInfo::State::WaitingForAuthentication;
         io::DataBuffer packet(PacketIDs::request_authentication, PacketIDs::magic_sp2_value);
-        client.socket.send(packet);
+        client.send(packet);
     }
     
     if (switchboard_connection.isConnecting() || switchboard_connection.isConnected())
@@ -194,14 +196,34 @@ void Server::onUpdate(float delta)
         sp::string msg;
         if (switchboard_connection.receive(msg))
         {
-            //TODO: New connection trough the switchboard
+            LOG(Info, "Accepted new connection from switchboard");
+
+            clients.emplace_back();
+            ClientInfo& client = clients.back();
+            client.websocket = std::move(switchboard_connection);
+            client.client_id = next_client_id;
+            client.current_ping_delay = 0.0;
+            next_client_id ++;
+            client.state = ClientInfo::State::WaitingForAuthentication;
+            io::DataBuffer packet(PacketIDs::request_authentication, PacketIDs::magic_sp2_value);
+            client.send(packet);
+        }
+    }
+    else if (!switchboard_hostname.empty())
+    {
+        switchboard_connection.setHeader("Game-Key", switchboard_key);
+        switchboard_connection.setHeader("Game-Secret", switchboard_secret);
+        if (!switchboard_connection.connect(switchboard_hostname, switchboard_port, "/game/master"))
+        {
+            LOG(Warning, "Failed to reconnect to switchboard server");
+            switchboard_hostname = "";
         }
     }
 
     for(auto client = clients.begin(); client != clients.end(); )
     {
         io::DataBuffer packet;
-        while(client->socket.receive(packet))
+        while(client->socket.receive(packet) || client->websocket.receive(packet))
         {
             uint8_t packet_id = 0;
             packet.read(packet_id);
@@ -220,17 +242,17 @@ void Server::onUpdate(float delta)
                         if (client_magic != PacketIDs::magic_sp2_value)
                         {
                             LOG(Warning, "Client magic value mismatch. Disconnecting...");
-                            client->socket.close();
+                            client->close();
                         }
                         else if (client_game_name != game_name)
                         {
                             LOG(Warning, "Client running different game. Disconnecting...");
-                            client->socket.close();
+                            client->close();
                         }
                         else if (client_game_version != game_version)
                         {
                             LOG(Warning, "Client running different game version. Disconnecting...");
-                            client->socket.close();
+                            client->close();
                         }
                         else
                         {
@@ -299,7 +321,7 @@ void Server::onUpdate(float delta)
                 break;
             }
         }
-        if (!client->socket.isConnected())
+        if (!client->socket.isConnected() && !client->websocket.isConnected())
         {
             LOG(Info, "Client connection closed on server");
             client = clients.erase(client);
@@ -318,7 +340,7 @@ void Server::onUpdate(float delta)
         {
             io::DataBuffer ping_packet;
             ping_packet.write(PacketIDs::alive, client.current_ping_delay, now.count());
-            client.socket.send(ping_packet);
+            client.send(ping_packet);
         }
     }
 }

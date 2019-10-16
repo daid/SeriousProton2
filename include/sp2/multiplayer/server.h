@@ -30,6 +30,7 @@ private:
     {
     public:
         io::network::TcpSocket socket;
+        io::http::Websocket websocket;
         uint32_t client_id;
         float current_ping_delay;
         enum class State
@@ -42,11 +43,20 @@ private:
         void send(const io::DataBuffer& packet)
         {
             socket.send(packet);
+            websocket.send(packet);
+        }
+
+        void close()
+        {
+            socket.close();
+            websocket.close();
         }
     };
     string game_name;
     uint32_t game_version;
 
+    string switchboard_hostname;
+    int switchboard_port;
     string switchboard_key;
     string switchboard_secret;
 

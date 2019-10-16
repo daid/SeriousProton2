@@ -47,6 +47,7 @@ Websocket& Websocket::operator=(Websocket&& other)
     socket = std::move(other.socket);
     buffer = std::move(other.buffer);
     received_fragment = std::move(other.received_fragment);
+    headers = std::move(other.headers);
     other.close();
     return *this;
 }
