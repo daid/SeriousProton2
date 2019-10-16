@@ -71,10 +71,10 @@ bool Server::listenOnSwitchboard(const string& hostname, int port)
     switchboard_secret = response_json["secret"].string_value();
     if (switchboard_key == "" || switchboard_secret == "")
         return false;
-    
+
     switchboard_connection.setHeader("Game-Key", switchboard_key);
     switchboard_connection.setHeader("Game-Secret", switchboard_secret);
-    if (!switchboard_connection.connect("ws://" + hostname + ":" + string(port) + "/game/master"))
+    if (!switchboard_connection.connect(hostname, port, "/game/master"))
         return false;
     LOG(Debug, "Registered on switchboard, key:", switchboard_key);
     return true;

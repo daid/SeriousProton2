@@ -13,6 +13,13 @@ namespace http {
 class Websocket : public sp::NonCopyable
 {
 public:
+    enum class Scheme
+    {
+        Auto,
+        Http,
+        Https
+    };
+
     Websocket();
     Websocket(Websocket&& other);
     ~Websocket();
@@ -24,6 +31,7 @@ public:
     ///     Returns true when the initial connection is done. But actual protocol negotiation is still happening.
     ///     isConnected will become true when negotiation is done.
     bool connect(const string& url);
+    bool connect(const string& hostname, int port, const string& path, Scheme scheme=Scheme::Auto);
     void close();
 
     void setHeader(const string& key, const string& value);

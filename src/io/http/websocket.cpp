@@ -47,6 +47,7 @@ Websocket& Websocket::operator=(Websocket&& other)
     socket = std::move(other.socket);
     buffer = std::move(other.buffer);
     received_fragment = std::move(other.received_fragment);
+    other.close();
     return *this;
 }
 
@@ -57,13 +58,17 @@ void Websocket::setHeader(const string& key, const string& value)
 
 bool Websocket::connect(const string& url)
 {
-    state = State::Disconnected;
+    close();
 
+    Scheme scheme = Scheme::Http;
     int scheme_length = 5;
     if (!url.startswith("ws://") && !url.startswith("wss://"))
         return false;
     if (url.startswith("wss://"))
+    {
         scheme_length = 6;
+        scheme = Scheme::Https;
+    }
     int end_of_hostname = url.find("/", scheme_length);
     string hostname = url.substr(scheme_length, end_of_hostname);
     int port = 80;
@@ -72,7 +77,19 @@ bool Websocket::connect(const string& url)
         port = sp::stringutil::convert::toInt(hostname.substr(hostname.find(":") + 1));
         hostname = hostname.substr(0, hostname.find(":"));
     }
-    if (url.startswith("wss://"))
+    string path = url.substr(end_of_hostname);
+
+    return connect(hostname, port, path, scheme);
+}
+
+bool Websocket::connect(const string& hostname, int port, const string& path, Scheme scheme)
+{
+    close();
+
+    if (scheme == Scheme::Auto)
+        scheme = port == 443 ? Scheme::Https : Scheme::Http;
+
+    if (scheme == Scheme::Https)
     {
         if (!socket.connectSSL(sp::io::network::Address(hostname), port))
             return false;
@@ -82,7 +99,7 @@ bool Websocket::connect(const string& url)
         if (!socket.connect(sp::io::network::Address(hostname), port))
             return false;
     }
-    string path = url.substr(end_of_hostname);
+
     for(int n=0;n<16;n++)
         websock_key += char(sp::irandom(0, 255));
     websock_key = sp::stringutil::base64::encode(websock_key);
@@ -109,6 +126,8 @@ void Websocket::close()
 {
     socket.close();
     state = State::Disconnected;
+    buffer.clear();
+    received_fragment.clear();
 }
 
 bool Websocket::isConnected()
