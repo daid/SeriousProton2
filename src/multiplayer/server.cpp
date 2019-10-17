@@ -51,7 +51,7 @@ bool Server::listen(int port_nr)
 bool Server::listenOnSwitchboard(const string& hostname, int port, const string& server_name, bool list_as_public_server)
 {
     json11::Json::array address;
-    if (new_connection_listener.isListening())
+    if (new_connection_listener.isListening() && local_port > 0)
     {
         for(auto a : io::network::Address::getLocalAddress().getHumanReadable())
             address.push_back(a.c_str());
