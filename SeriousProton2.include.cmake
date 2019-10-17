@@ -213,7 +213,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
             set(SINGLE_EXECUTABLE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.single.exe")
             add_custom_command(
                 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
-                COMMAND "rm" ARGS "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
+                COMMAND "rm" ARGS "-rf" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
                 COMMAND "zip" ARGS "-r" "-D" "-9" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip" .
                 WORKING_DIRECTORY "${SP2_RESOURCE_PATHS}"
                 DEPENDS "$<TARGET_FILE:${SP2_TARGET_NAME}>"
