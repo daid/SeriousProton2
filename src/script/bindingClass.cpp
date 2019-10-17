@@ -22,7 +22,7 @@ static int updateCallback(lua_State* L)
     return 0;
 }
 
-void ScriptBindingClass::bind(sp::string name, sp::script::Callback& callback)
+void ScriptBindingClass::bind(const string& name, sp::script::Callback& callback)
 {
     lua_pushlightuserdata(L, &callback);
     lua_pushvalue(L, object_table_index); //push the table of this object

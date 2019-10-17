@@ -119,9 +119,9 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
     return false;
 }
 
-bool Image::saveToFile(sp::string filename)
+bool Image::saveToFile(const string& filename)
 {
-    sp::string ext = filename.substr(filename.rfind(".") + 1).lower();
+    string ext = filename.substr(filename.rfind(".") + 1).lower();
     
     if (ext == "png")
         return stbi_write_png(filename.c_str(), size.x, size.y, 4, pixels.data(), size.x * 4) != 0;

@@ -9,7 +9,7 @@ lua_State* global_lua_state;
 
 static int luaLogFunction(lua_State* L)
 {
-    sp::string log_line;
+    string log_line;
     int count = lua_gettop(L);  /* number of arguments */
     lua_getglobal(L, "tostring");
     for (int index=1; index<=count; index++)

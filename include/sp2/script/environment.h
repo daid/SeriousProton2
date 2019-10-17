@@ -51,7 +51,7 @@ public:
     }
     
     bool load(const string& resource_name);
-    bool load(sp::io::ResourceStreamPtr resource);
+    bool load(io::ResourceStreamPtr resource);
     bool run(const string& code);
     CoroutinePtr runCoroutine(const string& code);
     
@@ -125,7 +125,7 @@ public:
         return coroutine;
     }
 
-    const sp::string& getLastError()
+    const string& getLastError()
     {
         return last_error;
     }
@@ -151,7 +151,7 @@ private:
     }
     
     lua_State* lua;
-    sp::string last_error;
+    string last_error;
     AllocInfo alloc_info;
 };
 

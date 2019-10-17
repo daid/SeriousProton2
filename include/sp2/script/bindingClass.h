@@ -14,7 +14,7 @@ class ScriptBindingObject;
 class ScriptBindingClass
 {
 public:
-    template<class TYPE, typename RET, typename... ARGS> void bind(sp::string name, RET(TYPE::*func)(ARGS...))
+    template<class TYPE, typename RET, typename... ARGS> void bind(const string& name, RET(TYPE::*func)(ARGS...))
     {
         typedef RET(TYPE::*FT)(ARGS...);
         
@@ -26,9 +26,9 @@ public:
         lua_setfield(L, function_table_index, name.c_str());
     }
 
-    void bind(sp::string name, sp::script::Callback& callback);
+    void bind(const string& name, sp::script::Callback& callback);
     
-    template<class TYPE> void bindProperty(const sp::string& name, TYPE& t)
+    template<class TYPE> void bindProperty(const string& name, TYPE& t)
     {
         lua_newtable(L);
         lua_pushlightuserdata(L, &t);
@@ -40,7 +40,7 @@ public:
         lua_setfield(L, function_table_index, name.c_str());
     }
 
-    template<class OBJECT_TYPE, typename PROPERTY_TYPE> void bindProperty(const sp::string& name, PROPERTY_TYPE(OBJECT_TYPE::*getter)(), void(OBJECT_TYPE::*setter)(PROPERTY_TYPE))
+    template<class OBJECT_TYPE, typename PROPERTY_TYPE> void bindProperty(const string& name, PROPERTY_TYPE(OBJECT_TYPE::*getter)(), void(OBJECT_TYPE::*setter)(PROPERTY_TYPE))
     {
         typedef PROPERTY_TYPE(OBJECT_TYPE::*GET_FT)();
         typedef void(OBJECT_TYPE::*SET_FT)(PROPERTY_TYPE);

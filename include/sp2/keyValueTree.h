@@ -12,7 +12,7 @@ class KeyValueTreeNode
 {
 public:
     KeyValueTreeNode() {}
-    KeyValueTreeNode(sp::string id) : id(id) {}
+    KeyValueTreeNode(const string& id) : id(id) {}
 
     const KeyValueTreeNode* findId(const string& id) const;
     KeyValueTreeNode* findId(const string& id);

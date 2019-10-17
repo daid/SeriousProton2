@@ -35,9 +35,9 @@ Request::Response Request::request(const string& method, const string& path, con
         if (scheme == Scheme::Auto)
             scheme = ((port == 443) ? Scheme::Https : Scheme::Http);
         if (scheme == Scheme::Http)
-            socket.connect(sp::io::network::Address(headers["Host"]), port);
+            socket.connect(io::network::Address(headers["Host"]), port);
         else
-            socket.connectSSL(sp::io::network::Address(headers["Host"]), port);
+            socket.connectSSL(io::network::Address(headers["Host"]), port);
         socket.setTimeout(5000);
     }
     Response response;
@@ -46,7 +46,7 @@ Request::Response Request::request(const string& method, const string& path, con
     for(auto& h : headers)
         request += h.first + ": " + h.second + "\r\n";
     if (data.length() > 0)
-        request += "Content-Length: " + sp::string(int(data.length())) + "\r\n";
+        request += "Content-Length: " + string(int(data.length())) + "\r\n";
     request += "\r\n";
 
     socket.send(request.data(), request.length());

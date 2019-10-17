@@ -314,7 +314,7 @@ void initOpenGL()
 
 #ifdef SP2_ENABLE_OPENGL_TRACING
 namespace sp {
-void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, sp::string parameters)
+void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, const string& parameters)
 {
     int error = glGetError();
 #if defined(ANDROID) || defined(__EMSCRIPTEN__)

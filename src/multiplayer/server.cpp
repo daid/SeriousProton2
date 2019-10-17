@@ -212,7 +212,7 @@ void Server::onUpdate(float delta)
     
     if (switchboard_connection.isConnecting() || switchboard_connection.isConnected())
     {
-        sp::string msg;
+        string msg;
         if (switchboard_connection.receive(msg))
         {
             LOG(Info, "Accepted new connection from switchboard");

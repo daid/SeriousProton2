@@ -178,7 +178,7 @@ AtlasManager::Result AtlasManager::add(const string& resource_name, Image&& imag
         cached_items[resource_name] = result;
         return result;
     }
-    AtlasTexture* texture = new AtlasTexture("AtlasManager:" + sp::string(int(textures.size())), texture_size);
+    AtlasTexture* texture = new AtlasTexture("AtlasManager:" + string(int(textures.size())), texture_size);
     result.texture = texture;
     result.rect = texture->add(std::move(image), default_margin);
     textures.push_back(texture);

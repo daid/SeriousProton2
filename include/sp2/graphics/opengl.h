@@ -19,12 +19,12 @@ void initOpenGL();
 #ifdef SP2_ENABLE_OPENGL_TRACING
 #include <sp2/string.h>
 namespace sp {
-void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, sp::string parameters);
-static inline sp::string traceOpenGLCallParams() { return ""; }
-static inline sp::string traceOpenGLCallParam(int n) { return sp::string(n); }
-static inline sp::string traceOpenGLCallParam(const void* ptr) { return "[ptr]"; }
-template<typename A1> sp::string traceOpenGLCallParams(const A1& a) { return traceOpenGLCallParam(a); }
-template<typename A1, typename... ARGS> sp::string traceOpenGLCallParams(const A1& a, const ARGS&... args) { return traceOpenGLCallParam(a) + ", " + traceOpenGLCallParams(args...); }
+void traceOpenGLCall(const char* function_name, const char* source_file, const char* source_function, int source_line_number, const string& parameters);
+static inline string traceOpenGLCallParams() { return ""; }
+static inline string traceOpenGLCallParam(int n) { return string(n); }
+static inline string traceOpenGLCallParam(const void* ptr) { return "[ptr]"; }
+template<typename A1> string traceOpenGLCallParams(const A1& a) { return traceOpenGLCallParam(a); }
+template<typename A1, typename... ARGS> string traceOpenGLCallParams(const A1& a, const ARGS&... args) { return traceOpenGLCallParam(a) + ", " + traceOpenGLCallParams(args...); }
 }//namespace sp
 
 #define glActiveTexture(...) do { glActiveTexture(__VA_ARGS__); sp::traceOpenGLCall("glActiveTexture", __FILE__, __PRETTY_FUNCTION__, __LINE__, sp::traceOpenGLCallParams(__VA_ARGS__)); } while(0)

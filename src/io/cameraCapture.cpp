@@ -85,10 +85,10 @@ public:
 
 bool CameraCapture::init(int index)
 {
-    data->fd = ::open(("/dev/video" + sp::string(index)).c_str(), O_RDWR);
+    data->fd = ::open(("/dev/video" + string(index)).c_str(), O_RDWR);
     if (data->fd == -1)
     {
-        LOG(Warning, "Failed to open /dev/video" + sp::string(index));
+        LOG(Warning, "Failed to open /dev/video" + string(index));
         return false;
     }
     

@@ -6,21 +6,21 @@
 namespace sp {
 namespace io {
 
-bool isFile(const sp::string& path);
-bool isDirectory(const sp::string& path);
+bool isFile(const string& path);
+bool isDirectory(const string& path);
 /** Make a directory, including all base directories.
     Returns true when the directory was successfully made, or if the directory already exists */
-bool makeDirectory(const sp::string& path);
-sp::string dirname(const sp::string& path);
-sp::string basename(const sp::string& path);
-std::vector<sp::string> listFiles(const sp::string& path);
+bool makeDirectory(const string& path);
+string dirname(const string& path);
+string basename(const string& path);
+std::vector<string> listFiles(const string& path);
 
-bool saveFileContents(const sp::string& filename, const sp::string& contents);
-sp::string loadFileContents(const sp::string& filename);
+bool saveFileContents(const string& filename, const string& contents);
+string loadFileContents(const string& filename);
 
 // Get the path where configuration data can be stored.
 //  Note that this caches the first call, if you change the application name mid run, it will still return the same path.
-const sp::string& preferencePath(const sp::string& application_name);
+const string& preferencePath(const string& application_name);
 
 }//namespace io
 }//namespace sp

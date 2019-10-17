@@ -75,7 +75,7 @@ bool Websocket::connect(const string& url)
     int port = 80;
     if (hostname.find(":") != -1)
     {
-        port = sp::stringutil::convert::toInt(hostname.substr(hostname.find(":") + 1));
+        port = stringutil::convert::toInt(hostname.substr(hostname.find(":") + 1));
         hostname = hostname.substr(0, hostname.find(":"));
     }
     string path = url.substr(end_of_hostname);
@@ -92,18 +92,18 @@ bool Websocket::connect(const string& hostname, int port, const string& path, Sc
 
     if (scheme == Scheme::Https)
     {
-        if (!socket.connectSSL(sp::io::network::Address(hostname), port))
+        if (!socket.connectSSL(io::network::Address(hostname), port))
             return false;
     }
     else
     {
-        if (!socket.connect(sp::io::network::Address(hostname), port))
+        if (!socket.connect(io::network::Address(hostname), port))
             return false;
     }
 
     for(int n=0;n<16;n++)
-        websock_key += char(sp::irandom(0, 255));
-    websock_key = sp::stringutil::base64::encode(websock_key);
+        websock_key += char(irandom(0, 255));
+    websock_key = stringutil::base64::encode(websock_key);
     string request = "GET " + path + " HTTP/1.1\r\n"
         "Host: " + hostname + "\r\n"
         "Connection: Upgrade\r\n"

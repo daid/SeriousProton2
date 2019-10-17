@@ -19,7 +19,7 @@ public:
         @param double_buffered: Set this to true if rendering is required while reading from this texture.
             This will effectively create 2 textures, one for reading and writting, and flips the goals around each frame.
      */
-    RenderTexture(sp::string name, Vector2i size, bool double_buffered);
+    RenderTexture(const string& name, Vector2i size, bool double_buffered);
     virtual ~RenderTexture();
     
     //Get the texture for rendering to other targets.

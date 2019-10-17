@@ -8,7 +8,7 @@
 namespace sp {
 namespace io {
 
-static int lastPathSeperator(const sp::string& path)
+static int lastPathSeperator(const string& path)
 {
     for(int n = path.length() - 1; n > 0; n--)
     {
@@ -23,7 +23,7 @@ static int lastPathSeperator(const sp::string& path)
     return -1;
 }
 
-bool isFile(const sp::string& path)
+bool isFile(const string& path)
 {
     struct stat s;
     if (stat(path.c_str(), &s))
@@ -31,7 +31,7 @@ bool isFile(const sp::string& path)
     return S_ISREG(s.st_mode);
 }
 
-bool isDirectory(const sp::string& path)
+bool isDirectory(const string& path)
 {
     struct stat s;
     if (stat(path.c_str(), &s))
@@ -39,14 +39,14 @@ bool isDirectory(const sp::string& path)
     return S_ISDIR(s.st_mode);
 }
 
-bool makeDirectory(const sp::string& path)
+bool makeDirectory(const string& path)
 {
     if (isDirectory(path))
         return true;
     int n = lastPathSeperator(path);
     if (n > 0)
     {
-        sp::string base = path.substr(0, n);
+        string base = path.substr(0, n);
         if (!makeDirectory(base))
             return false;
     }
@@ -57,7 +57,7 @@ bool makeDirectory(const sp::string& path)
 #endif
 }
 
-sp::string dirname(const sp::string& path)
+string dirname(const string& path)
 {
     int n = lastPathSeperator(path);
     if (n < 0)
@@ -65,15 +65,15 @@ sp::string dirname(const sp::string& path)
     return path.substr(0, n);
 }
 
-sp::string basename(const sp::string& path)
+string basename(const string& path)
 {
     int n = lastPathSeperator(path);
     return path.substr(n + 1);
 }
 
-std::vector<sp::string> listFiles(const sp::string& path)
+std::vector<string> listFiles(const string& path)
 {
-    std::vector<sp::string> result;
+    std::vector<string> result;
     DIR* dir = opendir(path.c_str());
     if (!dir)
         return result;
@@ -89,7 +89,7 @@ std::vector<sp::string> listFiles(const sp::string& path)
     return result;
 }
 
-bool saveFileContents(const sp::string& filename, const sp::string& contents)
+bool saveFileContents(const string& filename, const string& contents)
 {
     FILE* f = fopen(filename.c_str(), "wb");
     if (!f)
@@ -104,7 +104,7 @@ bool saveFileContents(const sp::string& filename, const sp::string& contents)
     return true;
 }
 
-sp::string loadFileContents(const sp::string& filename)
+string loadFileContents(const string& filename)
 {
     FILE* f = fopen(filename.c_str(), "rb");
     if (!f)
@@ -121,9 +121,9 @@ sp::string loadFileContents(const sp::string& filename)
     return result;
 }
 
-const sp::string& preferencePath(const sp::string& application_name)
+const string& preferencePath(const string& application_name)
 {
-    static sp::string preference_path;
+    static string preference_path;
 
     if (preference_path.length() == 0)
     {

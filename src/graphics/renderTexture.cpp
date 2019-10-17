@@ -4,7 +4,7 @@
 
 namespace sp {
 
-RenderTexture::RenderTexture(sp::string name, Vector2i size, bool double_buffered)
+RenderTexture::RenderTexture(const string& name, Vector2i size, bool double_buffered)
 : Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size)
 {
     flipped = false;

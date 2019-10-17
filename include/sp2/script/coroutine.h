@@ -41,7 +41,7 @@ public:
         return false;
     }
 
-    const sp::string& getLastError()
+    const string& getLastError()
     {
         return last_error;
     }

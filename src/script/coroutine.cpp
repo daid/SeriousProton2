@@ -47,7 +47,7 @@ int Coroutine::getCurrentLineNumber()
     return -1;
 }
 
-sp::string Coroutine::getCurrentSource()
+string Coroutine::getCurrentSource()
 {
     if (!L)
         return "";

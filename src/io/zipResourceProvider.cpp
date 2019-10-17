@@ -282,7 +282,7 @@ ZipResourceProvider::ZipResourceProvider(const string& zip_filename)
         eocd.central_directory_size -= central_directory.extra_field_length;
         eocd.central_directory_size -= central_directory.comment_length;
 
-        sp::string filename;
+        string filename;
         filename.resize(central_directory.filename_length);
         if (fread(&filename[0], central_directory.filename_length, 1, f) != 1)
         {

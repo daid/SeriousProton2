@@ -27,7 +27,7 @@ public:
     
     //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
     //Returns true on success.
-    bool saveToFile(sp::string filename);
+    bool saveToFile(const string& filename);
     
     void clear();
     

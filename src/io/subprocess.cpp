@@ -26,7 +26,7 @@ public:
 #endif
 };
 
-Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_directory)
+Subprocess::Subprocess(std::vector<string> command, const string& working_directory)
 {
     data = nullptr;
 
@@ -39,8 +39,8 @@ Subprocess::Subprocess(std::vector<sp::string> command, sp::string working_direc
     
     startup_info.cb = sizeof(startup_info);
     
-    sp::string command_string;
-    for(sp::string& part : command)
+    string command_string;
+    for(string& part : command)
     {
         if (command_string.length() > 0)
             command_string += " ";

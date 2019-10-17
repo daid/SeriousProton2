@@ -175,7 +175,7 @@ void SpriteAnimation::Data::load(const string& resource_name)
             for(int n=0; n<frame_count; n++)
                 frames.push_back(n);
         }
-        std::vector<sp::string> flip = data["flip"].upper().split(",");
+        std::vector<string> flip = data["flip"].upper().split(",");
         while(flip.size() < frames.size())
         {
             flip.push_back(flip[0]);
