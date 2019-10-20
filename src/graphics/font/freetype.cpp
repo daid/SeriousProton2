@@ -141,7 +141,7 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
                 const uint8_t* src_pixels = bitmap.buffer;
                 //We make a full white image, and then copy the alpha from the freetype render
                 std::vector<uint32_t> image_pixels;
-                image_pixels.resize(bitmap.width * bitmap.rows);
+                image_pixels.resize(bitmap.width * bitmap.rows, 0xffffffff);
                 if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
                 {
                     sp2assert(false, "TODO");
