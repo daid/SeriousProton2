@@ -222,6 +222,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
                 OUTPUT "${SINGLE_EXECUTABLE_NAME}"
                 COMMAND "cat" ARGS "$<TARGET_FILE:${SP2_TARGET_NAME}>" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip" ">" "${SINGLE_EXECUTABLE_NAME}"
                 COMMAND "zip" ARGS "-A" "${SINGLE_EXECUTABLE_NAME}"
+                COMMAND "chmod" ARGS "+x" "${SINGLE_EXECUTABLE_NAME}"
                 DEPENDS "$<TARGET_FILE:${SP2_TARGET_NAME}>" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
             )
             add_custom_target("${SP2_TARGET_NAME}.single" ALL DEPENDS "${SINGLE_EXECUTABLE_NAME}")
