@@ -23,7 +23,10 @@ void unhandledExceptionHandler(const UnhandledExceptionInfo& info)
 
     for(const AddressInfo& address_info : info.stack)
     {
-        LOG(Error, address_info.address, address_info.module.substr(address_info.module.replace("\\", "/").rfind("/") + 1), "@", reinterpret_cast<void*>(address_info.module_offset), "=", address_info.symbol, "+", address_info.symbol_offset);
+        if (address_info.module_offset != -1)
+            LOG(Error, address_info.address, address_info.module.substr(address_info.module.replace("\\", "/").rfind("/") + 1), "@", reinterpret_cast<void*>(address_info.module_offset), "=", address_info.symbol, "+", address_info.symbol_offset);
+        else
+            LOG(Error, address_info.address, address_info.module.substr(address_info.module.replace("\\", "/").rfind("/") + 1), "=", address_info.symbol, "+", address_info.symbol_offset);
     }
     LOG(Error, "--------------------------------------------------");
 
