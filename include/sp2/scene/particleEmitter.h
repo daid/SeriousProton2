@@ -2,29 +2,111 @@
 #define SP2_SCENE_PARTICLE_EMITTER_H
 
 #include <sp2/scene/node.h>
+#include <sp2/tween.h>
+
 
 namespace sp {
 
 class ParticleEmitter : public Node
 {
 public:
+    class Parameters;
+
+    class Effector : sp::NonCopyable
+    {
+    public:
+        //Apply an effect to a particle. "f" is the lifetime of the particle in the range 0.0-1.0
+        virtual void effect(Parameters& particle, float delta_time, float f) = 0;
+    };
+    template<typename T> class KeypointEffector : public Effector
+    {
+    public:
+        KeypointEffector(const T& start_value, const T& end_value)
+        {
+            addKeypoint(0.0f, start_value);
+            addKeypoint(1.0f, end_value);
+        }
+
+        void addKeypoint(float f, const T& value)
+        {
+            keypoints.emplace_back(f, value);
+            std::sort(keypoints.begin(), keypoints.end(), [](const std::pair<float, T>& a, const std::pair<float, T>& b) { return a.first < b.first;} );
+        }
+    protected:
+        T getValue(float f)
+        {
+            if (f < keypoints.front().first)
+                return keypoints.front().second;
+            for(size_t idx=1; idx<keypoints.size(); idx++)
+            {
+                if (f < keypoints[idx].first)
+                    return Tween<T>::linear(f, keypoints[idx-1].first, keypoints[idx].first, keypoints[idx-1].second, keypoints[idx].second);
+            }
+            return keypoints.back().second;
+        }
+    private:
+        std::vector<std::pair<float, T>> keypoints;
+    };
+    class SizeEffector : public KeypointEffector<float>
+    {
+    public:
+        using KeypointEffector<float>::KeypointEffector;
+
+        virtual void effect(Parameters& particle, float delta_time, float f) override
+        {
+            particle.size = getValue(f);
+        }
+    };
+    class ColorEffector : public KeypointEffector<Color>
+    {
+    public:
+        using KeypointEffector<Color>::KeypointEffector;
+
+        virtual void effect(Parameters& particle, float delta_time, float f) override
+        {
+            particle.color = getValue(f);
+        }
+    };
+    class VelocityScaleEffector : public KeypointEffector<float>
+    {
+    public:
+        using KeypointEffector<float>::KeypointEffector;
+
+        virtual void effect(Parameters& particle, float delta_time, float f) override
+        {
+            particle.velocity *= 1.0f + getValue(f) * delta_time;
+        }
+    };
+    class ConstantAcceleration : public Effector
+    {
+    public:
+        ConstantAcceleration(sp::Vector3f acceleration)
+        : acceleration(acceleration)
+        {
+        }
+
+        virtual void effect(Parameters& particle, float delta_time, float f) override
+        {
+            particle.velocity += acceleration * delta_time;
+        }
+    private:
+        sp::Vector3f acceleration;
+    };
+
     class Parameters
     {
     public:
         Vector3f position;
         Vector3f velocity;
-        Vector3f acceleration;
-        float start_size;
-        float end_size;
-        Color start_color;
-        Color end_color; 
+        float size;
+        Color color;
         float lifetime;
         float time;
 
         Parameters()
-        : position(0, 0, 0), velocity(0, 0, 0), acceleration(0, 0, 0)
-        , start_size(1.0), end_size(1.0)
-        , start_color(1, 1, 1), end_color(0, 0, 0)
+        : position(0, 0, 0), velocity(0, 0, 0)
+        , size(1.0)
+        , color(1, 1, 1)
         , lifetime(1.0), time(0.0)
         {
         }
@@ -51,6 +133,10 @@ public:
         * Smoke: global
     */
     ParticleEmitter(P<Node> parent, int initial_buffer_size=16, Origin origin=Origin::Local);
+    template<typename T, typename... ARGS> void addEffector(ARGS... args)
+    {
+        effectors.emplace_back(std::unique_ptr<Effector>(new T(args...)));
+    }
     
     void emit(const Parameters& parameters);
     
@@ -61,6 +147,7 @@ public:
 private:
     Origin origin;
     std::vector<Parameters> particles;
+    std::vector<std::unique_ptr<Effector>> effectors;
 };
 
 }//namespace sp

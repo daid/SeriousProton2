@@ -44,25 +44,28 @@ void ParticleEmitter::onUpdate(float delta)
     for(auto it = particles.begin(); it != particles.end(); )
     {
         Parameters& particle = *it;
-        
-        particle.velocity += particle.acceleration * delta;
+
+        float f = particle.time / particle.lifetime;
+        for(auto& effector : effectors)
+            effector->effect(particle, delta, f);
+
         particle.position += particle.velocity * delta;
-        
-        float size = Tween<float>::linear(particle.time, 0, particle.lifetime, particle.start_size, particle.end_size);
-        Color color = Tween<Color>::linear(particle.time, 0, particle.lifetime, particle.start_color, particle.end_color);
-        
+
+        float size = particle.size;
+        Color color = particle.color;
+
         indices.emplace_back(vertices.size() + 0);
         indices.emplace_back(vertices.size() + 1);
         indices.emplace_back(vertices.size() + 2);
         indices.emplace_back(vertices.size() + 2);
         indices.emplace_back(vertices.size() + 1);
         indices.emplace_back(vertices.size() + 3);
-        
+
         vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f(-size,-color.a));
         vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f( size,-color.a));
         vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f(-size, color.a));
         vertices.emplace_back(particle.position, sp::Vector3f(color.r, color.g, color.b), sp::Vector2f( size, color.a));
-        
+
         particle.time += delta;
         if (particle.time >= particle.lifetime)
         {
