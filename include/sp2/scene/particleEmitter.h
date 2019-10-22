@@ -26,6 +26,12 @@ public:
             addKeypoint(0.0f, start_value);
             addKeypoint(1.0f, end_value);
         }
+        
+        KeypointEffector(std::initializer_list<std::pair<float, T>> keypoints)
+        {
+            for(auto& it : keypoints)
+                addKeypoint(it.first, it.second);
+        }
 
         void addKeypoint(float f, const T& value)
         {
@@ -65,6 +71,16 @@ public:
         virtual void effect(Parameters& particle, float delta_time, float f) override
         {
             particle.color = getValue(f);
+        }
+    };
+    class AlphaEffector : public KeypointEffector<float>
+    {
+    public:
+        using KeypointEffector<float>::KeypointEffector;
+
+        virtual void effect(Parameters& particle, float delta_time, float f) override
+        {
+            particle.color.a = getValue(f);
         }
     };
     class VelocityScaleEffector : public KeypointEffector<float>
@@ -136,6 +152,11 @@ public:
     template<typename T, typename... ARGS> void addEffector(ARGS... args)
     {
         effectors.emplace_back(std::unique_ptr<Effector>(new T(args...)));
+    }
+
+    void clearEffectors()
+    {
+        effectors.clear();
     }
     
     void emit(const Parameters& parameters);
