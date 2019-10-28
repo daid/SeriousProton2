@@ -48,17 +48,12 @@ void MeshData::render()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_vbo);
     if (dirty)
     {
-        switch(type)
-        {
-        case Type::Static:
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * indices.size(), indices.data(), GL_STATIC_DRAW);
-            break;
-        case Type::Dynamic:
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * indices.size(), indices.data(), GL_DYNAMIC_DRAW);
-            break;
-        }
+        int gl_type = GL_STATIC_DRAW;
+        if (type == Type::Dynamic)
+            gl_type = GL_DYNAMIC_DRAW;
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), gl_type);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * indices.size(), indices.data(), gl_type);
         dirty = false;
     }
 

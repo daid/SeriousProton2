@@ -26,8 +26,14 @@ public:
             addKeypoint(0.0f, start_value);
             addKeypoint(1.0f, end_value);
         }
-        
+
         KeypointEffector(std::initializer_list<std::pair<float, T>> keypoints)
+        {
+            for(auto& it : keypoints)
+                addKeypoint(it.first, it.second);
+        }
+
+        KeypointEffector(const std::vector<std::pair<float, T>>& keypoints)
         {
             for(auto& it : keypoints)
                 addKeypoint(it.first, it.second);
