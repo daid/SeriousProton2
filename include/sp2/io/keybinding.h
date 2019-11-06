@@ -41,6 +41,9 @@ public:
     void startUserRebind();
     bool isUserRebinding();
     
+    static int joystickCount();
+    static int gamepadCount();
+
     static void loadKeybindings(const string& filename);
     static void saveKeybindings(const string& filename);
     

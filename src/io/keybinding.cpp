@@ -236,6 +236,20 @@ bool Keybinding::isUserRebinding()
     return rebinding_key == this;
 }
 
+int Keybinding::joystickCount()
+{
+    return SDL_NumJoysticks() - gamepadCount();
+}
+
+int Keybinding::gamepadCount()
+{
+    int count = 0;
+    for(int n=0; n<SDL_NumJoysticks(); n++)
+        if (SDL_IsGameController(n))
+            count += 1;
+    return count;
+}
+
 void Keybinding::loadKeybindings(const string& filename)
 {
     std::ifstream file(filename);
