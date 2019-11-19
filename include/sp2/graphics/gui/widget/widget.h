@@ -86,6 +86,7 @@ public:
     bool isEnabled();
     bool isFocused();
     void setID(const string& id);
+    const string& getID() { return id; }
 
     sp::Vector2d getRenderSize() { return render_size; }
     
