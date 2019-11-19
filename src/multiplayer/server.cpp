@@ -183,13 +183,19 @@ void Server::onUpdate(float delta)
         if (packet.getDataSize() != zero_data_size)
             sendToAllConnectedClients(packet);
 
-        for(auto& prepared_call : it->second->multiplayer.prepared_calls)
+        for(auto& prepared_call : it->second->multiplayer.server_prepared_calls)
         {
             uint16_t index = 0;
             prepared_call.read(index);
             it->second->multiplayer.replication_calls[index]->doCall(*it->second, prepared_call);
         }
-        it->second->multiplayer.prepared_calls.clear();
+        it->second->multiplayer.server_prepared_calls.clear();
+        for(auto& prepared_call : it->second->multiplayer.client_prepared_calls)
+        {
+            io::DataBuffer packet(PacketIDs::call_on_client, it->first, prepared_call);
+            sendToAllConnectedClients(packet);
+        }
+        it->second->multiplayer.client_prepared_calls.clear();
     }
     
     //Check for new connections.

@@ -97,7 +97,7 @@ public:
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.
     //Called when the game is paused with delta = 0
     virtual void onUpdate(float delta) {}
-    //Event called 30 times per second. Not called when the game is paused.
+    //Event called 60 times per second. Not called when the game is paused.
     virtual void onFixedUpdate() {}
     //Event called when 2 nodes collide. Not called when the game is paused.
     virtual void onCollision(CollisionInfo& info) {}
@@ -147,19 +147,31 @@ public:
         {
             replication_calls.push_back(new multiplayer::ReplicationCallInfo<CLASS, ARGS...>(func));
         }
-        
+
         template<typename CLASS, typename... ARGS> void callOnServer(void(CLASS::*func)(ARGS...), ARGS... args)
         {
             for(unsigned int n=0; n<replication_calls.size(); n++)
             {
                 if (replication_calls[n]->getPtr() == multiplayer::ReplicationCallInfoBase::ReplicationCallInfoBase::BaseFuncPtr(func))
                 {
-                    prepared_calls.emplace_back(uint16_t(n), args...);
+                    server_prepared_calls.emplace_back(uint16_t(n), args...);
                     return;
                 }
             }
         }
-        
+
+        template<typename CLASS, typename... ARGS> void callOnClients(void(CLASS::*func)(ARGS...), ARGS... args)
+        {
+            for(unsigned int n=0; n<replication_calls.size(); n++)
+            {
+                if (replication_calls[n]->getPtr() == multiplayer::ReplicationCallInfoBase::ReplicationCallInfoBase::BaseFuncPtr(func))
+                {
+                    client_prepared_calls.emplace_back(uint16_t(n), args...);
+                    return;
+                }
+            }
+        }
+
         uint64_t getId() const
         {
             return id;
@@ -170,7 +182,8 @@ public:
         uint64_t id;
         std::vector<multiplayer::ReplicationLinkBase*> replication_links;
         std::vector<multiplayer::ReplicationCallInfoBase*> replication_calls;
-        std::vector<io::DataBuffer> prepared_calls;
+        std::vector<io::DataBuffer> server_prepared_calls;
+        std::vector<io::DataBuffer> client_prepared_calls;
         
         friend class ::sp::multiplayer::Server;
         friend class ::sp::multiplayer::Client;

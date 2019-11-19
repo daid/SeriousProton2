@@ -31,6 +31,8 @@ public:
 
     //Packet send from the client to the server to indicate the client wants to call a function on the server.
     static constexpr uint8_t call_on_server = 0x80;
+    //Packet send from the server to the clients to indicate the server wants to call a function on all the clients.
+    static constexpr uint8_t call_on_client = 0x81;
     
     //Alive packet. Empty packet that is being send from the server to indicate that the server is still connected to the client.
     //TCP timeouts will handle disconnecting clients from the server. Clients need to have extra timeout handling.

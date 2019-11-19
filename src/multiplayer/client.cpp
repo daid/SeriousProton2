@@ -167,7 +167,16 @@ void Client::onUpdate(float delta)
                 LOG(Error, "Server send data for scene", scene_name, "but could not find the scene, this most likely will result in missing parents as well.");
             }
             }break;
-
+        case PacketIDs::call_on_client:
+            {
+                uint64_t object_id = 0;
+                uint16_t index = 0;
+                packet.read(object_id, index);
+                P<Node> node = getNode(object_id);
+                if (node && index < node->multiplayer.replication_calls.size())   //Node could have been deleted on the client already.
+                    node->multiplayer.replication_calls[index]->doCall(*node, packet);
+            }
+            break;
         case PacketIDs::alive:
             {
                 float send_timestamp;
@@ -182,12 +191,13 @@ void Client::onUpdate(float delta)
     }
     for(auto it = nodeBegin(); it != nodeEnd(); ++it)
     {
-        for(auto& prepared_call : it->second->multiplayer.prepared_calls)
+        for(auto& prepared_call : it->second->multiplayer.server_prepared_calls)
         {
             io::DataBuffer packet(PacketIDs::call_on_server, it->first, prepared_call);
             send(packet);
         }
-        it->second->multiplayer.prepared_calls.clear();
+        it->second->multiplayer.server_prepared_calls.clear();
+        it->second->multiplayer.client_prepared_calls.clear();
     }
     if (!socket.isConnected() && !websocket.isConnected() && !websocket.isConnecting() && state != State::Disconnected)
     {
