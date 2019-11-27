@@ -209,7 +209,7 @@ public:
     {
         string ret;
 
-        //Reserve the target UnicodeString to the current length plus the length of all the parameters.
+        //Reserve the target String to the current length plus the length of all the parameters.
         //Which should be a good rough estimate for the final UnicodeString length.
         int itemslength = 0;
         for(auto it : mapping)
@@ -218,10 +218,10 @@ public:
         }
         ret.reserve(length() + itemslength);
 
-        //Run through the source UnicodeString, find matching brackets.
+        //Run through the source String, find matching brackets.
         for(unsigned int n=0; n<length(); n++)
         {
-            char c = at(n);
+            char c = this->operator[](n);
             if (c == '{')
             {
                 unsigned int end = n;
@@ -240,7 +240,7 @@ public:
             else if (c == '\\')
             {
                 n++;
-                ret.push_back(at(n));
+                ret.push_back(this->operator[](n));
             }
             else
             {
