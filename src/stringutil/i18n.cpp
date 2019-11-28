@@ -42,7 +42,6 @@ bool load(const string& resource_name)
     uint32_t magic;
     if (stream->read(&magic, sizeof(magic)) != sizeof(magic))
         return false;
-
     if (magic == mo_file_magic || magic == mo_file_magic_swapped)
     {
         bool swap = magic == mo_file_magic_swapped;
@@ -61,10 +60,10 @@ bool load(const string& resource_name)
         length_offset_origonal.resize(header.count * 2);
         length_offset_translated.resize(header.count * 2);
         stream->seek(header.offset_origonal);
-        if (stream->read(length_offset_origonal.data(), length_offset_origonal.size() * sizeof(uint32_t)) != length_offset_origonal.size() * sizeof(uint32_t))
+        if (stream->read(length_offset_origonal.data(), length_offset_origonal.size() * sizeof(uint32_t)) != int(length_offset_origonal.size() * sizeof(uint32_t)))
             return false;
         stream->seek(header.offset_translated);
-        if (stream->read(length_offset_translated.data(), length_offset_translated.size() * sizeof(uint32_t)) != length_offset_translated.size() * sizeof(uint32_t))
+        if (stream->read(length_offset_translated.data(), length_offset_translated.size() * sizeof(uint32_t)) != int(length_offset_translated.size() * sizeof(uint32_t)))
             return false;
         if (swap)
         {
@@ -87,14 +86,65 @@ bool load(const string& resource_name)
             if (origonal.find("\x04") > -1)
                 origonal = origonal.substr(origonal.find("\x04") + 1);
 
-            translations[origonal] = translated;
+            if (!origonal.empty())
+                translations[origonal] = translated;
         }
         return true;
     }
-    stream->seek(0);
-    while(stream->tell() != stream->getSize())
+
+    if (resource_name.endswith(".po"))
     {
-        string line = stream->readLine();
+        string origonal;
+        string translated;
+        string* target = &origonal;
+
+        stream->seek(0);
+        while(stream->tell() != stream->getSize())
+        {
+            string line = stream->readLine().strip();
+            string line_contents;
+            if (line.endswith("\""))
+            {
+                if (line.startswith("msgid \""))
+                {
+                    if (!origonal.empty() && !translated.empty())
+                        translations[origonal] = translated;
+                    origonal = "";
+                    target = &origonal;
+                    line_contents = line.substr(7, -1);
+                }
+                if (line.startswith("msgstr \""))
+                {
+                    translated = "";
+                    target = &translated;
+                    line_contents = line.substr(8, -1);
+                }
+                if (line.startswith("\""))
+                {
+                    line_contents = line.substr(1, -1);
+                }
+                for(size_t n=0; n<line_contents.size(); n++)
+                {
+                    if (line_contents[n] == '\\')
+                    {
+                        switch(line_contents[++n])
+                        {
+                        case 'n': *target += '\n'; break;
+                        case 'r': *target += '\r'; break;
+                        case 't': *target += '\t'; break;
+                        default: *target += line_contents[n]; break;
+                        }
+                    }
+                    else
+                    {
+                        *target += line_contents[n];
+                    }
+                }
+            }
+        }
+        if (!origonal.empty() && !translated.empty())
+            translations[origonal] = translated;
+        return true;
     }
 
     return false;
