@@ -82,6 +82,10 @@ void AudioSource::startAudioSystem()
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
     sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");
     sp2assert(have.channels == 2, "Needs 2 channel audio output.");
+
+    //Check if any audio source was started before we opened our audio device.
+    if (AudioSource::source_list_start)
+        SDL_PauseAudioDevice(sdl_audio_device, 0);
 }
 
 void AudioSource::onAudioCallback(float* stream, int sample_count)
