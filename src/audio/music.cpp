@@ -51,6 +51,8 @@ protected:
     {
         float buffer[sample_count];
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
+        if (vorbis_samples == 0)
+            stb_vorbis_seek_frame(vorbis, 0);
         mix(stream, buffer, vorbis_samples * 2, mix_volume);
     }
 
