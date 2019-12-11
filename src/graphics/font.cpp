@@ -221,10 +221,10 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
             indices.emplace_back(vertices.size() + 3);
             indices.emplace_back(vertices.size() + 1);
 
-            vertices.emplace_back(p0, sp::Vector2f(u0, v0));
-            vertices.emplace_back(p1, sp::Vector2f(u1, v0));
-            vertices.emplace_back(p2, sp::Vector2f(u0, v1));
-            vertices.emplace_back(p3, sp::Vector2f(u1, v1));
+            vertices.emplace_back(p0, sp::Vector3f(0, 0, 1), sp::Vector2f(u0, v0));
+            vertices.emplace_back(p1, sp::Vector3f(0, 0, 1), sp::Vector2f(u1, v0));
+            vertices.emplace_back(p2, sp::Vector3f(0, 0, 1), sp::Vector2f(u0, v1));
+            vertices.emplace_back(p3, sp::Vector3f(0, 0, 1), sp::Vector2f(u1, v1));
         }
     }
 
