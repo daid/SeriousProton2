@@ -15,6 +15,7 @@ public:
     class Effector : sp::NonCopyable
     {
     public:
+        virtual ~Effector() = default;
         //Apply an effect to a particle. "f" is the lifetime of the particle in the range 0.0-1.0
         virtual void effect(Parameters& particle, float delta_time, float f) = 0;
     };

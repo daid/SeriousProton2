@@ -1001,6 +1001,16 @@ static int ilog(int32 n)
              else                     return 30 + log2_4[n >> 30];
 }
 
+static int ipow(int32 base, int32 iexp)
+{
+   if (iexp < 1)
+      return 0;
+   int result = base;
+   for(;iexp>1;iexp--)
+      result *= base;
+   return result;
+}
+
 #ifndef M_PI
   #define M_PI  3.14159265358979323846264f  // from CRC
 #endif
@@ -1200,10 +1210,10 @@ static int vorbis_validate(uint8 *data)
 static int lookup1_values(int entries, int dim)
 {
    int r = (int) floor(exp((float) log((float) entries) / dim));
-   if ((int) floor(pow((float) r+1, dim)) <= entries)   // (int) cast for MinGW warning;
+   if (ipow(r+1, dim) <= entries)   // (int) cast for MinGW warning;
       ++r;                                              // floor() to avoid _ftol() when non-CRT
-   assert(pow((float) r+1, dim) > entries);
-   assert((int) floor(pow((float) r, dim)) <= entries); // (int),floor() as above
+   assert(ipow(r+1, dim) > entries);
+   assert(ipow(r, dim) <= entries); // (int),floor() as above
    return r;
 }
 
