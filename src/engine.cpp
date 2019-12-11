@@ -84,7 +84,9 @@ void Engine::initialize()
 
     initialized = true;
 
+#ifndef __EMSCRIPTEN__
     audio::AudioSource::startAudioSystem();
+#endif
 }
 
 class Clock
@@ -165,6 +167,9 @@ void Engine::run()
 
 void Engine::processEvents()
 {
+#ifdef __EMSCRIPTEN__
+    static bool audio_started = false;
+#endif
     SDL_Event event;
 
     while (SDL_PollEvent(&event))
@@ -173,6 +178,13 @@ void Engine::processEvents()
         switch(event.type)
         {
         case SDL_KEYDOWN:
+#ifdef __EMSCRIPTEN__
+            if (!audio_started)
+            {
+                audio::AudioSource::startAudioSystem();
+                audio_started = true;
+            }
+#endif
         case SDL_KEYUP:
             window_id = event.key.windowID;
             break;
@@ -180,6 +192,13 @@ void Engine::processEvents()
             window_id = event.motion.windowID;
             break;
         case SDL_MOUSEBUTTONDOWN:
+#ifdef __EMSCRIPTEN__
+            if (!audio_started)
+            {
+                audio::AudioSource::startAudioSystem();
+                audio_started = true;
+            }
+#endif
         case SDL_MOUSEBUTTONUP:
             window_id = event.button.windowID;
             break;

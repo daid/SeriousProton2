@@ -1,7 +1,7 @@
 #include <sp2/exception/unhandled.h>
 #include <sp2/stringutil/convert.h>
 
-#if !defined(ANDROID) && !defined(EMSCRIPTEN)
+#if !defined(ANDROID) && !defined(__EMSCRIPTEN__)
 
 #include <sys/ucontext.h>
 #include <ucontext.h>
