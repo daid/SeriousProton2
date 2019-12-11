@@ -1,7 +1,7 @@
 #include <sp2/exception/unhandled.h>
 #include <sp2/stringutil/convert.h>
 
-#ifndef ANDROID
+#if !defined(ANDROID) && !defined(EMSCRIPTEN)
 
 #include <sys/ucontext.h>
 #include <ucontext.h>
@@ -81,5 +81,5 @@ void setupUnhandledExceptionHandler()
 }//namespace exception
 }//namespace sp
 
-#endif//ANDROID
+#endif//!ANDROID && !EMSCRIPTEN
 

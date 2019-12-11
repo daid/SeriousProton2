@@ -39,4 +39,4 @@ if(EMSCRIPTEN_SDK_PATH STREQUAL "")
     endif()
 endif()
 
-include("${EMSCRIPTEN_SDK_PATH}/fastcomp/emscripten/cmake/Modules/Platform/Emscripten.cmake")
+include("${EMSCRIPTEN_SDK_PATH}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake")
