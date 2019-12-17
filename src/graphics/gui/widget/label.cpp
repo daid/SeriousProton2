@@ -29,6 +29,11 @@ void Label::setLabel(const string& label)
     }
 }
 
+const string& Label::getLabel()
+{
+    return label;
+}
+
 void Label::setAttribute(const string& key, const string& value)
 {
     if (key == "label" || key == "caption")

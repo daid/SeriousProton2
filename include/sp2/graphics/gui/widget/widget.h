@@ -133,7 +133,6 @@ protected:
     {
         if (slave_widget)
         {
-            slave_widget->visible = visible;
             slave_widget->enabled = enabled;
             slave_widget->focus = focus;
             slave_widget->hover = hover;
