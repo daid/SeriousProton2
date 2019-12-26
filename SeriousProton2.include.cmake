@@ -233,6 +233,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
                 DEPENDS "$<TARGET_FILE:${SP2_TARGET_NAME}>" "${CMAKE_CURRENT_BINARY_DIR}/${SP2_TARGET_NAME}.resources.zip"
             )
             add_custom_target("${SP2_TARGET_NAME}.single" ALL DEPENDS "${SINGLE_EXECUTABLE_NAME}")
+            install(PROGRAMS "${SINGLE_EXECUTABLE_NAME}" DESTINATION .)
         else()
             install(TARGETS ${SP2_TARGET_NAME} RUNTIME DESTINATION .)
             execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread-1.dll OUTPUT_VARIABLE MINGW_PTHREAD_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
