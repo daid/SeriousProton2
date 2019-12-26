@@ -9,6 +9,10 @@
 
 #include <SDL.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #define GIF_FLIP_VERT
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -251,6 +255,14 @@ void Window::createRenderWindow()
     float window_height = display_mode.h;
     if (!fullscreen)
     {
+        SDL_GetDisplayUsableBounds(0, &display_mode);
+#ifdef __EMSCRIPTEN__
+        display_mode.w = EM_ASM_INT({ return window.innerWidth; });
+        display_mode.h = EM_ASM_INT({ return window.innerHeight; });
+#endif//__EMSCRIPTEN__
+        window_width = display_mode.w;
+        window_height = display_mode.h;
+
         if (max_window_size_ratio.x != 0.0 && max_window_size_ratio.y != 0.0)
         {
             window_width *= max_window_size_ratio.x;
@@ -259,7 +271,7 @@ void Window::createRenderWindow()
         else
         {
             //Make sure the window fits on the screen with some edge around it.
-            while(window_width >= int(display_mode.w) || window_height >= int(display_mode.h) - 100)
+            while(window_width >= int(display_mode.w) || window_height >= int(display_mode.h))
             {
                 window_width *= 0.9;
                 window_height *= 0.9;
