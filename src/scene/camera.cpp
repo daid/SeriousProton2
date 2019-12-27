@@ -82,6 +82,7 @@ void Camera::setAspectRatio(double ratio)
             setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
         else
             setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 1.0f, view_distance));        
+        break;
     case Type::PerspectiveVertical:
         setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
         break;
