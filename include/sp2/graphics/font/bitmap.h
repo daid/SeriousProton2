@@ -25,6 +25,7 @@ private:
     Texture* texture = nullptr;
     Vector2f glyph_size;
     Vector2f glyph_advance;
+    float aspect_ratio;
     std::unordered_map<int, Vector2f> glyphs;
     std::unordered_map<string, Rect2f> specials;
 };

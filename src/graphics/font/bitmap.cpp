@@ -51,6 +51,8 @@ BitmapFont::BitmapFont(const string& name, io::ResourceStreamPtr stream)
             LOG(Warning, "Ignoring line in bitmap font file:", line);
         }
     }
+    aspect_ratio = pixel_glyph_size.x / pixel_glyph_size.y;
+    glyph_advance.x *= aspect_ratio;
     glyph_size = Vector2f(pixel_glyph_size.x / texture_size.x, pixel_glyph_size.y / texture_size.y);
     int y = 0;
     for(string line : lines)
@@ -104,7 +106,7 @@ bool BitmapFont::getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info)
     if (it == glyphs.end())
         return false;
     info.uv_rect = {it->second.x, it->second.y, glyph_size.x, glyph_size.y};
-    info.bounds = {0, float(pixel_size), float(pixel_size), float(pixel_size)};
+    info.bounds = {0, float(pixel_size), float(pixel_size) * aspect_ratio, float(pixel_size)};
     info.advance = pixel_size * glyph_advance.x;
     info.consumed_characters = 1;
     return true;
