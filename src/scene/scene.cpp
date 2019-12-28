@@ -117,10 +117,24 @@ void Scene::queryCollision(sp::Vector2d position, double range, std::function<bo
 {
     if (!collision_backend)
         return;
+    collision_backend->query(sp::Vector3d(position.x, position.y, 0.0), range, callback_function);
+}
+
+void Scene::queryCollision(sp::Vector3d position, double range, std::function<bool(P<Node> object)> callback_function)
+{
+    if (!collision_backend)
+        return;
     collision_backend->query(position, range, callback_function);
 }
 
 void Scene::queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function)
+{
+    if (!collision_backend)
+        return;
+    collision_backend->query(sp::Vector3d(position.x, position.y, 0.0), callback_function);
+}
+
+void Scene::queryCollision(sp::Vector3d position, std::function<bool(P<Node> object)> callback_function)
 {
     if (!collision_backend)
         return;
@@ -138,10 +152,30 @@ void Scene::queryCollisionAny(Ray2d ray, std::function<bool(P<Node> object, Vect
 {
     if (!collision_backend)
         return;
+    collision_backend->queryAny(sp::Ray3d(sp::Vector3d(ray.start.x, ray.start.y, 0), sp::Vector3d(ray.end.x, ray.end.y, 0)), [callback_function](sp::P<sp::Node> obj, sp::Vector3d hit_location, sp::Vector3d hit_normal)
+    {
+        return callback_function(obj, sp::Vector2d(hit_location.x, hit_location.y), sp::Vector2d(hit_normal.x, hit_normal.y));
+    });
+}
+
+void Scene::queryCollisionAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
+{
+    if (!collision_backend)
+        return;
     collision_backend->queryAny(ray, callback_function);
 }
 
 void Scene::queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+{
+    if (!collision_backend)
+        return;
+    collision_backend->queryAll(sp::Ray3d(sp::Vector3d(ray.start.x, ray.start.y, 0), sp::Vector3d(ray.end.x, ray.end.y, 0)), [callback_function](sp::P<sp::Node> obj, sp::Vector3d hit_location, sp::Vector3d hit_normal)
+    {
+        return callback_function(obj, sp::Vector2d(hit_location.x, hit_location.y), sp::Vector2d(hit_normal.x, hit_normal.y));
+    });
+}
+
+void Scene::queryCollisionAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
     if (!collision_backend)
         return;

@@ -220,7 +220,7 @@ bool Simple2DBackend::isSolid(void* _body)
     return body->type == Shape::Type::Static || body->type == Shape::Type::Kinematic;
 }
 
-void Simple2DBackend::query(Vector2d position, std::function<bool(P<Node> object)> callback_function)
+void Simple2DBackend::query(Vector3d position, std::function<bool(P<Node> object)> callback_function)
 {
     b2AABB bounds;
     bounds.lowerBound.x = bounds.upperBound.x = position.x;
@@ -236,17 +236,18 @@ void Simple2DBackend::query(Vector2d position, std::function<bool(P<Node> object
     query_callback = nullptr;
 }
 
-void Simple2DBackend::query(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function)
+void Simple2DBackend::query(Vector3d position, double range, std::function<bool(P<Node> object)> callback_function)
 {
     b2AABB bounds;
     bounds.lowerBound.x = position.x - range;
     bounds.lowerBound.y = position.y - range;
     bounds.upperBound.x = position.x + range;
     bounds.upperBound.y = position.y + range;
-    query_callback = [&callback_function, position, range](void* _body)
+    sp::Vector2d p(position.x, position.y);
+    query_callback = [&callback_function, p, range](void* _body)
     {
         Node* owner = static_cast<Simple2DBody*>(_body)->owner;
-        if (owner && (owner->getPosition2D() - position).length() <= range)
+        if (owner && (owner->getPosition2D() - p).length() <= range)
             return callback_function(owner);
         return true;
     };
@@ -272,12 +273,12 @@ void Simple2DBackend::query(Rect2d area, std::function<bool(P<Node> object)> cal
     query_callback = nullptr;
 }
 
-void Simple2DBackend::queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Simple2DBackend::queryAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
     LOG(Warning, "Simple2D raycasting called, but not implemented yet.");
 }
 
-void Simple2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Simple2DBackend::queryAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
     LOG(Warning, "Simple2D raycasting called, but not implemented yet.");
 }

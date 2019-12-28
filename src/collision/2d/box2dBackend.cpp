@@ -349,7 +349,7 @@ public:
 	}
 };
 
-void Box2DBackend::query(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function)
+void Box2DBackend::query(sp::Vector3d position, std::function<bool(P<Node> object)> callback_function)
 {
     Box2DQueryCallback callback;
     callback.callback = [callback_function, position](Node* node) {
@@ -363,11 +363,12 @@ void Box2DBackend::query(sp::Vector2d position, std::function<bool(P<Node> objec
     world->QueryAABB(&callback, aabb);
 }
 
-void Box2DBackend::query(sp::Vector2d position, double range, std::function<bool(P<Node> object)> callback_function)
+void Box2DBackend::query(sp::Vector3d position, double range, std::function<bool(P<Node> object)> callback_function)
 {
+    sp::Vector2d p(position.x, position.y);
     Box2DQueryCallback callback;
-    callback.callback = [callback_function, position, range](Node* node) {
-        if ((node->getGlobalPosition2D() - position).length() <= range)
+    callback.callback = [callback_function, p, range](Node* node) {
+        if ((node->getGlobalPosition2D() - p).length() <= range)
             return callback_function(node);
         return true;
     };
@@ -392,18 +393,18 @@ void Box2DBackend::query(Rect2d area, std::function<bool(P<Node> object)> callba
 class Box2DRayCastCallbackAny : public b2RayCastCallback
 {
 public:
-    std::function<bool(Node* node, Vector2d hit_location, Vector2d hit_normal)> callback;
+    std::function<bool(Node* node, Vector3d hit_location, Vector3d hit_normal)> callback;
     
 	virtual float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) override
 	{
         Node* node = static_cast<Node*>(fixture->GetUserData());
-        if (callback(node, toVector<double>(point), toVector<double>(normal)))
+        if (callback(node, toVector3<double>(point), toVector3<double>(normal)))
             return -1.0;
         return 0.0;
 	}
 };
 
-void Box2DBackend::queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Box2DBackend::queryAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
     Box2DRayCastCallbackAny callback;
     callback.callback = callback_function;
@@ -441,7 +442,7 @@ public:
 	}
 };
 
-void Box2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void Box2DBackend::queryAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
     Box2DRayCastCallbackAll callback;
     world->RayCast(&callback, toVector(ray.start), toVector(ray.end));
@@ -450,7 +451,7 @@ void Box2DBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector
     
     for(Box2DRayCastCallbackAll::Hit& hit : callback.hits)
     {
-        if (!callback_function(hit.node, hit.location, hit.normal))
+        if (!callback_function(hit.node, sp::Vector3d(hit.location.x, hit.location.y, 0), sp::Vector3d(hit.normal.x, hit.normal.y, 0)))
             return;
     }
 }

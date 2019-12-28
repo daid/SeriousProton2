@@ -84,6 +84,7 @@ public:
     
     //Test if the given point will collide with the shape of this Node.
     bool testCollision(sp::Vector2d position);
+    bool testCollision(sp::Vector3d position);
     //Test if this is a solid object, so it has a collision shape, which isn't generated as Sensor.
     bool isSolid();
     

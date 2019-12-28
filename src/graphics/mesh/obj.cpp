@@ -165,6 +165,11 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                     if (parts.size() > 2) materials[mtl_name].specular.g = stringutil::convert::toFloat(parts[2]);
                     if (parts.size() > 3) materials[mtl_name].specular.b = stringutil::convert::toFloat(parts[3]);
                 }
+                else if (line.startswith("Ns ") || line.startswith("illum "))
+                {
+                    //Ns = specular exponent
+                    //illum = illumination model
+                }
                 else
                 {
                     LOG(Debug, "Unknown line in", mtl_resource_name, ":", mtl_name, ":", line);
@@ -204,6 +209,7 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
     {
         texture_cache[resource_name] = new ObjTexture(resource_name + ".texture", std::move(generated_texture));
     }
+    LOG(Info, "Loaded:", resource_name, vertices.size(), "vertices");
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 

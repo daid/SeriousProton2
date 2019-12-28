@@ -49,18 +49,22 @@ public:
 
     //Query for collision enabled objects at a specific position.
     void queryCollision(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function);
+    void queryCollision(sp::Vector3d position, std::function<bool(P<Node> object)> callback_function);
     //Query objects in a circle around a point. Note that the collision shape might not hit the collision shape.
     void queryCollision(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function);
+    void queryCollision(Vector3d position, double range, std::function<bool(P<Node> object)> callback_function);
     //Get collision objects inside a rectangle area.
     void queryCollision(Rect2d area, std::function<bool(P<Node> object)> callback_function);
     //Gives a callback for any object being hit by the ray from start to end. In any order.
     //Best used to see if start to end is blocked by anything (line of sight)
     //Return false to stop searching for colliding objects.
     void queryCollisionAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function);
+    void queryCollisionAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function);
     //Gives a callback for any object being hit by the ray from start to end. In the order from start to end.
     //Best used to trace towards the first object that will be hit by something. (hit trace weapons)
     //Return false to stop searching for colliding objects.
     void queryCollisionAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function);
+    void queryCollisionAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function);
 
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}

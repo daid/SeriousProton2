@@ -189,6 +189,7 @@ Vector3d BulletBackend::getAngularVelocity(void* _body)
 bool BulletBackend::testCollision(void* _body, Vector3d position)
 {
     //btRigidBody* body = static_cast<btRigidBody*>(_body);
+    LOG(Warning, "Bullet3D testCollision called, but not implemented yet.");
     return false;
 }
 
@@ -198,24 +199,75 @@ bool BulletBackend::isSolid(void* _body)
     return !(body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
 
-void BulletBackend::query(sp::Vector2d position, std::function<bool(P<Node> object)> callback_function)
+void BulletBackend::query(sp::Vector3d position, std::function<bool(P<Node> object)> callback_function)
 {
+    LOG(Warning, "Bullet3D query called, but not implemented yet.");
 }
 
-void BulletBackend::query(sp::Vector2d position, double range, std::function<bool(P<Node> object)> callback_function)
+void BulletBackend::query(sp::Vector3d position, double range, std::function<bool(P<Node> object)> callback_function)
 {
+    LOG(Warning, "Bullet3D query called, but not implemented yet.");
 }
 
 void BulletBackend::query(Rect2d area, std::function<bool(P<Node> object)> callback_function)
 {
+    LOG(Warning, "Bullet3D query called, but not implemented yet.");
 }
 
-void BulletBackend::queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+class BulletRaycastCallback : public btCollisionWorld::RayResultCallback
 {
+public:
+    BulletRaycastCallback()
+    {
+    }
+
+    btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override
+    {
+        sp::P<Node> node = static_cast<Node*>(rayResult.m_collisionObject->getUserPointer());
+        entries.emplace_back(node, rayResult.m_hitFraction, toVector<double>(rayResult.m_hitNormalLocal));
+        return 1.0f;
+    }
+
+    struct Entry
+    {
+        Entry(sp::P<Node> node, float fraction, sp::Vector3d normal): node(node), fraction(fraction), normal(normal) {}
+        sp::P<Node> node;
+        float fraction;
+        sp::Vector3d normal;
+    };
+    std::vector<Entry> entries;
+};
+
+void BulletBackend::queryAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
+{
+    BulletRaycastCallback callback_object;
+    world->rayTest(toVector(ray.start), toVector(ray.end), callback_object);
+    for(auto entry : callback_object.entries)
+    {
+        if (entry.node)
+        {
+            if (!callback_function(entry.node, ray.start + (ray.end - ray.start) * double(entry.fraction), entry.normal))
+                return;
+        }
+    }
 }
 
-void BulletBackend::queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function)
+void BulletBackend::queryAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function)
 {
+    BulletRaycastCallback callback_object;
+    world->rayTest(toVector(ray.start), toVector(ray.end), callback_object);
+    std::sort(callback_object.entries.begin(), callback_object.entries.end(), [](const BulletRaycastCallback::Entry& a, const BulletRaycastCallback::Entry& b)
+    {
+        return a.fraction < b.fraction;
+    });
+    for(auto entry : callback_object.entries)
+    {
+        if (entry.node)
+        {
+            if (!callback_function(entry.node, ray.start + (ray.end - ray.start) * double(entry.fraction), entry.normal))
+                return;
+        }
+    }
 }
 
 }//namespace collision

@@ -39,11 +39,11 @@ public:
     virtual bool testCollision(void* body, Vector3d position) override;
     virtual bool isSolid(void* body) override;
 
-    virtual void query(Vector2d position, std::function<bool(P<Node> object)> callback_function) override;
-    virtual void query(Vector2d position, double range, std::function<bool(P<Node> object)> callback_function) override;
+    virtual void query(Vector3d position, std::function<bool(P<Node> object)> callback_function) override;
+    virtual void query(Vector3d position, double range, std::function<bool(P<Node> object)> callback_function) override;
     virtual void query(Rect2d area, std::function<bool(P<Node> object)> callback_function) override;
-    virtual void queryAny(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) override;
-    virtual void queryAll(Ray2d ray, std::function<bool(P<Node> object, Vector2d hit_location, Vector2d hit_normal)> callback_function) override;
+    virtual void queryAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function) override;
+    virtual void queryAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function) override;
 private:
     btDefaultCollisionConfiguration* configuration = nullptr;
     btCollisionDispatcher* dispatcher = nullptr;

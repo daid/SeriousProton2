@@ -246,6 +246,13 @@ bool Node::testCollision(sp::Vector2d position)
     return scene->collision_backend->testCollision(collision_body, Vector3d(position.x, position.y, 0));
 }
 
+bool Node::testCollision(sp::Vector3d position)
+{
+    if (!collision_body)
+        return false;
+    return scene->collision_backend->testCollision(collision_body, position);
+}
+
 bool Node::isSolid()
 {
     if (!collision_body)
