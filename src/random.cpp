@@ -29,4 +29,9 @@ int irandom(int imin, int imax)
     return std::uniform_int_distribution<>(imin, imax)(random_engine);
 }
 
+bool chance(float percentage)
+{
+    return std::bernoulli_distribution(percentage / 100.0f)(random_engine);
+}
+
 }//namespace sp
