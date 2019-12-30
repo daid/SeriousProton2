@@ -55,6 +55,11 @@ void Label::setAttribute(const string& key, const string& value)
         vertical = stringutil::convert::toBool(value);
         markRenderDataOutdated();
     }
+    else if (key == "scale_to_text")
+    {
+        scale_to_text = stringutil::convert::toBool(value);
+        markRenderDataOutdated();
+    }
     else
     {
         Widget::setAttribute(key, value);
@@ -68,10 +73,12 @@ void Label::updateRenderData()
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
     {
-        if (vertical)
-            render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
-        else
-            render_data.mesh = t.font->createString(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
+        //TODO: Vertical
+        sp::Font::PreparedFontString prepared;
+        prepared = t.font->prepare(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
+        if (scale_to_text)
+            setSize(sp::Vector2d(prepared.getUsedAreaSize()));
+        render_data.mesh = prepared.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
     }

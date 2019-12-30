@@ -27,6 +27,7 @@ private:
     string label;
     float text_size;
     bool vertical;
+    bool scale_to_text = false;
     int texture_revision;
 };
 
