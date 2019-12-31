@@ -68,6 +68,9 @@ void openFileDialog(const sp::string& filter, std::function<void(const sp::strin
 #endif//__EMPSCRIPTEN__
 }
 
+}//namespace io
+}//namespace sp
+
 #ifdef __EMSCRIPTEN__
 void sp2fileSelectionCallback(const char* str)
 {
@@ -75,6 +78,3 @@ void sp2fileSelectionCallback(const char* str)
         sp2_file_selection_callback(str);
 }
 #endif//__EMPSCRIPTEN__
-
-}//namespace io
-}//namespace sp
