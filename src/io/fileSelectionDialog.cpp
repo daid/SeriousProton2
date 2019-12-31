@@ -64,7 +64,7 @@ void openFileDialog(const sp::string& filter, std::function<void(const sp::strin
         sp2_file_input_element.value = "";
         sp2_file_input_element.accept = UTF8ToString($0);
         sp2_file_input_element.click();
-    }, filter.c_Str());
+    }, filter.c_str());
 #endif//__EMPSCRIPTEN__
 }
 
