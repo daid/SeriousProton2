@@ -36,6 +36,12 @@ void openFileDialog(const sp::string& filter, std::function<void(const sp::strin
 #endif
 #ifdef __EMSCRIPTEN__
     sp2_file_selection_callback = callback;
+
+    //The following javascript code does a bunch of things:
+    // * It creates an invisible file selection input field if it does not exists yet.
+    // * It opens up the dialog that belongs with the file selection.
+    // * If a file is selected, the contents of that file is copied into the virtual filesystem at /upload/
+    // * A call is made back to C code to call the callback async.
     EM_ASM({
         if (typeof(sp2_file_input_element) == "undefined")
         {
