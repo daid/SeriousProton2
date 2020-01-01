@@ -1,21 +1,22 @@
 #include <sp2/io/fileSelectionDialog.h>
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
 #include <windows.h>
-#endif//__WIN32__
-#ifdef __EMSCRIPTEN__
+#elif defined(__linux__) && !defined(__ANDROID__)
+#include <gtk/gtk.h>
+#elif defined(__EMSCRIPTEN__)
 #include <emscripten.h>
 
 extern "C" void sp2fileSelectionCallback(const char* str) __attribute__((used));
 static std::function<void(const sp::string&)> sp2_file_selection_callback;
-#endif//__EMSCRIPTEN__
+#endif
 
 namespace sp {
 namespace io {
 
 void openFileDialog(const sp::string& filter, std::function<void(const sp::string&)> callback)
 {
-#ifdef __WIN32__
+#if defined(__WIN32__)
     sp::string filter_string = "*" + filter + sp::string('\0') + "*" + filter + sp::string('\0');
 
     OPENFILENAMEA openfilename;
@@ -33,8 +34,36 @@ void openFileDialog(const sp::string& filter, std::function<void(const sp::strin
     GetOpenFileNameA(&openfilename);
     if (strlen(filename) > 0)
         callback(filename);
-#endif
-#ifdef __EMSCRIPTEN__
+#elif defined(__linux__) && !defined(__ANDROID__) && 0
+    if (!gtk_init_check(nullptr, nullptr))
+    {
+        return;
+    }
+    GtkWidget* dialog = gtk_file_chooser_dialog_new("Open File", nullptr, GTK_FILE_CHOOSER_ACTION_OPEN,
+        "_Cancel", GTK_RESPONSE_CANCEL,
+        "_Open", GTK_RESPONSE_ACCEPT, nullptr);
+    
+    if (filter != "")
+    {
+        GtkFileFilter* file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, ("*" + filter).c_str());
+		gtk_file_filter_add_pattern(file_filter, ("*" + filter).c_str());
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+    }
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+    {
+        char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        callback(filename);
+        g_free(filename);
+    }
+
+	while (gtk_events_pending())
+		gtk_main_iteration();
+    gtk_widget_destroy(dialog);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+#elif defined(__EMSCRIPTEN__)
     sp2_file_selection_callback = callback;
 
     //The following javascript code does a bunch of things:
@@ -71,7 +100,7 @@ void openFileDialog(const sp::string& filter, std::function<void(const sp::strin
         sp2_file_input_element.accept = UTF8ToString($0);
         sp2_file_input_element.click();
     }, filter.c_str());
-#endif//__EMPSCRIPTEN__
+#endif
 }
 
 }//namespace io
