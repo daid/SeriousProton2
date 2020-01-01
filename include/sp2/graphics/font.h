@@ -13,11 +13,13 @@ namespace sp {
 class Font : NonCopyable
 {
 public:
+    static constexpr int FlagLineWrap = 0x01;
+
     /** Create a meshData for the given string.
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.
         Compare the texture revision to the revision that it initially had to check if the data is still valid or needs to be re-generated.
      */
-    std::shared_ptr<MeshData> createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
+    std::shared_ptr<MeshData> createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags);
     virtual Texture* getTexture(int pixel_size) = 0;
 
     class PreparedFontString
@@ -48,7 +50,7 @@ public:
         
         friend class Font;
     };
-    PreparedFontString prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment);
+    PreparedFontString prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags);
 protected:
     class GlyphInfo
     {

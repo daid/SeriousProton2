@@ -28,6 +28,7 @@ private:
     float text_size;
     bool vertical;
     bool scale_to_text = false;
+    bool line_wrap = false;
     int texture_revision;
 };
 

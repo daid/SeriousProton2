@@ -3,12 +3,12 @@
 
 namespace sp {
 
-std::shared_ptr<MeshData> Font::createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
+std::shared_ptr<MeshData> Font::createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags)
 {
-    return prepare(s, pixel_size, text_size, area_size, alignment).create();
+    return prepare(s, pixel_size, text_size, area_size, alignment, flags).create();
 }
 
-Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment)
+Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags)
 {
     float size_scale = text_size / float(pixel_size);
     float line_spacing = getLineSpacing(pixel_size) * size_scale;
@@ -65,6 +65,42 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
         current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
         position.x += glyph.advance * size_scale;
         index += glyph.consumed_characters;
+
+        if (current_line_width >= area_size.x && (flags & FlagLineWrap))
+        {
+            int wrap_index = -1;
+            for(int n=result.data.size()-1; n>int(line_start_result_index); n--)
+            {
+                if (s[result.data[n].string_offset] == ' ')
+                {
+                    wrap_index = n;
+                    break;
+                }
+            }
+
+            while(result.data.size() > line_start_result_index + 1 &&
+                (
+                    (wrap_index == -1 && current_line_width >= area_size.x) ||
+                    (wrap_index < int(result.data.size()))
+                ))
+            {
+                getGlyphInfo(&s[result.data.back().string_offset], pixel_size, glyph);
+                current_line_width -= glyph.advance * size_scale;
+
+                index = result.data.back().string_offset;
+                result.data.pop_back();
+            }
+            if (wrap_index)
+                index++;
+
+            position.x = 0;
+            position.y -= line_spacing;
+            result.line_count++;
+            result.alignLine(line_start_result_index, current_line_width);
+            result.max_line_width = std::max(result.max_line_width, current_line_width);
+            current_line_width = 0;
+            line_start_result_index = result.data.size();
+        }
     }
 
     result.alignLine(line_start_result_index, current_line_width);

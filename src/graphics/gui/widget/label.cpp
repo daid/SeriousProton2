@@ -55,6 +55,11 @@ void Label::setAttribute(const string& key, const string& value)
         vertical = stringutil::convert::toBool(value);
         markRenderDataOutdated();
     }
+    else if (key == "word_wrap" || key == "line_wrap")
+    {
+        line_wrap = stringutil::convert::toBool(value);
+        markRenderDataOutdated();
+    }
     else if (key == "scale_to_text")
     {
         scale_to_text = stringutil::convert::toBool(value);
@@ -75,9 +80,14 @@ void Label::updateRenderData()
     {
         //TODO: Vertical
         sp::Font::PreparedFontString prepared;
-        prepared = t.font->prepare(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment);
+        prepared = t.font->prepare(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment, line_wrap ? Font::FlagLineWrap : 0);
         if (scale_to_text)
-            setSize(sp::Vector2d(prepared.getUsedAreaSize()));
+        {
+            if (line_wrap)
+                layout.size.y = prepared.getUsedAreaSize().y;
+            else
+                layout.size = sp::Vector2d(prepared.getUsedAreaSize());
+        }
         render_data.mesh = prepared.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
