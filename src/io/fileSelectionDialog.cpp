@@ -2,7 +2,7 @@
 
 #if defined(__WIN32__)
 #include <windows.h>
-#elif defined(__linux__) && !defined(__ANDROID__)
+#elif defined(__linux__) && !defined(__ANDROID__) && 0
 #include <gtk/gtk.h>
 #elif defined(__EMSCRIPTEN__)
 #include <emscripten.h>
