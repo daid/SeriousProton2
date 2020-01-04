@@ -98,8 +98,8 @@ public:
 #endif//ANDROID
 
 
-DirectoryResourceProvider::DirectoryResourceProvider(const string& base_path)
-: base_path(base_path)
+DirectoryResourceProvider::DirectoryResourceProvider(const string& base_path, int priority)
+: ResourceProvider(priority), base_path(base_path)
 {
 }
 

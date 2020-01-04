@@ -9,7 +9,7 @@ namespace io {
 class DirectoryResourceProvider : public ResourceProvider
 {
 public:
-    DirectoryResourceProvider(const string& base_path);
+    DirectoryResourceProvider(const string& base_path, int priority=0);
     
     virtual ResourceStreamPtr getStream(const string& filename) override;
     virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) override;

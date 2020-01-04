@@ -2,8 +2,10 @@
 #include <sp2/window.h>
 #include <sp2/logging.h>
 #include <sp2/io/directoryResourceProvider.h>
+#include <sp2/io/zipResourceProvider.h>
 #include <sp2/graphics/gui/scene.h>
 #include <sp2/graphics/gui/theme.h>
+#include <sp2/graphics/gui/loader.h>
 #include <sp2/graphics/scene/graphicslayer.h>
 #include <sp2/graphics/scene/basicnoderenderpass.h>
 #include <sp2/graphics/scene/collisionrenderpass.h>
@@ -23,6 +25,7 @@ int main(int argc, char** argv)
 
     //Create resource providers, so we can load things.
     new sp::io::DirectoryResourceProvider("resources");
+    new sp::io::ZipResourceProvider(argv[0]);
 
     //Disable or enable smooth filtering by default, enabling it gives nice smooth looks, but disabling it gives a more pixel art look.
     sp::texture_manager.setDefaultSmoothFiltering(false);

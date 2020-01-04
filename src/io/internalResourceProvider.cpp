@@ -46,8 +46,8 @@ public:
 };
 
 
-InternalResourceProvider::InternalResourceProvider(std::map<string, string>&& resources)
-: resources(resources)
+InternalResourceProvider::InternalResourceProvider(std::map<string, string>&& resources, int priority)
+: ResourceProvider(priority), resources(resources)
 {
 }
 

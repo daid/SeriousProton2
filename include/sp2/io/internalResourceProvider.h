@@ -9,7 +9,7 @@ namespace io {
 class InternalResourceProvider : public ResourceProvider
 {
 public:
-    InternalResourceProvider(std::map<string, string>&& resources);
+    InternalResourceProvider(std::map<string, string>&& resources, int priority=0);
     
     virtual ResourceStreamPtr getStream(const string& filename) override;
     virtual std::vector<string> findResources(const string& search_pattern) override;

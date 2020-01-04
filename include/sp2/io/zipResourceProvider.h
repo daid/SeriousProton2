@@ -9,7 +9,7 @@ namespace io {
 class ZipResourceProvider : public ResourceProvider
 {
 public:
-    ZipResourceProvider(const string& zip_filename);
+    ZipResourceProvider(const string& zip_filename, int priority=0);
     
     virtual ResourceStreamPtr getStream(const string& filename) override;
     virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) override;

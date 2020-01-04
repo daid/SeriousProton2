@@ -6,9 +6,14 @@ namespace io {
 
 PList<ResourceProvider> ResourceProvider::providers SP2_INIT_EARLY;
 
-ResourceProvider::ResourceProvider()
+ResourceProvider::ResourceProvider(int priority)
+: priority(priority)
 {
     providers.add(this);
+    providers.sort([](P<ResourceProvider> a, P<ResourceProvider> b)
+    {
+        return b->priority - a->priority;
+    });
 }
 
 bool ResourceProvider::searchMatch(const string& name, const string& search_pattern)

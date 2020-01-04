@@ -228,8 +228,8 @@ public:
 };
 
 
-ZipResourceProvider::ZipResourceProvider(const string& zip_filename)
-: zip_filename(zip_filename)
+ZipResourceProvider::ZipResourceProvider(const string& zip_filename, int priority)
+: ResourceProvider(priority), zip_filename(zip_filename)
 {
     FILE* f = fopen(zip_filename.c_str(), "rb");
     if (!f)

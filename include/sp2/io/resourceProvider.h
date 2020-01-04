@@ -29,7 +29,7 @@ typedef std::shared_ptr<ResourceStream> ResourceStreamPtr;
 class ResourceProvider : public AutoPointerObject
 {
 public:
-    ResourceProvider();
+    ResourceProvider(int priority);
     
     virtual ResourceStreamPtr getStream(const string& filename) = 0;
     virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) { return std::chrono::system_clock::time_point(); }
@@ -42,6 +42,7 @@ protected:
     bool searchMatch(const string& name, const string& search_pattern);
 
 private:
+    int priority;
     static PList<ResourceProvider> providers;
 };
 
