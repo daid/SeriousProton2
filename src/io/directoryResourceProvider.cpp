@@ -7,47 +7,6 @@
 namespace sp {
 namespace io {
 
-#ifdef ANDROID
-class FileResourceStream : public ResourceStream
-{
-private:
-    SDL_RWops* rw_ops;
-
-public:
-    FileResourceStream(const string& filename)
-    {
-        rw_ops = SDL_RWFromFile(filename.c_str(), "rb");
-    }
-    virtual ~FileResourceStream()
-    {
-        if (rw_ops)
-            SDL_RWclose(rw_ops);
-    }
-    
-    bool isOpen()
-    {
-        return rw_ops != nullptr;
-    }
-    
-    virtual int64_t read(void* data, int64_t size) override
-    {
-        return SDL_RWread(rw_ops, data, 1, size);
-    }
-    virtual int64_t seek(int64_t position) override
-    {
-        SDL_RWseek(rw_ops, position, RW_SEEK_SET);
-        return SDL_RWtell(rw_ops);
-    }
-    virtual int64_t tell() override
-    {
-        return SDL_RWtell(rw_ops);
-    }
-    virtual int64_t getSize() override
-    {
-        return SDL_RWsize(rw_ops);
-    }
-};
-#else
 class FileResourceStream : public ResourceStream
 {
 private:
@@ -95,7 +54,6 @@ public:
         return size;
     }
 };
-#endif//ANDROID
 
 
 DirectoryResourceProvider::DirectoryResourceProvider(const string& base_path, int priority)

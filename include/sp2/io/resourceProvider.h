@@ -38,6 +38,13 @@ public:
     static ResourceStreamPtr get(const string& filename);
     static std::chrono::system_clock::time_point getModifyTime(const string& filename);
     static std::vector<string> find(const string& search_pattern);
+
+    //Create the default resource providers.
+    //  The result of this depends on the OS and build.
+    //  Usually this adds a directoryResourceProvider for the directroy "resources".
+    //  But it can also create a zipResourceProvider for the running executable, for a single exe setup.
+    //  And for android it will create a AndroidAssetResourceProvider that reads from android assets.
+    static void createDefault();
 protected:
     bool searchMatch(const string& name, const string& search_pattern);
 

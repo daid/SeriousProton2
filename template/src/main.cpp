@@ -1,8 +1,7 @@
 #include <sp2/engine.h>
 #include <sp2/window.h>
 #include <sp2/logging.h>
-#include <sp2/io/directoryResourceProvider.h>
-#include <sp2/io/zipResourceProvider.h>
+#include <sp2/io/resourceProvider.h>
 #include <sp2/graphics/gui/scene.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/gui/loader.h>
@@ -24,8 +23,7 @@ int main(int argc, char** argv)
     sp::P<sp::Engine> engine = new sp::Engine();
 
     //Create resource providers, so we can load things.
-    new sp::io::DirectoryResourceProvider("resources");
-    new sp::io::ZipResourceProvider(argv[0]);
+    sp::io::ResourceProvider::createDefault();
 
     //Disable or enable smooth filtering by default, enabling it gives nice smooth looks, but disabling it gives a more pixel art look.
     sp::texture_manager.setDefaultSmoothFiltering(false);

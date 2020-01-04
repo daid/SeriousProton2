@@ -1,5 +1,119 @@
 #include <sp2/io/resourceProvider.h>
+#include <sp2/io/directoryResourceProvider.h>
+#include <sp2/io/zipResourceProvider.h>
+#include <sp2/io/filesystem.h>
 #include <sp2/attributes.h>
+
+#ifdef __WIN32__
+#include <windows.h>
+#endif//__WIN32__
+
+#ifdef ANDROID
+#include <SDL.h>
+#include <jni.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+
+class AndroidAssetResourceStream : public sp::io::ResourceStream
+{
+public:
+    AndroidAssetResourceStream(AAsset* asset)
+    : asset(asset)
+    {
+    }
+
+    virtual ~AndroidAssetResourceStream()
+    {
+        AAsset_close(asset);
+    }
+    
+    virtual int64_t read(void* data, int64_t size) override
+    {
+        return AAsset_read(asset, data, size);
+    }
+    virtual int64_t seek(int64_t position) override
+    {
+        return AAsset_seek(asset, position, SEEK_SET);
+    }
+    virtual int64_t tell() override
+    {
+        return AAsset_seek(asset, 0, SEEK_CUR);
+    }
+    virtual int64_t getSize() override
+    {
+        return AAsset_getLength64(asset);
+    }
+
+private:
+    AAsset* asset;
+};
+
+class AndroidAssetsResourceProvider : public sp::io::ResourceProvider
+{
+public:
+    AndroidAssetsResourceProvider(const sp::string& base_path, int priority=0)
+    : ResourceProvider(priority), base_path(base_path)
+    {
+        JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+        jobject activity = (jobject)SDL_AndroidGetActivity();
+        jclass clazz(env->GetObjectClass(activity));
+        jmethodID method_id = env->GetMethodID(clazz, "getAssets", "()Landroid/content/res/AssetManager;");
+        asset_manager_jobject = env->CallObjectMethod(activity, method_id);
+        asset_manager = AAssetManager_fromJava(env, asset_manager_jobject);
+
+        env->DeleteLocalRef(activity);
+        env->DeleteLocalRef(clazz);
+    }
+
+    virtual ~AndroidAssetsResourceProvider()
+    {
+        JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+        env->DeleteLocalRef(asset_manager_jobject);
+    }
+    
+    virtual sp::io::ResourceStreamPtr getStream(const sp::string& filename) override
+    {
+        AAsset* asset = AAssetManager_open(asset_manager, (base_path + "/" + filename).c_str(), AASSET_MODE_UNKNOWN);
+        if (asset)
+            return std::make_shared<AndroidAssetResourceStream>(asset);
+        return nullptr;
+    }
+
+    virtual std::vector<sp::string> findResources(const sp::string& search_pattern) override
+    {
+        std::vector<sp::string> results;
+
+        int idx = search_pattern.rfind("/");
+        sp::string path = base_path;
+        sp::string prefix = "";
+        if (idx > -1)
+        {
+            prefix = search_pattern.substr(0, idx);
+            path += "/" + prefix;
+            prefix += "/";
+        }
+
+        AAssetDir* dir = AAssetManager_openDir(asset_manager, (path).c_str());
+        if (dir)
+        {
+            const char* filename;
+            while ((filename = AAssetDir_getNextFileName(dir)) != nullptr)
+            {
+                if (searchMatch(prefix + filename, search_pattern))
+                    results.push_back(prefix + filename);
+            }
+            AAssetDir_close(dir);
+        }
+        return results;
+    }
+
+private:
+    sp::string base_path;
+    
+    jobject asset_manager_jobject;
+    AAssetManager* asset_manager;
+};
+#endif//ANDROID
 
 namespace sp {
 namespace io {
@@ -91,6 +205,38 @@ std::vector<string> ResourceProvider::find(const string& search_pattern)
         found_files.insert(found_files.end(), res.begin(), res.end());
     }
     return found_files;
+}
+
+void ResourceProvider::createDefault()
+{
+#ifdef __WIN32__
+    // Check if our executable is possibly a zip file. And if it is, add a zipResourceProvider to read from it.
+    char path[MAX_PATH];
+    GetModuleFileNameA(GetModuleHandleA(NULL), path, sizeof(path));
+
+    FILE* f = fopen(path, "rb");
+    if (f)
+    {
+        fseek(f, -22, SEEK_END);
+        uint32_t signature;
+        if (fread(&signature, sizeof(signature), 1, f) == 1)
+        {
+            if (signature == 0x06054b50)
+            {
+                new ZipResourceProvider(path);
+            }
+        }
+        fclose(f);
+    }
+#endif//__WIN32__
+#ifdef ANDROID
+    new AndroidAssetsResourceProvider("resources");
+#endif
+
+    if (isDirectory("resources"))
+    {
+        new DirectoryResourceProvider("resources");
+    }
 }
 
 }//namespace io
