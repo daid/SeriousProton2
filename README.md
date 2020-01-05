@@ -7,7 +7,7 @@ SeriousProton2 uses various open source projects. Proper attribution is required
     * Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC
   * lua
     * Copyright (C) 1994-2015 Lua.org, PUC-Rio.
-  *json11
+  * json11
     * Copyright (c) 2013 Dropbox, Inc.
 * BSD like licence
   * freetype2
