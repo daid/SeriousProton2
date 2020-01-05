@@ -16,8 +16,6 @@
 
 sp::P<sp::Window> window;
 
-sp::io::Keybinding escape_key{"exit", "Escape"};
-
 int main(int argc, char** argv)
 {
     sp::P<sp::Engine> engine = new sp::Engine();
@@ -30,9 +28,8 @@ int main(int argc, char** argv)
 
     //Create a window to render on, and our engine.
     window = new sp::Window(4.0/3.0);
-#ifndef DEBUG
+#if !defined(DEBUG) && !defined(EMSCRIPTEN)
     window->setFullScreen(true);
-    window->hideCursor();
 #endif
 
     sp::gui::Theme::loadTheme("default", "gui/theme/basic.theme.txt");
