@@ -14,6 +14,7 @@ public:
     
     //Set the music volume in the range of 0 to 100
     static void setVolume(float volume);
+    static float getVolume();
 };
 
 }//namespace audio

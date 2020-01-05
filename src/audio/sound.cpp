@@ -130,7 +130,12 @@ void Sound::play(const string& resource_name)
 
 void Sound::setVolume(float volume)
 {
-    mix_volume = volume * SDL_MIX_MAXVOLUME / 100.0;
+    mix_volume = volume * SDL_MIX_MAXVOLUME / 100.0f;
+}
+
+float Sound::getVolume()
+{
+    return float(mix_volume) * 100.0f / SDL_MIX_MAXVOLUME;
 }
 
 }//namespace audio
