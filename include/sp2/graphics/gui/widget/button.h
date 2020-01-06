@@ -5,6 +5,7 @@
 #include <sp2/string.h>
 
 namespace sp {
+namespace io { class Keybinding; }
 namespace gui {
 
 class Label;
@@ -15,11 +16,13 @@ public:
 
     void setLabel(const string& label);
     virtual void setAttribute(const string& key, const string& value) override;
-    
+
+    virtual void onUpdate(float delta) override;
     virtual void updateRenderData() override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
 private:
+    P<io::Keybinding> keybinding;
     P<Label> label;
 };
 

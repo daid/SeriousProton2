@@ -4,6 +4,7 @@
 #include <sp2/graphics/meshdata.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
+#include <sp2/io/keybinding.h>
 #include <sp2/engine.h>
 
 
@@ -42,9 +43,31 @@ void Button::setAttribute(const string& key, const string& value)
         Widget::setAttribute("theme_data", value + ".background");
         label->setAttribute("theme_data", value + ".forground");
     }
+    else if (key == "keybinding")
+    {
+        keybinding = io::Keybinding::getByName(value);
+    }
     else
     {
         Widget::setAttribute(key, value);
+    }
+}
+
+void Button::onUpdate(float delta)
+{
+    Widget::onUpdate(delta);
+
+    if (isVisible() && isEnabled() && keybinding)
+    {
+        if (keybinding->getDown())
+        {
+            playThemeSound(State::Normal);
+        }
+        if (keybinding->getUp())
+        {
+            playThemeSound(State::Hovered);
+            runCallback(Variant());
+        }
     }
 }
 
