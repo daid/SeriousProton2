@@ -107,6 +107,7 @@ void Theme::loadTheme(const string& name, const string& resource_name)
 Theme::Theme(const string& name)
 : name(name)
 {
+    themes[name].destroy();
     themes[name] = this;
     
     ThemeData::StateData fallback_state;

@@ -53,7 +53,7 @@ private:
     
     Loaded images are cached and retrieving the same image is relatively quick and efficient.
  */
-class AtlasManager
+class AtlasManager : sp::NonCopyable
 {
 public:
     AtlasManager(Vector2i texture_size, int default_margin = 1);
