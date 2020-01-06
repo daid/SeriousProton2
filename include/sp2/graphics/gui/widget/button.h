@@ -22,6 +22,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
 private:
+    bool keybinding_down = false;
     P<io::Keybinding> keybinding;
     P<Label> label;
 };

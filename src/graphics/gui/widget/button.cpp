@@ -62,9 +62,11 @@ void Button::onUpdate(float delta)
         if (keybinding->getDown())
         {
             playThemeSound(State::Normal);
+            keybinding_down = true;
         }
-        if (keybinding->getUp())
+        if (keybinding->getUp() && keybinding_down)
         {
+            keybinding_down = false;
             playThemeSound(State::Hovered);
             runCallback(Variant());
         }
