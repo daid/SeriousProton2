@@ -7,6 +7,18 @@ LayoutClassRegistry* LayoutClassRegistry::first;
 
 SP_REGISTER_LAYOUT("default", Layout);
 
+void Layout::updateLoop(P<Widget> container, Rect2d rect)
+{
+    do
+    {
+        int repeat_counter = 10;
+        require_repeat = false;
+        update(container, rect);
+        if (--repeat_counter < 1)
+            return;
+    } while(require_repeat);
+}
+
 void Layout::update(P<Widget> container, Rect2d rect)
 {
     for(P<Widget> w : container->getChildren())
@@ -104,7 +116,12 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
             result_size.y = result_size.x * aspect;
         }
     }
+    sp::Vector2d pre_layout_size = widget->layout.size;
     widget->updateLayout(result_position, result_size);
+    if (pre_layout_size != widget->layout.size)
+    {
+        require_repeat = true;
+    }
 }
 
 }//namespace gui

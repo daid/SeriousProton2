@@ -13,10 +13,14 @@ class Layout : NonCopyable
 {
 public:
     virtual ~Layout() {}
+    void updateLoop(P<Widget> container, Rect2d rect);
     virtual void update(P<Widget> container, Rect2d rect);
 
 protected:
     virtual void basicLayout(Rect2d rect, Widget* widget);
+
+private:
+    bool require_repeat = false;
 };
 
 class LayoutClassRegistry : NonCopyable
