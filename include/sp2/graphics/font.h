@@ -29,41 +29,50 @@ public:
         {
         public:
             sp::Vector2f position;
+            int char_code;
             int string_offset;
         };
         std::vector<GlyphData> data;
-        
+
         std::shared_ptr<MeshData> create(bool clip=false);
-        sp::Vector2f getUsedAreaSize();
+        sp::Vector2f getUsedAreaSize() const;
+
     private:
-        Font* font;
-        string s;
+        Font* font = nullptr;
         Alignment alignment;
         int pixel_size;
         float text_size;
-        float max_line_width;
-        int line_count;
         sp::Vector2d area_size;
-        
-        void alignLine(unsigned int line_start_result_index, float current_line_width);
+
+        float getMaxLineWidth() const;
+        int getLineCount() const;
+        int lastLineCharacterCount() const;
+
         void alignAll();
-        
+
         friend class Font;
     };
     PreparedFontString prepare(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags=0);
+
 protected:
+    class CharacterInfo
+    {
+    public:
+        int code;
+        int consumed_bytes;
+    };
     class GlyphInfo
     {
     public:
         Rect2f uv_rect;
         Rect2f bounds;
         float advance;
-        int consumed_characters;
     };
-    virtual bool getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info) = 0;
+    virtual CharacterInfo getCharacterInfo(const char* str) = 0;
+    virtual bool getGlyphInfo(int char_code, int pixel_size, GlyphInfo& info) = 0;
     virtual float getLineSpacing(int pixel_size) = 0;
     virtual float getBaseline(int pixel_size) = 0;
-    virtual float getKerning(const char* previous, const char* current) = 0;
+    virtual float getKerning(int previous_char_code, int current_char_code) = 0;
 };
 
 }//namespace sp

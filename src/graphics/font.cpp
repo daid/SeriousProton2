@@ -15,99 +15,84 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     PreparedFontString result;
 
     result.font = this;
-    result.s = s;
     result.alignment = alignment;
     result.text_size = text_size;
     result.pixel_size = pixel_size;
-    result.max_line_width = 0;
-    result.line_count = 1;
     result.area_size = area_size;
 
     sp::Vector2f position(0, -line_spacing);
-    int previous_character_index = -1;
-    float current_line_width = 0;
-    unsigned int line_start_result_index = 0;
-    
+    int previous_char_code = -1;
+
     for(unsigned int index=0; index<s.size(); )
     {
-        if (previous_character_index > -1)
+        CharacterInfo char_info = getCharacterInfo(&s[index]);
+        if (previous_char_code > -1)
         {
-            position.x += getKerning(&s[previous_character_index], &s[index]) * size_scale;
+            position.x += getKerning(previous_char_code, char_info.code) * size_scale;
         }
-        previous_character_index = index;
+        result.data.push_back({
+            .position = position,
+            .char_code = char_info.code,
+            .string_offset = int(index),
+        });
+        previous_char_code = char_info.code;
+        index += char_info.consumed_bytes;
 
-        PreparedFontString::GlyphData data;
-        data.position = position;
-        data.string_offset = index;
-        result.data.push_back(data);
-
-        if (s[index] == '\n')
+        if (char_info.code == '\n')
         {
+            result.data.back().char_code = 0;
             position.x = 0;
             position.y -= line_spacing;
-            result.line_count++;
-            result.alignLine(line_start_result_index, current_line_width);
-            result.max_line_width = std::max(result.max_line_width, current_line_width);
-            current_line_width = 0;
-            line_start_result_index = result.data.size();
-            index += 1;
             continue;
         }
-        
+
         GlyphInfo glyph;
-        if (!getGlyphInfo(&s[index], pixel_size, glyph))
+        if (!getGlyphInfo(char_info.code, pixel_size, glyph))
         {
-            glyph.consumed_characters = 1;
             glyph.advance = 0;
             glyph.bounds.size.x = 0;
         }
 
-        current_line_width = std::max(current_line_width, position.x + (glyph.bounds.position.x + glyph.bounds.size.x) * size_scale);
         position.x += glyph.advance * size_scale;
-        index += glyph.consumed_characters;
-
-        if (current_line_width >= area_size.x && (flags & FlagLineWrap))
+        if ((flags & FlagLineWrap) && position.x > area_size.x)
         {
-            int wrap_index = -1;
-            for(int n=result.data.size()-1; n>int(line_start_result_index); n--)
+            //Try to wrap the line by going back to the last space character and replace that with a newline.
+            for(int n=result.data.size()-2; (n > 0) && (result.data[n].char_code != 0); n--)
             {
-                if (s[result.data[n].string_offset] == ' ')
+                if (result.data[n].char_code == ' ')
                 {
-                    wrap_index = n;
+                    result.data[n].char_code = 0;
+                    index = result.data[n + 1].string_offset;
+                    result.data.resize(n + 1);
+                    position.x = 0.0f;
+                    position.y -= line_spacing;
                     break;
                 }
             }
 
-            while(result.data.size() > line_start_result_index + 1 &&
-                (
-                    (wrap_index == -1 && current_line_width >= area_size.x) ||
-                    (wrap_index < int(result.data.size()))
-                ))
+            if (result.lastLineCharacterCount() > 1)
             {
-                getGlyphInfo(&s[result.data.back().string_offset], pixel_size, glyph);
-                current_line_width -= glyph.advance * size_scale;
-
+                // If line wrapping by space-replacement failed. Chop off characters till we are inside the area.
+                while(result.lastLineCharacterCount() > 2 && result.data.back().position.x > area_size.x)
+                {
+                    result.data.pop_back();
+                }
                 index = result.data.back().string_offset;
-                result.data.pop_back();
+                result.data.back().char_code = 0;
+                result.data.back().string_offset = -1;
+                position.x = 0.0f;
+                position.y -= line_spacing;
             }
-            if (wrap_index)
-                index++;
-
-            position.x = 0;
-            position.y -= line_spacing;
-            result.line_count++;
-            result.alignLine(line_start_result_index, current_line_width);
-            result.max_line_width = std::max(result.max_line_width, current_line_width);
-            current_line_width = 0;
-            line_start_result_index = result.data.size();
         }
     }
+    result.data.push_back({
+        .position = position,
+        .char_code = 0,
+        .string_offset = int(s.size()),
+    });
 
-    result.alignLine(line_start_result_index, current_line_width);
-    result.max_line_width = std::max(result.max_line_width, current_line_width);
-    
     result.alignAll();
-    
+
     return result;
 }
 
@@ -116,53 +101,69 @@ void Font::PreparedFontString::alignAll()
     float size_scale = text_size / float(pixel_size);
     float line_spacing = font->getLineSpacing(pixel_size) * size_scale;
 
-    sp::Vector2f offset;
-    switch(alignment)
+    auto start_of_line = data.begin();
+    for(auto it = data.begin(); it != data.end(); ++it)
     {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        offset.x = 0;
-        break;
-    case Alignment::Top:
-    case Alignment::Center:
-    case Alignment::Bottom:
-        offset.x = (area_size.x - max_line_width) / 2;
-        break;
-    case Alignment::TopRight:
-    case Alignment::Right:
-    case Alignment::BottomRight:
-        offset.x = area_size.x - max_line_width;
-        break;
+        if (it->char_code == 0)
+        {
+            float offset = 0.0f;
+            switch(alignment)
+            {
+            case Alignment::TopLeft:
+            case Alignment::BottomLeft:
+            case Alignment::Left:
+                offset = 0.0f;
+                break;
+            case Alignment::Top:
+            case Alignment::Center:
+            case Alignment::Bottom:
+                offset = (area_size.x - it->position.x) * 0.5f;
+                break;
+            case Alignment::TopRight:
+            case Alignment::Right:
+            case Alignment::BottomRight:
+                offset = area_size.x - it->position.x;
+                break;
+            }
+            while(start_of_line != it)
+            {
+                start_of_line->position.x += offset;
+                ++start_of_line;
+            }
+            start_of_line->position.x += offset;
+            ++start_of_line;
+        }
     }
+
+    float offset = 0.0;
     switch(alignment)
     {
     case Alignment::TopLeft:
     case Alignment::Top:
     case Alignment::TopRight:
-        offset.y = area_size.y;
+        offset = area_size.y;
         break;
     case Alignment::Left:
     case Alignment::Center:
     case Alignment::Right:
-        offset.y = (area_size.y + line_spacing * (line_count + 1)) / 2;
-        offset.y -= font->getBaseline(pixel_size) * size_scale * 0.5;
+        offset = (area_size.y + line_spacing * (getLineCount() + 1)) * 0.5f;
+        offset -= font->getBaseline(pixel_size) * size_scale * 0.5f;
         break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
     case Alignment::BottomRight:
-        offset.y = line_spacing * line_count;
+        offset = line_spacing * getLineCount();
         break;
     }
     for(GlyphData& d : data)
     {
-        d.position += offset;
+        d.position.y += offset;
     }
 }
 
-sp::Vector2f Font::PreparedFontString::getUsedAreaSize()
+sp::Vector2f Font::PreparedFontString::getUsedAreaSize() const
 {
-    return sp::Vector2f(max_line_width, (float(line_count) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
+    return sp::Vector2f(getMaxLineWidth(), (float(getLineCount()) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
 }
 
 std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
@@ -178,27 +179,13 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
     for(const GlyphData& d : data)
     {
         GlyphInfo glyph;
-        if (d.string_offset < 0)
+        if (d.char_code == 0 || !font->getGlyphInfo(d.char_code, pixel_size, glyph))
         {
-            char tmp[2] = {char(-d.string_offset), 0};
-            if (!font->getGlyphInfo(tmp, pixel_size, glyph))
-            {
-                glyph.consumed_characters = 1;
-                glyph.advance = 0;
-                glyph.bounds.size.x = 0;
-            }
-        }
-        else
-        {
-            if (!font->getGlyphInfo(&s[d.string_offset], pixel_size, glyph))
-            {
-                glyph.consumed_characters = 1;
-                glyph.advance = 0;
-                glyph.bounds.size.x = 0;
-            }
+            glyph.advance = 0.0f;
+            glyph.bounds.size.x = 0.0f;
         }
 
-        if (glyph.bounds.size.x > 0.0)
+        if (glyph.bounds.size.x > 0.0f)
         {
             float u0 = glyph.uv_rect.position.x;
             float v0 = glyph.uv_rect.position.y;
@@ -267,47 +254,31 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
-void Font::PreparedFontString::alignLine(unsigned int line_start_result_index, float current_line_width)
+float Font::PreparedFontString::getMaxLineWidth() const
 {
-    switch(alignment)
+    float max_x = 0.0f;
+    for(auto& d : data)
+        max_x = std::max(max_x, d.position.x);
+    return max_x;
+}
+
+int Font::PreparedFontString::getLineCount() const
+{
+    int count = 0;
+    for(auto& d : data)
+        if (d.char_code == 0)
+            count += 1;
+    return count;
+}
+
+int Font::PreparedFontString::lastLineCharacterCount() const
+{
+    for(int n=data.size()-1; n >= 0; n--)
     {
-    case Alignment::TopLeft:
-    case Alignment::BottomLeft:
-    case Alignment::Left:
-        break;
-    case Alignment::Center:
-    case Alignment::Top:
-    case Alignment::Bottom:
-        if (current_line_width < max_line_width)
-        {
-            float offset = (max_line_width - current_line_width) / 2.0;
-            for(unsigned int n=line_start_result_index; n<data.size(); n++)
-                data[n].position.x += offset;
-        }
-        else
-        {
-            float offset = (current_line_width - max_line_width) / 2.0;
-            for(unsigned int n=0; n<line_start_result_index; n++)
-                data[n].position.x += offset;
-        }
-        break;
-    case Alignment::TopRight:
-    case Alignment::Right:
-    case Alignment::BottomRight:
-        if (current_line_width < max_line_width)
-        {
-            float offset = max_line_width - current_line_width;
-            for(unsigned int n=line_start_result_index; n<data.size(); n++)
-                data[n].position.x += offset;
-        }
-        else
-        {
-            float offset = current_line_width - max_line_width;
-            for(unsigned int n=0; n<line_start_result_index; n++)
-                data[n].position.x += offset;
-        }
-        break;
+        if (data[n].char_code == 0)
+            return data.size() - n - 1;
     }
+    return data.size();
 }
 
 }//namespace sp

@@ -102,14 +102,18 @@ Texture* FreetypeFont::getTexture(int pixel_size)
     return nullptr;
 }
 
-bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo& info)
+Font::CharacterInfo FreetypeFont::getCharacterInfo(const char* str)
+{
+    Font::CharacterInfo info;
+    info.code = stringutil::utf8::decodeSingle(str, &info.consumed_bytes);
+    return info;
+}
+
+bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& info)
 {
     std::unordered_map<int, GlyphInfo>& known_glyphs = loaded_glyphs[pixel_size];
 
-    int consumed_characters;
-    int unicode = stringutil::utf8::decodeSingle(str, &consumed_characters);
-
-    if (known_glyphs.find(unicode) == known_glyphs.end())
+    if (known_glyphs.find(char_code) == known_glyphs.end())
     {
         FT_Face face = static_cast<FT_Face>(ft_face);
         
@@ -117,12 +121,11 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
         info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.advance = 0;
-        info.consumed_characters = consumed_characters;
         
-        int glyph_index = FT_Get_Char_Index(face, unicode);
+        int glyph_index = FT_Get_Char_Index(face, char_code);
         if (glyph_index == 0 || FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_FORCE_AUTOHINT) != 0)
         {
-            LOG(Warning, "Failed to find glyph in font:", "0x" + string::hex(unicode));
+            LOG(Warning, "Failed to find glyph in font:", "0x" + string::hex(char_code));
         }
         else
         {
@@ -164,9 +167,9 @@ bool FreetypeFont::getGlyphInfo(const char* str, int pixel_size, Font::GlyphInfo
             }
         }
         
-        known_glyphs[unicode] = info;
+        known_glyphs[char_code] = info;
     }
-    info = known_glyphs[unicode];
+    info = known_glyphs[char_code];
     return true;
 }
 
@@ -188,14 +191,14 @@ float FreetypeFont::getBaseline(int pixel_size)
     return getLineSpacing(pixel_size) * 0.6;
 }
 
-float FreetypeFont::getKerning(const char* previous, const char* current)
+float FreetypeFont::getKerning(int previous_char_code, int current_char_code)
 {
     // Apply the kerning offset
     FT_Face face = static_cast<FT_Face>(ft_face);
     if (FT_HAS_KERNING(face))
     {
         FT_Vector kerning;
-        FT_Get_Kerning(face, FT_Get_Char_Index(face, *previous), FT_Get_Char_Index(face, *current), FT_KERNING_DEFAULT, &kerning);
+        FT_Get_Kerning(face, FT_Get_Char_Index(face, previous_char_code), FT_Get_Char_Index(face, current_char_code), FT_KERNING_DEFAULT, &kerning);
         if (!FT_IS_SCALABLE(face))
             return float(kerning.x);
         else

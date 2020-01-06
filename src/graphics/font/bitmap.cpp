@@ -76,39 +76,52 @@ BitmapFont::BitmapFont(const string& name, io::ResourceStreamPtr stream)
         int x = stringutil::convert::toInt(parts[0].strip());
         int y = stringutil::convert::toInt(parts[1].strip());
         int w = stringutil::convert::toInt(parts[2].strip());
-        
-        specials[parts[3].strip()] = Rect2f(Vector2f(glyph_size.x * x, glyph_size.y * y), Vector2f(glyph_size.x * w, glyph_size.y));
+
+        int code = specials.size() | special_mask | (w << 16);
+
+        glyphs[code] = Vector2f(glyph_size.x * x, glyph_size.y * y);
+        specials[parts[3].strip()] = code;
     }
 }
 
-bool BitmapFont::getGlyphInfo(const char* str, int pixel_size, GlyphInfo& info)
+Font::CharacterInfo BitmapFont::getCharacterInfo(const char* str)
 {
+    Font::CharacterInfo info;
+
     for(auto it : specials)
     {
         if (strncmp(it.first.c_str(), str, it.first.length()) == 0)
         {
-            info.uv_rect = it.second;
-            info.bounds = {0, pixel_size * it.second.size.y / glyph_size.y, pixel_size * it.second.size.x / glyph_size.x, pixel_size * it.second.size.y / glyph_size.y};
-            info.advance = pixel_size * glyph_advance.x * it.second.size.x / glyph_size.x;
-            info.consumed_characters = it.first.length();
-            return true;
+            info.code = it.second;
+            info.consumed_bytes = it.first.length();
+            return info;
         }
     }
-    if (*str == ' ')
+    info.code = *str;
+    info.consumed_bytes = 1;
+    return info;
+}
+
+bool BitmapFont::getGlyphInfo(int char_code, int pixel_size, GlyphInfo& info)
+{
+    if (char_code == ' ')
     {
         info.uv_rect = {0, 0, 0, 0};
         info.bounds = {0, 0, 0, 0};
         info.advance = pixel_size * glyph_advance.x;
-        info.consumed_characters = 1;
         return true;
     }
-    auto it = glyphs.find(*str);
+    auto it = glyphs.find(char_code);
     if (it == glyphs.end())
         return false;
-    info.uv_rect = {it->second.x, it->second.y, glyph_size.x, glyph_size.y};
-    info.bounds = {0, float(pixel_size), float(pixel_size) * aspect_ratio, float(pixel_size)};
-    info.advance = pixel_size * glyph_advance.x;
-    info.consumed_characters = 1;
+    float w = 1.0f;
+    if (char_code & special_mask)
+    {
+        w = float(char_code >> 16);
+    }
+    info.uv_rect = {it->second.x, it->second.y, glyph_size.x * w, glyph_size.y};
+    info.bounds = {0, float(pixel_size), float(pixel_size) * aspect_ratio * w, float(pixel_size)};
+    info.advance = pixel_size * glyph_advance.x * w;
     return true;
 }
 
@@ -122,9 +135,9 @@ float BitmapFont::getBaseline(int pixel_size)
     return getLineSpacing(pixel_size);
 }
 
-float BitmapFont::getKerning(const char* previous, const char* current)
+float BitmapFont::getKerning(int previous_char_code, int current_char_code)
 {
-    return 0;
+    return 0.0f;
 }
 
 Texture* BitmapFont::getTexture(int pixel_size)
