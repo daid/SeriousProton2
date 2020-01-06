@@ -19,6 +19,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     result.text_size = text_size;
     result.pixel_size = pixel_size;
     result.area_size = area_size;
+    result.flags = flags;
 
     sp::Vector2f position(0, -line_spacing);
     int previous_char_code = -1;
@@ -166,7 +167,7 @@ sp::Vector2f Font::PreparedFontString::getUsedAreaSize() const
     return sp::Vector2f(getMaxLineWidth(), (float(getLineCount()) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
 }
 
-std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
+std::shared_ptr<MeshData> Font::PreparedFontString::create()
 {
     float size_scale = text_size / float(pixel_size);
 
@@ -197,7 +198,7 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create(bool clip)
             float top = d.position.y + glyph.bounds.position.y * size_scale;
             float bottom = top - glyph.bounds.size.y * size_scale;
             
-            if (clip)
+            if (flags & FlagClip)
             {
                 if (right < 0)
                     continue;

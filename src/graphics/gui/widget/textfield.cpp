@@ -49,7 +49,7 @@ void TextField::updateRenderData()
         float t_size = text_size < 0 ? t.size : text_size;
     
         Font::PreparedFontString result;
-        result = t.font->prepare(value + " ", 64, t_size, getRenderSize(), Alignment::Left);
+        result = t.font->prepare(value, 64, t_size, getRenderSize(), Alignment::Left);
         render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
@@ -160,7 +160,7 @@ int TextField::getTextOffsetForPosition(Vector2d position)
     const ThemeData::StateData& t = theme->states[int(getState())];
     if (t.font)
     {
-        Font::PreparedFontString result = t.font->prepare(value + " ", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
+        Font::PreparedFontString result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);
         for(auto& d : result.data)
         {
             if (d.position.x <= position.x)

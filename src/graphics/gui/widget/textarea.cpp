@@ -56,12 +56,12 @@ void TextArea::updateRenderData()
         if (isFocused())
         {
             float ts = text_size < 0 ? t.size : text_size;
-            result = t.font->prepare(value + "_", 64, ts, getRenderSize(), Alignment::TopLeft);
+            result = t.font->prepare(value + "_", 64, ts, getRenderSize(), Alignment::TopLeft, Font::FlagClip);
             for(auto d : result.data)
             {
                 if (d.string_offset == cursor)
                 {
-                    result.data.back().position = d.position;
+                    result.data[result.data.size()-2].position = d.position;
                     
                     float y = getRenderSize().y - d.position.y;
                     y -= vertical_scroll->getValue();
@@ -74,12 +74,12 @@ void TextArea::updateRenderData()
         }
         else
         {
-            result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+            result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft, Font::FlagClip);
         }
         vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
         for(auto& data : result.data)
             data.position.y += vertical_scroll->getValue();
-        render_data.mesh = result.create(true);
+        render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
     }
@@ -99,7 +99,7 @@ bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int 
     const ThemeData::StateData& t = theme->states[int(getState())];
     if (t.font)
     {
-        Font::PreparedFontString result = t.font->prepare(value + "_", 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+        Font::PreparedFontString result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
         unsigned int n;
         for(n=0; n<result.data.size(); n++)
         {

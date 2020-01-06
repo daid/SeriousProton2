@@ -14,6 +14,7 @@ class Font : NonCopyable
 {
 public:
     static constexpr int FlagLineWrap = 0x01;
+    static constexpr int FlagClip = 0x02;
 
     /** Create a meshData for the given string.
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.
@@ -34,7 +35,7 @@ public:
         };
         std::vector<GlyphData> data;
 
-        std::shared_ptr<MeshData> create(bool clip=false);
+        std::shared_ptr<MeshData> create();
         sp::Vector2f getUsedAreaSize() const;
 
     private:
@@ -43,6 +44,7 @@ public:
         int pixel_size;
         float text_size;
         sp::Vector2d area_size;
+        int flags;
 
         float getMaxLineWidth() const;
         int getLineCount() const;
