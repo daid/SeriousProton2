@@ -99,7 +99,11 @@ void Scene::updateNode(float delta, P<Node> node)
     if (node)
     {
         for(P<Node> child : node->children)
+        {
             updateNode(delta, child);
+            if (!node)
+                break;
+        }
     }
 }
 
@@ -109,7 +113,11 @@ void Scene::fixedUpdateNode(P<Node> node)
     if (node)
     {
         for(P<Node> child : node->children)
+        {
             fixedUpdateNode(child);
+            if (!node)
+                break;
+        }
     }
 }
 
