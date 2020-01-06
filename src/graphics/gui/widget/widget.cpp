@@ -5,6 +5,7 @@
 #include <sp2/graphics/gui/loader.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
+#include <sp2/audio/sound.h>
 #include <sp2/assert.h>
 #include <limits>
 
@@ -443,6 +444,12 @@ void Widget::runCallback(Variant v)
         Callback c = callback;
         c(v);
     }
+}
+
+void Widget::playThemeSound(State state)
+{
+    if (!theme->states[int(state)].sound.empty())
+        sp::audio::Sound::play(theme->states[int(state)].sound);
 }
 
 std::shared_ptr<MeshData> Widget::createStretched(Vector2d size)

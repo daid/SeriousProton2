@@ -19,6 +19,7 @@ public:
         sp::Color color;
         float size; //general size parameter, depends on the widget type what it means.
         Font* font;
+        sp::string sound;   //Sound effect played by the widget on certain actions.
     };
     StateData states[int(Widget::State::Count)];
 };
@@ -34,6 +35,7 @@ public:
     - color
     - font
     - size
+    - sound
    
     With the possibility to distingish with the following states:
     - normal: Default state

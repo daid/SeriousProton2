@@ -63,13 +63,18 @@ void Button::updateRenderData()
 
 bool Button::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
+    if (isEnabled())
+        playThemeSound(State::Normal);
     return true;
 }
 
 void Button::onPointerUp(Vector2d position, int id)
 {
     if (position.x >= 0 && position.x <= getRenderSize().x && position.y >= 0 && position.y <= getRenderSize().y && isEnabled())
+    {
+        playThemeSound(State::Hovered);
         runCallback(Variant());
+    }
 }
 
 }//namespace gui

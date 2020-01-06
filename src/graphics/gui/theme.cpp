@@ -60,6 +60,7 @@ void Theme::loadTheme(const string& name, const string& resource_name)
             global_data.color = Color(1, 1, 1);
         global_data.font = font_manager.get(input["font"]);
         global_data.size = stringutil::convert::toFloat(input["size"]);
+        global_data.sound = input["sound"];
         for(unsigned int n=0; n<int(Widget::State::Count); n++)
         {
             string postfix = "?";
@@ -95,6 +96,8 @@ void Theme::loadTheme(const string& name, const string& resource_name)
                 data.states[n].font = font_manager.get(input["font." + postfix]);
             if (input.find("size." + postfix) != input.end())
                 data.states[n].size = stringutil::convert::toFloat(input["size." + postfix]);
+            if (input.find("sound." + postfix) != input.end())
+                data.states[n].sound = input["sound." + postfix];
         }
 
         theme->data[it.first] = data;

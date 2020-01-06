@@ -129,6 +129,7 @@ protected:
     void setFocusable(bool value);
 
     void runCallback(Variant v);
+    void playThemeSound(State state);
     void markRenderDataOutdated()
     {
         if (slave_widget)
