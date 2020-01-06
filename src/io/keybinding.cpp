@@ -309,6 +309,14 @@ void Keybinding::saveKeybindings(const string& filename)
     file << json.dump();
 }
 
+P<Keybinding> Keybinding::getByName(const string& name)
+{
+    for(P<Keybinding> binding : keybindings)
+        if (binding->name == name)
+            return binding;
+    return nullptr;
+}
+
 void Keybinding::setVirtualKey(int index, float value)
 {
     sp2assert(index >= 0 && index <= 255, "Virtual key indexes need to be in the range 0-255");
