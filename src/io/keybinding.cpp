@@ -156,12 +156,12 @@ void Keybinding::clearKeys()
     key_number.clear();
 }
 
-bool Keybinding::isBound()
+bool Keybinding::isBound() const
 {
     return key_number.size() > 0;
 }
 
-string Keybinding::getKey(int index)
+string Keybinding::getKey(int index) const
 {
     if (index >= 0 && index < int(key_number.size()))
     {
@@ -195,6 +195,55 @@ string Keybinding::getKey(int index)
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case virtual_mask:
             return "virtual:" + string(key & 0xff);
+        }
+    }
+    return "unknown";
+}
+
+string Keybinding::getHumanReadableKeyName(int index) const
+{
+    if (index >= 0 && index < int(key_number.size()))
+    {
+        int key = key_number[index];
+        switch(key & type_mask)
+        {
+        case keyboard_mask:
+            return SDL_GetKeyName(key & ~type_mask);
+        case pointer_mask:
+            switch(Pointer::Button(key & ~type_mask))
+            {
+            case Pointer::Button::Touch: return "Touch Screen";
+            case Pointer::Button::Left: return "Left Mouse Button";
+            case Pointer::Button::Middle: return "Middle Mouse Button";
+            case Pointer::Button::Right: return "Right Mouse Button";
+            case Pointer::Button::Other1: return "Other1 Mouse Button";
+            case Pointer::Button::Other2: return "Other2 Mouse Button";
+            default: break;
+            }
+            break;
+        case joystick_axis_mask:
+            return "Joystick Axis: " + string(key & 0xff);
+        case joystick_axis_inverted_mask:
+            return "Joystick Axis: " + string(key & 0xff) + " (inverted)";
+        case joystick_button_mask:
+            return "Joystick Button: " + string(key & 0xff);
+        case mouse_wheel_mask:
+            switch(key & ~type_mask)
+            {
+            case 0: return "Mouse Wheel";
+            case 1: return "Mouse Wheel";
+            case 2: return "Mouse Wheel Sideways";
+            case 3: return "Mouse Wheel Sideways";
+            }
+            break;
+        case game_controller_button_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":button:" + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
+        case game_controller_axis_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":axis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+        case game_controller_axis_inverted_mask:
+            return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+        case virtual_mask:
+            return "Virtual: " + string(key & 0xff);
         }
     }
     return "Unknown";
@@ -231,7 +280,7 @@ void Keybinding::startUserRebind()
     rebinding_key = this;
 }
 
-bool Keybinding::isUserRebinding()
+bool Keybinding::isUserRebinding() const
 {
     return rebinding_key == this;
 }

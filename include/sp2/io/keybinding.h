@@ -23,6 +23,7 @@ public:
 
     const string& getName() const { return name; }
     const string& getLabel() const { return label; }
+    void setLabel(const string& label) { this->label = label; }
 
     //Set/get/add bound keys to the keybinding.
     //  Key name should be one of the following:
@@ -38,12 +39,16 @@ public:
     //  * "virtual:[id], where id is the number of a virtual key, controlled by setVirtualKey, and the virtual touchscreen controls.
     void setKey(const string& key);
     void setKeys(const std::initializer_list<const string>& keys);
-    string getKey(int index);
     void addKey(const string& key);
     void clearKeys();
 
+    // Get the name of the key in the same format as used for setKey and friends. Returns empty string if the index as no set key.
+    string getKey(int index) const;
+    // Get a human readable name of the key for display purposes.
+    string getHumanReadableKeyName(int index) const;
+
     //Returns true if there is anything bound to this keybinding.
-    bool isBound();
+    bool isBound() const;
 
     bool get() const; //True when this key is currently being pressed.
     bool getDown() const; //True for 1 update cycle when the key is pressed.
@@ -53,7 +58,7 @@ public:
     //Start a binding process from the user. The next button pressed by the user will be bound to this key.
     //Note that this will add on top of the already existing binds, so clearKeys() need to be called if you want to bind a single key.
     void startUserRebind();
-    bool isUserRebinding();
+    bool isUserRebinding() const;
 
     static int joystickCount();
     static int gamepadCount();
