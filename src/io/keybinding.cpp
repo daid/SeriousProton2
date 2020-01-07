@@ -15,7 +15,7 @@ PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 P<Keybinding> Keybinding::rebinding_key SP2_INIT_EARLY;
 
 Keybinding::Keybinding(const string& name)
-: name(name), label(name)
+: name(name), label(name.substr(0, 1).upper() + name.substr(1).lower())
 {
     value = 0.0;
     down_event = false;
@@ -196,8 +196,9 @@ string Keybinding::getKey(int index) const
         case virtual_mask:
             return "virtual:" + string(key & 0xff);
         }
+        return "unknown";
     }
-    return "unknown";
+    return "";
 }
 
 string Keybinding::getHumanReadableKeyName(int index) const
@@ -237,16 +238,17 @@ string Keybinding::getHumanReadableKeyName(int index) const
             }
             break;
         case game_controller_button_mask:
-            return "gamecontroller:" + string((key >> 8) & 0xff) + ":button:" + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
+            return "Controller: " + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
         case game_controller_axis_mask:
-            return "gamecontroller:" + string((key >> 8) & 0xff) + ":axis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+            return "Controller: " + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case game_controller_axis_inverted_mask:
-            return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+            return "Controller: " + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case virtual_mask:
             return "Virtual: " + string(key & 0xff);
         }
+        return "Unknown";
     }
-    return "Unknown";
+    return "";
 }
 
 bool Keybinding::get() const
