@@ -231,10 +231,10 @@ string Keybinding::getHumanReadableKeyName(int index) const
         case mouse_wheel_mask:
             switch(key & ~type_mask)
             {
-            case 0: return "Mouse Wheel";
-            case 1: return "Mouse Wheel";
-            case 2: return "Mouse Wheel Sideways";
-            case 3: return "Mouse Wheel Sideways";
+            case 0: return "Mouse Wheel Sideways";
+            case 1: return "Mouse Wheel Sideways";
+            case 2: return "Mouse Wheel";
+            case 3: return "Mouse Wheel";
             }
             break;
         case game_controller_button_mask:
