@@ -3,6 +3,7 @@
 
 #include <sp2/pointer.h>
 #include <sp2/string.h>
+#include <sp2/assert.h>
 
 namespace sp {
 
@@ -28,18 +29,29 @@ public:
     void initialize();
     void processEvents();
     void update(float time_delta);
-    
+
     void setGameSpeed(float speed);
     float getGameSpeed();
     void setPause(bool pause);
     bool getPause();
     void shutdown();
-    
+
     // Check if we are currently calling onUpdateFixed.
     bool isInFixedUpdate() { return in_fixed_update; }
-    
+
+    float getUpdateDelta()
+    {
+        sp2assert(!in_fixed_update, "When in a fixed update, use sp::Engine::fixed_update_delta instead.");
+        return update_delta;
+    }
+
+    double getElapsedGameTime()
+    {
+        return elapsed_game_time;
+    }
+
     float getFPS() { return current_fps; }
-    
+
     static Engine* getInstance() { return *engine; }
 private:
     static P<Engine> engine;
@@ -48,6 +60,8 @@ private:
     bool paused;
 
     bool in_fixed_update;
+    float update_delta;
+    double elapsed_game_time;
 
     float maximum_frame_time;
     float minimum_frame_time;

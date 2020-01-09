@@ -62,7 +62,9 @@ Engine::Engine()
     last_update_timing = {0};
 
     in_fixed_update = false;
-    
+    update_delta = 0.0f;
+    elapsed_game_time = 0.0;
+
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
@@ -248,6 +250,9 @@ void Engine::update(float time_delta)
             time_delta = fixed_update_delta;
     }
 #endif
+    update_delta = time_delta;
+    elapsed_game_time += time_delta;
+
     fixed_update_accumulator += time_delta;
     in_fixed_update = true;
     while(fixed_update_accumulator > fixed_update_delta)
