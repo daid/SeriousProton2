@@ -21,6 +21,7 @@ constexpr uint8_t PacketIDs::update_object;
 constexpr uint8_t PacketIDs::delete_object;
 constexpr uint8_t PacketIDs::setup_scene;
 constexpr uint8_t PacketIDs::call_on_server;
+constexpr uint8_t PacketIDs::call_on_client;
 constexpr uint8_t PacketIDs::alive;
 constexpr uint64_t PacketIDs::magic_sp2_value;
 

@@ -29,8 +29,13 @@ public:
         running = false;
     }
 
+    bool isRunning()
+    {
+        return running;
+    }
+
     //Call this to check if the timer has expired. This will return true only once if the timer expired.
-    bool update()
+    bool isExpired()
     {
         if (!running)
             return false;
