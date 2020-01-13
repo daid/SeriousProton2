@@ -49,6 +49,10 @@ void Image::setAttribute(const string& key, const string& value)
         }
         markRenderDataOutdated();
     }
+    else if (key == "color")
+    {
+        render_data.color = sp::Color::fromString(value);
+    }
     else
     {
         Widget::setAttribute(key, value);
