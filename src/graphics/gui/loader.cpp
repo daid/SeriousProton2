@@ -8,11 +8,15 @@
 namespace sp {
 namespace gui {
 
-P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Widget> root_widget, bool auto_reload)
+Loader::Loader(const sp::string& resource_name)
+: primary_resource_name(resource_name)
 {
-    Loader loader;
-    loader.subs.emplace(resource_name, SubLoader(loader, resource_name));
-    SubLoader& sub = loader.subs.find(resource_name)->second;
+    subs.emplace(resource_name, SubLoader(*this, resource_name));
+}
+
+P<Widget> Loader::create(const string& root_id, P<Widget> root_widget, bool auto_reload)
+{
+    SubLoader& sub = subs.find(primary_resource_name)->second;
     if (!sub.tree)
         return nullptr;
     KeyValueTreeNode* root = sub.tree->findId(root_id);
@@ -29,7 +33,7 @@ P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Wid
         if (auto_reload)
         {
 #ifdef DEBUG
-            root_widget->setupAutoReload(result, resource_name, root_id);
+            root_widget->setupAutoReload(result, primary_resource_name, root_id);
 #else
             LOG(Warning, "Cannot use 'auto reload' on sp::gui::Loader in release builds");
 #endif
@@ -37,6 +41,11 @@ P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Wid
         return result;
     }
     return nullptr;
+}
+
+P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Widget> root_widget, bool auto_reload)
+{
+    return Loader(resource_name).create(root_id, root_widget, auto_reload);
 }
 
 Loader::SubLoader::SubLoader(Loader& loader, const string& resource_name)
@@ -83,11 +92,11 @@ void Loader::SubLoader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& n
             string key = args.substr(start_of_key + 1);
             args = args.substr(0, start_of_key);
             new_parameters[key] = value;
-            
+
             start_of_value = args.rfind("=");
         }
         string reference_name = args;
-        
+
         KeyValueTreeNode* ref = findRef(reference_name);
         if (ref)
             loadWidgetFromTree(widget, *ref, new_parameters);
@@ -101,7 +110,7 @@ void Loader::SubLoader::loadWidgetFromTree(P<Widget> widget, KeyValueTreeNode& n
             widget->setAttribute(it.first, it.second.format(parameters));
         }
     }
-    
+
     for(KeyValueTreeNode& child_node : node.child_nodes)
     {
         createWidget(widget, child_node, parameters);

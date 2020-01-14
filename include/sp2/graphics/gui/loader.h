@@ -13,6 +13,9 @@ class Widget;
 class Loader : NonCopyable
 {
 public:
+    Loader(const string& resource_name);
+    P<Widget> create(const string& root_id, P<Widget> root=nullptr, bool auto_reload=false);
+
     static P<Widget> load(const string& resource_name, const string& root_id, P<Widget> root=nullptr, bool auto_reload=false);
 
 private:
@@ -29,7 +32,8 @@ private:
         Loader& loader;
         KeyValueTreePtr tree;
     };
-    
+
+    string primary_resource_name;
     std::map<string, SubLoader> subs;
 };
 
