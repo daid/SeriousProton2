@@ -85,7 +85,7 @@ bool Music::play(const string& resource_name, bool loop)
 
 bool Music::isPlaying()
 {
-    return music_source.isActive();
+    return music_source.isPlaying();
 }
 
 void Music::stop()
