@@ -18,6 +18,7 @@ public:
 private:
     string texture;
     Rect2d uv;
+    Vector2d tile_size;
 };
 
 }//namespace gui
