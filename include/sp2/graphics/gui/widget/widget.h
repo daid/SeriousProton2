@@ -15,7 +15,7 @@ namespace sp {
 namespace gui {
 
 class Layout;
-class ThemeData;
+class ThemeStyle;
 class Widget : public Node
 {
 public:
@@ -45,8 +45,8 @@ public:
         bool fill_width = false;
         bool fill_height = false;
         bool lock_aspect_ratio = false;
-        bool match_content_size = false;
-        
+        bool match_content_size = true;
+
         P<Widget> anchor_widget;
         Alignment anchor_point = Alignment::TopLeft;
     };
@@ -56,7 +56,7 @@ public:
         Disabled,
         Focused,
         Hovered,
-        
+
         Count
     };
     typedef std::function<void(Variant value)> Callback;
@@ -122,10 +122,10 @@ public:
     void setupAutoReload(P<Widget> widget, const string& resource_name, const string& root_id);
 #endif
 protected:
-    const ThemeData* theme;
+    const ThemeStyle* theme;
     sp::P<Widget> slave_widget;
     
-    void loadThemeData(const string& name);
+    void loadThemeStyle(const string& name);
     void setFocusable(bool value);
 
     void runCallback(Variant v);
@@ -161,7 +161,7 @@ private:
 
     string id;
     string theme_name = "default";
-    string theme_data_name;
+    string theme_style_name;
     
     Callback callback;
     

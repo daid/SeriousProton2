@@ -10,7 +10,7 @@ namespace gui {
 class Label : public Widget
 {
 public:
-    Label(P<Widget> parent, const string& theme_data_name="label");
+    Label(P<Widget> parent, const string& theme_style_name="label");
 
     void setLabel(const string& label);
     const string& getLabel();

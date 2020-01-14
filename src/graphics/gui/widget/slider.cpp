@@ -12,7 +12,7 @@ SP_REGISTER_WIDGET("slider", Slider);
 Slider::Slider(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("slider.background");
+    loadThemeStyle("slider.background");
 
     min_value = 0.0;
     max_value = 1.0;
@@ -57,10 +57,10 @@ void Slider::setAttribute(const string& key, const string& value)
         this->value = stringutil::convert::toFloat(value);
         markRenderDataOutdated();
     }
-    else if (key == "theme_data")
+    else if (key == "style" || key == "theme_data")
     {
-        Widget::setAttribute("theme_data", value + ".background");
-        dial->setAttribute("theme_data", value + ".forground");
+        Widget::setAttribute("style", value + ".background");
+        dial->setAttribute("style", value + ".forground");
     }
     else
     {
@@ -92,7 +92,7 @@ void Slider::setRange(float min, float max)
 void Slider::updateRenderData()
 {
     Vector2d size(getRenderSize());
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretched(size);
     render_data.texture = t.texture;

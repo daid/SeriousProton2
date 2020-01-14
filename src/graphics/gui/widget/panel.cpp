@@ -12,12 +12,12 @@ SP_REGISTER_WIDGET("panel", Panel);
 Panel::Panel(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("panel");
+    loadThemeStyle("panel");
 }
 
 void Panel::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretchedHV(getRenderSize(), t.size);

@@ -11,7 +11,7 @@ SP_REGISTER_WIDGET("textfield", TextField);
 TextField::TextField(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("textfield");
+    loadThemeStyle("textfield");
     text_size = -1;
     texture_revision = -1;
     setFocusable(true);
@@ -41,7 +41,7 @@ void TextField::setAttribute(const string& key, const string& value)
 
 void TextField::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
@@ -157,7 +157,7 @@ void TextField::onTextInput(TextInputEvent e)
 int TextField::getTextOffsetForPosition(Vector2d position)
 {
     int result_offset = 0;
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     if (t.font)
     {
         Font::PreparedFontString result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::Left);

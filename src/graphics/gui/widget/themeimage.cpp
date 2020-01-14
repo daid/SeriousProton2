@@ -7,10 +7,10 @@
 namespace sp {
 namespace gui {
 
-ThemeImage::ThemeImage(P<Widget> parent, const string& theme_data_name)
+ThemeImage::ThemeImage(P<Widget> parent, const string& theme_style_name)
 : Widget(parent)
 {
-    loadThemeData(theme_data_name);
+    loadThemeStyle(theme_style_name);
     orientation = Orientation::Auto;
     setAttribute("order", "-2");
 }
@@ -26,7 +26,7 @@ void ThemeImage::setOrientation(Orientation orientation)
 
 void ThemeImage::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     
     render_data.shader = Shader::get("internal:basic.shader");
     switch(orientation)

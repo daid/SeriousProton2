@@ -36,10 +36,10 @@ Widget::~Widget()
         delete layout_manager;
 }
 
-void Widget::loadThemeData(const string& name)
+void Widget::loadThemeStyle(const string& name)
 {
-    theme_data_name = name;
-    theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+    theme_style_name = name;
+    theme = Theme::getTheme(theme_name)->getStyle(theme_style_name);
 }
 
 void Widget::setFocusable(bool value)
@@ -208,14 +208,17 @@ void Widget::setAttribute(const string& key, const string& value)
     if (key == "size")
     {
         layout.size = stringutil::convert::toVector2d(value);
+        layout.match_content_size = false;
     }
     else if (key == "width")
     {
         layout.size.x = stringutil::convert::toFloat(value);
+        layout.match_content_size = false;
     }
     else if (key == "height")
     {
         layout.size.y = stringutil::convert::toFloat(value);
+        layout.match_content_size = false;
     }
     else if (key == "position")
     {
@@ -301,33 +304,38 @@ void Widget::setAttribute(const string& key, const string& value)
     else if (key == "match_content_size")
     {
         layout.match_content_size = stringutil::convert::toBool(value);
+        if (layout.match_content_size)
+            LOG(Warning, "match_content_size was set for widget:", id, "but default is set unless a size is specified.");
     }
     else if (key == "stretch")
     {
         layout.fill_height = layout.fill_width = stringutil::convert::toBool(value);
+        layout.match_content_size = false;
     }
     else if (key == "fill_height")
     {
         layout.fill_height = stringutil::convert::toBool(value);
+        layout.match_content_size = false;
     }
     else if (key == "fill_width")
     {
         layout.fill_width = stringutil::convert::toBool(value);
+        layout.match_content_size = false;
     }
     else if (key == "theme")
     {
         if (theme_name != value)
         {
             theme_name = value;
-            theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+            theme = Theme::getTheme(theme_name)->getStyle(theme_style_name);
         }
     }
-    else if (key == "theme_data")
+    else if (key == "theme_data" || key == "style")
     {
-        if (theme_data_name != value)
+        if (theme_style_name != value)
         {
-            theme_data_name = value;
-            theme = Theme::getTheme(theme_name)->getData(theme_data_name);
+            theme_style_name = value;
+            theme = Theme::getTheme(theme_name)->getStyle(theme_style_name);
             markRenderDataOutdated();
         }
     }

@@ -16,7 +16,7 @@ SP_REGISTER_WIDGET("button", Button);
 Button::Button(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("button.background");
+    loadThemeStyle("button.background");
     label = new Label(this, "button.forground");
     label->layout.fill_height = true;
     label->layout.fill_width = true;
@@ -38,10 +38,10 @@ void Button::setAttribute(const string& key, const string& value)
     {
         label->setAttribute(key, value);
     }
-    else if (key == "theme_data")
+    else if (key == "style" || key == "theme_data")
     {
-        Widget::setAttribute("theme_data", value + ".background");
-        label->setAttribute("theme_data", value + ".forground");
+        Widget::setAttribute("style", value + ".background");
+        label->setAttribute("style", value + ".forground");
     }
     else if (key == "keybinding")
     {
@@ -75,7 +75,7 @@ void Button::onUpdate(float delta)
 
 void Button::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = t.texture;

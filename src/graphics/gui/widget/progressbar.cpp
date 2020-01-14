@@ -12,7 +12,7 @@ SP_REGISTER_WIDGET("progressbar", Progressbar);
 Progressbar::Progressbar(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("progressbar.background");
+    loadThemeStyle("progressbar.background");
     value = 0.5;
     min_value = 0.0;
     max_value = 1.0;
@@ -61,10 +61,10 @@ void Progressbar::setAttribute(const string& key, const string& value)
             min_value = v.x;
         markRenderDataOutdated();
     }
-    else if (key == "theme_data")
+    else if (key == "style" || key == "theme_data")
     {
-        Widget::setAttribute("theme_data", value + ".background");
-        fill->setAttribute("theme_data", value + ".forground");
+        Widget::setAttribute("style", value + ".background");
+        fill->setAttribute("style", value + ".forground");
     }
     else
     {
@@ -76,7 +76,7 @@ void Progressbar::updateRenderData()
 {
     float f = (value - min_value) / (max_value - min_value);
     f = std::max(0.0f, std::min(f, 1.0f));
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = t.texture;
     render_data.color = t.color;

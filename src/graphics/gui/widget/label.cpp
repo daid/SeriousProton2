@@ -8,10 +8,10 @@ namespace gui {
 
 SP_REGISTER_WIDGET("label", Label);
 
-Label::Label(P<Widget> parent, const string& theme_data_name)
+Label::Label(P<Widget> parent, const string& theme_style_name)
 : Widget(parent)
 {
-    loadThemeData(theme_data_name);
+    loadThemeStyle(theme_style_name);
     text_alignment = Alignment::Center;
     vertical = false;
     text_size = -1;
@@ -73,7 +73,7 @@ void Label::setAttribute(const string& key, const string& value)
 
 void Label::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)

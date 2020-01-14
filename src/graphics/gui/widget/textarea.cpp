@@ -12,7 +12,7 @@ SP_REGISTER_WIDGET("textarea", TextArea);
 TextArea::TextArea(P<Widget> parent)
 : Widget(parent)
 {
-    loadThemeData("textarea");
+    loadThemeStyle("textarea");
     text_size = -1;
     texture_revision = -1;
     setFocusable(true);
@@ -47,7 +47,7 @@ void TextArea::setAttribute(const string& key, const string& value)
 
 void TextArea::updateRenderData()
 {
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
@@ -96,7 +96,7 @@ void TextArea::onUpdate(float delta)
 bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     position.y -= vertical_scroll->getValue();
-    const ThemeData::StateData& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     if (t.font)
     {
         Font::PreparedFontString result = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);

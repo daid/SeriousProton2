@@ -9,10 +9,10 @@ namespace sp {
 class Font;
 namespace gui {
 
-class ThemeData
+class ThemeStyle
 {
 public:
-    class StateData
+    class StateStyle
     {
     public:
         Texture* texture;
@@ -21,7 +21,7 @@ public:
         Font* font;
         sp::string sound;   //Sound effect played by the widget on certain actions.
     };
-    StateData states[int(Widget::State::Count)];
+    StateStyle states[int(Widget::State::Count)];
 };
 
 /** The Theme class is used by the sp::gui::widget classes to style themselves.
@@ -46,7 +46,7 @@ public:
 class Theme : public AutoPointerObject
 {
 public:
-    const ThemeData* getData(const string& element);
+    const ThemeStyle* getStyle(const string& element);
 
     static P<Theme> getTheme(const string& name);
     static void loadTheme(const string& name, const string& resource_name);
@@ -55,8 +55,8 @@ private:
     virtual ~Theme();
 
     string name;
-    std::map<string, ThemeData> data;
-    
+    std::map<string, ThemeStyle> styles;
+
     static std::map<string, P<Theme>> themes;
 };
 
