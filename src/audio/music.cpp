@@ -25,7 +25,7 @@ static int mix_volume = SDL_MIX_MAXVOLUME;
 class MusicSource : public AudioSource
 {
 public:
-    bool open(io::ResourceStreamPtr stream)
+    bool open(io::ResourceStreamPtr stream, bool loop)
     {
         if (!stream)
             return false;
@@ -52,18 +52,24 @@ protected:
         float buffer[sample_count];
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
         if (vorbis_samples == 0)
-            stb_vorbis_seek_frame(vorbis, 0);
+        {
+            if (loop)
+                stb_vorbis_seek_frame(vorbis, 0);
+            else
+                stop();
+        }
         mix(stream, buffer, vorbis_samples * 2, mix_volume);
     }
 
 private:
     std::vector<uint8_t> file_data;
+    bool loop = false;
     stb_vorbis* vorbis = nullptr;
 };
 
 static MusicSource music_source;
 
-bool Music::play(const string& resource_name)
+bool Music::play(const string& resource_name, bool loop)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
@@ -71,10 +77,15 @@ bool Music::play(const string& resource_name)
         LOG(Error, "Failed to open", resource_name, "to play as music");
         return false;
     }
-    if (!music_source.open(stream))
+    if (!music_source.open(stream, loop))
         return false;
     LOG(Info, "Playing music", resource_name);
     return true;
+}
+
+bool Music::isPlaying()
+{
+    return music_source.isActive();
 }
 
 void Music::stop()

@@ -33,6 +33,11 @@ void AudioSource::start()
     SDL_UnlockAudioDevice(sdl_audio_device);
 }
 
+bool AudioSource::isPlaying()
+{
+    return active;
+}
+
 void AudioSource::stop()
 {
     if (!active)

@@ -17,6 +17,7 @@ public:
     virtual ~AudioSource();
 
     void start();
+    bool isPlaying();
     void stop();
 
 protected:

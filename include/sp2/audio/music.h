@@ -9,9 +9,10 @@ namespace audio {
 class Music
 {
 public:
-    static bool play(const string& resource_name);
+    static bool play(const string& resource_name, bool loop=true);
+    static bool isPlaying();
     static void stop();
-    
+
     //Set the music volume in the range of 0 to 100
     static void setVolume(float volume);
     static float getVolume();
