@@ -74,7 +74,11 @@ void AudioSource::startAudioSystem()
     want.freq = 44100;
     want.format = AUDIO_F32;
     want.channels = 2;
+#ifdef EMSCRIPTEN
+    want.samples = 2048;
+#else
     want.samples = 1024;
+#endif
     want.callback = audioCallback;
 
     sdl_audio_device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
