@@ -30,6 +30,8 @@ public:
     void addButton(const Rect2f& area, int virtual_key_index);
 
     virtual void render(RenderQueue& queue) override;
+    virtual bool onPointerMove(Vector2d position, int id) override { return false; }
+    virtual void onPointerLeave(int id) override {}
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
