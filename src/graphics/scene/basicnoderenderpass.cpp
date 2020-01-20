@@ -58,6 +58,12 @@ bool BasicNodeRenderPass::onPointerMove(Vector2d position, int id)
 
 void BasicNodeRenderPass::onPointerLeave(int id)
 {
+    auto it = pointer_scene.find(id);
+    if (it != pointer_scene.end() && it->second)
+    {
+        it->second->onPointerLeave(id);
+        pointer_scene.erase(it);
+    }
 }
 
 bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
