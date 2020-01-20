@@ -6,6 +6,15 @@ RenderPass::RenderPass()
 {
 }
 
+bool RenderPass::onPointerMove(Vector2d position, int id)
+{
+    return false;
+}
+
+void RenderPass::onPointerLeave(int id)
+{
+}
+
 bool RenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     return false;

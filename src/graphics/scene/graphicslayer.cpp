@@ -44,6 +44,32 @@ void SceneGraphicsLayer::render(RenderQueue& queue)
     });
 }
 
+bool SceneGraphicsLayer::onPointerMove(Vector2d position, int id)
+{
+    position = screenToViewportPosition(position);
+    if (position.x < -1.0 || position.y < -1.0 || position.x > 1.0 || position.y > 1.0)
+        return false;
+    for(P<RenderPass> pass : render_passes)
+    {
+        if (pass->onPointerMove(position, id))
+        {
+            pointer_render_pass[id] = pass;
+            return true;
+        }
+    }
+    return false;
+}
+
+void SceneGraphicsLayer::onPointerLeave(int id)
+{
+    auto it = pointer_render_pass.find(id);
+    if (it != pointer_render_pass.end() && it->second)
+    {
+        it->second->onPointerLeave(id);
+        pointer_render_pass.erase(it);
+    }
+}
+
 bool SceneGraphicsLayer::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     position = screenToViewportPosition(position);

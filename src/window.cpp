@@ -455,11 +455,16 @@ void Window::handleEvent(const SDL_Event& event)
     case SDL_MOUSEMOTION:
         if (mouse_button_down_mask)
             pointerDrag(screenToGLPosition(event.motion.x, event.motion.y), -1);
+        else
+            pointerMove(screenToGLPosition(event.motion.x, event.motion.y), -1);
         break;
     case SDL_MOUSEBUTTONUP:
         mouse_button_down_mask &=~(1 << int(event.button.button));
         if (!mouse_button_down_mask)
+        {
             pointerUp(screenToGLPosition(event.button.x, event.button.y), -1);
+            pointerMove(screenToGLPosition(event.button.x, event.button.y), -1);
+        }
         break;
     case SDL_FINGERDOWN:
         pointerDown(io::Pointer::Button::Touch, Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
@@ -562,6 +567,9 @@ void Window::handleEvent(const SDL_Event& event)
     case SDL_WINDOWEVENT:
         switch(event.window.event)
         {
+        case SDL_WINDOWEVENT_LEAVE:
+            pointerLeave(-1);
+            break;
         case SDL_WINDOWEVENT_CLOSE:
             close();
             break;
@@ -575,14 +583,42 @@ void Window::handleEvent(const SDL_Event& event)
     }
 }
 
+void Window::pointerMove(Vector2d position, int id)
+{
+    auto it = pointer_focus_layer.find(id);
+    for(auto layer : graphics_layers)
+    {
+        if (layer->onPointerMove(position, id))
+        {
+            if (it != pointer_focus_layer.end() && it->second && it->second != layer)
+                it->second->onPointerLeave(id);
+            pointer_focus_layer[id] = layer;
+            return;
+        }
+    }
+    if (it != pointer_focus_layer.end())
+        pointerLeave(id);
+}
+
+void Window::pointerLeave(int id)
+{
+    auto it = pointer_focus_layer.find(id);
+    if (it != pointer_focus_layer.end())
+    {
+        if (it->second)
+            it->second->onPointerLeave(id);
+        pointer_focus_layer.erase(it);
+    }
+}
+
 void Window::pointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    for(auto l : graphics_layers)
+    for(auto layer : graphics_layers)
     {
-        if (l->onPointerDown(button, position, id))
+        if (layer->onPointerDown(button, position, id))
         {
-            pointer_focus_layer[id] = l;
-            focus_layer = l;
+            pointer_focus_layer[id] = layer;
+            focus_layer = layer;
             return;
         }
     }

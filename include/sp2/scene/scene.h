@@ -41,6 +41,8 @@ public:
     void postFixedUpdate(float delta);
     void update(float delta);
 
+    virtual bool onPointerMove(Ray3d ray, int id);
+    virtual void onPointerLeave(int id);
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id);
     virtual void onPointerDrag(Ray3d ray, int id);
     virtual void onPointerUp(Ray3d ray, int id);

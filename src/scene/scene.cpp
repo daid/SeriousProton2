@@ -60,6 +60,15 @@ void Scene::update(float delta)
     onUpdate(delta);
 }
 
+bool Scene::onPointerMove(Ray3d ray, int id)
+{
+    return false;
+}
+
+void Scene::onPointerLeave(int id)
+{
+}
+
 bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
 {
     return false;

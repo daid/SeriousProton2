@@ -52,6 +52,8 @@ private:
     void createRenderWindow();
     void render();
     void handleEvent(const SDL_Event& event);
+    void pointerMove(Vector2d position, int id);
+    void pointerLeave(int id);
     void pointerDown(io::Pointer::Button button, Vector2d position, int id);
     void pointerDrag(Vector2d position, int id);
     void pointerUp(Vector2d position, int id);

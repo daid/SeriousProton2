@@ -19,6 +19,8 @@ public:
     
     virtual void render(RenderQueue& queue) override;
 
+    virtual bool onPointerMove(Vector2d position, int id) override;
+    virtual void onPointerLeave(int id) override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
@@ -35,6 +37,7 @@ private:
     std::map<int, P<Camera>> pointer_camera;
     P<Scene> focus_scene;
     
+    bool privateOnPointerMove(P<Scene> scene, P<Camera> camera, Vector2d position, int id);
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
     void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
     void recursiveNodeRender(RenderQueue& queue, P<Node> node);

@@ -17,6 +17,8 @@ public:
     
     virtual void render(RenderQueue& queue) = 0;
 
+    virtual bool onPointerMove(Vector2d position, int id);
+    virtual void onPointerLeave(int id);
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);
     virtual void onPointerUp(Vector2d position, int id);

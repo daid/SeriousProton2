@@ -35,6 +35,31 @@ void BasicNodeRenderPass::render(RenderQueue& queue)
     }
 }
 
+bool BasicNodeRenderPass::onPointerMove(Vector2d position, int id)
+{
+    if (!cameras.empty())
+    {
+        for(P<Camera> camera : cameras)
+        {
+            if (privateOnPointerMove(camera->getScene(), camera, position, id))
+                return true;
+        }
+    }
+    else
+    {
+        for(P<Scene> scene : Scene::all())
+        {
+            if (privateOnPointerMove(scene, nullptr, position, id))
+                return true;
+        }
+    }
+    return false;
+}
+
+void BasicNodeRenderPass::onPointerLeave(int id)
+{
+}
+
 bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     if (!cameras.empty())
@@ -52,6 +77,21 @@ bool BasicNodeRenderPass::onPointerDown(io::Pointer::Button button, Vector2d pos
             if (privateOnPointerDown(scene, nullptr, button, position, id))
                 return true;
         }
+    }
+    return false;
+}
+
+bool BasicNodeRenderPass::privateOnPointerMove(P<Scene> scene, P<Camera> camera, Vector2d position, int id)
+{
+    if (!camera)
+        camera = scene->getCamera();
+    if (!camera)
+        return false;
+    if (scene->onPointerMove(camera->screenToWorldRay(Vector2f(position)), id))
+    {
+        pointer_scene[id] = scene;
+        pointer_camera[id] = camera;
+        return true;
     }
     return false;
 }

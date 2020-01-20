@@ -26,6 +26,8 @@ public:
     RenderTexture* getTarget();
     
     virtual void render(RenderQueue& queue) = 0;
+    virtual bool onPointerMove(Vector2d position, int id) = 0;
+    virtual void onPointerLeave(int id) = 0;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;
