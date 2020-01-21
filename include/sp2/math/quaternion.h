@@ -57,28 +57,28 @@ public:
             pMult * v.z + vMult * z + crossMult * (x * v.y - y * v.x));
     }
     
-    T length()
+    T length() const
     {
         return std::sqrt(x * x + y * y + z * z + w * w);
     }
     
-    Quaternion<T> normalized()
+    Quaternion<T> normalized() const
     {
         T len = std::sqrt(x * x + y * y + z * z + w * w);
         return Quaternion<T>(x / len, y / len, z / len, w / len);
     }
     
-    Quaternion<T> inverse()
+    Quaternion<T> inverse() const
     {
         return Quaternion<T>(-x, -y, -z, w);
     }
     
-    Quaternion<T> diff(const Quaternion<T>& other)
+    Quaternion<T> diff(const Quaternion<T>& other) const
     {
         return inverse() * other;
     }
     
-    Vector3<T> toAxisAngle()
+    Vector3<T> toAxisAngle() const
     {
         T wclamped = std::max(-1.0, std::min(1.0, w));
         T angle = std::acos(wclamped) * 2.0 / sp::pi * 180.0;
@@ -99,7 +99,7 @@ public:
         w /= len;
     }
     
-    Quaternion slerp(const Quaternion<T>& other, T t)
+    Quaternion slerp(const Quaternion<T>& other, T t) const
     {
         Quaternion<T> v = other;
         v.normalize();
@@ -130,9 +130,14 @@ public:
         return Quaternion<T>(x * s0 + v.x * s1, y * s0 + v.y * s1, z * s0 + v.z * s1, w * s0 + v.w * s1);
     }
     
-    Quaternion conjugate()
+    Quaternion conjugate() const
     {
         return Quaternion<T>(-x, -y, -z, w);
+    }
+
+    T angle(const Quaternion<T>& other) const
+    {
+        return std::acos((other * inverse()).w) / pi * 360.0;
     }
     
     static Quaternion fromAxisAngle(const Vector3<T>& axis, T angle)
@@ -158,8 +163,21 @@ public:
     
     static Quaternion fromVectorToVector(const Vector3<T> v0, const Vector3<T>& v1)
     {
-        Vector3<T> a = v0.cross(v1);
-        return Quaternion<T>(a.x, a.y, a.z, std::sqrt(v0.dot(v0) + v1.dot(v1)) + v0.dot(v1));
+        T d = v0.dot(v1);
+        if (d >= 1.0)
+            return Quaternion<T>();
+        if (d <= -1.0 + 1e-6) //180 deg
+        {
+            Vector3<T> a = v0.cross(Vector3<T>(1, 0, 0));
+            if (a.dot(a) == 0.0)
+                a = v0.cross(Vector3<T>(0, 1, 0));
+            return fromAxisAngle(a, 180);
+        }
+        T s = std::sqrt((1+d)*2);
+        Vector3<T> a = v0.cross(v1) / s;
+        Quaternion<T> result = Quaternion<T>(a.x, a.y, a.z, s * 0.5);
+        result.normalize();
+        return result;
     }
 };
 
