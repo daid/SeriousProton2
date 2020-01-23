@@ -6,7 +6,9 @@
 #include <sp2/math/vector.h>
 #include <unordered_map>
 
-namespace sp::io::serialization {
+namespace sp {
+namespace io {
+namespace serialization {
 
 class Serializer;
 class DataSet
@@ -34,8 +36,7 @@ protected:
     DataSet(Serializer& serializer);
     ~DataSet();
 
-    Serializer& serializer;
-
+private:
     enum class DataType
     {
         Integer,
@@ -47,9 +48,16 @@ protected:
         Vector3i,
         Vector3f,
         Vector3d,
+        String
     };
+
+    void addAsRawData(const char* key, DataType type, const void* ptr, size_t size);
+    bool getAsRawData(const char* key, DataType type, void* ptr, size_t size) const;
+
     std::unordered_map<int, std::pair<DataType, int>> values;
     std::vector<uint8_t> data;
+
+    Serializer& serializer;
 };
 template<> int DataSet::get(const char* key) const;
 template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
@@ -67,6 +75,8 @@ template<> Vector3f DataSet::get(const char* key) const;
 template<> Vector3d DataSet::get(const char* key) const;
 template<> string DataSet::get(const char* key) const;
 
+}//namespace
+}//namespace
 }//namespace
 
 #endif//SP2_IO_SERIALIZATION_DATASET_H

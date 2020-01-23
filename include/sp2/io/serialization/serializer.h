@@ -11,7 +11,9 @@
 
 #include <sp2/io/serialization/dataset.h>
 
-namespace sp::io::serialization {
+namespace sp {
+namespace io {
+namespace serialization {
 
 class Serializer : public DataSet
 {
@@ -43,6 +45,8 @@ private:
     friend class DataSet;
 };
 
+}//namespace
+}//namespace
 }//namespace
 
 #endif//SP2_IO_SERIALIZATION_SERIALIZER_H

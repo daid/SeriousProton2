@@ -1,6 +1,8 @@
 #include <sp2/io/serialization/serializer.h>
 
-namespace sp::io::serialization {
+namespace sp {
+namespace io {
+namespace serialization {
 
 Serializer::Serializer(const string& filename, Mode mode)
 : DataSet(*this), mode(mode)
@@ -22,4 +24,6 @@ int Serializer::getStringIndex(const string& s)
     return string_table.size() - 1;
 }
 
+} // namespace
+} // namespace
 } // namespace
