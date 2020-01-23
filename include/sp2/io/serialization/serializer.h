@@ -34,12 +34,18 @@ public:
 
 protected:
     int getStringIndex(const sp::string& s);
+    void requestWriteFrom(DataSet& dataset);
 
 private:
+    void finishFile();
+    void initialRead();
+
     Mode mode;
+    FILE* f = nullptr;
     std::unordered_map<std::type_index, sp::string> type_to_name_mapping;
     std::unordered_map<string, createFunctionType> name_to_create_function_mapping;
 
+    std::unordered_map<int, off_t> dataset_file_position;
     std::unordered_map<string, int> string_table;
 
     friend class DataSet;

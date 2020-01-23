@@ -5,13 +5,17 @@ namespace sp {
 namespace io {
 namespace serialization {
 
-DataSet::DataSet(Serializer& serializer)
-: serializer(serializer)
+DataSet::DataSet(Serializer& serializer, int id)
+: serializer(serializer), id(id)
 {
 }
 
 DataSet::~DataSet()
 {
+    if (serializer.mode == Serializer::Mode::Write)
+    {
+        serializer.requestWriteFrom(*this);
+    }
 }
 
 void DataSet::set(const char* key, int value)
@@ -92,48 +96,56 @@ template<> float DataSet::get(const char* key) const
     getAsRawData(key, DataType::Float, &result, sizeof(result));
     return result;
 }
+
 template<> double DataSet::get(const char* key) const
 {
     double result = 0.0;
     getAsRawData(key, DataType::Double, &result, sizeof(result));
     return result;
 }
+
 template<> Vector2i DataSet::get(const char* key) const
 {
     Vector2i result;
     getAsRawData(key, DataType::Vector2i, &result, sizeof(result));
     return result;
 }
+
 template<> Vector2f DataSet::get(const char* key) const
 {
     Vector2f result;
     getAsRawData(key, DataType::Vector2f, &result, sizeof(result));
     return result;
 }
+
 template<> Vector2d DataSet::get(const char* key) const
 {
     Vector2d result;
     getAsRawData(key, DataType::Vector2d, &result, sizeof(result));
     return result;
 }
+
 template<> Vector3i DataSet::get(const char* key) const
 {
     Vector3i result;
     getAsRawData(key, DataType::Vector3i, &result, sizeof(result));
     return result;
 }
+
 template<> Vector3f DataSet::get(const char* key) const
 {
     Vector3f result;
     getAsRawData(key, DataType::Vector3f, &result, sizeof(result));
     return result;
 }
+
 template<> Vector3d DataSet::get(const char* key) const
 {
     Vector3d result;
     getAsRawData(key, DataType::Vector3d, &result, sizeof(result));
     return result;
 }
+
 template<> string DataSet::get(const char* key) const
 {
     int idx = serializer.getStringIndex(key);
@@ -174,6 +186,67 @@ bool DataSet::getAsRawData(const char* key, DataType type, void* ptr, size_t siz
         return false;
     memcpy(ptr, &data[it->second.second], size);
     return true;
+}
+
+void DataSet::writeToFile(FILE* f)
+{
+    writeUInt(values.size(), f);
+    for(auto it : values)
+    {
+        writeUInt(it.first, f);
+        if (it.second.second < 0)
+            writeUInt(static_cast<int>(it.second.first) | 0x40, f);
+        else
+            writeUInt(static_cast<int>(it.second.first), f);
+        writeUInt(std::abs(it.second.second), f);
+    }
+
+    writeUInt(data.size(), f);
+    fwrite(data.data(), data.size(), 1, f);
+}
+
+void DataSet::readFromFile(FILE* f)
+{
+    unsigned int value_count = readUInt(f);
+    for(unsigned int n=0; n<value_count; n++)
+    {
+        int string_index = readUInt(f);
+        int type = readUInt(f);
+        int value = readUInt(f);
+        if (type & 0x40)
+        {
+            type &= 0x3f;
+            value =-value;
+        }
+        values[string_index] = {static_cast<DataType>(type), value};
+    }
+
+    data.resize(readUInt(f));
+    fread(data.data(), data.size(), 1, f);
+}
+
+void DataSet::writeUInt(unsigned int v, FILE* f)
+{
+    while(v > 127)
+    {
+        fputc((v & 0x7f) | 0x80, f);
+        v >>= 7;
+    }
+    fputc(v, f);
+}
+
+unsigned int DataSet::readUInt(FILE* f)
+{
+    unsigned int result = 0;
+    size_t shift = 0;
+    int c;
+    for(c = fgetc(f); c & 0x80; c = fgetc(f))
+    {
+        result |= (c & 0x7f) << shift;
+        shift += 7;
+    }
+    result |= c << shift;
+    return result;
 }
 
 } // namespace

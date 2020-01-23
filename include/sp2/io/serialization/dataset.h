@@ -33,9 +33,16 @@ public:
     T get(const char* key) const;
 
 protected:
-    DataSet(Serializer& serializer);
+    DataSet(Serializer& serializer, int id);
     ~DataSet();
 
+    void writeToFile(FILE* f);
+    void readFromFile(FILE* f);
+
+    int getId() { return id; }
+
+    static void writeUInt(unsigned int v, FILE* f);
+    static unsigned int readUInt(FILE* f);
 private:
     enum class DataType
     {
@@ -58,6 +65,9 @@ private:
     std::vector<uint8_t> data;
 
     Serializer& serializer;
+    int id;
+
+    friend class Serializer;
 };
 template<> int DataSet::get(const char* key) const;
 template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>
