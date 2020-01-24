@@ -19,8 +19,7 @@ bool saveFileContents(const string& filename, const string& contents);
 string loadFileContents(const string& filename);
 
 // Get the path where configuration data can be stored.
-//  Note that this caches the first call, if you change the application name mid run, it will still return the same path.
-const string& preferencePath(const string& application_name);
+const string& preferencePath();
 
 }//namespace io
 }//namespace sp

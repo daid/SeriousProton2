@@ -4,6 +4,10 @@
 #include <sys/stat.h>
 #include <SDL.h>
 
+#ifdef __WIN32__
+#include <windows.h>
+#endif
+
 
 namespace sp {
 namespace io {
@@ -121,13 +125,41 @@ string loadFileContents(const string& filename)
     return result;
 }
 
-const string& preferencePath(const string& application_name)
+const string& preferencePath()
 {
     static string preference_path;
 
     if (preference_path.length() == 0)
     {
-        char* path = SDL_GetPrefPath(nullptr, application_name.c_str());
+        char* path = nullptr;
+#ifdef EMSCRIPTEN
+        //For emscripten, we have a virtual filesystem, so we do not really care.
+        path = "preferences"
+#elif defined(ANDROID)
+        //For android, we have local storage per app. SDL_GetPrefPath handles this.
+        path = nullptr;
+#elif defined(__linux__)
+        //On linux, we need our application name, grab it from the proc interface
+        char executable_name[MAX_PATH] = {0};
+        readlink("/proc/self/exe", executable_name, sizeof(executable_name) - 1);
+        path = strrchr(executable_name, '/');
+        if (path)
+            path += 1;
+#elif defined(__WIN32__)
+        //On windows, we need our application name, we grab the name of our executable and use that.
+        // And then use the SDL function to get our actual path.
+        char executable_name[MAX_PATH] = {0};
+        GetModuleFileNameA(nullptr, executable_name, sizeof(executable_name) - 1);
+        path = strrchr(executable_name, '\\');
+        if (path)
+        {
+            path += 1;
+            if (strrchr(path, '.'))
+                *strrchr(path, '.') = '\0';
+        }
+#endif
+        path = SDL_GetPrefPath(nullptr, path);
+        
         if (!path)
         {
             preference_path = "./";
