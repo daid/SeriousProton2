@@ -98,6 +98,12 @@ public:
         return *this;
     }
 
+    P& operator = (P&& p)
+    {
+        take(p);
+        return *this;
+    }
+
     T* operator->() const
     {
         return static_cast<T*>(ptr);

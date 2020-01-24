@@ -9,7 +9,7 @@ class _PBase;
 class _PListEntry;
 class AutoPointerObject;
 
-class _PBase
+class _PBase : NonCopyable
 {
 protected:
     AutoPointerObject* ptr;
