@@ -1,5 +1,6 @@
 #include <sp2/io/serialization/serializer.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 
 namespace sp {
 namespace io {
@@ -52,6 +53,24 @@ void Serializer::requestWriteFrom(DataSet& dataset)
     }
 }
 
+P<AutoPointerObject> Serializer::getStoredObject(int id)
+{
+    auto it = id_to_object.find(id);
+    if (it != id_to_object.end())
+        return it->second;
+    DataSet data(*this, id);
+    fseeko(f, dataset_file_position[id], SEEK_SET);
+    data.readFromFile(f);
+    AutoPointerObject* obj = nullptr;
+    auto create_function_it = name_to_create_function_mapping.find(data.get<string>("class"));
+    if (create_function_it == name_to_create_function_mapping.end())
+        LOG(Warning, "Failed to find create function for class:", data.get<string>("class"));
+    else
+        obj = create_function_it->second(data);
+    id_to_object[id] = obj;
+    return nullptr;
+}
+
 void Serializer::finishFile()
 {
     requestWriteFrom(*this);
@@ -88,16 +107,15 @@ void Serializer::initialRead()
     fread(&string_table_position, sizeof(string_table_position), 1, f);
     fread(&version, sizeof(version), 1, f);
     fread(&magic, sizeof(magic), 1, f);
-    if (magic != *reinterpret_cast<const uint64_t*>("SP2:DATA"))
+    if (magic != *reinterpret_cast<const int64_t*>("SP2:DATA"))
     {
         LOG(Warning, "Magic header mismatch on deserialization. Ignoring file.");
         return;
     }
     fseeko(f, dataset_table_position, SEEK_SET);
+    int n = 0;
     while(ftello(f) < string_table_position)
-    {
-        LOG(Debug, "dataset at:", readUInt(f));
-    }
+        dataset_file_position[n++] = readUInt(f);
     
     string s;
     int index = 0;

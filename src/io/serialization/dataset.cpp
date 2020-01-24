@@ -79,6 +79,27 @@ void DataSet::set(const char* key, const string& value)
     memcpy(&data[index], value.data(), value.length());
 }
 
+void DataSet::set(const char* key, P<AutoPointerObject> obj)
+{
+    auto it = serializer.object_to_id.find(*obj);
+    if (it != serializer.object_to_id.end())
+    {
+        values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, it->second};
+        return;
+    }
+
+    auto t = std::type_index(typeid(**obj));
+    auto type_to_name = serializer.type_to_name_mapping.find(t);
+    sp2assert(type_to_name != serializer.type_to_name_mapping.end(), "Missing class registration for serialization");
+
+    serializer.object_to_id[*obj] = serializer.next_object_id;
+    DataSet dataset(serializer, serializer.next_object_id);
+    dataset.set("class", type_to_name->second);
+    serializer.type_to_save_function_mapping[t](*obj, dataset);
+    serializer.next_object_id += 1;
+    values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, dataset.getId()};
+}
+
 template<> int DataSet::get(const char* key) const
 {
     int idx = serializer.getStringIndex(key);
@@ -166,6 +187,17 @@ template<> string DataSet::get(const char* key) const
     length = length | (data[index] << shift);
     index += 1;
     return string(reinterpret_cast<const char*>(&data[index]), length);
+}
+
+P<AutoPointerObject> DataSet::getObject(const char* key) const
+{
+    int idx = serializer.getStringIndex(key);
+    if (idx < 0)
+        return nullptr;
+    auto it = values.find(idx);
+    if (it == values.end() || it->second.first != DataType::AutoPointerObject)
+        return nullptr;
+    return serializer.getStoredObject(it->second.second);
 }
 
 void DataSet::addAsRawData(const char* key, DataType type, const void* ptr, size_t size)

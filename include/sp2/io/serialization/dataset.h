@@ -4,6 +4,7 @@
 #include <sp2/string.h>
 #include <sp2/nonCopyable.h>
 #include <sp2/math/vector.h>
+#include <sp2/pointer.h>
 #include <unordered_map>
 
 namespace sp {
@@ -11,7 +12,7 @@ namespace io {
 namespace serialization {
 
 class Serializer;
-class DataSet
+class DataSet : NonCopyable
 {
 public:
     void set(const char* key, int value);
@@ -26,12 +27,14 @@ public:
     void set(const char* key, const Vector3f& value);
     void set(const char* key, const Vector3d& value);
     void set(const char* key, const string& value);
+    void set(const char* key, P<AutoPointerObject> obj);
 
     template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     T get(const char* key) const = delete;
     template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
     T get(const char* key) const;
 
+    P<AutoPointerObject> getObject(const char* key) const;
 protected:
     DataSet(Serializer& serializer, int id);
     ~DataSet();
@@ -55,7 +58,8 @@ private:
         Vector3i,
         Vector3f,
         Vector3d,
-        String
+        String,
+        AutoPointerObject,
     };
 
     void addAsRawData(const char* key, DataType type, const void* ptr, size_t size);
