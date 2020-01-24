@@ -62,9 +62,14 @@ P<AutoPointerObject> Serializer::getStoredObject(int id)
     fseeko(f, dataset_file_position[id], SEEK_SET);
     data.readFromFile(f);
     AutoPointerObject* obj = nullptr;
-    auto create_function_it = name_to_create_function_mapping.find(data.get<string>("class"));
+    string class_name = "";
+    int class_name_index = data.get<int>("class");
+    for(auto it : string_table)
+        if (it.second == class_name_index)
+            class_name = it.first;
+    auto create_function_it = name_to_create_function_mapping.find(class_name);
     if (create_function_it == name_to_create_function_mapping.end())
-        LOG(Warning, "Failed to find create function for class:", data.get<string>("class"));
+        LOG(Warning, "Failed to find create function for class:", class_name);
     else
         obj = create_function_it->second(data);
     id_to_object[id] = obj;

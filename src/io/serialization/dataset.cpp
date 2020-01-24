@@ -94,7 +94,7 @@ void DataSet::set(const char* key, P<AutoPointerObject> obj)
 
     serializer.object_to_id[*obj] = serializer.next_object_id;
     DataSet dataset(serializer, serializer.next_object_id);
-    dataset.set("class", type_to_name->second);
+    dataset.set("class", serializer.getStringIndex(type_to_name->second));
     serializer.type_to_save_function_mapping[t](*obj, dataset);
     serializer.next_object_id += 1;
     values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, dataset.getId()};
