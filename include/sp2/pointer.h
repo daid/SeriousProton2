@@ -72,10 +72,6 @@ public:
     {
         set(p.ptr);
     }
-    P(P&& p)
-    {
-        take(p);
-    }
     P(T* p)
     {
         set(p);
@@ -95,12 +91,6 @@ public:
     P& operator = (const P& p)
     {
         if (&p != this) set(p.ptr);
-        return *this;
-    }
-
-    P& operator = (P&& p)
-    {
-        take(p);
         return *this;
     }
 
