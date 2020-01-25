@@ -73,7 +73,7 @@ P<AutoPointerObject> Serializer::getStoredObject(int id)
     else
         obj = create_function_it->second(data);
     id_to_object[id] = obj;
-    return nullptr;
+    return obj;
 }
 
 void Serializer::finishFile()
