@@ -29,7 +29,7 @@ public:
         running = false;
     }
 
-    bool isRunning()
+    bool isRunning() const
     {
         return running;
     }
@@ -48,18 +48,18 @@ public:
         return expired;
     }
 
-    float getTimeLeft()
+    float getTimeLeft() const
     {
         return timeout - getTimeElapsed();
     }
 
-    float getTimeElapsed()
+    float getTimeElapsed() const
     {
         return std::chrono::duration<float>(ClockSource::now() - start_time).count();
     }
 
     // Return the timer progress in the range 0.0 to 1.0, where 0.0 is at the start.
-    float getProgress()
+    float getProgress() const
     {
         return getTimeElapsed() / timeout;
     }

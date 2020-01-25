@@ -33,6 +33,8 @@ public:
     void set(const char* key, P<AutoPointerObject> obj);
     void createList(const char* key, std::function<void(List&)> callback);
 
+    bool has(const char* key);
+
     template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     T get(const char* key) const = delete;
     template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>

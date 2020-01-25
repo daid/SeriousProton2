@@ -109,6 +109,14 @@ void DataSet::createList(const char* key, std::function<void(List&)> callback)
         pushUInt(id);
 }
 
+bool DataSet::has(const char* key)
+{
+    int idx = serializer.getStringIndex(key);
+    if (idx < 0)
+        return false;
+    return values.find(idx) != values.end();
+}
+
 template<> int DataSet::get(const char* key) const
 {
     int idx = serializer.getStringIndex(key);
