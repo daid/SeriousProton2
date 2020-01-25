@@ -109,7 +109,7 @@ void DataSet::createList(const char* key, std::function<void(List&)> callback)
         pushUInt(id);
 }
 
-bool DataSet::has(const char* key)
+bool DataSet::has(const char* key) const
 {
     int idx = serializer.getStringIndex(key);
     if (idx < 0)

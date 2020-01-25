@@ -39,8 +39,8 @@ public:
     Node(P<Node> parent);
     virtual ~Node();
 
-    P<Node> getParent();
-    P<Scene> getScene();
+    P<Node> getParent() const;
+    P<Scene> getScene() const;
     const PList<Node>& getChildren();
     void setParent(P<Node> new_parent);
     
@@ -53,25 +53,25 @@ public:
     void setAngularVelocity(double velocity);
     void setAngularVelocity(Vector3d velocity);
     
-    Vector2d getPosition2D();
-    double getRotation2D();
-    Vector2d getLocalPoint2D(Vector2d v);
+    Vector2d getPosition2D() const;
+    double getRotation2D() const;
+    Vector2d getLocalPoint2D(Vector2d v) const;
     
-    Vector2d getGlobalPosition2D();
-    double getGlobalRotation2D();
-    Vector2d getGlobalPoint2D(Vector2d v);
+    Vector2d getGlobalPosition2D() const;
+    double getGlobalRotation2D() const;
+    Vector2d getGlobalPoint2D(Vector2d v) const;
     
-    Vector2d getLinearVelocity2D();
-    double getAngularVelocity2D();
+    Vector2d getLinearVelocity2D() const;
+    double getAngularVelocity2D() const;
 
-    Vector3d getPosition3D();
-    Quaterniond getRotation3D();
+    Vector3d getPosition3D() const;
+    Quaterniond getRotation3D() const;
 
-    Vector3d getGlobalPosition3D();
-    Vector3d getGlobalPoint3D(Vector3d v);
+    Vector3d getGlobalPosition3D() const;
+    Vector3d getGlobalPoint3D(Vector3d v) const;
 
-    Vector3d getLinearVelocity3D();
-    Vector3d getAngularVelocity3D();
+    Vector3d getLinearVelocity3D() const;
+    Vector3d getAngularVelocity3D() const;
     
     const Matrix4x4f& getGlobalTransform() const { return global_transform; }
     const Matrix4x4f& getLocalTransform() const { return local_transform; }
@@ -83,16 +83,16 @@ public:
     void removeCollisionShape();
     
     //Test if the given point will collide with the shape of this Node.
-    bool testCollision(sp::Vector2d position);
-    bool testCollision(sp::Vector3d position);
+    bool testCollision(sp::Vector2d position) const;
+    bool testCollision(sp::Vector3d position) const;
     //Test if this is a solid object, so it has a collision shape, which isn't generated as Sensor.
-    bool isSolid();
+    bool isSolid() const;
     
     void setAnimation(std::unique_ptr<Animation> animation);
     void animationPlay(const string& key, float speed=1.0);
     void animationSetFlags(int flags);
-    int animationGetFlags();
-    bool animationIsFinished();
+    int animationGetFlags() const;
+    bool animationIsFinished() const;
     
     //Event called every frame.
     //The delta is the time in seconds passed sinds the previous frame, multiplied by the global game speed.

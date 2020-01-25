@@ -42,12 +42,12 @@ Node::~Node()
         child.destroy();
 }
 
-P<Node> Node::getParent()
+P<Node> Node::getParent() const
 {
     return parent;
 }
 
-P<Scene> Node::getScene()
+P<Scene> Node::getScene() const
 {
     return scene;
 }
@@ -143,37 +143,37 @@ void Node::setAngularVelocity(sp::Vector3d velocity)
         scene->collision_backend->setAngularVelocity(collision_body, velocity);
 }
 
-Vector2d Node::getPosition2D()
+Vector2d Node::getPosition2D() const
 {
     return Vector2d(translation.x, translation.y);
 }
 
-double Node::getRotation2D()
+double Node::getRotation2D() const
 {
     return (rotation * Vector2d(1, 0)).angle();
 }
 
-Vector2d Node::getGlobalPosition2D()
+Vector2d Node::getGlobalPosition2D() const
 {
     return Vector2d(global_transform * Vector2f(0, 0));
 }
 
-double Node::getGlobalRotation2D()
+double Node::getGlobalRotation2D() const
 {
     return global_transform.applyDirection(Vector2f(1, 0)).angle();
 }
 
-Vector2d Node::getLocalPoint2D(Vector2d v)
+Vector2d Node::getLocalPoint2D(Vector2d v) const
 {
     return Vector2d(local_transform * Vector2f(v));
 }
 
-Vector2d Node::getGlobalPoint2D(Vector2d v)
+Vector2d Node::getGlobalPoint2D(Vector2d v) const
 {
     return Vector2d(global_transform * Vector2f(v));
 }
 
-sp::Vector2d Node::getLinearVelocity2D()
+sp::Vector2d Node::getLinearVelocity2D() const
 {
     if (collision_body)
     {
@@ -183,7 +183,7 @@ sp::Vector2d Node::getLinearVelocity2D()
     return Vector2d(0.0, 0.0);
 }
 
-double Node::getAngularVelocity2D()
+double Node::getAngularVelocity2D() const
 {
     if (collision_body)
     {
@@ -193,34 +193,34 @@ double Node::getAngularVelocity2D()
     return 0.0;
 }
 
-Vector3d Node::getPosition3D()
+Vector3d Node::getPosition3D() const
 {
     return translation;
 }
 
-Quaterniond Node::getRotation3D()
+Quaterniond Node::getRotation3D() const
 {
     return rotation;
 }
 
-Vector3d Node::getGlobalPosition3D()
+Vector3d Node::getGlobalPosition3D() const
 {
     return Vector3d(global_transform * Vector3f(0, 0, 0));
 }
 
-Vector3d Node::getGlobalPoint3D(Vector3d v)
+Vector3d Node::getGlobalPoint3D(Vector3d v) const
 {
     return Vector3d(global_transform * Vector3f(v));
 }
 
-Vector3d Node::getLinearVelocity3D()
+Vector3d Node::getLinearVelocity3D() const
 {
     if (collision_body)
         return scene->collision_backend->getLinearVelocity(collision_body);
     return Vector3d(0, 0, 0);
 }
 
-Vector3d Node::getAngularVelocity3D()
+Vector3d Node::getAngularVelocity3D() const
 {
     if (collision_body)
         return scene->collision_backend->getAngularVelocity(collision_body);
@@ -239,21 +239,21 @@ void Node::removeCollisionShape()
     collision_body = nullptr;
 }
 
-bool Node::testCollision(sp::Vector2d position)
+bool Node::testCollision(sp::Vector2d position) const
 {
     if (!collision_body)
         return false;
     return scene->collision_backend->testCollision(collision_body, Vector3d(position.x, position.y, 0));
 }
 
-bool Node::testCollision(sp::Vector3d position)
+bool Node::testCollision(sp::Vector3d position) const
 {
     if (!collision_body)
         return false;
     return scene->collision_backend->testCollision(collision_body, position);
 }
 
-bool Node::isSolid()
+bool Node::isSolid() const
 {
     if (!collision_body)
         return false;
@@ -279,14 +279,14 @@ void Node::animationSetFlags(int flags)
         animation->setFlags(flags);
 }
 
-int Node::animationGetFlags()
+int Node::animationGetFlags() const
 {
     if (animation)
         return animation->getFlags();
     return 0;
 }
 
-bool Node::animationIsFinished()
+bool Node::animationIsFinished() const
 {
     if (!animation)
         return true;
