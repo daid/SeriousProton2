@@ -5,7 +5,10 @@
 #include <sp2/nonCopyable.h>
 #include <sp2/math/vector.h>
 #include <sp2/pointer.h>
+#include <sp2/io/serialization/list.h>
 #include <unordered_map>
+#include <functional>
+
 
 namespace sp {
 namespace io {
@@ -28,6 +31,7 @@ public:
     void set(const char* key, const Vector3d& value);
     void set(const char* key, const string& value);
     void set(const char* key, P<AutoPointerObject> obj);
+    void createList(const char* key, std::function<void(List&)> callback);
 
     template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
     T get(const char* key) const = delete;
@@ -35,6 +39,7 @@ public:
     T get(const char* key) const;
 
     P<AutoPointerObject> getObject(const char* key) const;
+    void getList(const char* key, std::function<void(const DataSet&)> callback) const;
 protected:
     DataSet(Serializer& serializer, int id);
     ~DataSet();
@@ -60,10 +65,13 @@ private:
         Vector3d,
         String,
         AutoPointerObject,
+        List,
     };
 
     void addAsRawData(const char* key, DataType type, const void* ptr, size_t size);
     bool getAsRawData(const char* key, DataType type, void* ptr, size_t size) const;
+    void pushUInt(int n);
+    int pullUInt(int& index) const;
 
     std::unordered_map<int, std::pair<DataType, int>> values;
     std::vector<uint8_t> data;
@@ -72,6 +80,7 @@ private:
     int id;
 
     friend class Serializer;
+    friend class List;
 };
 template<> int DataSet::get(const char* key) const;
 template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type>

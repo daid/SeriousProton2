@@ -119,27 +119,27 @@ public:
             delete ptr;
     }
 
-    bool operator==(const P<T>& other)
+    bool operator==(const P<T>& other) const
     {
         return ptr == other.ptr;
     }
 
-    bool operator==(const T* other)
+    bool operator==(const T* other) const
     {
         return ptr == other;
     }
 
-    bool operator!=(const P<T>& other)
+    bool operator!=(const P<T>& other) const
     {
         return ptr != other.ptr;
     }
 
-    bool operator!=(const T* other)
+    bool operator!=(const T* other) const
     {
         return ptr != other;
     }
 
-    template<class T2> operator P<T2>()
+    template<class T2> operator P<T2>() const
     {
         return dynamic_cast<T2*>(**this);
     }

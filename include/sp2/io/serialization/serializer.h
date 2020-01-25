@@ -60,9 +60,10 @@ private:
 
     std::unordered_map<AutoPointerObject*, int> object_to_id;
     std::unordered_map<int, AutoPointerObject*> id_to_object;
-    int next_object_id = 1;
+    int next_dataset_id = 1;
 
     friend class DataSet;
+    friend class List;
 };
 
 }//namespace

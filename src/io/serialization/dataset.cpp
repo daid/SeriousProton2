@@ -67,13 +67,7 @@ void DataSet::set(const char* key, const string& value)
 {
     size_t index = data.size();
     values[serializer.getStringIndex(key)] = {DataType::String, index};
-    size_t string_length = value.length();
-    while(string_length > 127)
-    {
-        data.push_back(0x80 | (string_length & 0x7f));
-        string_length >>= 7;
-    }
-    data.push_back(string_length);
+    pushUInt(value.length());
     index = data.size();
     data.resize(data.size() + value.length());
     memcpy(&data[index], value.data(), value.length());
@@ -92,12 +86,24 @@ void DataSet::set(const char* key, P<AutoPointerObject> obj)
     auto type_to_name = serializer.type_to_name_mapping.find(t);
     sp2assert(type_to_name != serializer.type_to_name_mapping.end(), "Missing class registration for serialization");
 
-    serializer.object_to_id[*obj] = serializer.next_object_id;
-    DataSet dataset(serializer, serializer.next_object_id);
+    serializer.object_to_id[*obj] = serializer.next_dataset_id;
+    DataSet dataset(serializer, serializer.next_dataset_id);
+    serializer.next_dataset_id += 1;
     dataset.set("class", serializer.getStringIndex(type_to_name->second));
     serializer.type_to_save_function_mapping[t](*obj, dataset);
-    serializer.next_object_id += 1;
     values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, dataset.getId()};
+}
+
+void DataSet::createList(const char* key, std::function<void(List&)> callback)
+{
+    List list(serializer);
+    callback(list);
+
+    size_t index = data.size();
+    values[serializer.getStringIndex(key)] = {DataType::List, index};
+    pushUInt(list.ids.size());
+    for(auto id : list.ids)
+        pushUInt(id);
 }
 
 template<> int DataSet::get(const char* key) const
@@ -175,17 +181,8 @@ template<> string DataSet::get(const char* key) const
     auto it = values.find(idx);
     if (it == values.end() || it->second.first != DataType::String)
         return "";
-    size_t index = it->second.second;
-    size_t length = 0;
-    size_t shift = 0;
-    while(data[index] & 0x80)
-    {
-        length = length | ((data[index] & 0x7f) << shift);
-        shift += 7;
-        index += 1;
-    }
-    length = length | (data[index] << shift);
-    index += 1;
+    int index = it->second.second;
+    int length = pullUInt(index);
     return string(reinterpret_cast<const char*>(&data[index]), length);
 }
 
@@ -198,6 +195,27 @@ P<AutoPointerObject> DataSet::getObject(const char* key) const
     if (it == values.end() || it->second.first != DataType::AutoPointerObject)
         return nullptr;
     return serializer.getStoredObject(it->second.second);
+}
+
+void DataSet::getList(const char* key, std::function<void(const DataSet&)> callback) const
+{
+    int idx = serializer.getStringIndex(key);
+    if (idx < 0)
+        return;
+    auto it = values.find(idx);
+    if (it == values.end() || it->second.first != DataType::List)
+        return;
+    int index = it->second.second;
+    int count = pullUInt(index);
+    while(count > 0)
+    {
+        int id = pullUInt(index);
+        DataSet data(serializer, id);
+        fseeko(serializer.f, serializer.dataset_file_position[id], SEEK_SET);
+        data.readFromFile(serializer.f);
+        callback(data);
+        count -= 1;
+    }
 }
 
 void DataSet::addAsRawData(const char* key, DataType type, const void* ptr, size_t size)
@@ -218,6 +236,31 @@ bool DataSet::getAsRawData(const char* key, DataType type, void* ptr, size_t siz
         return false;
     memcpy(ptr, &data[it->second.second], size);
     return true;
+}
+
+void DataSet::pushUInt(int n)
+{
+    while(n > 127)
+    {
+        data.push_back(0x80 | (n & 0x7f));
+        n >>= 7;
+    }
+    data.push_back(n);
+}
+
+int DataSet::pullUInt(int& index) const
+{
+    int result = 0;
+    size_t shift = 0;
+    while(data[index] & 0x80)
+    {
+        result = result | ((data[index] & 0x7f) << shift);
+        shift += 7;
+        index += 1;
+    }
+    result = result | (data[index] << shift);
+    index += 1;
+    return result;
 }
 
 void DataSet::writeToFile(FILE* f)
