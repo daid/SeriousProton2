@@ -37,6 +37,10 @@ public:
         {
             static_cast<T*>(obj)->save(data);
         };
+        name_to_load_function_mapping[name] = [](AutoPointerObject* obj, const DataSet& data)
+        {
+            static_cast<T*>(obj)->load(data);
+        };
         name_to_create_function_mapping[name] = &T::create;
     }
 
@@ -53,6 +57,7 @@ private:
     FILE* f = nullptr;
     std::unordered_map<std::type_index, sp::string> type_to_name_mapping;
     std::unordered_map<std::type_index, std::function<void(AutoPointerObject*, DataSet&)>> type_to_save_function_mapping;
+    std::unordered_map<string, std::function<void(AutoPointerObject*, DataSet&)>> name_to_load_function_mapping;
     std::unordered_map<string, createFunctionType> name_to_create_function_mapping;
 
     std::unordered_map<int, off_t> dataset_file_position;

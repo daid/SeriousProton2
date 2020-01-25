@@ -75,6 +75,9 @@ void DataSet::set(const char* key, const string& value)
 
 void DataSet::set(const char* key, P<AutoPointerObject> obj)
 {
+    if (!obj)
+        return;
+
     auto it = serializer.object_to_id.find(*obj);
     if (it != serializer.object_to_id.end())
     {
