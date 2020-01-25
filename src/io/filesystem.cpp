@@ -142,7 +142,7 @@ const string& preferencePath()
         path = nullptr;
 #elif defined(__linux__)
         //On linux, we need our application name, grab it from the proc interface
-        char executable_name[MAX_PATH] = {0};
+        char executable_name[PATH_MAX] = {0};
         readlink("/proc/self/exe", executable_name, sizeof(executable_name) - 1);
         path = strrchr(executable_name, '/');
         if (path)
