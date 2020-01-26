@@ -48,6 +48,13 @@ public:
         return expired;
     }
 
+    void setProgress(float progress)
+    {
+        if (!running)
+            return;
+        start_time = ClockSource::now() - std::chrono::duration_cast<typename ClockSource::duration>(std::chrono::duration<float>(timeout * progress));
+    }
+
     float getTimeLeft() const
     {
         return timeout - getTimeElapsed();
