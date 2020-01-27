@@ -143,10 +143,12 @@ const string& preferencePath()
 #elif defined(__linux__)
         //On linux, we need our application name, grab it from the proc interface
         char executable_name[PATH_MAX] = {0};
-        readlink("/proc/self/exe", executable_name, sizeof(executable_name) - 1);
-        path = strrchr(executable_name, '/');
-        if (path)
-            path += 1;
+        if (readlink("/proc/self/exe", executable_name, sizeof(executable_name) - 1) > 1)
+        {
+            path = strrchr(executable_name, '/');
+            if (path)
+                path += 1;
+        }
 #elif defined(__WIN32__)
         //On windows, we need our application name, we grab the name of our executable and use that.
         // And then use the SDL function to get our actual path.

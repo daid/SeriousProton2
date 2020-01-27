@@ -107,16 +107,25 @@ void Serializer::finishFile()
 
 void Serializer::initialRead()
 {
-    fseeko(f, sizeof(uint64_t) * -4, SEEK_END);
+    if (!f)
+        return;
+
+    if (fseeko(f, sizeof(uint64_t) * -4, SEEK_END))
+        return;
+
     off_t header_start = ftello(f);
     int64_t dataset_table_position = 0;
     int64_t string_table_position = 0;
     int64_t version = 0;
     int64_t magic = 0;
-    fread(&dataset_table_position, sizeof(dataset_table_position), 1, f);
-    fread(&string_table_position, sizeof(string_table_position), 1, f);
-    fread(&version, sizeof(version), 1, f);
-    fread(&magic, sizeof(magic), 1, f);
+    if (fread(&dataset_table_position, sizeof(dataset_table_position), 1, f) != 1)
+        return;
+    if (fread(&string_table_position, sizeof(string_table_position), 1, f) != 1)
+        return;
+    if (fread(&version, sizeof(version), 1, f) != 1)
+        return;
+    if (fread(&magic, sizeof(magic), 1, f) != 1)
+        return;
     if (magic != *reinterpret_cast<const int64_t*>("SP2:DATA"))
     {
         LOG(Warning, "Magic header mismatch on deserialization. Ignoring file.");
