@@ -22,6 +22,7 @@ template<typename T> struct typeIdentifier{};
 template<std::size_t ...> struct sequence{};
 template<std::size_t N, std::size_t ...S> struct sequenceGenerator : sequenceGenerator<N-1, N-1, S...>{};
 template<std::size_t ...S> struct sequenceGenerator<0, S...>{ typedef sequence<S...> type; };
+template<typename T> using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
 template<typename... ARGS, std::size_t... N> std::tuple<ARGS...> getArgs(lua_State* L, sequence<N...>)
 {
@@ -94,7 +95,11 @@ template<typename T> int pushToLua(lua_State* L, Vector3<T> f)
 template<class TYPE, typename RET> class callClassHelper
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, RET(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, RET(TYPE::*f)(ARGS...), std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
+    {
+        return pushToLua(L, (obj->*(f))(std::get<N>(args)...));
+    }
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, RET(TYPE::*f)(ARGS...) const, std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
     {
         return pushToLua(L, (obj->*(f))(std::get<N>(args)...));
     }
@@ -103,7 +108,12 @@ public:
 template<class TYPE> class callClassHelper<TYPE, void>
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, void(TYPE::*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, void(TYPE::*f)(ARGS...), std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
+    {
+        (obj->*(f))(std::get<N>(args)...);
+        return pushToLua(L, obj);
+    }
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, TYPE* obj, void(TYPE::*f)(ARGS...) const, std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
     {
         (obj->*(f))(std::get<N>(args)...);
         return pushToLua(L, obj);
@@ -113,7 +123,7 @@ public:
 template<typename RET> class callFunctionHelper
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, RET(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, RET(*f)(ARGS...), std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
     {
         return pushToLua(L, (*f)(std::get<N>(args)...));
     }
@@ -122,7 +132,7 @@ public:
 template<> class callFunctionHelper<void>
 {
 public:
-    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, void(*f)(ARGS...), std::tuple<ARGS...>& args, sequence<N...>)
+    template<typename... ARGS, std::size_t... N> static int doCall(lua_State* L, void(*f)(ARGS...), std::tuple<remove_cvref<ARGS>...>& args, sequence<N...>)
     {
         (*f)(std::get<N>(args)...);
         return 0;
@@ -136,7 +146,18 @@ template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State* L
     TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
     if (!obj)
         return 0;
-    std::tuple<ARGS...> args = getArgs<ARGS...>(L);
+    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
+    return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+}
+
+template<class TYPE, typename RET, typename... ARGS> int callConstMember(lua_State* L)
+{
+    typedef RET(TYPE::*FT)(ARGS...) const;
+    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+    TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
+    if (!obj)
+        return 0;
+    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
     return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
@@ -144,7 +165,7 @@ template<typename RET, typename... ARGS> int callFunction(lua_State* L)
 {
     typedef RET(*FT)(ARGS...);
     FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
-    std::tuple<ARGS...> args = getArgs<ARGS...>(L);
+    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
     return callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 

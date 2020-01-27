@@ -25,6 +25,17 @@ public:
         lua_pushcclosure(L, &script::callMember<TYPE, RET, ARGS...>, 2);
         lua_setfield(L, function_table_index, name.c_str());
     }
+    template<class TYPE, typename RET, typename... ARGS> void bind(const string& name, RET(TYPE::*func)(ARGS...) const)
+    {
+        typedef RET(TYPE::*FT)(ARGS...) const;
+        
+        FT* f = reinterpret_cast<FT*>(lua_newuserdata(L, sizeof(FT)));
+        *f = func;
+        lua_pushvalue(L, object_table_index); //push the table of this object
+        
+        lua_pushcclosure(L, &script::callConstMember<TYPE, RET, ARGS...>, 2);
+        lua_setfield(L, function_table_index, name.c_str());
+    }
 
     void bind(const string& name, sp::script::Callback& callback);
     
