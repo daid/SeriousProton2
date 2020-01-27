@@ -40,9 +40,9 @@ public:
         lua_setfield(L, function_table_index, name.c_str());
     }
 
-    template<class OBJECT_TYPE, typename PROPERTY_TYPE> void bindProperty(const string& name, PROPERTY_TYPE(OBJECT_TYPE::*getter)(), void(OBJECT_TYPE::*setter)(PROPERTY_TYPE))
+    template<class OBJECT_TYPE, typename PROPERTY_TYPE> void bindProperty(const string& name, PROPERTY_TYPE(OBJECT_TYPE::*getter)() const, void(OBJECT_TYPE::*setter)(PROPERTY_TYPE))
     {
-        typedef PROPERTY_TYPE(OBJECT_TYPE::*GET_FT)();
+        typedef PROPERTY_TYPE(OBJECT_TYPE::*GET_FT)() const;
         typedef void(OBJECT_TYPE::*SET_FT)(PROPERTY_TYPE);
         
         lua_newtable(L);
