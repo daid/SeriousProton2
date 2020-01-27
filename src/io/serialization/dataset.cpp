@@ -194,6 +194,8 @@ template<> string DataSet::get(const char* key) const
         return "";
     int index = it->second.second;
     int length = pullUInt(index);
+    if (length < 0 || index < 0 || size_t(index + length) > data.size())
+        return "";
     return string(reinterpret_cast<const char*>(&data[index]), length);
 }
 
@@ -245,6 +247,8 @@ bool DataSet::getAsRawData(const char* key, DataType type, void* ptr, size_t siz
     auto it = values.find(idx);
     if (it == values.end() || it->second.first != type)
         return false;
+    if (it->second.second < 0 || it->second.second + size >= data.size())
+        return false;
     memcpy(ptr, &data[it->second.second], size);
     return true;
 }
@@ -261,6 +265,8 @@ void DataSet::pushUInt(int n)
 
 int DataSet::pullUInt(int& index) const
 {
+    if (index < 0)
+        return 0;
     int result = 0;
     size_t shift = 0;
     while(data[index] & 0x80)
@@ -268,6 +274,8 @@ int DataSet::pullUInt(int& index) const
         result = result | ((data[index] & 0x7f) << shift);
         shift += 7;
         index += 1;
+        if (size_t(index) >= data.size())
+            return 0;
     }
     result = result | (data[index] << shift);
     index += 1;
@@ -308,7 +316,8 @@ void DataSet::readFromFile(FILE* f)
     }
 
     data.resize(readUInt(f));
-    fread(data.data(), data.size(), 1, f);
+    if (fread(data.data(), data.size(), 1, f) != 1)
+        data.clear();
 }
 
 void DataSet::writeUInt(unsigned int v, FILE* f)
@@ -328,6 +337,8 @@ unsigned int DataSet::readUInt(FILE* f)
     int c;
     for(c = fgetc(f); c & 0x80; c = fgetc(f))
     {
+        if (feof(f))
+            return 0;
         result |= (c & 0x7f) << shift;
         shift += 7;
     }
