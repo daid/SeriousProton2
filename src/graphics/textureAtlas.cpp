@@ -140,11 +140,7 @@ AtlasManager::Result AtlasManager::get(const string& resource_name)
     {
         return it->second;
     }
-    io::ResourceStreamPtr stream;
-    if (resource_name.find("#") > -1)
-        stream = io::ResourceProvider::get(resource_name.substr(0, resource_name.find("#")));
-    else
-        stream = io::ResourceProvider::get(resource_name);
+    io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
 
     Result result;
     result.texture = nullptr;

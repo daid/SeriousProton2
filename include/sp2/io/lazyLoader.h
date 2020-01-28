@@ -41,10 +41,7 @@ protected:
     void addToWorkqueue(T ptr, const string& name)
     {
         io::ResourceStreamPtr stream;
-        if (name.find("#") > -1)
-            stream = io::ResourceProvider::get(name.substr(0, name.find("#")));
-        else
-            stream = io::ResourceProvider::get(name);
+        stream = io::ResourceProvider::get(name);
         if (stream)
         {
             LazyLoaderManager::addWork([this, ptr, stream]()

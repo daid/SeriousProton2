@@ -20,9 +20,17 @@ public:
     virtual int64_t seek(int64_t position) = 0;
     virtual int64_t tell() = 0;
     virtual int64_t getSize() = 0;
-    
+
     string readLine();
     string readAll();
+
+    // Optional stream flags. Generally set by extra parameters on the filename.
+    bool hasFlag(const string& name);
+    string getFlag(const string& name);
+protected:
+    std::unordered_map<string, string> flags;
+
+    friend class ResourceProvider;
 };
 typedef std::shared_ptr<ResourceStream> ResourceStreamPtr;
 
@@ -35,7 +43,7 @@ public:
     virtual std::chrono::system_clock::time_point getResourceModifyTime(const string& filename) { return std::chrono::system_clock::time_point(); }
     virtual std::vector<string> findResources(const string& search_pattern) = 0;
 
-    static ResourceStreamPtr get(const string& filename);
+    static ResourceStreamPtr get(string filename);
     static std::chrono::system_clock::time_point getModifyTime(const string& filename);
     static std::vector<string> find(const string& search_pattern);
 

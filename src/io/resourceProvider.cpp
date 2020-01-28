@@ -174,13 +174,41 @@ string ResourceStream::readAll()
     return result;
 }
 
-ResourceStreamPtr ResourceProvider::get(const string& filename)
+bool ResourceStream::hasFlag(const string& name)
 {
+    return flags.find(name) != flags.end();
+}
+
+string ResourceStream::getFlag(const string& name)
+{
+    auto it = flags.find(name);
+    if (it == flags.end())
+        return "";
+    return it->second;
+}
+
+ResourceStreamPtr ResourceProvider::get(string filename)
+{
+    string flags;
+    if (filename.find("#") > -1)
+    {
+        flags = filename.substr(filename.find("#") + 1);
+        filename = filename.substr(0, filename.find("#"));
+    }
     for(P<ResourceProvider> rp : providers)
     {
         ResourceStreamPtr stream = rp->getStream(filename);
         if (stream)
+        {
+            for(auto item : flags.split(","))
+            {
+                if (item.find("="))
+                    stream->flags[item.substr(0, item.find("="))] = item.substr(item.find("="));
+                else if (item.length() > 0)
+                    stream->flags[item] = "";
+            }
             return stream;
+        }
     }
     return nullptr;
 }

@@ -1,5 +1,8 @@
 #include <sp2/graphics/image.h>
+#include <sp2/graphics/image/hq2x.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/assert.h>
+
 
 #define STBI_ASSERT(x) sp2assert(x, "stb_image assert")
 #define STB_IMAGE_IMPLEMENTATION
@@ -114,6 +117,28 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
     {
         update(Vector2i(x, y), buffer);
         stbi_image_free(buffer);
+
+        if (stream->hasFlag("hq2x") || stream->hasFlag("hq3x") || stream->hasFlag("hq4x"))
+        {
+            image::HQ2xConfig config;
+            Vector2i tile_size(0, 0);
+            config.scale = 2;
+            if (stream->hasFlag("hq3x"))
+                config.scale = 3;
+            else if (stream->hasFlag("hq4x"))
+                config.scale = 4;
+            config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Clamp;
+            if (stream->hasFlag("wrap"))
+                config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Wrap;
+            else if (stream->hasFlag("wrap"))
+                config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Transparent;
+            if (stream->hasFlag("tiles"))
+                tile_size.x = tile_size.y = stringutil::convert::toInt(stream->getFlag("tiles"));
+            if (tile_size.x > 0 && tile_size.y > 0)
+                image::hq2xTiles(*this, tile_size, config);
+            else
+                image::hq2x(*this, config);
+        }
         return true;
     }
     return false;
