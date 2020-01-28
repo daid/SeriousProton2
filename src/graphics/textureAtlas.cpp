@@ -13,6 +13,7 @@ AtlasTexture::AtlasTexture(const string& name, Vector2i size)
     texture_size = size;
     available_areas.emplace_back(0, 0, size.x, size.y);
     gl_handle = 0;
+    smooth = texture_manager.isDefaultSmoothFiltering();
 }
 
 AtlasTexture::~AtlasTexture()
@@ -29,8 +30,8 @@ void AtlasTexture::bind()
         glBindTexture(GL_TEXTURE_2D, gl_handle);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_manager.isDefaultSmoothFiltering() ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_manager.isDefaultSmoothFiltering() ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
         
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size.x, texture_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }

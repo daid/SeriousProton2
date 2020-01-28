@@ -21,6 +21,11 @@ public:
     {
         setImage(std::move(image));
     }
+
+    void setSmooth(bool value)
+    {
+        smooth = value;
+    }
 };
 
 TextureManager::TextureManager()
@@ -51,9 +56,14 @@ void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr st
     if (stream)
     {
         sp::Image image;
+        TextureManagerTexture* tmt = static_cast<TextureManagerTexture*>(texture);
         if (!image.loadFromStream(stream))
             LOG(Warning, "Failed to load image:", texture->getName());
-        (static_cast<TextureManagerTexture*>(texture))->transferImageFromThread(std::move(image));
+        if (stream->hasFlag("smooth") || stream->getFlag("filter") == "linear")
+            tmt->setSmooth(true);
+        if (stream->hasFlag("pixel") || stream->getFlag("filter") == "nearest")
+            tmt->setSmooth(false);
+        tmt->transferImageFromThread(std::move(image));
     }
 }
 

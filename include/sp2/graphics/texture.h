@@ -29,6 +29,7 @@ protected:
     Type type;
     string name;
     int revision;
+    bool smooth = false;
 };
 
 class OpenGLTexture : public Texture
