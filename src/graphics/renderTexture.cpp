@@ -1,4 +1,5 @@
 #include <sp2/graphics/renderTexture.h>
+#include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/opengl.h>
 
 
@@ -9,6 +10,7 @@ RenderTexture::RenderTexture(const string& name, Vector2i size, bool double_buff
 {
     flipped = false;
     auto_clear = !double_buffered;
+    smooth = texture_manager.isDefaultSmoothFiltering();
     
     for(int n=0; n<2; n++)
     {
@@ -45,8 +47,8 @@ void RenderTexture::create()
         
         glBindTexture(GL_TEXTURE_2D, color_buffer[n]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer[n], 0);
         
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer[n]);
