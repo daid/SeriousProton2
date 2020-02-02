@@ -7,7 +7,6 @@
 #define STBI_ASSERT(x) sp2assert(x, "stb_image assert")
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
-#define STBI_NO_STDIO
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
 #if defined(__GNUC__) && !defined(__clang__)
@@ -139,6 +138,19 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
             else
                 image::hq2x(*this, config);
         }
+        return true;
+    }
+    return false;
+}
+
+bool Image::loadFromFile(const string& filename)
+{
+    int x, y, channels;
+    uint32_t* buffer = reinterpret_cast<uint32_t*>(stbi_load(filename.c_str(), &x, &y, &channels, 4));
+    if (buffer)
+    {
+        update(Vector2i(x, y), buffer);
+        stbi_image_free(buffer);
         return true;
     }
     return false;

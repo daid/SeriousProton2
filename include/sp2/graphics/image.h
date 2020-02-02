@@ -24,6 +24,7 @@ public:
     void update(Vector2i size, const uint32_t* ptr);
     void update(Vector2i size, const uint32_t* ptr, int pitch);
     bool loadFromStream(io::ResourceStreamPtr stream);
+    bool loadFromFile(const string& filename);
     
     //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
     //Returns true on success.
