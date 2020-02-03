@@ -133,45 +133,45 @@ const string& preferencePath()
 
     if (preference_path.length() == 0)
     {
-        char* path = nullptr;
+        const char* input_path = nullptr;
 #ifdef EMSCRIPTEN
         //For emscripten, we have a virtual filesystem, so we do not really care.
-        path = "preferences"
+        input_path = "preferences";
 #elif defined(ANDROID)
         //For android, we have local storage per app. SDL_GetPrefPath handles this.
-        path = nullptr;
+        input_path = nullptr;
 #elif defined(__linux__)
         //On linux, we need our application name, grab it from the proc interface
         char executable_name[PATH_MAX] = {0};
         if (readlink("/proc/self/exe", executable_name, sizeof(executable_name) - 1) > 1)
         {
-            path = strrchr(executable_name, '/');
-            if (path)
-                path += 1;
+            input_path = strrchr(executable_name, '/');
+            if (input_path)
+                input_path += 1;
         }
 #elif defined(__WIN32__)
         //On windows, we need our application name, we grab the name of our executable and use that.
         // And then use the SDL function to get our actual path.
         char executable_name[MAX_PATH] = {0};
         GetModuleFileNameA(nullptr, executable_name, sizeof(executable_name) - 1);
-        path = strrchr(executable_name, '\\');
-        if (path)
+        input_path = strrchr(executable_name, '\\');
+        if (input_path)
         {
-            path += 1;
-            if (strrchr(path, '.'))
-                *strrchr(path, '.') = '\0';
+            input_path += 1;
+            if (strrchr(executable_name, '.'))
+                *strrchr(executable_name, '.') = '\0';
         }
 #endif
-        path = SDL_GetPrefPath(nullptr, path);
-        
-        if (!path)
+        char* pref_path = SDL_GetPrefPath(nullptr, input_path);
+
+        if (!pref_path)
         {
             preference_path = "./";
         }
         else
         {
-            preference_path = path;
-            SDL_free(path);
+            preference_path = pref_path;
+            SDL_free(pref_path);
         }
     }
 
