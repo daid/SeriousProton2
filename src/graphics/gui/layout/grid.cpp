@@ -9,6 +9,7 @@ SP_REGISTER_LAYOUT("grid", GridLayout);
 void GridLayout::update(P<Widget> container, Rect2d rect)
 {
     Vector2i grid_size;
+    int max_span = 1;
     for(P<Widget> w : container->getChildren())
     {
         if (!w || !w->isVisible())
@@ -17,8 +18,10 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
         Vector2i span = w->layout.span;
         grid_size.x = std::max(grid_size.x, position.x + span.x);
         grid_size.y = std::max(grid_size.y, position.y + span.y);
+        max_span = std::max(max_span, span.x);
+        max_span = std::max(max_span, span.y);
     }
-    
+
     float col_width[grid_size.x];
     float row_height[grid_size.y];
     for(int n=0; n<grid_size.x; n++)
@@ -26,26 +29,54 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
     for(int n=0; n<grid_size.y; n++)
         row_height[n] = 0.0;
 
-    for(P<Widget> w : container->getChildren())
+    for(int span_size = 1; span_size <= max_span; span_size += 1)
     {
-        if (!w || !w->isVisible())
-            continue;
-        Vector2i position = Vector2i(w->layout.position);
-        Vector2i span = w->layout.span;
-        
-        if (span.x == 1)
+        for(P<Widget> w : container->getChildren())
         {
-            float width = w->layout.size.x + w->layout.margin.left + w->layout.margin.right;
-            col_width[position.x] = std::max(col_width[position.x], width);
-        }
-        if (span.y == 1)
-        {
-            float height = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;
-            row_height[position.y] = std::max(row_height[position.y], height);
+            if (!w || !w->isVisible())
+                continue;
+            Vector2i position = Vector2i(w->layout.position);
+            Vector2i span = w->layout.span;
+
+            if (span.x == span_size)
+            {
+                float widget_width = w->layout.size.x + w->layout.margin.left + w->layout.margin.right;
+                float total_width = 0.0f;
+                for(int x=position.x; x<position.x+span.x; x++)
+                    total_width += col_width[x];
+                float delta = widget_width - total_width;
+                if (delta > 0.0f)
+                {
+                    for(int x=position.x; x<position.x+span.x; x++)
+                    {
+                        if (total_width == 0.0f)
+                            col_width[x] = widget_width / float(span_size);
+                        else
+                            col_width[x] += delta * col_width[x] / total_width;
+                    }
+                }
+            }
+            if (span.y == span_size)
+            {
+                float widget_height = w->layout.size.y + w->layout.margin.top + w->layout.margin.bottom;
+                float total_height = 0.0f;
+                for(int y=position.y; y<position.y+span.y; y++)
+                    total_height += row_height[y];
+                float delta = widget_height - total_height;
+                if (delta > 0.0f)
+                {
+                    for(int y=position.y; y<position.y+span.y; y++)
+                    {
+                        if (total_height == 0.0f)
+                            row_height[y] = widget_height / float(span_size);
+                        else
+                            row_height[y] += delta * row_height[y] / total_height;
+                    }
+                }
+            }
         }
     }
-    //SP2TODO: Handle the case where span > 1
-    
+
     float col_x[grid_size.x];
     float row_y[grid_size.y];
     for(int n=0; n<grid_size.x; n++)
