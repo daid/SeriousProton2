@@ -319,7 +319,10 @@ void Widget::setAttribute(const string& key, const string& value)
     }
     else if (key == "stretch")
     {
-        layout.fill_height = layout.fill_width = stringutil::convert::toBool(value);
+        if (value == "aspect")
+            layout.fill_height = layout.fill_width = layout.lock_aspect_ratio = true;
+        else
+            layout.fill_height = layout.fill_width = stringutil::convert::toBool(value);
         layout.match_content_size = false;
     }
     else if (key == "fill_height")
