@@ -25,6 +25,11 @@ void Panel::updateRenderData()
     render_data.color = t.color;
 }
 
+bool Panel::onPointerMove(Vector2d position, int id)
+{
+    return true;
+}
+
 bool Panel::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     return true;

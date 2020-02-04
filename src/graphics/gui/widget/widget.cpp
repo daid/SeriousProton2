@@ -70,6 +70,15 @@ void Widget::postLoading()
 {
 }
 
+bool Widget::onPointerMove(Vector2d position, int id)
+{
+    return false;
+}
+
+void Widget::onPointerLeave(int id)
+{
+}
+
 bool Widget::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
     return false;

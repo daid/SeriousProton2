@@ -14,6 +14,8 @@ public:
     Scene(Vector2d size, const string& scene_name="GUI", int priority=100);
 
     virtual void onUpdate(float delta) override;
+    virtual bool onPointerMove(Ray3d ray, int id) override;
+    virtual void onPointerLeave(int id) override;
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id) override;
     virtual void onPointerDrag(Ray3d ray, int id) override;
     virtual void onPointerUp(Ray3d ray, int id) override;

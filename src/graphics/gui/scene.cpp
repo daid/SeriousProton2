@@ -40,6 +40,44 @@ void Scene::onUpdate(float delta)
     }
 }
 
+bool Scene::onPointerMove(Ray3d ray, int id)
+{
+    Vector2d position(ray.end.x, ray.end.y);
+    P<Widget> w = root_widget->getWidgetAt<Widget>(position);
+    while(w)
+    {
+        if (w->onPointerMove(position - w->getGlobalPosition2D(), id))
+        {
+            auto it = pointer_widget.find(id);
+            if (it != pointer_widget.end() && it->second && it->second != w)
+            {
+                pointer_widget[id]->hover = false;
+                pointer_widget[id]->markRenderDataOutdated();
+                pointer_widget[id]->onPointerLeave(id);
+
+                pointer_widget[id] = w;
+                w->hover = true;
+                w->markRenderDataOutdated();
+            }
+            return true;
+        }
+        w = w->getParent();
+    }
+    return false;
+}
+
+void Scene::onPointerLeave(int id)
+{
+    auto it = pointer_widget.find(id);
+    if (it != pointer_widget.end() && it->second)
+    {
+        pointer_widget[id]->hover = false;
+        pointer_widget[id]->markRenderDataOutdated();
+        pointer_widget[id]->onPointerLeave(id);
+        pointer_widget.erase(it);
+    }
+}
+
 bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
 {
     Vector2d position(ray.end.x, ray.end.y);
