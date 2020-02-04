@@ -1,5 +1,6 @@
 #include <sp2/graphics/font/bitmap.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/stringutil/convert.h>
 
 
 namespace sp {

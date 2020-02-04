@@ -1,8 +1,9 @@
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/graphics/textureManager.h>
-#include <sp2/logging.h>
 #include <sp2/io/keyValueTreeLoader.h>
+#include <sp2/stringutil/convert.h>
+#include <sp2/logging.h>
 
 namespace sp {
 namespace gui {
@@ -55,7 +56,7 @@ void Theme::loadTheme(const string& name, const string& resource_name)
         else
             global_style.texture = texture_manager.get(input["image"]);
         if (input.find("color") != input.end())
-            global_style.color = Color::fromString(input["color"]);
+            global_style.color = stringutil::convert::toColor(input["color"]);
         else
             global_style.color = Color(1, 1, 1);
         global_style.font = font_manager.get(input["font"]);
@@ -91,7 +92,7 @@ void Theme::loadTheme(const string& name, const string& resource_name)
                     style.states[n].texture = texture_manager.get(input["image." + postfix]);
             }
             if (input.find("color." + postfix) != input.end())
-                style.states[n].color = Color::fromString(input["color." + postfix]);
+                style.states[n].color = stringutil::convert::toColor(input["color." + postfix]);
             if (input.find("font." + postfix) != input.end())
                 style.states[n].font = font_manager.get(input["font." + postfix]);
             if (input.find("size." + postfix) != input.end())

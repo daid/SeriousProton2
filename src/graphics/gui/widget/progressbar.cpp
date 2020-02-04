@@ -1,6 +1,7 @@
 #include <sp2/graphics/gui/widget/progressbar.h>
 #include <sp2/graphics/gui/widget/themeimage.h>
 #include <sp2/graphics/gui/theme.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/engine.h>
 
 

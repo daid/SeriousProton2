@@ -6,6 +6,7 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/audio/sound.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/assert.h>
 #include <limits>
 

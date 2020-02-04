@@ -3,6 +3,7 @@
 
 #include <sp2/string.h>
 #include <sp2/alignment.h>
+#include <sp2/graphics/color.h>
 #include <sp2/math/vector.h>
 
 
@@ -39,6 +40,8 @@ sp::Vector2f toVector2f(const string& s);
 sp::Vector2i toVector2i(const string& s);
 
 Alignment toAlignment(const string& s);
+
+Color toColor(const string& s);
 
 }//namespace convert
 }//namespace stringutil

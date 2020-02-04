@@ -2,7 +2,6 @@
 #define SP2_GRAPHICS_COLOR_H
 
 #include <sp2/math/vector.h>
-#include <sp2/stringutil/convert.h>
 #include <sp2/string.h>
 #include <sp2/logging.h>
 #include <cmath>
@@ -100,19 +99,6 @@ public:
         a = 1.0;
     }
 
-    static Color fromString(const string& s)
-    {
-        if (s.startswith("#"))
-        {
-            if (s.length() == 7)
-                return Color(stringutil::convert::toInt(s.substr(1), 16) << 8 | 0xFF);
-            if (s.length() == 9)
-                return Color(stringutil::convert::toInt(s.substr(1, 5), 16) << 16 | stringutil::convert::toInt(s.substr(5), 16));  //toInt(16) fails with 8 bytes, so split the convertion in 2 sections.
-        }
-        LOG(Error, "Failed to parse color string", s);
-        return Color(1, 1, 1);
-    }
-    
     string toString()
     {
         if (a == 1.0f)

@@ -3,6 +3,7 @@
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/textureAtlas.h>
 #include <sp2/io/keyValueTreeLoader.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/logging.h>
 
 namespace sp {

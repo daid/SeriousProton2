@@ -2,6 +2,7 @@
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/meshdata.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/engine.h>
 
 namespace sp {
@@ -55,7 +56,7 @@ void Image::setAttribute(const string& key, const string& value)
     }
     else if (key == "color")
     {
-        render_data.color = sp::Color::fromString(value);
+        render_data.color = stringutil::convert::toColor(value);
     }
     else
     {
