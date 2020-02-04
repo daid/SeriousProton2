@@ -15,7 +15,10 @@ void Layout::updateLoop(P<Widget> container, Rect2d rect)
         require_repeat = false;
         update(container, rect);
         if (--repeat_counter < 1)
+        {
+            LOG(Warning, "Possible infinite loop in gui layout.");
             return;
+        }
     } while(require_repeat);
 }
 
