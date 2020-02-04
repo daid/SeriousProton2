@@ -103,16 +103,88 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
         {
             double current_aspect = result_size.x / result_size.y;
             if (current_aspect > aspect)
+            {
+                switch(widget->layout.alignment)
+                {
+                case Alignment::TopLeft:
+                case Alignment::Left:
+                case Alignment::BottomLeft:
+                    break;
+                case Alignment::Top:
+                case Alignment::Center:
+                case Alignment::Bottom:
+                    result_position.x += (result_size.x - result_size.y / aspect) * 0.5;
+                    break;
+                case Alignment::TopRight:
+                case Alignment::Right:
+                case Alignment::BottomRight:
+                    result_position.x += result_size.x - result_size.y / aspect;
+                    break;
+                }
                 result_size.x = result_size.y / aspect;
+            }
             else
+            {
+                switch(widget->layout.alignment)
+                {
+                case Alignment::TopLeft:
+                case Alignment::Top:
+                case Alignment::TopRight:
+                    result_position.y += result_size.y - result_size.x * aspect;
+                    break;
+                case Alignment::Left:
+                case Alignment::Center:
+                case Alignment::Right:
+                    result_position.y += (result_size.y - result_size.x * aspect) * 0.5;
+                    break;
+                case Alignment::BottomLeft:
+                case Alignment::Bottom:
+                case Alignment::BottomRight:
+                    break;
+                }
                 result_size.y = result_size.x * aspect;
+            }
         }
         else if (widget->layout.fill_height)
         {
+            switch(widget->layout.alignment)
+            {
+            case Alignment::TopLeft:
+            case Alignment::Left:
+            case Alignment::BottomLeft:
+                break;
+            case Alignment::Top:
+            case Alignment::Center:
+            case Alignment::Bottom:
+                result_position.x += (result_size.x - result_size.y / aspect) * 0.5;
+                break;
+            case Alignment::TopRight:
+            case Alignment::Right:
+            case Alignment::BottomRight:
+                result_position.x += result_size.x - result_size.y / aspect;
+                break;
+            }
             result_size.x = result_size.y / aspect;
         }
         else if (widget->layout.fill_width)
         {
+            switch(widget->layout.alignment)
+            {
+            case Alignment::TopLeft:
+            case Alignment::Top:
+            case Alignment::TopRight:
+                result_position.y += result_size.y - result_size.x * aspect;
+                break;
+            case Alignment::Left:
+            case Alignment::Center:
+            case Alignment::Right:
+                result_position.y += (result_size.y - result_size.x * aspect) * 0.5;
+                break;
+            case Alignment::BottomLeft:
+            case Alignment::Bottom:
+            case Alignment::BottomRight:
+                break;
+            }
             result_size.y = result_size.x * aspect;
         }
     }
