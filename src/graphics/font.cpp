@@ -35,6 +35,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
             .position = position,
             .char_code = char_info.code,
             .string_offset = int(index),
+            .normal = Vector3f(0, 0, 1),
         });
         previous_char_code = char_info.code;
         index += char_info.consumed_bytes;
@@ -90,6 +91,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
         .position = position,
         .char_code = 0,
         .string_offset = int(s.size()),
+        .normal = Vector3f(0, 0, 1),
     });
 
     result.alignAll();
@@ -245,10 +247,10 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create()
             indices.emplace_back(vertices.size() + 3);
             indices.emplace_back(vertices.size() + 1);
 
-            vertices.emplace_back(p0, sp::Vector3f(0, 0, 1), sp::Vector2f(u0, v0));
-            vertices.emplace_back(p1, sp::Vector3f(0, 0, 1), sp::Vector2f(u1, v0));
-            vertices.emplace_back(p2, sp::Vector3f(0, 0, 1), sp::Vector2f(u0, v1));
-            vertices.emplace_back(p3, sp::Vector3f(0, 0, 1), sp::Vector2f(u1, v1));
+            vertices.emplace_back(p0, d.normal, Vector2f(u0, v0));
+            vertices.emplace_back(p1, d.normal, Vector2f(u1, v0));
+            vertices.emplace_back(p2, d.normal, Vector2f(u0, v1));
+            vertices.emplace_back(p3, d.normal, Vector2f(u1, v1));
         }
     }
 
