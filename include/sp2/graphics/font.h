@@ -29,9 +29,10 @@ public:
         class GlyphData
         {
         public:
-            sp::Vector2f position;
+            Vector2f position;
             int char_code;
             int string_offset;
+            Vector3f normal;
         };
         std::vector<GlyphData> data;
 
