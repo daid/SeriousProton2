@@ -568,7 +568,10 @@ void Window::handleEvent(const SDL_Event& event)
         switch(event.window.event)
         {
         case SDL_WINDOWEVENT_LEAVE:
-            pointerLeave(-1);
+            if (!SDL_GetMouseState(nullptr, nullptr))
+            {
+                pointerLeave(-1);
+            }
             break;
         case SDL_WINDOWEVENT_CLOSE:
             close();
