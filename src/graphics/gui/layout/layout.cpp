@@ -116,15 +116,15 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
                 case Alignment::Top:
                 case Alignment::Center:
                 case Alignment::Bottom:
-                    result_position.x += (result_size.x - result_size.y / aspect) * 0.5;
+                    result_position.x += (result_size.x - result_size.y * aspect) * 0.5;
                     break;
                 case Alignment::TopRight:
                 case Alignment::Right:
                 case Alignment::BottomRight:
-                    result_position.x += result_size.x - result_size.y / aspect;
+                    result_position.x += result_size.x - result_size.y * aspect;
                     break;
                 }
-                result_size.x = result_size.y / aspect;
+                result_size.x = result_size.y * aspect;
             }
             else
             {
@@ -133,19 +133,19 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
                 case Alignment::TopLeft:
                 case Alignment::Top:
                 case Alignment::TopRight:
-                    result_position.y += result_size.y - result_size.x * aspect;
+                    result_position.y += result_size.y - result_size.x / aspect;
                     break;
                 case Alignment::Left:
                 case Alignment::Center:
                 case Alignment::Right:
-                    result_position.y += (result_size.y - result_size.x * aspect) * 0.5;
+                    result_position.y += (result_size.y - result_size.x / aspect) * 0.5;
                     break;
                 case Alignment::BottomLeft:
                 case Alignment::Bottom:
                 case Alignment::BottomRight:
                     break;
                 }
-                result_size.y = result_size.x * aspect;
+                result_size.y = result_size.x / aspect;
             }
         }
         else if (widget->layout.fill_height)
@@ -159,15 +159,15 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
             case Alignment::Top:
             case Alignment::Center:
             case Alignment::Bottom:
-                result_position.x += (result_size.x - result_size.y / aspect) * 0.5;
+                result_position.x += (result_size.x - result_size.y * aspect) * 0.5;
                 break;
             case Alignment::TopRight:
             case Alignment::Right:
             case Alignment::BottomRight:
-                result_position.x += result_size.x - result_size.y / aspect;
+                result_position.x += result_size.x - result_size.y * aspect;
                 break;
             }
-            result_size.x = result_size.y / aspect;
+            result_size.x = result_size.y * aspect;
         }
         else if (widget->layout.fill_width)
         {
@@ -176,19 +176,19 @@ void Layout::basicLayout(Rect2d rect, Widget* widget)
             case Alignment::TopLeft:
             case Alignment::Top:
             case Alignment::TopRight:
-                result_position.y += result_size.y - result_size.x * aspect;
+                result_position.y += result_size.y - result_size.x / aspect;
                 break;
             case Alignment::Left:
             case Alignment::Center:
             case Alignment::Right:
-                result_position.y += (result_size.y - result_size.x * aspect) * 0.5;
+                result_position.y += (result_size.y - result_size.x / aspect) * 0.5;
                 break;
             case Alignment::BottomLeft:
             case Alignment::Bottom:
             case Alignment::BottomRight:
                 break;
             }
-            result_size.y = result_size.x * aspect;
+            result_size.y = result_size.x / aspect;
         }
     }
     sp::Vector2d pre_layout_size = widget->layout.size;
