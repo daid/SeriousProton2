@@ -116,6 +116,18 @@ void Tumbler::onPointerUp(Vector2d position, int id)
     }
 }
 
+void Tumbler::clearItems()
+{
+    items.clear();
+    markRenderDataOutdated();
+}
+
+int Tumbler::addItem(const string& label)
+{
+    items.push_back(label);
+    markRenderDataOutdated();
+}
+
 void Tumbler::updateOffset()
 {
     while (scroll_offset < 0.0)

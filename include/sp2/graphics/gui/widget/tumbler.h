@@ -20,6 +20,8 @@ public:
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
     
+    void clearItems();
+    int addItem(const string& label);
 private:
     void updateOffset();
 
