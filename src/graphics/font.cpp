@@ -38,7 +38,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     result.area_size = area_size;
     result.flags = flags;
 
-    sp::Vector2f position(0, -line_spacing);
+    Vector2f position(0, -line_spacing);
     int previous_char_code = -1;
 
     for(unsigned int index=0; index<s.size(); )
@@ -181,9 +181,12 @@ void Font::PreparedFontString::alignAll()
     }
 }
 
-sp::Vector2f Font::PreparedFontString::getUsedAreaSize() const
+Vector2f Font::PreparedFontString::getUsedAreaSize() const
 {
-    return sp::Vector2f(getMaxLineWidth(), (float(getLineCount()) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
+    Vector2f result(getMaxLineWidth(), (float(getLineCount()) + 0.3) * font->getLineSpacing(pixel_size) * text_size / float(pixel_size));
+    if (flags & FlagVertical)
+        std::swap(result.x, result.y);
+    return result;
 }
 
 std::shared_ptr<MeshData> Font::PreparedFontString::create()
