@@ -14,7 +14,6 @@ Label::Label(P<Widget> parent, const string& theme_style_name)
 {
     loadThemeStyle(theme_style_name);
     text_alignment = Alignment::Center;
-    vertical = false;
     text_size = -1;
     texture_revision = -1;
     
@@ -56,6 +55,11 @@ void Label::setAttribute(const string& key, const string& value)
         vertical = stringutil::convert::toBool(value);
         markRenderDataOutdated();
     }
+    else if (key == "clip")
+    {
+        clip = stringutil::convert::toBool(value);
+        markRenderDataOutdated();
+    }
     else if (key == "word_wrap" || key == "line_wrap")
     {
         line_wrap = stringutil::convert::toBool(value);
@@ -80,6 +84,8 @@ void Label::updateRenderData()
     if (t.font)
     {
         int flags = 0;
+        if (clip)
+            flags |= Font::FlagClip;
         if (line_wrap)
             flags |= Font::FlagLineWrap;
         if (vertical)

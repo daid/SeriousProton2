@@ -26,9 +26,10 @@ private:
     Alignment text_alignment;
     string label;
     float text_size;
-    bool vertical;
+    bool vertical = false;
     bool scale_to_text = false;
     bool line_wrap = false;
+    bool clip = false;
     int texture_revision;
 };
 
