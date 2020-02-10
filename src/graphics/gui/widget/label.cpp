@@ -79,9 +79,13 @@ void Label::updateRenderData()
     render_data.shader = Shader::get("internal:basic.shader");
     if (t.font)
     {
-        //TODO: Vertical
+        int flags = 0;
+        if (line_wrap)
+            flags |= Font::FlagLineWrap;
+        if (vertical)
+            flags |= Font::FlagVertical;
         sp::Font::PreparedFontString prepared;
-        prepared = t.font->prepare(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment, line_wrap ? Font::FlagLineWrap : 0);
+        prepared = t.font->prepare(label, 64, text_size < 0 ? t.size : text_size, getRenderSize(), text_alignment, flags);
         if (scale_to_text)
         {
             if (line_wrap)

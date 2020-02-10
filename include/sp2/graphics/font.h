@@ -15,6 +15,7 @@ class Font : NonCopyable
 public:
     static constexpr int FlagLineWrap = 0x01;
     static constexpr int FlagClip = 0x02;
+    static constexpr int FlagVertical = 0x03;
 
     /** Create a meshData for the given string.
         This potential updates the texture, which can invalidate all previous created MeshData objects for this pixel size.

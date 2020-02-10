@@ -14,6 +14,23 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
     float line_spacing = getLineSpacing(pixel_size) * size_scale;
     PreparedFontString result;
 
+    if (flags & FlagVertical)
+    {
+        std::swap(area_size.x, area_size.y);
+        switch(alignment)
+        {
+        case Alignment::TopLeft:     alignment = Alignment::TopRight; break;
+        case Alignment::Top:         alignment = Alignment::Right; break;
+        case Alignment::TopRight:    alignment = Alignment::BottomRight; break;
+        case Alignment::Left:        alignment = Alignment::Top; break;
+        case Alignment::Center:      alignment = Alignment::Center; break;
+        case Alignment::Right:       alignment = Alignment::Bottom; break;
+        case Alignment::BottomLeft:  alignment = Alignment::TopLeft; break;
+        case Alignment::Bottom:      alignment = Alignment::Left; break;
+        case Alignment::BottomRight: alignment = Alignment::BottomLeft; break;
+        }
+    }
+
     result.font = this;
     result.alignment = alignment;
     result.text_size = text_size;
@@ -246,6 +263,14 @@ std::shared_ptr<MeshData> Font::PreparedFontString::create()
             indices.emplace_back(vertices.size() + 2);
             indices.emplace_back(vertices.size() + 3);
             indices.emplace_back(vertices.size() + 1);
+
+            if (flags & FlagVertical)
+            {
+                p0 = Vector3f(area_size.y - p0.y, p0.x, 0.0f);
+                p1 = Vector3f(area_size.y - p1.y, p1.x, 0.0f);
+                p2 = Vector3f(area_size.y - p2.y, p2.x, 0.0f);
+                p3 = Vector3f(area_size.y - p3.y, p3.x, 0.0f);
+            }
 
             vertices.emplace_back(p0, d.normal, Vector2f(u0, v0));
             vertices.emplace_back(p1, d.normal, Vector2f(u1, v0));
