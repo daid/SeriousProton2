@@ -49,6 +49,13 @@ void Tumbler::setAttribute(const string& key, const string& value)
     }
 }
 
+void Tumbler::onUpdate(float delta)
+{
+    Widget::onUpdate(delta);
+    for(auto node : text_nodes)
+        node->render_data.type = render_data.type;
+}
+
 void Tumbler::updateRenderData()
 {
     const ThemeStyle::StateStyle& bt = theme->states[int(getState())];
@@ -66,7 +73,6 @@ void Tumbler::updateRenderData()
     double offset = scroll_offset - getRenderSize().y * 0.75;
     for(auto node : text_nodes)
     {
-        node->render_data.type = render_data.type;
         node->render_data.shader = render_data.shader;
         node->render_data.order = render_data.order + 1;
         if (items.size() > 0)

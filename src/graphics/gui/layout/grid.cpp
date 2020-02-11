@@ -81,7 +81,7 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
     float row_y[grid_size.y];
     for(int n=0; n<grid_size.x; n++)
     {
-        col_x[n] = 0.0;
+        col_x[n] = rect.position.x;
         for(int m=0; m<n; m++)
             col_x[n] += col_width[m];
     }
@@ -107,7 +107,7 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
             cell_size.y += row_height[position.y + n];
         auto old_position = w->layout.position;
         w->layout.position.x = w->layout.position.y = 0.0;
-        cell_pos.y = rect.size.y - cell_pos.y - cell_size.y;
+        cell_pos.y = rect.position.y + rect.size.y - cell_pos.y - cell_size.y;
         basicLayout(Rect2d(cell_pos, cell_size), *w);
         w->layout.position = old_position;
     }
