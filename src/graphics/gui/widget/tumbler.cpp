@@ -77,6 +77,10 @@ void Tumbler::updateRenderData()
             node->render_data.mesh = text.create();
             node->render_data.color.a = 1.0 - (std::abs(offset) / getRenderSize().y);
         }
+        else
+        {
+            node->render_data.mesh = nullptr;
+        }
         node->render_data.texture = ft.font->getTexture(32);
         offset += getRenderSize().y * 0.25;
     }
@@ -106,19 +110,17 @@ void Tumbler::onPointerUp(Vector2d position, int id)
         scroll_offset = getRenderSize().y * 0.25;
     updateOffset();
 
-    if (position.x >= 0 && position.x <= getRenderSize().x && position.y >= 0 && position.y <= getRenderSize().y && isEnabled())
+    playThemeSound(State::Hovered);
+    if (items.size() > 0)
     {
-        playThemeSound(State::Hovered);
-        if (items.size() > 0)
-        {
-            runCallback(active_index);
-        }
+        runCallback(active_index);
     }
 }
 
 void Tumbler::clearItems()
 {
     items.clear();
+    active_index = 0;
     markRenderDataOutdated();
 }
 
