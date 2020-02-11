@@ -40,8 +40,6 @@ public:
         Vector2i span{1, 1};
         Sides margin;
         Sides padding;
-        Vector2d min_size;
-        Vector2d max_size{std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         bool fill_width = false;
         bool fill_height = false;
         bool lock_aspect_ratio = false;

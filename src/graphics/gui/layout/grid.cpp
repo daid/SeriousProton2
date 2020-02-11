@@ -105,7 +105,11 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
             cell_size.x += col_width[position.x + n];
         for(int n=1; n<span.y; n++)
             cell_size.y += row_height[position.y + n];
+        auto old_position = w->layout.position;
+        w->layout.position.x = w->layout.position.y = 0.0;
+        cell_pos.y = rect.size.y - cell_pos.y - cell_size.y;
         basicLayout(Rect2d(cell_pos, cell_size), *w);
+        w->layout.position = old_position;
     }
 }
 
