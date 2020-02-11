@@ -71,7 +71,7 @@ void Tumbler::updateRenderData()
         node->render_data.order = render_data.order + 1;
         if (items.size() > 0)
         {
-            auto text = ft.font->prepare(items[(n++) % items.size()], 32, ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
+            auto text = ft.font->prepare(items[(n++) % items.size()], 32, text_size > 0.0 ? text_size : ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
             for(auto& d : text.data)
                 d.position.y += offset;
             node->render_data.mesh = text.create();
