@@ -126,6 +126,7 @@ int Tumbler::addItem(const string& label)
 {
     items.push_back(label);
     markRenderDataOutdated();
+    return items.size() - 1;
 }
 
 void Tumbler::updateOffset()
