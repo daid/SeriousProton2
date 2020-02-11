@@ -137,6 +137,26 @@ int Tumbler::addItem(const string& label)
     return items.size() - 1;
 }
 
+int Tumbler::getSelectedIndex() const
+{
+    return active_index;
+}
+
+void Tumbler::setSelectedIndex(int index)
+{
+    if (items.size() > 0)
+    {
+        while(index < 0)
+            index += items.size();
+        active_index = index % items.size();
+    }
+    else
+    {
+        active_index = 0;
+    }
+    markRenderDataOutdated();
+}
+
 void Tumbler::updateOffset()
 {
     while (scroll_offset < 0.0)

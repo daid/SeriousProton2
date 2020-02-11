@@ -23,6 +23,9 @@ public:
     
     void clearItems();
     int addItem(const string& label);
+
+    int getSelectedIndex() const;
+    void setSelectedIndex(int index);
 private:
     void updateOffset();
 
