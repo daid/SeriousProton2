@@ -26,7 +26,9 @@ private:
     void updateOffset();
 
     std::unordered_map<int, Vector2d> pointer_position;
-    sp::PList<sp::gui::Label> texts;
+    const ThemeStyle* text_theme;
+    float text_size = 0.0f;
+    sp::PList<sp::Node> text_nodes;
     std::vector<string> items;
     int active_index = 0;
     double scroll_offset = 0.0;

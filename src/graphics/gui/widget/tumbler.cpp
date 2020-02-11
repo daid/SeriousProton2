@@ -4,6 +4,7 @@
 #include <sp2/graphics/meshdata.h>
 #include <sp2/graphics/textureManager.h>
 #include <sp2/graphics/fontManager.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/io/keybinding.h>
 #include <sp2/engine.h>
 
@@ -17,12 +18,11 @@ Tumbler::Tumbler(P<Widget> parent)
 : Widget(parent)
 {
     loadThemeStyle("tumbler.background");
+    text_theme = Theme::getTheme("default")->getStyle("tumbler.forground");
 
-    for(int n=0; n<4; n++)
+    for(int n=0; n<6; n++)
     {
-        sp::P<sp::gui::Label> text = new sp::gui::Label(this, "tumbler.forground");
-        text->setAttribute("clip", "true");
-        texts.add(text);
+        text_nodes.add(new sp::Node(this));
     }
 }
 
@@ -30,14 +30,12 @@ void Tumbler::setAttribute(const string& key, const string& value)
 {
     if (key == "text_size" || key == "text.size")
     {
-        for(auto text : texts)
-            text->setAttribute(key, value);
+        text_size = sp::stringutil::convert::toFloat(value);
     }
     else if (key == "style" || key == "theme_data")
     {
         Widget::setAttribute("style", value + ".background");
-        for(auto text : texts)
-            text->setAttribute("style", value + ".forground");
+        text_theme = Theme::getTheme("default")->getStyle(value + ".forground");
     }
     else if (key == "items")
     {
@@ -53,31 +51,34 @@ void Tumbler::setAttribute(const string& key, const string& value)
 
 void Tumbler::updateRenderData()
 {
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& bt = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& ft = text_theme->states[int(getState())];
 
     render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = t.texture;
-    if (t.texture)
+    render_data.texture = bt.texture;
+    if (bt.texture)
         render_data.mesh = createStretched(getRenderSize());
     else
         render_data.mesh = nullptr;
-    render_data.color = t.color;
+    render_data.color = bt.color;
 
-    Rect2d r(0, -getRenderSize().y * 0.5 - scroll_offset, getRenderSize().x, getRenderSize().y);
-    for(auto text : texts)
+    int n=active_index - 3 + items.size();
+    double offset = scroll_offset - getRenderSize().y * 0.75;
+    for(auto node : text_nodes)
     {
-        Rect2d tmp(r);
-        tmp.shrinkToFitWithin(Rect2d(0, 0, getRenderSize().x, getRenderSize().y));
-        text->layout.position = tmp.position;
-        text->layout.size = tmp.size;
-        r.position.y += r.size.y * 0.5;
-    }
-
-    if (items.size() > 0)
-    {
-        int n=active_index;
-        for(auto text : texts)
-            text->setLabel(items[(n++) % items.size()]);
+        node->render_data.type = render_data.type;
+        node->render_data.shader = render_data.shader;
+        node->render_data.order = render_data.order + 1;
+        if (items.size() > 0)
+        {
+            auto text = ft.font->prepare(items[(n++) % items.size()], 32, ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
+            for(auto& d : text.data)
+                d.position.y += offset;
+            node->render_data.mesh = text.create();
+            node->render_data.color.a = 1.0 - (std::abs(offset) / getRenderSize().y);
+        }
+        node->render_data.texture = ft.font->getTexture(32);
+        offset += getRenderSize().y * 0.25;
     }
 }
 
@@ -99,10 +100,10 @@ void Tumbler::onPointerDrag(Vector2d position, int id)
 
 void Tumbler::onPointerUp(Vector2d position, int id)
 {
-    if (scroll_offset < getRenderSize().y * 0.25)
+    if (scroll_offset < getRenderSize().y * 0.125)
         scroll_offset = 0.0;
     else
-        scroll_offset = getRenderSize().y * 0.5;
+        scroll_offset = getRenderSize().y * 0.25;
     updateOffset();
 
     if (position.x >= 0 && position.x <= getRenderSize().x && position.y >= 0 && position.y <= getRenderSize().y && isEnabled())
@@ -110,8 +111,7 @@ void Tumbler::onPointerUp(Vector2d position, int id)
         playThemeSound(State::Hovered);
         if (items.size() > 0)
         {
-            runCallback(int((active_index + 1) % items.size()));
-            //runCallback(items[(active_index + 1) % items.size()]);
+            runCallback(active_index);
         }
     }
 }
@@ -133,13 +133,13 @@ void Tumbler::updateOffset()
 {
     while (scroll_offset < 0.0)
     {
-        scroll_offset += getRenderSize().y * 0.5;
-        active_index -= 1;
-    }
-    while (scroll_offset > getRenderSize().y * 0.5)
-    {
-        scroll_offset -= getRenderSize().y * 0.5;
+        scroll_offset += getRenderSize().y * 0.25;
         active_index += 1;
+    }
+    while (scroll_offset >= getRenderSize().y * 0.25)
+    {
+        scroll_offset -= getRenderSize().y * 0.25;
+        active_index -= 1;
     }
     if (items.size() > 0)
     {
