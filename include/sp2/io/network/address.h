@@ -17,7 +17,7 @@ public:
     Address();
     Address(const string& hostname);
 
-    std::vector<string> getHumanReadable();
+    std::vector<string> getHumanReadable() const;
 
     static Address getLocalAddress();
 private:
