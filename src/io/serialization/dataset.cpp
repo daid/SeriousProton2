@@ -85,7 +85,8 @@ void DataSet::set(const char* key, P<AutoPointerObject> obj)
         return;
     }
 
-    auto t = std::type_index(typeid(**obj));
+    auto obj_ptr = *obj;
+    auto t = std::type_index(typeid(*obj_ptr));
     auto type_to_name = serializer.type_to_name_mapping.find(t);
     sp2assert(type_to_name != serializer.type_to_name_mapping.end(), "Missing class registration for serialization");
 
