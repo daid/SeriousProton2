@@ -5,7 +5,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
-#else
+#elif !defined(EMSCRIPTEN)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -28,7 +28,7 @@ Address::Address()
 Address::Address(const string& hostname)
 {
     initSocketLib();
-
+#ifndef EMSCRIPTEN
     struct addrinfo* result;
     if (::getaddrinfo(hostname.c_str(), nullptr, nullptr, &result))
         return;
@@ -44,6 +44,7 @@ Address::Address(const string& hostname)
         addr_info.emplace_back(data->ai_family, buffer, data->ai_addr, data->ai_addrlen);
     }
     ::freeaddrinfo(result);
+#endif
 }
 
 Address::Address(std::list<AddrInfo>&& addr_info)
@@ -93,7 +94,7 @@ Address Address::getLocalAddress()
         }
         free(addresses);
     }
-#elif !defined(__ANDROID_API__) || (__ANDROID_API__ >= 24)
+#elif (!defined(__ANDROID_API__) || (__ANDROID_API__ >= 24)) && !defined(EMSCRIPTEN)
     char buffer[128];
 
     struct ifaddrs* addrs;
@@ -119,7 +120,7 @@ Address Address::getLocalAddress()
         freeifaddrs(addrs);
     }
 #else
-#warning "No way to get the local IP address"
+    LOG(Warning, "No method to get local IP address.");
 #endif
     return Address(std::move(addr_info));
 }

@@ -1,5 +1,7 @@
+#define _WIN32_WINNT 0x0600
 #include <sp2/io/network/selector.h>
 #include <algorithm>
+#include <vector>
 
 #ifdef __WIN32
 #include <winsock2.h>
@@ -13,6 +15,7 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <errno.h>
+#include <poll.h>
 #endif
 
 
@@ -24,17 +27,12 @@ namespace network {
 class Selector::SelectorData
 {
 public:
-    fd_set sockets;
-    fd_set ready;
-    int max_handle;
+    std::vector<struct pollfd> fds;
 };
 
 Selector::Selector()
 : data(new SelectorData())
 {
-    FD_ZERO(&data->sockets);
-    FD_ZERO(&data->ready);
-    data->max_handle = 0;
 }
 
 Selector::Selector(const Selector& other)
@@ -57,8 +55,11 @@ void Selector::add(SocketBase& socket)
 {
     if (socket.handle != -1)
     {
-        FD_SET(socket.handle, &data->sockets);
-        data->max_handle = std::max(socket.handle, data->max_handle);
+        data->fds.push_back({
+            .fd = size_t(socket.handle),
+            .events = POLLIN,
+            .revents = 0,
+        });
     }
 }
 
@@ -66,32 +67,29 @@ void Selector::remove(SocketBase& socket)
 {
     if (socket.handle != -1)
     {
-        FD_CLR(socket.handle, &data->sockets);
-        FD_CLR(socket.handle, &data->ready);
+        data->fds.erase(std::remove_if(data->fds.begin(), data->fds.end(), [&socket](const struct pollfd& pfd)
+        {
+            return int(pfd.fd) == socket.handle;
+        }), data->fds.end());
     }
 }
 
 void Selector::wait(int timeout_ms)
 {
-    data->ready = data->sockets;
-    
-    if (timeout_ms >= 0)
-    {
-        timeval timeout;
-        timeout.tv_sec  = timeout_ms / 1000;
-        timeout.tv_usec = (timeout_ms % 1000) * 1000;
-        ::select(data->max_handle + 1, &data->ready, nullptr, nullptr, &timeout);
-    }
-    else
-    {
-        ::select(data->max_handle + 1, &data->ready, nullptr, nullptr, nullptr);
-    }
+#ifdef __WIN32
+    WSAPoll(data->fds.data(), data->fds.size(), timeout_ms);
+#else
+    poll(data->fds.data(), data->fds.size(), timeout_ms);
+#endif
 }
 
 bool Selector::isReady(SocketBase& socket)
 {
-    if (socket.handle != -1)
-        return FD_ISSET(socket.handle, &data->ready);
+    for(const auto& pfd : data->fds)
+    {
+        if (int(pfd.fd) == socket.handle)
+            return pfd.revents & POLLIN;
+    }
     return false;
 }
 
