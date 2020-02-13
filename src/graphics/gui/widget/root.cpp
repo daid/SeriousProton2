@@ -7,6 +7,7 @@ RootWidget::RootWidget(P<Node> parent, Vector2d size)
 : Widget(parent)
 {
     gui_size = size;
+    layout.match_content_size = false;
 }
 
 void RootWidget::onUpdate(float delta)
