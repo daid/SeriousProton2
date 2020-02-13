@@ -55,11 +55,11 @@ void Selector::add(SocketBase& socket)
 {
     if (socket.handle != -1)
     {
-        data->fds.push_back({
-            .fd = size_t(socket.handle),
-            .events = POLLIN,
-            .revents = 0,
-        });
+        struct pollfd fds;
+        fds.fd = socket.handle;
+        fds.events = POLLIN;
+        fds.revents = 0;
+        data->fds.push_back(fds);
     }
 }
 
