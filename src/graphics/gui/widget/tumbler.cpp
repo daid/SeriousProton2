@@ -20,7 +20,7 @@ Tumbler::Tumbler(P<Widget> parent)
     loadThemeStyle("tumbler.background");
     text_theme = Theme::getTheme("default")->getStyle("tumbler.forground");
 
-    for(int n=0; n<6; n++)
+    for(int n=0; n<row_count+1; n++)
     {
         text_nodes.add(new sp::Node(this));
     }
@@ -30,7 +30,7 @@ void Tumbler::setAttribute(const string& key, const string& value)
 {
     if (key == "text_size" || key == "text.size")
     {
-        text_size = sp::stringutil::convert::toFloat(value);
+        text_size = stringutil::convert::toFloat(value);
     }
     else if (key == "style" || key == "theme_data")
     {
@@ -42,6 +42,14 @@ void Tumbler::setAttribute(const string& key, const string& value)
         items = value.split(",");
         for(auto& e : items)
             e = e.strip();
+    }
+    else if (key == "rows")
+    {
+        row_count = std::max(2, stringutil::convert::toInt(value));
+        while(text_nodes.size() < row_count + 1)
+            text_nodes.add(new sp::Node(this));
+        while(text_nodes.size() > row_count + 1)
+            (*text_nodes.begin()).destroy();
     }
     else
     {
@@ -71,8 +79,9 @@ void Tumbler::updateRenderData()
 
     if (ft.font)
     {
-        int n=active_index - 3 + items.size();
-        double offset = scroll_offset - getRenderSize().y * 0.75;
+        int n=active_index - ((row_count - 1) / 2 + 1) + items.size();
+        double row_height = getRenderSize().y / double(row_count - 1);
+        double offset = scroll_offset - getRenderSize().y * 0.5 - row_height;
         for(auto node : text_nodes)
         {
             node->render_data.shader = render_data.shader;
@@ -91,7 +100,7 @@ void Tumbler::updateRenderData()
                 node->render_data.mesh = nullptr;
             }
             node->render_data.texture = ft.font->getTexture(32);
-            offset += getRenderSize().y * 0.25;
+            offset += row_height;
         }
     }
 }
@@ -114,10 +123,11 @@ void Tumbler::onPointerDrag(Vector2d position, int id)
 
 void Tumbler::onPointerUp(Vector2d position, int id)
 {
-    if (scroll_offset < getRenderSize().y * 0.125)
+    double row_height = getRenderSize().y / double(row_count - 1);
+    if (scroll_offset < row_height * 0.5)
         scroll_offset = 0.0;
     else
-        scroll_offset = getRenderSize().y * 0.25;
+        scroll_offset = row_height;
     updateOffset();
 
     playThemeSound(State::Hovered);
@@ -163,14 +173,15 @@ void Tumbler::setSelectedIndex(int index)
 
 void Tumbler::updateOffset()
 {
+    double row_height = getRenderSize().y / double(row_count - 1);
     while (scroll_offset < 0.0)
     {
-        scroll_offset += getRenderSize().y * 0.25;
+        scroll_offset += row_height;
         active_index += 1;
     }
-    while (scroll_offset >= getRenderSize().y * 0.25)
+    while (scroll_offset >= row_height)
     {
-        scroll_offset -= getRenderSize().y * 0.25;
+        scroll_offset -= row_height;
         active_index -= 1;
     }
     if (items.size() > 0)

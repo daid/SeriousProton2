@@ -36,6 +36,7 @@ private:
     std::vector<string> items;
     int active_index = 0;
     double scroll_offset = 0.0;
+    int row_count = 5;
 };
 
 }//namespace gui
