@@ -69,26 +69,30 @@ void Tumbler::updateRenderData()
         render_data.mesh = nullptr;
     render_data.color = bt.color;
 
-    int n=active_index - 3 + items.size();
-    double offset = scroll_offset - getRenderSize().y * 0.75;
-    for(auto node : text_nodes)
+    if (ft.font)
     {
-        node->render_data.shader = render_data.shader;
-        node->render_data.order = render_data.order + 1;
-        if (items.size() > 0)
+        int n=active_index - 3 + items.size();
+        double offset = scroll_offset - getRenderSize().y * 0.75;
+        for(auto node : text_nodes)
         {
-            auto text = ft.font->prepare(items[(n++) % items.size()], 32, text_size > 0.0 ? text_size : ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
-            for(auto& d : text.data)
-                d.position.y += offset;
-            node->render_data.mesh = text.create();
-            node->render_data.color.a = 1.0 - (std::abs(offset) / getRenderSize().y);
+            node->render_data.shader = render_data.shader;
+            node->render_data.order = render_data.order + 1;
+            if (items.size() > 0)
+            {
+                auto text = ft.font->prepare(items[(n++) % items.size()], 32, text_size > 0.0 ? text_size : ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
+                for(auto& d : text.data)
+                    d.position.y += offset;
+                node->render_data.mesh = text.create();
+                node->render_data.color = ft.color;
+                node->render_data.color.a = 1.0 - (std::abs(offset) / getRenderSize().y);
+            }
+            else
+            {
+                node->render_data.mesh = nullptr;
+            }
+            node->render_data.texture = ft.font->getTexture(32);
+            offset += getRenderSize().y * 0.25;
         }
-        else
-        {
-            node->render_data.mesh = nullptr;
-        }
-        node->render_data.texture = ft.font->getTexture(32);
-        offset += getRenderSize().y * 0.25;
     }
 }
 
