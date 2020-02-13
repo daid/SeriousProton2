@@ -224,6 +224,11 @@ void Window::setPosition(Vector2f position, int monitor_number)
     SDL_SetWindowPosition(render_window, rect.x + left + (rect.w - size.x) * position.x, rect.y + top + (rect.h - size.y) * position.y);
 }
 
+int Window::getMonitorCount()
+{
+    return SDL_GetNumVideoDisplays();
+}
+
 void Window::addLayer(P<GraphicsLayer> layer)
 {
     graphics_layers.add(layer);
@@ -331,7 +336,7 @@ void Window::createRenderWindow()
     }
     else
     {
-        render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+        render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0), window_width, window_height, flags);
     }
     if (!render_window)
     {
