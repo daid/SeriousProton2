@@ -72,7 +72,7 @@ void Tumbler::updateRenderData()
     render_data.shader = Shader::get("internal:basic.shader");
     render_data.texture = bt.texture;
     if (bt.texture)
-        render_data.mesh = createStretched(getRenderSize());
+        render_data.mesh = createStretchedHV(getRenderSize(), bt.size);
     else
         render_data.mesh = nullptr;
     render_data.color = bt.color;

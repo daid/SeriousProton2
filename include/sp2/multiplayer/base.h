@@ -15,6 +15,8 @@ namespace multiplayer {
 class Base
 {
 public:
+    virtual ~Base() = default;
+
     P<Node> getNode(uint64_t id);
 
     float getNetworkDelay() { return network_delay; }
@@ -24,6 +26,7 @@ public:
 
     bool isServer();
 protected:
+
     void addNode(P<Node> node);    
     void cleanDeletedNodes();
     
