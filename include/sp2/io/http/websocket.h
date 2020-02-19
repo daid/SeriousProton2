@@ -45,6 +45,8 @@ public:
     void send(const io::DataBuffer& data_buffer);
     bool receive(io::DataBuffer& data_buffer);
 private:
+    void updateReceiveBuffer();
+
     enum class State
     {
         Disconnected,
@@ -52,11 +54,15 @@ private:
         Operational,
     } state = State::Disconnected;
 
+#ifdef EMSCRIPTEN
+    int socket_handle = -1;
+#else
     string websock_key;
     sp::io::network::TcpSocket socket;
     std::vector<uint8_t> buffer;
     std::vector<uint8_t> received_fragment;
     std::unordered_map<string, string> headers;
+#endif
 };
 
 }//namespace http
