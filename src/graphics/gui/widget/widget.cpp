@@ -565,5 +565,59 @@ std::shared_ptr<MeshData> Widget::createStretchedHV(Vector2d size, double corner
     return MeshData::create(std::move(vertices), std::move(indices));
 }
 
+std::shared_ptr<MeshData> Widget::createStretchedHV(Rect2d rect, Rect2d clip_rect, double corner_size)
+{
+    MeshData::Vertices vertices;
+    MeshData::Indices indices{0, 1, 4, 1, 5, 4, 1, 2, 5, 2, 6, 5, 2, 3, 6, 3, 7, 6, 4, 5, 8, 5, 9, 8, 5, 6, 9, 6, 10, 9, 6, 7, 10, 7, 11, 10, 8, 9, 12, 9, 13, 12, 9, 10, 13, 10, 14, 13, 10, 11, 14, 11, 15, 14};
+    vertices.reserve(16);
+
+    if (!clip_rect.overlaps(rect))
+        return nullptr;
+
+    corner_size = std::min(corner_size, rect.size.x / 2.0f);
+    corner_size = std::min(corner_size, rect.size.y / 2.0f);
+
+    Vector2f v0(rect.position);
+    Vector2f v1(v0 + Vector2f(corner_size, corner_size));
+    Vector2f v3(v0 + Vector2f(rect.size));
+    Vector2f v2(v3 - Vector2f(corner_size, corner_size));
+
+    v0.x = std::min(std::max(v0.x, float(clip_rect.position.x)), float(clip_rect.position.x + clip_rect.size.x));
+    v0.y = std::min(std::max(v0.y, float(clip_rect.position.y)), float(clip_rect.position.y + clip_rect.size.y));
+    v1.x = std::min(std::max(v1.x, float(clip_rect.position.x)), float(clip_rect.position.x + clip_rect.size.x));
+    v1.y = std::min(std::max(v1.y, float(clip_rect.position.y)), float(clip_rect.position.y + clip_rect.size.y));
+    v2.x = std::min(std::max(v2.x, float(clip_rect.position.x)), float(clip_rect.position.x + clip_rect.size.x));
+    v2.y = std::min(std::max(v2.y, float(clip_rect.position.y)), float(clip_rect.position.y + clip_rect.size.y));
+    v3.x = std::min(std::max(v3.x, float(clip_rect.position.x)), float(clip_rect.position.x + clip_rect.size.x));
+    v3.y = std::min(std::max(v3.y, float(clip_rect.position.y)), float(clip_rect.position.y + clip_rect.size.y));
+
+    Vector2f uv0(0.5 * (v0.x - rect.position.x) / corner_size, 1.0 - 0.5 * (v0.y - rect.position.y) / corner_size);
+    Vector2f uv1(0.5 * (v1.x - rect.position.x) / corner_size, 1.0 - 0.5 * (v1.y - rect.position.y) / corner_size);
+    Vector2f uv2(1.0 - 0.5 * (rect.position.x + rect.size.x - v2.x) / corner_size, 0.5 * (rect.position.y + rect.size.y - v2.y) / corner_size);
+    Vector2f uv3(1.0 - 0.5 * (rect.position.x + rect.size.x - v3.x) / corner_size, 0.5 * (rect.position.y + rect.size.y - v3.y) / corner_size);
+
+    vertices.emplace_back(Vector3f(v0.x, v0.y, 0), Vector2f(uv0.x, uv0.y));
+    vertices.emplace_back(Vector3f(v1.x, v0.y, 0), Vector2f(uv1.x, uv0.y));
+    vertices.emplace_back(Vector3f(v2.x, v0.y, 0), Vector2f(uv2.x, uv0.y));
+    vertices.emplace_back(Vector3f(v3.x, v0.y, 0), Vector2f(uv3.x, uv0.y));
+
+    vertices.emplace_back(Vector3f(v0.x, v1.y, 0), Vector2f(uv0.x, uv1.y));
+    vertices.emplace_back(Vector3f(v1.x, v1.y, 0), Vector2f(uv1.x, uv1.y));
+    vertices.emplace_back(Vector3f(v2.x, v1.y, 0), Vector2f(uv2.x, uv1.y));
+    vertices.emplace_back(Vector3f(v3.x, v1.y, 0), Vector2f(uv3.x, uv1.y));
+
+    vertices.emplace_back(Vector3f(v0.x, v2.y, 0), Vector2f(uv0.x, uv2.y));
+    vertices.emplace_back(Vector3f(v1.x, v2.y, 0), Vector2f(uv1.x, uv2.y));
+    vertices.emplace_back(Vector3f(v2.x, v2.y, 0), Vector2f(uv2.x, uv2.y));
+    vertices.emplace_back(Vector3f(v3.x, v2.y, 0), Vector2f(uv3.x, uv2.y));
+
+    vertices.emplace_back(Vector3f(v0.x, v3.y, 0), Vector2f(uv0.x, uv3.y));
+    vertices.emplace_back(Vector3f(v1.x, v3.y, 0), Vector2f(uv1.x, uv3.y));
+    vertices.emplace_back(Vector3f(v2.x, v3.y, 0), Vector2f(uv2.x, uv3.y));
+    vertices.emplace_back(Vector3f(v3.x, v3.y, 0), Vector2f(uv3.x, uv3.y));
+
+    return MeshData::create(std::move(vertices), std::move(indices));
+}
+
 }//namespace gui
 }//namespace sp

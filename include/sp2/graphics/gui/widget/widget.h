@@ -86,9 +86,9 @@ public:
     bool isEnabled();
     bool isFocused();
     void setID(const string& id);
-    const string& getID() { return id; }
+    const string& getID() const { return id; }
 
-    sp::Vector2d getRenderSize() { return render_size; }
+    sp::Vector2d getRenderSize() const { return render_size; }
     
     void setEventCallback(Callback callback);
     virtual void setAttribute(const string& key, const string& value);
@@ -146,6 +146,8 @@ protected:
     std::shared_ptr<MeshData> createStretchedH(Vector2d size);
     std::shared_ptr<MeshData> createStretchedV(Vector2d size);
     std::shared_ptr<MeshData> createStretchedHV(Vector2d size, double corner_size);
+    std::shared_ptr<MeshData> createStretchedHV(Rect2d size, double corner_size);
+    std::shared_ptr<MeshData> createStretchedHV(Rect2d size, Rect2d clip_rect, double corner_size);
 private:
     Widget(P<Node> parent);
 
