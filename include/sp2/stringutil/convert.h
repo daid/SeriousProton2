@@ -38,6 +38,15 @@ std::vector<float> toFloatArray(const string& s);
 sp::Vector2d toVector2d(const string& s);
 sp::Vector2f toVector2f(const string& s);
 sp::Vector2i toVector2i(const string& s);
+/*
+    Convert a string to a 3d vector value.
+    Will try to convert "x, y" into a vector.
+    If the y value is missing (only a single number) then the x value is copied into the y and z value as well.
+    If the z value is missing (only a single number) then the x value is copied into the z value as well.
+*/
+sp::Vector3d toVector3d(const string& s);
+sp::Vector3f toVector3f(const string& s);
+sp::Vector3i toVector3i(const string& s);
 
 Alignment toAlignment(const string& s);
 

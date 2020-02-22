@@ -437,7 +437,24 @@ public:
         the separator itand the part after it.  If the separator is not
         found, return S and two empty strings.
     */
-    std::vector<string> partition(const string& sep) const;
+    std::vector<string> partition(const string& sep) const
+    {
+        int index = find(sep);
+        std::vector<string> result;
+        if (index < 0)
+        {
+            result.emplace_back(*this);
+            result.emplace_back();
+            result.emplace_back();
+        }
+        else
+        {
+            result.emplace_back(std::move(substr(0, index)));
+            result.emplace_back(sep);
+            result.emplace_back(std::move(substr(index + sep.length())));
+        }
+        return result;
+    }
 
     /*
         Return a copy of string S with all occurrences of substring

@@ -57,6 +57,57 @@ Vector2i toVector2i(const string& s)
     return Vector2i(i, i);
 }
 
+Vector3d toVector3d(const string& s)
+{
+    double x = toFloat(s);
+    double y = x;
+    double z = x;
+    if (s.find(",") > -1)
+    {
+        y = toFloat(s.substr(s. find(",") + 1).strip());
+        z = y;
+        if (s.find(",", s.find(",") + 1) > -1)
+        {
+            z = toFloat(s.substr(s. find(",", s.find(",") + 1) + 1).strip());
+        }
+    }
+    return Vector3d(x, y, z);
+}
+
+Vector3f toVector3f(const string& s)
+{
+    float x = toFloat(s);
+    float y = x;
+    float z = x;
+    if (s.find(",") > -1)
+    {
+        y = toFloat(s.substr(s. find(",") + 1).strip());
+        z = y;
+        if (s.find(",", s.find(",") + 1) > -1)
+        {
+            z = toFloat(s.substr(s. find(",", s.find(",") + 1) + 1).strip());
+        }
+    }
+    return Vector3f(x, y, z);
+}
+
+Vector3i toVector3i(const string& s)
+{
+    int x = toInt(s);
+    int y = x;
+    int z = x;
+    if (s.find(",") > -1)
+    {
+        y = toInt(s.substr(s. find(",") + 1).strip());
+        z = y;
+        if (s.find(",", s.find(",") + 1) > -1)
+        {
+            z = toInt(s.substr(s. find(",", s.find(",") + 1) + 1).strip());
+        }
+    }
+    return Vector3i(x, y, z);
+}
+
 Alignment toAlignment(const string& s)
 {
     string value = s.lower();
