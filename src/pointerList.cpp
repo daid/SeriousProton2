@@ -6,6 +6,10 @@ static _PListEntry* free_list;
 
 _PListBase::~_PListBase()
 {
+    _PListEntry* e = list_start;
+    while(e)
+        e = removeEntry(e);
+
     for(_PListIteratorBase* i = iterators_start; i; i=i->iterator_next)
     {
         i->entry = nullptr;
