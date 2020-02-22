@@ -4,11 +4,10 @@
 #include <sp2/string.h>
 #include <sp2/pointer.h>
 #include <sp2/keyValueTree.h>
+#include <sp2/graphics/gui/widget/widget.h>
 
 namespace sp {
 namespace gui {
-
-class Widget;
 
 class Loader : NonCopyable
 {
