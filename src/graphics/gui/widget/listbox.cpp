@@ -15,7 +15,7 @@ namespace gui {
 SP_REGISTER_WIDGET("listbox", Listbox);
 
 Listbox::Listbox(P<Widget> parent)
-: Widget(parent)
+: ItemList(parent)
 {
     loadThemeStyle("listbox.background");
     text_theme = Theme::getTheme("default")->getStyle("listbox.forground");
@@ -41,15 +41,9 @@ void Listbox::setAttribute(const string& key, const string& value)
         Widget::setAttribute("style", value + ".background");
         text_theme = Theme::getTheme("default")->getStyle(value + ".forground");
     }
-    else if (key == "items")
-    {
-        items = value.split(",");
-        for(auto& e : items)
-            e = e.strip();
-    }
     else
     {
-        Widget::setAttribute(key, value);
+        ItemList::setAttribute(key, value);
     }
 }
 
@@ -101,7 +95,7 @@ void Listbox::updateRenderData()
 
             node->render_data.shader = render_data.shader;
             node->render_data.order = render_data.order + 1;
-            auto text = ft.font->prepare(item, 32, text_size > 0.0 ? text_size : ft.size, Vector2d(getRenderSize().x - bt.size, entry_height), Alignment::Center, Font::FlagClip);
+            auto text = ft.font->prepare(item.label, 32, text_size > 0.0 ? text_size : ft.size, Vector2d(getRenderSize().x - bt.size, entry_height), Alignment::Center, Font::FlagClip);
             double y = getRenderSize().y - entry_height - entry_height * index + slider->getValue();
             if (y < 0.0)
             {
@@ -148,40 +142,6 @@ void Listbox::onPointerUp(Vector2d position, int id)
         playThemeSound(State::Hovered);
         runCallback(active_index);
     }
-}
-
-void Listbox::clearItems()
-{
-    items.clear();
-    active_index = 0;
-    markRenderDataOutdated();
-}
-
-int Listbox::addItem(const string& label)
-{
-    items.push_back(label);
-    markRenderDataOutdated();
-    return items.size() - 1;
-}
-
-int Listbox::getSelectedIndex() const
-{
-    return active_index;
-}
-
-void Listbox::setSelectedIndex(int index)
-{
-    if (items.size() > 0)
-    {
-        while(index < 0)
-            index += items.size();
-        active_index = index % items.size();
-    }
-    else
-    {
-        active_index = 0;
-    }
-    markRenderDataOutdated();
 }
 
 }//namespace gui

@@ -15,7 +15,7 @@ namespace gui {
 SP_REGISTER_WIDGET("tumbler", Tumbler);
 
 Tumbler::Tumbler(P<Widget> parent)
-: Widget(parent)
+: ItemList(parent)
 {
     loadThemeStyle("tumbler.background");
     text_theme = Theme::getTheme("default")->getStyle("tumbler.forground");
@@ -37,12 +37,6 @@ void Tumbler::setAttribute(const string& key, const string& value)
         Widget::setAttribute("style", value + ".background");
         text_theme = Theme::getTheme("default")->getStyle(value + ".forground");
     }
-    else if (key == "items")
-    {
-        items = value.split(",");
-        for(auto& e : items)
-            e = e.strip();
-    }
     else if (key == "rows")
     {
         row_count = std::max(2, stringutil::convert::toInt(value));
@@ -53,7 +47,7 @@ void Tumbler::setAttribute(const string& key, const string& value)
     }
     else
     {
-        Widget::setAttribute(key, value);
+        ItemList::setAttribute(key, value);
     }
 }
 
@@ -88,7 +82,7 @@ void Tumbler::updateRenderData()
             node->render_data.order = render_data.order + 1;
             if (items.size() > 0)
             {
-                auto text = ft.font->prepare(items[(n++) % items.size()], 32, text_size > 0.0 ? text_size : ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
+                auto text = ft.font->prepare(items[(n++) % items.size()].label, 32, text_size > 0.0 ? text_size : ft.size, getRenderSize(), Alignment::Center, Font::FlagClip);
                 for(auto& d : text.data)
                     d.position.y += offset;
                 node->render_data.mesh = text.create();
@@ -135,40 +129,6 @@ void Tumbler::onPointerUp(Vector2d position, int id)
     {
         runCallback(active_index);
     }
-}
-
-void Tumbler::clearItems()
-{
-    items.clear();
-    active_index = 0;
-    markRenderDataOutdated();
-}
-
-int Tumbler::addItem(const string& label)
-{
-    items.push_back(label);
-    markRenderDataOutdated();
-    return items.size() - 1;
-}
-
-int Tumbler::getSelectedIndex() const
-{
-    return active_index;
-}
-
-void Tumbler::setSelectedIndex(int index)
-{
-    if (items.size() > 0)
-    {
-        while(index < 0)
-            index += items.size();
-        active_index = index % items.size();
-    }
-    else
-    {
-        active_index = 0;
-    }
-    markRenderDataOutdated();
 }
 
 void Tumbler::updateOffset()

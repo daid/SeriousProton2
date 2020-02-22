@@ -1,14 +1,14 @@
 #ifndef SP2_GRAPHICS_GUI_TUMBLER_H
 #define SP2_GRAPHICS_GUI_TUMBLER_H
 
-#include <sp2/graphics/gui/widget/widget.h>
+#include <sp2/graphics/gui/widget/itemlist.h>
 #include <sp2/string.h>
 
 namespace sp {
 namespace gui {
 
 class Label;
-class Tumbler : public Widget
+class Tumbler : public ItemList
 {
 public:
     Tumbler(P<Widget> parent);
@@ -20,12 +20,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
-    
-    void clearItems();
-    int addItem(const string& label);
 
-    int getSelectedIndex() const;
-    void setSelectedIndex(int index);
 private:
     void updateOffset();
 
@@ -33,8 +28,6 @@ private:
     const ThemeStyle* text_theme;
     float text_size = 0.0f;
     sp::PList<sp::Node> text_nodes;
-    std::vector<string> items;
-    int active_index = 0;
     double scroll_offset = 0.0;
     int row_count = 5;
 };
