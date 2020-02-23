@@ -12,6 +12,18 @@ namespace collision {
 class Collision3DDebugRender : public btIDebugDraw
 {
 public:
+    Collision3DDebugRender(std::vector<std::shared_ptr<MeshData>>& meshes)
+    : meshes(meshes)
+    {
+    }
+
+    ~Collision3DDebugRender()
+    {
+        if (indices.size() > 0)
+            addToMeshes();
+        meshes.resize(mesh_index);
+    }
+
     virtual void drawLine(const btVector3& from,const btVector3& to,const btVector3& color) override
     {
         Vector3f c = toVector<float>(color);
@@ -35,6 +47,9 @@ public:
         indices.emplace_back(index);
         indices.emplace_back(index + 1);
         indices.emplace_back(index + 3);
+
+        if (index > 65000)
+            addToMeshes();
     }
 
     virtual void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) override
@@ -58,6 +73,18 @@ public:
         return DBG_DrawWireframe;
 	}
 
+private:
+    void addToMeshes()
+    {
+        if (mesh_index < meshes.size())
+            meshes[mesh_index]->update(std::move(vertices), std::move(indices));
+        else
+            meshes.push_back(MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic));
+        mesh_index++;
+    }
+
+    size_t mesh_index = 0;
+    std::vector<std::shared_ptr<MeshData>>& meshes;
     sp::MeshData::Vertices vertices;
     sp::MeshData::Indices indices;
 };
@@ -127,18 +154,13 @@ void BulletBackend::destroyBody(void* _body)
     delete shape;
 }
 
-void BulletBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
+void BulletBackend::getDebugRenderMesh(std::vector<std::shared_ptr<MeshData>>& meshes)
 {
-    Collision3DDebugRender debug_renderer;
+    Collision3DDebugRender debug_renderer(meshes);
     
     world->setDebugDrawer(&debug_renderer);
     world->debugDrawWorld();
     world->setDebugDrawer(nullptr);
-
-    if (!mesh)
-        mesh = MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic);
-    else
-        mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
 }
 
 void BulletBackend::updatePosition(void* _body, sp::Vector3d position)

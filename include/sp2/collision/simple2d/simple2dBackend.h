@@ -23,7 +23,7 @@ public:
     virtual void step(float time_delta) override;
     virtual void postUpdate(float delta) override;
     virtual void destroyBody(void* body) override;
-    virtual void getDebugRenderMesh(std::shared_ptr<MeshData>& mesh) override;
+    virtual void getDebugRenderMesh(std::vector<std::shared_ptr<MeshData>>& meshes) override;
     
     virtual void updatePosition(void* body, Vector3d position) override;
     virtual void updateRotation(void* body, float angle) override;

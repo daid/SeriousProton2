@@ -26,7 +26,7 @@ private:
     
     void renderScene(RenderQueue& queue, P<Scene> scene);
 
-    std::shared_ptr<MeshData> mesh;
+    std::vector<std::shared_ptr<MeshData>> meshes;
 };
 
 }//namespace sp

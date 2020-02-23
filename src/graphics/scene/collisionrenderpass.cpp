@@ -77,17 +77,20 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, P<Scene> scene)
     {
         if (scene->collision_backend)
         {
-            scene->collision_backend->getDebugRenderMesh(mesh);
+            scene->collision_backend->getDebugRenderMesh(meshes);
 
-            if (mesh)
+            if (meshes.size() > 0)
             {
                 queue.setCamera(camera);
                 RenderData render_data;
                 render_data.shader = Shader::get("internal:normal_as_color.shader");
                 render_data.type = RenderData::Type::Normal;
-                render_data.mesh = mesh;
                 render_data.color = Color(1, 1, 1, 0.25);
-                queue.add(Matrix4x4f::identity(), render_data);
+                for(auto& mesh : meshes)
+                {
+                    render_data.mesh = mesh;
+                    queue.add(Matrix4x4f::identity(), render_data);
+                }
             }
         }
     }

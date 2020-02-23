@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <vector>
 #include <sp2/pointer.h>
 #include <sp2/math/vector3.h>
 #include <sp2/math/quaternion.h>
@@ -24,7 +25,7 @@ public:
     virtual void step(float time_delta) = 0;
     virtual void postUpdate(float delta) = 0;
     virtual void destroyBody(void* body) = 0;
-    virtual void getDebugRenderMesh(std::shared_ptr<MeshData>& mesh) = 0;
+    virtual void getDebugRenderMesh(std::vector<std::shared_ptr<MeshData>>& meshes) = 0;
     
     virtual void updatePosition(void* body, Vector3d position) = 0;
     virtual void updateRotation(void* body, float angle) = 0;

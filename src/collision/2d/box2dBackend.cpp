@@ -255,7 +255,7 @@ void Box2DBackend::destroyBody(void* body)
     world->DestroyBody(static_cast<b2Body*>(body));
 }
 
-void Box2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
+void Box2DBackend::getDebugRenderMesh(std::vector<std::shared_ptr<MeshData>>& meshes)
 {
     Collision2DDebugRender debug_renderer;
     
@@ -263,10 +263,10 @@ void Box2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
     world->DrawDebugData();
     world->SetDebugDraw(nullptr);
     
-    if (!mesh)
-        mesh = MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic);
+    if (meshes.size() < 1)
+        meshes.push_back(MeshData::create(std::move(debug_renderer.vertices), std::move(debug_renderer.indices), MeshData::Type::Dynamic));
     else
-        mesh->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
+        meshes[0]->update(std::move(debug_renderer.vertices), std::move(debug_renderer.indices));
 }
 
 void Box2DBackend::updatePosition(void* _body, sp::Vector3d position)

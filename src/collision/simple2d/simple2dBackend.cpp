@@ -137,7 +137,7 @@ void Simple2DBackend::destroyBody(void* _body)
     delete_list.push_back(body);
 }
 
-void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
+void Simple2DBackend::getDebugRenderMesh(std::vector<std::shared_ptr<MeshData>>& meshes)
 {
     b2AABB bounds;
     bounds.lowerBound.x = bounds.lowerBound.y = -std::numeric_limits<float>::infinity();
@@ -170,10 +170,10 @@ void Simple2DBackend::getDebugRenderMesh(std::shared_ptr<MeshData>& mesh)
     broadphase->Query(this, bounds);
     query_callback = nullptr;
 
-    if (!mesh)
-        mesh = MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic);
+    if (meshes.size() < 1)
+        meshes.push_back(MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic));
     else
-        mesh->update(std::move(vertices), std::move(indices));
+        meshes[0]->update(std::move(vertices), std::move(indices));
 }
 
 void Simple2DBackend::updatePosition(void* _body, Vector3d position)
