@@ -18,6 +18,10 @@ BasicNodeRenderPass::BasicNodeRenderPass(P<Camera> camera)
 void BasicNodeRenderPass::addCamera(P<Camera> camera)
 {
     cameras.add(camera);
+    cameras.sort([](const sp::P<sp::Camera>& a, const sp::P<sp::Camera>& b)
+    {
+        return b->getScene()->getPriority() - a->getScene()->getPriority();
+    });
 }
 
 void BasicNodeRenderPass::render(RenderQueue& queue)

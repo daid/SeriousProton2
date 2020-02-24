@@ -74,6 +74,7 @@ public:
     virtual void onDisable() {}
     
     string getName() const { return scene_name; }
+    int getPriority() const { return priority; }
     
     friend class collision::Shape;
     friend class collision::Joint2D;
