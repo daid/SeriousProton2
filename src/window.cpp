@@ -594,8 +594,9 @@ void Window::handleEvent(const SDL_Event& event)
 void Window::pointerMove(Vector2d position, int id)
 {
     auto it = pointer_focus_layer.find(id);
-    for(auto layer : graphics_layers)
+    for(auto layer_iterator = graphics_layers.rbegin(); layer_iterator != graphics_layers.rend(); ++layer_iterator)
     {
+        auto layer = *layer_iterator;
         if (layer->onPointerMove(position, id))
         {
             if (it != pointer_focus_layer.end() && it->second && it->second != layer)
@@ -621,8 +622,9 @@ void Window::pointerLeave(int id)
 
 void Window::pointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    for(auto layer : graphics_layers)
+    for(auto layer_iterator = graphics_layers.rbegin(); layer_iterator != graphics_layers.rend(); ++layer_iterator)
     {
+        auto layer = *layer_iterator;
         if (layer->onPointerDown(button, position, id))
         {
             pointer_focus_layer[id] = layer;
