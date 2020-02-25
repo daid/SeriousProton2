@@ -21,8 +21,8 @@ public:
     int getSelectedIndex() const;
     void setSelectedIndex(int index);
 
-    const string& getItemLabel(int index);
-    const string& getItemData(int index);
+    string getItemLabel(int index);
+    string getItemData(int index);
 protected:
     struct Item
     {

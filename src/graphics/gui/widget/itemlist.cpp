@@ -63,14 +63,14 @@ void ItemList::setSelectedIndex(int index)
     markRenderDataOutdated();
 }
 
-const string& ItemList::getItemLabel(int index)
+string ItemList::getItemLabel(int index)
 {
     if (index < 0 || index >= int(items.size()))
         return "";
     return items[index].label;
 }
 
-const string& ItemList::getItemData(int index)
+string ItemList::getItemData(int index)
 {
     if (index < 0 || index >= int(items.size()))
         return "";
