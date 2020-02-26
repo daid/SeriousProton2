@@ -449,9 +449,9 @@ public:
         }
         else
         {
-            result.emplace_back(std::move(substr(0, index)));
+            result.emplace_back(substr(0, index));
             result.emplace_back(sep);
-            result.emplace_back(std::move(substr(index + sep.length())));
+            result.emplace_back(substr(index + sep.length()));
         }
         return result;
     }
