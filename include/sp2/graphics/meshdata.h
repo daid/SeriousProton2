@@ -58,7 +58,7 @@ public:
     static std::shared_ptr<MeshData> create(Vertices&& vertices, Indices&& indices, Type type=Type::Static);
     static std::shared_ptr<MeshData> createQuad(Vector2f size, Vector2f uv0=Vector2f(0, 0), Vector2f uv1=Vector2f(1, 1));
     static std::shared_ptr<MeshData> createDoubleSidedQuad(Vector2f size, Vector2f uv0=Vector2f(0, 0), Vector2f uv1=Vector2f(1, 1));
-    static std::shared_ptr<MeshData> createCircle(float radius, int point_count);
+    static std::shared_ptr<MeshData> createCircle(float radius, int point_count, bool double_sided=false);
 private:
     Vertices vertices;
     Indices indices;

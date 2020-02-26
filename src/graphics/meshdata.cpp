@@ -113,7 +113,7 @@ std::shared_ptr<MeshData> MeshData::createDoubleSidedQuad(Vector2f size, Vector2
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
-std::shared_ptr<MeshData> MeshData::createCircle(float radius, int point_count)
+std::shared_ptr<MeshData> MeshData::createCircle(float radius, int point_count, bool double_sided)
 {
     Vertices vertices;
     vertices.reserve(point_count + 1);
@@ -128,6 +128,12 @@ std::shared_ptr<MeshData> MeshData::createCircle(float radius, int point_count)
         indices.push_back(0);
         indices.push_back(((n + 1) % point_count) + 1);
         indices.push_back(n + 1);
+        if (double_sided)
+        {
+            indices.push_back(0);
+            indices.push_back(n + 1);
+            indices.push_back(((n + 1) % point_count) + 1);
+        }
     }
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
