@@ -208,6 +208,18 @@ Vector3d Node::getGlobalPosition3D() const
     return Vector3d(global_transform * Vector3f(0, 0, 0));
 }
 
+Quaterniond Node::getGlobalRotation3D() const
+{
+    Quaterniond result = rotation;
+    sp::P<Node> n = getParent();
+    while(n)
+    {
+        result = n->rotation * result;
+        n = n->getParent();
+    }
+    return result;
+}
+
 Vector3d Node::getGlobalPoint3D(Vector3d v) const
 {
     return Vector3d(global_transform * Vector3f(v));

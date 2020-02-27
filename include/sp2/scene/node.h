@@ -68,6 +68,7 @@ public:
     Quaterniond getRotation3D() const;
 
     Vector3d getGlobalPosition3D() const;
+    Quaterniond getGlobalRotation3D() const;
     Vector3d getGlobalPoint3D(Vector3d v) const;
 
     Vector3d getLinearVelocity3D() const;
