@@ -18,16 +18,17 @@ Scene::Scene(Vector2d size, const string& scene_name, int priority)
         default_gui_scene = this;
 
     root_widget = new gui::RootWidget(getRoot(), size);
-    setDefaultCamera(new Camera(getRoot()));
-    getCamera()->setOrtographic(size * 0.5);
-    getCamera()->setPosition(size * 0.5);
+    camera = new Camera(getRoot());
+    camera->setOrtographic(size * 0.5);
+    camera->setPosition(size * 0.5);
+    setDefaultCamera(camera);
 }
 
 void Scene::onUpdate(float delta)
 {
-    if (stretch && getCamera())
+    if (stretch && camera)
     {
-        auto projection_matrix = getCamera()->getProjectionMatrix();
+        auto projection_matrix = camera->getProjectionMatrix();
         double render_aspect_ratio = projection_matrix.data[5] / projection_matrix.data[0];
         double requested_aspect_radio = size.x / size.y;
         
@@ -36,7 +37,7 @@ void Scene::onUpdate(float delta)
             root_widget->gui_size.x = size.y * render_aspect_ratio;
         else
             root_widget->gui_size.y = size.x / render_aspect_ratio;
-        getCamera()->setPosition(root_widget->gui_size * 0.5);
+        camera->setPosition(root_widget->gui_size * 0.5);
     }
 }
 

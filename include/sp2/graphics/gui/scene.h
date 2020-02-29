@@ -29,6 +29,7 @@ private:
     P<RootWidget> root_widget;
     std::map<int, P<Widget>> pointer_widget;
     P<Widget> focus_widget;
+    P<Camera> camera;
 
     bool stretch = true;
     Vector2d size;
