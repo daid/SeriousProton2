@@ -2,6 +2,7 @@
 #define SP2_STRINGUTIL_I18N_H
 
 #include <sp2/string.h>
+#include <unordered_map>
 
 namespace sp {
 
@@ -9,7 +10,7 @@ namespace sp {
 // If no translation was loaded, return the origonal string unmodified.
 // There functions are not in the i18n namespace to prevent very long identifiers.
 const string& tr(const string& input);
-const string& tr(const char* context, const string& input);
+const string& tr(const string& context, const string& input);
 
 namespace i18n {
 
@@ -19,6 +20,18 @@ namespace i18n {
 //  Returns true if loading was succesful.
 bool load(const string& resource_name);
 void reset();
+
+class Catalogue
+{
+public:
+    bool load(const string& resource_name);
+
+    const string& tr(const string& input);
+    const string& tr(const string& context, const string& input);
+private:
+    std::unordered_map<string, string> entries;
+    std::unordered_map<string, std::unordered_map<string, string>> context_entries;
+};
 
 }//!namespace i18n
 }//!namespace sp

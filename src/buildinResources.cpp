@@ -1,8 +1,9 @@
 #include <sp2/io/internalResourceProvider.h>
+#include <sp2/attributes.h>
 
 namespace sp {
 
-static io::InternalResourceProvider buildin_resources({
+static io::InternalResourceProvider SP2_STATIC_INIT buildin_resources({
     {"basic.shader", R"EOS(
 [VERTEX]
 attribute vec3 a_vertex;
