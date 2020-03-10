@@ -36,4 +36,5 @@ directory = _build_unittests
 commands =
     cmake ../tests/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/
     cmake --build .
+    ln -sf ../tests/resources resources
     ./UnitTests
