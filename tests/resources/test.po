@@ -1,0 +1,9 @@
+msgid "X"
+msgstr "Y"
+
+msgid "Z"
+msgstr ""
+
+msgctxt "context"
+msgid "X"
+msgstr "YY"

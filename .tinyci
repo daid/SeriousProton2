@@ -30,3 +30,10 @@ directory = _build_android
 commands =
     cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.toolchain
     cmake --build .
+
+[build-unittests]
+directory = _build_unittests
+commands =
+    cmake ../tests/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/
+    cmake --build .
+    ./UnitTests
