@@ -14,6 +14,8 @@ class Shape2D : public Shape
 private:
     virtual void create(Node* node) const override;
     virtual void createFixture(b2Body* body) const = 0;
+
+    friend class Compound2D;
 protected:
     void createFixtureOnBody(b2Body* body, b2Shape* shape) const;
 };

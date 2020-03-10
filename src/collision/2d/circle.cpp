@@ -12,10 +12,16 @@ Circle2D::Circle2D(double radius)
 {
 }
 
+Circle2D::Circle2D(Vector2d center, double radius)
+: radius(radius), center(center)
+{
+}
+
 void Circle2D::createFixture(b2Body* body) const
 {
     b2CircleShape shape;
     shape.m_radius = radius;
+    shape.m_p = toVector(center);
 
     createFixtureOnBody(body, &shape);
 }
