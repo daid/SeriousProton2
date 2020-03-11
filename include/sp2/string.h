@@ -192,10 +192,10 @@ public:
     {
         if (start < 0)
             start = length() + start;
-        if (start >= int(length()))
+        if (sub.length() + start > length())
             return -1;
-        if (sub.length() + start > length() || sub.length() < 1)
-            return -1;
+        if (sub.length() < 1)
+            return start;
         const char* ptr = ::strstr(c_str() + start, sub.c_str());
         if (!ptr)
             return -1;
@@ -342,23 +342,18 @@ public:
     bool istitle() const
     {
         int count = 0;
-        bool needUpper = true;
-        for(unsigned int n=0; n<length(); n++)
+        bool need_upper = true;
+        for(auto c : *this)
         {
-            if ((*this)[n] == '\n')
+            if (::isalpha(c))
             {
-                needUpper = true;
-                continue;
-            }
-            if (::isalpha((*this)[n]))
-            {
-                if (::isupper((*this)[n]) != needUpper)
+                if (bool(::isupper(c)) != need_upper)
                     return false;
-                needUpper = false;
+                need_upper = false;
+                count += 1;
             }else{
-                needUpper = true;
+                need_upper = true;
             }
-            count++;
         }
         return count > 0;
     }
@@ -426,8 +421,8 @@ public:
     */
     string lstrip(const string& chars=_WHITESPACE) const
     {
-        int start=0;
-        while(chars.find(substr(start, start+1)) > -1)
+        size_t start=0;
+        while(start < length() && chars.find(substr(start, start+1)) > -1)
             start++;
         return substr(start);
     }
@@ -463,13 +458,25 @@ public:
     */
     string replace(const string& old, const string& _new, const int count=-1) const
     {
-        if (old.length() < 1)
-            return *this;
-        
         string result;
         result.reserve(length());
         int start = 0;
         int end = 0;
+
+        if (old.length() < 1)
+        {
+            if (count == 0)
+                return *this;
+            result = _new;
+            for(int amount=1; amount!=count && start < int(length());amount++)
+            {
+                result += substr(start, start + 1) + _new;
+                start += 1;
+            }
+            result += substr(start);
+            return result;
+        }
+
         for(int amount=0; amount!=count;amount++)
         {
             start = find(old, end);
@@ -533,7 +540,7 @@ public:
     string rstrip(const string& chars=_WHITESPACE) const
     {
         int end=length()-1;
-        while(chars.find(substr(end, end+1)) > -1)
+        while(end >= 0 && chars.find(substr(end, end+1)) > -1)
             end--;
         return substr(0, end+1);
     }

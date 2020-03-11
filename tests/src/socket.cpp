@@ -5,7 +5,7 @@
 #include <chrono>
 #include <thread>
 
-TEST_CASE("TcpSocket" * doctest::timeout(1.5))
+TEST_CASE("TcpSocket")
 {
     sp::io::network::TcpSocket socket;
 
@@ -22,7 +22,7 @@ TEST_CASE("TcpSocket" * doctest::timeout(1.5))
 }
 
 
-TEST_CASE("WebSocket" * doctest::timeout(1.5))
+TEST_CASE("WebSocket")
 {
 #ifdef EMSCRIPTEN
     //TODO: Emscripten requires main loop updates before websockets work.
