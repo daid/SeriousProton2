@@ -548,15 +548,23 @@ public:
         int start = 0;
         if(sep == "")
         {
-            res = split(" ", maxsplit);
-            for(unsigned int n=0; n<res.size(); n++)
+            string cur;
+            for(auto c : *this)
             {
-                if (res[n].length() < 1)
+                if (::isspace(c) && !cur.empty() && maxsplit != 0)
                 {
-                    res.erase(res.begin() + n);
-                    n--;
+                    res.emplace_back(std::move(cur));
+                    cur.clear();
+                    if (maxsplit > 0)
+                        maxsplit -= 1;
+                }
+                else if (!cur.empty() || !::isspace(c))
+                {
+                    cur.push_back(c);
                 }
             }
+            if (!cur.empty())
+                res.emplace_back(std::move(cur));
             return res;
         }
         while(maxsplit != 0 && start < int(length()))

@@ -3,6 +3,27 @@
 
 using sp::string;
 
+namespace doctest {
+    template<typename T> struct StringMaker<std::vector<T>> {
+        static String convert(const std::vector<T>& value) {
+            String result = "{";
+            bool first = true;
+            for(const auto& v : value)
+            {
+                if (first)
+                    first = false;
+                else
+                    result += " ,";
+                result += "'";
+                result += StringMaker<T>::convert(v);
+                result += "'";
+            }
+            result += "}";
+            return result;
+        }
+    };
+}
+
 TEST_CASE("strings")
 {
     CHECK(string("hello") == string("hello").substr());
@@ -71,161 +92,155 @@ TEST_CASE("strings")
     CHECK(string("abc\rab      def\ng       hi") == string("abc\rab\tdef\ng\thi").expandtabs(8));
     CHECK(string("abc\r\nab\r\ndef\ng\r\nhi") == string("abc\r\nab\r\ndef\ng\r\nhi").expandtabs(4));
     CHECK(string("  a\n b") == string(" \ta\n\tb").expandtabs(1));
-/*
+
     //test_split
-    CHECK(["this", "is", "the", "split", "function"], "this is the split function", "split")
+    CHECK(std::vector<string>{"this", "is", "the", "split", "function"} == string("this is the split function").split());
 
-        # by whitespace
-    CHECK(["a", "b", "c", "d"], "a b c d ", "split")
-    CHECK(["a", "b c d"], "a b c d", "split", None, 1)
-    CHECK(["a", "b", "c d"], "a b c d", "split", None, 2)
-    CHECK(["a", "b", "c", "d"], "a b c d", "split", None, 3)
-    CHECK(["a", "b", "c", "d"], "a b c d", "split", None, 4)
-    CHECK(["a", "b", "c", "d"], "a b c d", "split", None,
-                        std::numeric_limits<int>::max()-1)
-    CHECK(["a b c d"], "a b c d", "split", None, 0)
-    CHECK(["a b c d"], "  a b c d", "split", None, 0)
-    CHECK(["a", "b", "c  d"], "a  b  c  d", "split", None, 2)
+    // by whitespace
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d ").split());
+    CHECK(std::vector<string>{"a", "b c d"} == string("a b c d").split("", 1));
+    CHECK(std::vector<string>{"a", "b", "c d"} == string("a b c d").split("", 2));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d").split("", 3));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d").split("", 4));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d").split("", std::numeric_limits<int>::max()-1));
+    CHECK(std::vector<string>{"a b c d"} == string("a b c d").split("", 0));
+    CHECK(std::vector<string>{"a b c d"} == string("  a b c d").split("", 0));
+    CHECK(std::vector<string>{"a", "b", "c  d"} == string("a  b  c  d").split("", 2));
 
-    CHECK([], "         ", "split")
-    CHECK(["a"], "  a    ", "split")
-    CHECK(["a", "b"], "  a    b   ", "split")
-    CHECK(["a", "b   "], "  a    b   ", "split", None, 1)
-    CHECK(["a", "b   c   "], "  a    b   c   ", "split", None, 1)
-    CHECK(["a", "b", "c   "], "  a    b   c   ", "split", None, 2)
-    CHECK(["a", "b"], "\n\ta \t\r b \v ", "split")
-        aaa = " a "*20
-    CHECK(["a"]*20, aaa, "split")
-    CHECK(["a"] + [aaa[4:]], aaa, "split", None, 1)
-    CHECK(["a"]*19 + ["a "], aaa, "split", None, 19)
+    CHECK(std::vector<string>{} == string("         ").split());
+    CHECK(std::vector<string>{"a"} == string("  a    ").split());
+    CHECK(std::vector<string>{"a", "b"} == string("  a    b   ").split());
+    CHECK(std::vector<string>{"a", "b   "} == string("  a    b   ").split("", 1));
+    CHECK(std::vector<string>{"a", "b   c   "} == string("  a    b   c   ").split("", 1));
+    CHECK(std::vector<string>{"a", "b", "c   "} == string("  a    b   c   ").split("", 2));
+    CHECK(std::vector<string>{"a", "b"} == string("\n\ta \t\r b \v ").split());
+    //string aaa = string(" a ")*20;
+    //CHECK(std::vector<string>{"a"}*20, aaa.split());
+    //CHECK(std::vector<string>{"a"} + [aaa[4:]], aaa, "split", "", 1)
+    //CHECK(std::vector<string>{"a"}*19 + ["a "], aaa, "split", "", 19)
 
-        # by a char
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "split", "|")
-    CHECK(["a|b|c|d"], "a|b|c|d", "split", "|", 0)
-    CHECK(["a", "b|c|d"], "a|b|c|d", "split", "|", 1)
-    CHECK(["a", "b", "c|d"], "a|b|c|d", "split", "|", 2)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "split", "|", 3)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "split", "|", 4)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "split", "|",
-                        std::numeric_limits<int>::max()-2)
-    CHECK(["a|b|c|d"], "a|b|c|d", "split", "|", 0)
-    CHECK(["a", "", "b||c||d"], "a||b||c||d", "split", "|", 2)
-    CHECK(["endcase ", ""], "endcase |", "split", "|")
-    CHECK(["", " startcase"], "| startcase", "split", "|")
-    CHECK(["", "bothcase", ""], "|bothcase|", "split", "|")
-    CHECK(["a", "", "b\x00c\x00d"], "a\x00\x00b\x00c\x00d", "split", "\x00", 2)
+    // by a char
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d").split("|"));
+    CHECK(std::vector<string>{"a|b|c|d"} == string("a|b|c|d").split("|", 0));
+    CHECK(std::vector<string>{"a", "b|c|d"} == string("a|b|c|d").split("|", 1));
+    CHECK(std::vector<string>{"a", "b", "c|d"} == string("a|b|c|d").split("|", 2));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d").split("|", 3));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d").split("|", 4));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d").split("|", std::numeric_limits<int>::max()-2));
+    CHECK(std::vector<string>{"a|b|c|d"} == string("a|b|c|d").split("|", 0));
+    CHECK(std::vector<string>{"a", "", "b||c||d"} == string("a||b||c||d").split("|", 2));
+    CHECK(std::vector<string>{"endcase ", ""} == string("endcase |").split("|"));
+    CHECK(std::vector<string>{"", " startcase"} == string("| startcase").split("|"));
+    CHECK(std::vector<string>{"", "bothcase", ""} == string("|bothcase|").split("|"));
+    CHECK(std::vector<string>{"a", "", "bXcXd"} == string("aXXbXcXd").split("X", 2));
 
-    CHECK(["a"]*20, ("a|"*20)[:-1], "split", "|")
-    CHECK(["a"]*15 +["a|a|a|a|a"],
-                                   ("a|"*20)[:-1], "split", "|", 15)
+    //CHECK(std::vector<string>{"a"]*20, ("a|"*20)[:-1], "split", "|"));
+    //CHECK(std::vector<string>{"a"]*15 +["a|a|a|a|a"] == string("a|"*20)[:-1], "split", "|", 15));
 
-        # by string
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "split", "//")
-    CHECK(["a", "b//c//d"], "a//b//c//d", "split", "//", 1)
-    CHECK(["a", "b", "c//d"], "a//b//c//d", "split", "//", 2)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "split", "//", 3)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "split", "//", 4)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "split", "//",
-                        std::numeric_limits<int>::max()-10)
-    CHECK(["a//b//c//d"], "a//b//c//d", "split", "//", 0)
-    CHECK(["a", "", "b////c////d"], "a////b////c////d", "split", "//", 2)
-    CHECK(["endcase ", ""], "endcase test", "split", "test")
-    CHECK(["", " begincase"], "test begincase", "split", "test")
-    CHECK(["", " bothcase ", ""], "test bothcase test",
-                        "split", "test")
-    CHECK(["a", "bc"], "abbbc", "split", "bb")
-    CHECK(["", ""], "aaa", "split", "aaa")
-    CHECK(["aaa"], "aaa", "split", "aaa", 0)
-    CHECK(["ab", "ab"], "abbaab", "split", "ba")
-    CHECK(["aaaa"], "aaaa", "split", "aab")
-    CHECK([""], "", "split", "aaa")
-    CHECK(["aa"], "aa", "split", "aaa")
-    CHECK(["A", "bobb"], "Abbobbbobb", "split", "bbobb")
-    CHECK(["A", "B", ""], "AbbobbBbbobb", "split", "bbobb")
+    // by string
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d").split("//"));
+    CHECK(std::vector<string>{"a", "b//c//d"} == string("a//b//c//d").split("//", 1));
+    CHECK(std::vector<string>{"a", "b", "c//d"} == string("a//b//c//d").split("//", 2));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d").split("//", 3));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d").split("//", 4));
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d").split("//", std::numeric_limits<int>::max()-10));
+    CHECK(std::vector<string>{"a//b//c//d"} == string("a//b//c//d").split("//", 0));
+    CHECK(std::vector<string>{"a", "", "b////c////d"} == string("a////b////c////d").split("//", 2));
+    CHECK(std::vector<string>{"endcase ", ""} == string("endcase test").split("test"));
+    CHECK(std::vector<string>{"", " begincase"} == string("test begincase").split("test"));
+    CHECK(std::vector<string>{"", " bothcase ", ""} == string("test bothcase test").split("test"));
+    CHECK(std::vector<string>{"a", "bc"} == string("abbbc").split("bb"));
+    CHECK(std::vector<string>{"", ""} == string("aaa").split("aaa"));
+    CHECK(std::vector<string>{"aaa"} == string("aaa").split("aaa", 0));
+    CHECK(std::vector<string>{"ab", "ab"} == string("abbaab").split("ba"));
+    CHECK(std::vector<string>{"aaaa"} == string("aaaa").split("aab"));
+    CHECK(std::vector<string>{""} == string("").split("aaa"));
+    CHECK(std::vector<string>{"aa"} == string("aa").split("aaa"));
+    CHECK(std::vector<string>{"A", "bobb"} == string("Abbobbbobb").split("bbobb"));
+    CHECK(std::vector<string>{"A", "B", ""} == string("AbbobbBbbobb").split("bbobb"));
 
-    CHECK(["a"]*20, ("aBLAH"*20)[:-4], "split", "BLAH")
-    CHECK(["a"]*20, ("aBLAH"*20)[:-4], "split", "BLAH", 19)
-    CHECK(["a"]*18 + ["aBLAHa"], ("aBLAH"*20)[:-4],
-                        "split", "BLAH", 18)
-
+    //CHECK(std::vector<string>{"a"]*20, ("aBLAH"*20)[:-4], "split", "BLAH"));
+    //CHECK(std::vector<string>{"a"]*20, ("aBLAH"*20)[:-4], "split", "BLAH", 19));
+    //CHECK(std::vector<string>{"a"]*18 + ["aBLAHa"], ("aBLAH"*20)[:-4], "split", "BLAH", 18)
+/*
     //test_rsplit
-    CHECK(["this", "is", "the", "rsplit", "function"],
+    CHECK(std::vector<string>{"this", "is", "the", "rsplit", "function"],
                          "this is the rsplit function", "rsplit")
 
-        # by whitespace
-    CHECK(["a", "b", "c", "d"], "a b c d ", "rsplit")
-    CHECK(["a b c", "d"], "a b c d", "rsplit", None, 1)
-    CHECK(["a b", "c", "d"], "a b c d", "rsplit", None, 2)
-    CHECK(["a", "b", "c", "d"], "a b c d", "rsplit", None, 3)
-    CHECK(["a", "b", "c", "d"], "a b c d", "rsplit", None, 4)
-    CHECK(["a", "b", "c", "d"], "a b c d", "rsplit", None,
+    // by whitespace
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d ", "rsplit")
+    CHECK(std::vector<string>{"a b c", "d"} == string("a b c d", "rsplit", None, 1)
+    CHECK(std::vector<string>{"a b", "c", "d"} == string("a b c d", "rsplit", None, 2)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d", "rsplit", None, 3)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d", "rsplit", None, 4)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a b c d", "rsplit", None,
                         std::numeric_limits<int>::max()-20)
-    CHECK(["a b c d"], "a b c d", "rsplit", None, 0)
-    CHECK(["a b c d"], "a b c d  ", "rsplit", None, 0)
-    CHECK(["a  b", "c", "d"], "a  b  c  d", "rsplit", None, 2)
+    CHECK(std::vector<string>{"a b c d"} == string("a b c d", "rsplit", None, 0)
+    CHECK(std::vector<string>{"a b c d"} == string("a b c d  ", "rsplit", None, 0)
+    CHECK(std::vector<string>{"a  b", "c", "d"} == string("a  b  c  d", "rsplit", None, 2)
 
     CHECK([], "         ", "rsplit")
-    CHECK(["a"], "  a    ", "rsplit")
-    CHECK(["a", "b"], "  a    b   ", "rsplit")
-    CHECK(["  a", "b"], "  a    b   ", "rsplit", None, 1)
-    CHECK(["  a    b","c"], "  a    b   c   ", "rsplit",
+    CHECK(std::vector<string>{"a"} == string("  a    ", "rsplit")
+    CHECK(std::vector<string>{"a", "b"} == string("  a    b   ", "rsplit")
+    CHECK(std::vector<string>{"  a", "b"} == string("  a    b   ", "rsplit", None, 1)
+    CHECK(std::vector<string>{"  a    b","c"} == string("  a    b   c   ", "rsplit",
                         None, 1)
-    CHECK(["  a", "b", "c"], "  a    b   c   ", "rsplit",
+    CHECK(std::vector<string>{"  a", "b", "c"} == string("  a    b   c   ", "rsplit",
                         None, 2)
-    CHECK(["a", "b"], "\n\ta \t\r b \v ", "rsplit", None, 88)
+    CHECK(std::vector<string>{"a", "b"} == string("\n\ta \t\r b \v ", "rsplit", None, 88)
         aaa = " a "*20
-    CHECK(["a"]*20, aaa, "rsplit")
+    CHECK(std::vector<string>{"a"]*20, aaa, "rsplit")
     CHECK([aaa[:-4]] + ["a"], aaa, "rsplit", None, 1)
-    CHECK([" a  a"] + ["a"]*18, aaa, "rsplit", None, 18)
+    CHECK(std::vector<string>{" a  a"] + ["a"]*18, aaa, "rsplit", None, 18)
 
 
         # by a char
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "rsplit", "|")
-    CHECK(["a|b|c", "d"], "a|b|c|d", "rsplit", "|", 1)
-    CHECK(["a|b", "c", "d"], "a|b|c|d", "rsplit", "|", 2)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "rsplit", "|", 3)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "rsplit", "|", 4)
-    CHECK(["a", "b", "c", "d"], "a|b|c|d", "rsplit", "|",
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d", "rsplit", "|")
+    CHECK(std::vector<string>{"a|b|c", "d"} == string("a|b|c|d", "rsplit", "|", 1)
+    CHECK(std::vector<string>{"a|b", "c", "d"} == string("a|b|c|d", "rsplit", "|", 2)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d", "rsplit", "|", 3)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d", "rsplit", "|", 4)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a|b|c|d", "rsplit", "|",
                         std::numeric_limits<int>::max()-100)
-    CHECK(["a|b|c|d"], "a|b|c|d", "rsplit", "|", 0)
-    CHECK(["a||b||c", "", "d"], "a||b||c||d", "rsplit", "|", 2)
-    CHECK(["", " begincase"], "| begincase", "rsplit", "|")
-    CHECK(["endcase ", ""], "endcase |", "rsplit", "|")
-    CHECK(["", "bothcase", ""], "|bothcase|", "rsplit", "|")
+    CHECK(std::vector<string>{"a|b|c|d"} == string("a|b|c|d", "rsplit", "|", 0)
+    CHECK(std::vector<string>{"a||b||c", "", "d"} == string("a||b||c||d", "rsplit", "|", 2)
+    CHECK(std::vector<string>{"", " begincase"} == string("| begincase", "rsplit", "|")
+    CHECK(std::vector<string>{"endcase ", ""} == string("endcase |", "rsplit", "|")
+    CHECK(std::vector<string>{"", "bothcase", ""} == string("|bothcase|", "rsplit", "|")
 
-    CHECK(["a\x00\x00b", "c", "d"], "a\x00\x00b\x00c\x00d", "rsplit", "\x00", 2)
+    CHECK(std::vector<string>{"a\x00\x00b", "c", "d"} == string("a\x00\x00b\x00c\x00d", "rsplit", "\x00", 2)
 
-    CHECK(["a"]*20, ("a|"*20)[:-1], "rsplit", "|")
-    CHECK(["a|a|a|a|a"]+["a"]*15,
+    CHECK(std::vector<string>{"a"]*20, ("a|"*20)[:-1], "rsplit", "|")
+    CHECK(std::vector<string>{"a|a|a|a|a"]+["a"]*15,
                         ("a|"*20)[:-1], "rsplit", "|", 15)
 
         # by string
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "rsplit", "//")
-    CHECK(["a//b//c", "d"], "a//b//c//d", "rsplit", "//", 1)
-    CHECK(["a//b", "c", "d"], "a//b//c//d", "rsplit", "//", 2)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "rsplit", "//", 3)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "rsplit", "//", 4)
-    CHECK(["a", "b", "c", "d"], "a//b//c//d", "rsplit", "//",
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d", "rsplit", "//")
+    CHECK(std::vector<string>{"a//b//c", "d"} == string("a//b//c//d", "rsplit", "//", 1)
+    CHECK(std::vector<string>{"a//b", "c", "d"} == string("a//b//c//d", "rsplit", "//", 2)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d", "rsplit", "//", 3)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d", "rsplit", "//", 4)
+    CHECK(std::vector<string>{"a", "b", "c", "d"} == string("a//b//c//d", "rsplit", "//",
                         std::numeric_limits<int>::max()-5)
-    CHECK(["a//b//c//d"], "a//b//c//d", "rsplit", "//", 0)
-    CHECK(["a////b////c", "", "d"], "a////b////c////d", "rsplit", "//", 2)
-    CHECK(["", " begincase"], "test begincase", "rsplit", "test")
-    CHECK(["endcase ", ""], "endcase test", "rsplit", "test")
-    CHECK(["", " bothcase ", ""], "test bothcase test",
+    CHECK(std::vector<string>{"a//b//c//d"} == string("a//b//c//d", "rsplit", "//", 0)
+    CHECK(std::vector<string>{"a////b////c", "", "d"} == string("a////b////c////d", "rsplit", "//", 2)
+    CHECK(std::vector<string>{"", " begincase"} == string("test begincase", "rsplit", "test")
+    CHECK(std::vector<string>{"endcase ", ""} == string("endcase test", "rsplit", "test")
+    CHECK(std::vector<string>{"", " bothcase ", ""} == string("test bothcase test",
                         "rsplit", "test")
-    CHECK(["ab", "c"], "abbbc", "rsplit", "bb")
-    CHECK(["", ""], "aaa", "rsplit", "aaa")
-    CHECK(["aaa"], "aaa", "rsplit", "aaa", 0)
-    CHECK(["ab", "ab"], "abbaab", "rsplit", "ba")
-    CHECK(["aaaa"], "aaaa", "rsplit", "aab")
-    CHECK([""], "", "rsplit", "aaa")
-    CHECK(["aa"], "aa", "rsplit", "aaa")
-    CHECK(["bbob", "A"], "bbobbbobbA", "rsplit", "bbobb")
-    CHECK(["", "B", "A"], "bbobbBbbobbA", "rsplit", "bbobb")
+    CHECK(std::vector<string>{"ab", "c"} == string("abbbc", "rsplit", "bb")
+    CHECK(std::vector<string>{"", ""} == string("aaa", "rsplit", "aaa")
+    CHECK(std::vector<string>{"aaa"} == string("aaa", "rsplit", "aaa", 0)
+    CHECK(std::vector<string>{"ab", "ab"} == string("abbaab", "rsplit", "ba")
+    CHECK(std::vector<string>{"aaaa"} == string("aaaa", "rsplit", "aab")
+    CHECK(std::vector<string>{""} == string("", "rsplit", "aaa")
+    CHECK(std::vector<string>{"aa"} == string("aa", "rsplit", "aaa")
+    CHECK(std::vector<string>{"bbob", "A"} == string("bbobbbobbA", "rsplit", "bbobb")
+    CHECK(std::vector<string>{"", "B", "A"} == string("bbobbBbbobbA", "rsplit", "bbobb")
 
-    CHECK(["a"]*20, ("aBLAH"*20)[:-4], "rsplit", "BLAH")
-    CHECK(["a"]*20, ("aBLAH"*20)[:-4], "rsplit", "BLAH", 19)
-    CHECK(["aBLAHa"] + ["a"]*18, ("aBLAH"*20)[:-4],
+    CHECK(std::vector<string>{"a"]*20, ("aBLAH"*20)[:-4], "rsplit", "BLAH")
+    CHECK(std::vector<string>{"a"]*20, ("aBLAH"*20)[:-4], "rsplit", "BLAH", 19)
+    CHECK(std::vector<string>{"aBLAHa"] + ["a"]*18, ("aBLAH"*20)[:-4],
                         "rsplit", "BLAH", 18)
 */
     //test_strip
@@ -516,13 +531,13 @@ TEST_CASE("strings")
     CHECK(string("Getint") == string("getInt").title());
 /*
     //test_splitlines
-    CHECK(["abc", "def", "", "ghi"], "abc\ndef\n\rghi", "splitlines")
-    CHECK(["abc", "def", "", "ghi"], "abc\ndef\n\r\nghi", "splitlines")
-    CHECK(["abc", "def", "ghi"], "abc\ndef\r\nghi", "splitlines")
-    CHECK(["abc", "def", "ghi"], "abc\ndef\r\nghi\n", "splitlines")
-    CHECK(["abc", "def", "ghi", ""], "abc\ndef\r\nghi\n\r", "splitlines")
-    CHECK(["", "abc", "def", "ghi", ""], "\nabc\ndef\r\nghi\n\r", "splitlines")
-    CHECK(["\n", "abc\n", "def\r\n", "ghi\n", "\r"], "\nabc\ndef\r\nghi\n\r", "splitlines", 1)
+    CHECK(std::vector<string>{"abc", "def", "", "ghi"} == string("abc\ndef\n\rghi", "splitlines")
+    CHECK(std::vector<string>{"abc", "def", "", "ghi"} == string("abc\ndef\n\r\nghi", "splitlines")
+    CHECK(std::vector<string>{"abc", "def", "ghi"} == string("abc\ndef\r\nghi", "splitlines")
+    CHECK(std::vector<string>{"abc", "def", "ghi"} == string("abc\ndef\r\nghi\n", "splitlines")
+    CHECK(std::vector<string>{"abc", "def", "ghi", ""} == string("abc\ndef\r\nghi\n\r", "splitlines")
+    CHECK(std::vector<string>{"", "abc", "def", "ghi", ""} == string("\nabc\ndef\r\nghi\n\r", "splitlines")
+    CHECK(std::vector<string>{"\n", "abc\n", "def\r\n", "ghi\n", "\r"} == string("\nabc\ndef\r\nghi\n\r", "splitlines", 1)
 
         checkraises(TypeError, "abc", "splitlines", 42, 42)
 */
