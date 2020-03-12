@@ -40,8 +40,9 @@ int Serializer::getStringIndex(const string& s)
         return it->second;
     if (mode == Mode::Read)
         return -1;
-    string_table[s] = string_table.size();
-    return string_table.size() - 1;
+    int index = string_table.size();
+    string_table[s] = index;
+    return index;
 }
 
 void Serializer::requestWriteFrom(DataSet& dataset)
