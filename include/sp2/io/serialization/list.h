@@ -15,15 +15,17 @@ class DataSet;
 class List : NonCopyable
 {
 public:
-    void next(std::function<void(DataSet&)> callback);
+    DataSet next();
 
-protected:
-    List(Serializer& serializer);
+    List(List&& other);
     ~List();
+protected:
+    List(DataSet* dataset, int key_index);
 
     std::vector<int> ids;
 private:
-    Serializer& serializer;
+    DataSet* dataset;
+    int key_index;
 
     friend class DataSet;
 };

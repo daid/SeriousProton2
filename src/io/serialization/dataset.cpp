@@ -6,21 +6,27 @@ namespace io {
 namespace serialization {
 
 DataSet::DataSet(Serializer& serializer, int id)
-: serializer(serializer), id(id)
+: serializer(&serializer), id(id)
 {
+}
+
+DataSet::DataSet(DataSet&& other)
+: values(std::move(other.values)), data(std::move(other.data)), serializer(other.serializer), id(other.id)
+{
+    other.serializer = nullptr;
 }
 
 DataSet::~DataSet()
 {
-    if (serializer.mode == Serializer::Mode::Write)
+    if (serializer && serializer->mode == Serializer::Mode::Write)
     {
-        serializer.requestWriteFrom(*this);
+        serializer->requestWriteFrom(*this);
     }
 }
 
 void DataSet::set(const char* key, int value)
 {
-    values[serializer.getStringIndex(key)] = {DataType::Integer, value};
+    values[serializer->getStringIndex(key)] = {DataType::Integer, value};
 }
 
 void DataSet::set(const char* key, float value)
@@ -66,7 +72,7 @@ void DataSet::set(const char* key, const Vector3d& value)
 void DataSet::set(const char* key, const string& value)
 {
     size_t index = data.size();
-    values[serializer.getStringIndex(key)] = {DataType::String, index};
+    values[serializer->getStringIndex(key)] = {DataType::String, index};
     pushUInt(value.length());
     index = data.size();
     data.resize(data.size() + value.length());
@@ -78,41 +84,44 @@ void DataSet::set(const char* key, P<AutoPointerObject> obj)
     if (!obj)
         return;
 
-    auto it = serializer.object_to_id.find(*obj);
-    if (it != serializer.object_to_id.end())
+    auto it = serializer->object_to_id.find(*obj);
+    if (it != serializer->object_to_id.end())
     {
-        values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, it->second};
+        values[serializer->getStringIndex(key)] = {DataType::AutoPointerObject, it->second};
         return;
     }
 
     auto obj_ptr = *obj;
     auto t = std::type_index(typeid(*obj_ptr));
-    auto type_to_name = serializer.type_to_name_mapping.find(t);
-    sp2assert(type_to_name != serializer.type_to_name_mapping.end(), "Missing class registration for serialization");
+    auto type_to_name = serializer->type_to_name_mapping.find(t);
+    sp2assert(type_to_name != serializer->type_to_name_mapping.end(), "Missing class registration for serialization");
 
-    serializer.object_to_id[*obj] = serializer.next_dataset_id;
-    DataSet dataset(serializer, serializer.next_dataset_id);
-    serializer.next_dataset_id += 1;
-    dataset.set("class", serializer.getStringIndex(type_to_name->second));
-    serializer.type_to_save_function_mapping[t](*obj, dataset);
-    values[serializer.getStringIndex(key)] = {DataType::AutoPointerObject, dataset.getId()};
+    serializer->object_to_id[*obj] = serializer->next_dataset_id;
+    DataSet dataset(*serializer, serializer->next_dataset_id);
+    serializer->next_dataset_id += 1;
+    dataset.set("class", serializer->getStringIndex(type_to_name->second));
+    serializer->type_to_save_function_mapping[t](*obj, dataset);
+    values[serializer->getStringIndex(key)] = {DataType::AutoPointerObject, dataset.getId()};
 }
 
-void DataSet::createList(const char* key, std::function<void(List&)> callback)
+List DataSet::createList(const char* key)
 {
-    List list(serializer);
-    callback(list);
+    return List(this, serializer->getStringIndex(key));
+}
 
-    size_t index = data.size();
-    values[serializer.getStringIndex(key)] = {DataType::List, index};
-    pushUInt(list.ids.size());
-    for(auto id : list.ids)
-        pushUInt(id);
+DataSet DataSet::createDataSet(const char* key)
+{
+    sp2assert(serializer->mode == Serializer::Mode::Write, "Can only create datasets on writing");
+
+    DataSet set(*serializer, serializer->next_dataset_id);
+    values[serializer->getStringIndex(key)] = {DataType::DataSet, serializer->next_dataset_id};
+    serializer->next_dataset_id += 1;
+    return set;
 }
 
 bool DataSet::has(const char* key) const
 {
-    int idx = serializer.getStringIndex(key);
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
         return false;
     return values.find(idx) != values.end();
@@ -120,7 +129,7 @@ bool DataSet::has(const char* key) const
 
 template<> int DataSet::get(const char* key) const
 {
-    int idx = serializer.getStringIndex(key);
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
         return 0;
     auto it = values.find(idx);
@@ -187,7 +196,7 @@ template<> Vector3d DataSet::get(const char* key) const
 
 template<> string DataSet::get(const char* key) const
 {
-    int idx = serializer.getStringIndex(key);
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
         return "";
     auto it = values.find(idx);
@@ -202,47 +211,64 @@ template<> string DataSet::get(const char* key) const
 
 P<AutoPointerObject> DataSet::getObject(const char* key) const
 {
-    int idx = serializer.getStringIndex(key);
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
         return nullptr;
     auto it = values.find(idx);
     if (it == values.end() || it->second.first != DataType::AutoPointerObject)
         return nullptr;
-    return serializer.getStoredObject(it->second.second);
+    return serializer->getStoredObject(it->second.second);
 }
 
-void DataSet::getList(const char* key, std::function<void(const DataSet&)> callback) const
+std::vector<DataSet> DataSet::getList(const char* key) const
 {
-    int idx = serializer.getStringIndex(key);
+    std::vector<DataSet> result;
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
-        return;
+        return result;
     auto it = values.find(idx);
     if (it == values.end() || it->second.first != DataType::List)
-        return;
+        return result;
     int index = it->second.second;
     int count = pullUInt(index);
     while(count > 0)
     {
         int id = pullUInt(index);
-        DataSet data(serializer, id);
-        fseeko(serializer.f, serializer.dataset_file_position[id], SEEK_SET);
-        data.readFromFile(serializer.f);
-        callback(data);
+        DataSet data(*serializer, id);
+        fseeko(serializer->f, serializer->dataset_file_position[id], SEEK_SET);
+        data.readFromFile(serializer->f);
+        result.emplace_back(std::move(data));
         count -= 1;
     }
+    return result;
+}
+
+const DataSet DataSet::getDataSet(const char* key) const
+{
+    int idx = serializer->getStringIndex(key);
+    if (idx < 0)
+        return DataSet(*serializer, -1);
+    auto it = values.find(idx);
+    if (it == values.end() || it->second.first != DataType::DataSet)
+        return DataSet(*serializer, -1);
+    int id = it->second.second;
+    DataSet data(*serializer, id);
+    fseeko(serializer->f, serializer->dataset_file_position[id], SEEK_SET);
+    data.readFromFile(serializer->f);
+    return data;
 }
 
 void DataSet::addAsRawData(const char* key, DataType type, const void* ptr, size_t size)
 {
     size_t index = data.size();
-    values[serializer.getStringIndex(key)] = {type, index};
+    values[serializer->getStringIndex(key)] = {type, index};
     data.resize(data.size() + size);
     memcpy(&data[index], ptr, size);
 }
 
 bool DataSet::getAsRawData(const char* key, DataType type, void* ptr, size_t size) const
 {
-    int idx = serializer.getStringIndex(key);
+    int idx = serializer->getStringIndex(key);
     if (idx < 0)
         return false;
     auto it = values.find(idx);

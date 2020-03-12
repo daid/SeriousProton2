@@ -31,7 +31,8 @@ public:
     void set(const char* key, const Vector3d& value);
     void set(const char* key, const string& value);
     void set(const char* key, P<AutoPointerObject> obj);
-    void createList(const char* key, std::function<void(List&)> callback);
+    List createList(const char* key);
+    DataSet createDataSet(const char* key);
 
     bool has(const char* key) const;
 
@@ -41,10 +42,13 @@ public:
     T get(const char* key) const;
 
     P<AutoPointerObject> getObject(const char* key) const;
-    void getList(const char* key, std::function<void(const DataSet&)> callback) const;
+    std::vector<DataSet> getList(const char* key) const;
+    const DataSet getDataSet(const char* key) const;
+
+    DataSet(DataSet&& other);
+    ~DataSet();
 protected:
     DataSet(Serializer& serializer, int id);
-    ~DataSet();
 
     void writeToFile(FILE* f);
     void readFromFile(FILE* f);
@@ -66,6 +70,7 @@ private:
         Vector3f,
         Vector3d,
         String,
+        DataSet,
         AutoPointerObject,
         List,
     };
@@ -78,7 +83,7 @@ private:
     std::unordered_map<int, std::pair<DataType, int>> values;
     std::vector<uint8_t> data;
 
-    Serializer& serializer;
+    Serializer* serializer;
     int id;
 
     friend class Serializer;
