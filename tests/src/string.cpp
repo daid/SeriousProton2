@@ -371,76 +371,64 @@ TEST_CASE("strings")
     CHECK("Who goes there!!" == string("Who goes there??").replace("?", "!"));
 
     CHECK("Who goes there?" == string("Who goes there?").replace(".", "!"));
-/*
+
     // substring replace in place (len(from)==len(to) > 1)
-    CHECK("Th** ** a t**sue", "This is a tissue").replace("is", "**")
-    CHECK("Th** ** a t**sue", "This is a tissue").replace("is", "**", std::numeric_limits<int>::max())
-    CHECK("Th** ** a t**sue", "This is a tissue").replace("is", "**", -1)
-    CHECK("Th** ** a t**sue", "This is a tissue").replace("is", "**", 4)
-    CHECK("Th** ** a t**sue", "This is a tissue").replace("is", "**", 3)
-    CHECK("Th** ** a tissue", "This is a tissue").replace("is", "**", 2)
-    CHECK("Th** is a tissue", "This is a tissue").replace("is", "**", 1)
-    CHECK("This is a tissue", "This is a tissue").replace("is", "**", 0)
-    CHECK("cobob", "bobob").replace("bob", "cob")
-    CHECK("cobobXcobocob", "bobobXbobobob").replace("bob", "cob")
-    CHECK("bobob", "bobob").replace("bot", "bot")
+    CHECK("Th** ** a t**sue" == string("This is a tissue").replace("is", "**"));
+    CHECK("Th** ** a t**sue" == string("This is a tissue").replace("is", "**", std::numeric_limits<int>::max()));
+    CHECK("Th** ** a t**sue" == string("This is a tissue").replace("is", "**", -1));
+    CHECK("Th** ** a t**sue" == string("This is a tissue").replace("is", "**", 4));
+    CHECK("Th** ** a t**sue" == string("This is a tissue").replace("is", "**", 3));
+    CHECK("Th** ** a tissue" == string("This is a tissue").replace("is", "**", 2));
+    CHECK("Th** is a tissue" == string("This is a tissue").replace("is", "**", 1));
+    CHECK("This is a tissue" == string("This is a tissue").replace("is", "**", 0));
+    CHECK("cobob" == string("bobob").replace("bob", "cob"));
+    CHECK("cobobXcobocob" == string("bobobXbobobob").replace("bob", "cob"));
+    CHECK("bobob" == string("bobob").replace("bot", "bot"));
 
-        # replace single character (len(from)==1, len(to)>1)
-    CHECK("ReyKKjaviKK", "Reykjavik").replace("k", "KK")
-    CHECK("ReyKKjaviKK", "Reykjavik").replace("k", "KK", -1)
-    CHECK("ReyKKjaviKK", "Reykjavik").replace("k", "KK", std::numeric_limits<int>::max())
-    CHECK("ReyKKjaviKK", "Reykjavik").replace("k", "KK", 2)
-    CHECK("ReyKKjavik", "Reykjavik").replace("k", "KK", 1)
-    CHECK("Reykjavik", "Reykjavik").replace("k", "KK", 0)
-    CHECK("A----B----C----", "A.B.C.").replace(".", "----")
+    // replace single character (len(from)==1, len(to)>1)
+    CHECK("ReyKKjaviKK" == string("Reykjavik").replace("k", "KK"));
+    CHECK("ReyKKjaviKK" == string("Reykjavik").replace("k", "KK", -1));
+    CHECK("ReyKKjaviKK" == string("Reykjavik").replace("k", "KK", std::numeric_limits<int>::max()));
+    CHECK("ReyKKjaviKK" == string("Reykjavik").replace("k", "KK", 2));
+    CHECK("ReyKKjavik" == string("Reykjavik").replace("k", "KK", 1));
+    CHECK("Reykjavik" == string("Reykjavik").replace("k", "KK", 0));
+    CHECK("A----B----C----" == string("A.B.C.").replace(".", "----"));
 
-    CHECK("Reykjavik", "Reykjavik").replace("q", "KK")
+    CHECK("Reykjavik" == string("Reykjavik").replace("q", "KK"));
 
-        # replace substring (len(from)>1, len(to)!=len(from))
-    CHECK("ham, ham, eggs and ham", "spam, spam, eggs and spam",
-           "replace", "spam", "ham")
-    CHECK("ham, ham, eggs and ham", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", std::numeric_limits<int>::max())
-    CHECK("ham, ham, eggs and ham", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", -1)
-    CHECK("ham, ham, eggs and ham", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", 4)
-    CHECK("ham, ham, eggs and ham", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", 3)
-    CHECK("ham, ham, eggs and spam", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", 2)
-    CHECK("ham, spam, eggs and spam", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", 1)
-    CHECK("spam, spam, eggs and spam", "spam, spam, eggs and spam",
-           "replace", "spam", "ham", 0)
+    // replace substring (len(from)>1, len(to)!=len(from))
+    CHECK("ham, ham, eggs and ham" == string("spam, spam, eggs and spam").replace("spam", "ham"));
+    CHECK("ham, ham, eggs and ham" == string("spam, spam, eggs and spam").replace("spam", "ham", std::numeric_limits<int>::max()));
+    CHECK("ham, ham, eggs and ham" == string("spam, spam, eggs and spam").replace("spam", "ham", -1));
+    CHECK("ham, ham, eggs and ham" == string("spam, spam, eggs and spam").replace("spam", "ham", 4));
+    CHECK("ham, ham, eggs and ham" == string("spam, spam, eggs and spam").replace("spam", "ham", 3));
+    CHECK("ham, ham, eggs and spam" == string("spam, spam, eggs and spam").replace("spam", "ham", 2));
+    CHECK("ham, spam, eggs and spam" == string("spam, spam, eggs and spam").replace("spam", "ham", 1));
+    CHECK("spam, spam, eggs and spam" == string("spam, spam, eggs and spam").replace("spam", "ham", 0));
 
-    CHECK("bobob", "bobobob").replace("bobob", "bob")
-    CHECK("bobobXbobob", "bobobobXbobobob").replace("bobob", "bob")
-    CHECK("BOBOBOB", "BOBOBOB").replace("bob", "bobby")
+    CHECK("bobob" == string("bobobob").replace("bobob", "bob"));
+    CHECK("bobobXbobob" == string("bobobobXbobobob").replace("bobob", "bob"));
+    CHECK("BOBOBOB" == string("BOBOBOB").replace("bob", "bobby"));
 
-    CHECK("one@two!three!", "one!two!three!").replace("!", "@", 1)
-    CHECK("onetwothree", "one!two!three!").replace("!", "")
-    CHECK("one@two@three!", "one!two!three!").replace("!", "@", 2)
-    CHECK("one@two@three@", "one!two!three!").replace("!", "@", 3)
-    CHECK("one@two@three@", "one!two!three!").replace("!", "@", 4)
-    CHECK("one!two!three!", "one!two!three!").replace("!", "@", 0)
-    CHECK("one@two@three@", "one!two!three!").replace("!", "@")
-    CHECK("one!two!three!", "one!two!three!").replace("x", "@")
-    CHECK("one!two!three!", "one!two!three!").replace("x", "@", 2)
-    CHECK("-a-b-c-", "abc").replace("", "-")
-    CHECK("-a-b-c", "abc").replace("", "-", 3)
-    CHECK("abc", "abc").replace("", "-", 0)
-    CHECK("", "").replace("", "")
-    CHECK("abc", "abc").replace("ab", "--", 0)
-    CHECK("abc", "abc").replace("xy", "--")
-        # Next three for SF bug 422088: [OSF1 alpha] string.replace(); died with
-        # MemoryError due to empty result (platform malloc issue when requesting
-        # 0 bytes).
-    CHECK("", "123").replace("123", "")
-    CHECK("", "123123").replace("123", "")
-    CHECK("x", "123x123").replace("123", "")
+    CHECK("one@two!three!" == string("one!two!three!").replace("!", "@", 1));
+    CHECK("onetwothree" == string("one!two!three!").replace("!", ""));
+    CHECK("one@two@three!" == string("one!two!three!").replace("!", "@", 2));
+    CHECK("one@two@three@" == string("one!two!three!").replace("!", "@", 3));
+    CHECK("one@two@three@" == string("one!two!three!").replace("!", "@", 4));
+    CHECK("one!two!three!" == string("one!two!three!").replace("!", "@", 0));
+    CHECK("one@two@three@" == string("one!two!three!").replace("!", "@"));
+    CHECK("one!two!three!" == string("one!two!three!").replace("x", "@"));
+    CHECK("one!two!three!" == string("one!two!three!").replace("x", "@", 2));;
+    CHECK("-a-b-c-" == string("abc").replace("", "-"));
+    CHECK("-a-b-c" == string("abc").replace("", "-", 3));
+    CHECK("abc" == string("abc").replace("", "-", 0));
+    CHECK("" == string("").replace("", ""));
+    CHECK("abc" == string("abc").replace("ab", "--", 0));
+    CHECK("abc" == string("abc").replace("xy", "--"));
+    CHECK("" == string("123").replace("123", ""));
+    CHECK("" == string("123123").replace("123", ""));
+    CHECK("x" == string("123x123").replace("123", ""));
 
-*/
     //test_zfill
     CHECK(string("123") == string("123").zfill(2));
     CHECK(string("123") == string("123").zfill(3));
