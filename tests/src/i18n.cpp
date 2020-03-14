@@ -13,9 +13,11 @@ TEST_CASE("i18n")
     CHECK(sp::tr("X") == "Y");
     CHECK(sp::tr("Z") == "Z");
     CHECK(sp::tr("context", "X") == "YY");
+    CHECK(sp::tr("context2", "X") == "YY2");
     sp::i18n::reset();
     CHECK(sp::tr("X") == "X");
     CHECK(sp::i18n::load("test.mo") == true);
     CHECK(sp::tr("X") == "Y");
     CHECK(sp::tr("context", "X") == "YY");
+    CHECK(sp::tr("context2", "X") == "YY2");
 }

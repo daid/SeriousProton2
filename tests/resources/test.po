@@ -7,3 +7,7 @@ msgstr ""
 msgctxt "context"
 msgid "X"
 msgstr "YY"
+
+msgctxt "context2"
+msgid "X"
+msgstr "YY2"
