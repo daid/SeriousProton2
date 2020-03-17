@@ -43,19 +43,23 @@ Keybinding::Keybinding(const string& name, const std::initializer_list<const str
 
 void Keybinding::setKey(const string& key)
 {
-    key_number.clear();
+    bindings.clear();
     addKey(key);
 }
 
 void Keybinding::setKeys(const std::initializer_list<const string>& keys)
 {
-    key_number.clear();
+    bindings.clear();
     for(const string& key : keys)
         addKey(key);
 }
 
-void Keybinding::addKey(const string& key)
+void Keybinding::addKey(const string& key, bool inverted)
 {
+    if (key.startswith("-"))
+    {
+        return addKey(key.substr(1), !inverted);
+    }
     //Format for joystick keys:
     //joy:[joystick_id]:axis:[axis_id]
     //joy:[joystick_id]:button:[button_id]
@@ -67,11 +71,9 @@ void Keybinding::addKey(const string& key)
             int joystick_id = stringutil::convert::toInt(parts[1]);
             int axis_button_id = stringutil::convert::toInt(parts[3]);
             if (parts[2] == "axis")
-                key_number.push_back(int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask);
-            else if (parts[2] == "invertedaxis")
-                key_number.push_back(int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_inverted_mask);
+                bindings.push_back({int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask, inverted});
             else if (parts[2] == "button")
-                key_number.push_back(int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask);
+                bindings.push_back({int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask, inverted});
             else
                 LOG(Warning, "Unknown joystick binding:", key);
         }
@@ -94,17 +96,7 @@ void Keybinding::addKey(const string& key)
                     LOG(Warning, "Unknown axis in game controller binding:", key);
                     return;
                 }
-                key_number.push_back(axis | int(controller_id) << 8 | game_controller_axis_mask);
-            }
-            else if (parts[2] == "invertedaxis")
-            {
-                int axis = SDL_GameControllerGetAxisFromString(parts[3].c_str());
-                if (axis < 0)
-                {
-                    LOG(Warning, "Unknown axis in game controller binding:", key);
-                    return;
-                }
-                key_number.push_back(axis | int(controller_id) << 8 | game_controller_axis_inverted_mask);
+                bindings.push_back({axis | int(controller_id) << 8 | game_controller_axis_mask, inverted});
             }
             else if (parts[2] == "button")
             {
@@ -114,7 +106,7 @@ void Keybinding::addKey(const string& key)
                     LOG(Warning, "Unknown button in game controller binding:", key);
                     return;
                 }
-                key_number.push_back(button | int(controller_id) << 8 | game_controller_button_mask);
+                bindings.push_back({button | int(controller_id) << 8 | game_controller_button_mask, inverted});
             }
             else
             {
@@ -125,47 +117,45 @@ void Keybinding::addKey(const string& key)
     }
     if (key.startswith("pointer:"))
     {
-        key_number.push_back(pointer_mask | stringutil::convert::toInt(key.substr(8)));
+        bindings.push_back({pointer_mask | stringutil::convert::toInt(key.substr(8)), inverted});
         return;
     }
     if (key.startswith("wheel:"))
     {
-        if (key == "wheel:x+") key_number.push_back(mouse_wheel_mask | 0);
-        else if (key == "wheel:x-") key_number.push_back(mouse_wheel_mask | 1);
-        else if (key == "wheel:y+") key_number.push_back(mouse_wheel_mask | 2);
-        else if (key == "wheel:y-") key_number.push_back(mouse_wheel_mask | 3);
+        if (key == "wheel:x") bindings.push_back({mouse_wheel_mask | 0, inverted});
+        else if (key == "wheel:y") bindings.push_back({mouse_wheel_mask | 1, inverted});
         else LOG(Warning, "Unknown mouse wheel binding:", key);
         return;
     }
     if (key.startswith("virtual:"))
     {
         int index = stringutil::convert::toInt(key.substr(8));
-        key_number.push_back(virtual_mask | index);
+        bindings.push_back({virtual_mask | index, inverted});
         return;
     }
 
     SDL_Keycode code = SDL_GetKeyFromName(key.c_str());
     if (code != SDLK_UNKNOWN)
-        key_number.push_back(code | keyboard_mask);
+        bindings.push_back({code | keyboard_mask, inverted});
     else
         LOG(Warning, "Unknown key binding:", key);
 }
 
 void Keybinding::clearKeys()
 {
-    key_number.clear();
+    bindings.clear();
 }
 
 bool Keybinding::isBound() const
 {
-    return key_number.size() > 0;
+    return bindings.size() > 0;
 }
 
 string Keybinding::getKey(int index) const
 {
-    if (index >= 0 && index < int(key_number.size()))
+    if (index >= 0 && index < int(bindings.size()))
     {
-        int key = key_number[index];
+        int key = bindings[index].key;
         switch(key & type_mask)
         {
         case keyboard_mask:
@@ -174,25 +164,19 @@ string Keybinding::getKey(int index) const
             return "pointer:" + string(key & ~type_mask);
         case joystick_axis_mask:
             return "joy:" + string((key >> 8) & 0xff) + ":axis:" + string(key & 0xff);
-        case joystick_axis_inverted_mask:
-            return "joy:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(key & 0xff);
         case joystick_button_mask:
             return "joy:" + string((key >> 8) & 0xff) + ":button:" + string(key & 0xff);
         case mouse_wheel_mask:
             switch(key & ~type_mask)
             {
-            case 0: return "wheel:x+";
-            case 1: return "wheel:x-";
-            case 2: return "wheel:y+";
-            case 3: return "wheel:y-";
+            case 0: return "wheel:x";
+            case 1: return "wheel:y";
             }
             break;
         case game_controller_button_mask:
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":button:" + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
         case game_controller_axis_mask:
             return "gamecontroller:" + string((key >> 8) & 0xff) + ":axis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
-        case game_controller_axis_inverted_mask:
-            return "gamecontroller:" + string((key >> 8) & 0xff) + ":invertedaxis:" + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case virtual_mask:
             return "virtual:" + string(key & 0xff);
         }
@@ -203,9 +187,9 @@ string Keybinding::getKey(int index) const
 
 string Keybinding::getHumanReadableKeyName(int index) const
 {
-    if (index >= 0 && index < int(key_number.size()))
+    if (index >= 0 && index < int(bindings.size()))
     {
-        int key = key_number[index];
+        int key = bindings[index].key;
         switch(key & type_mask)
         {
         case keyboard_mask:
@@ -224,24 +208,18 @@ string Keybinding::getHumanReadableKeyName(int index) const
             break;
         case joystick_axis_mask:
             return "Joystick Axis: " + string(key & 0xff);
-        case joystick_axis_inverted_mask:
-            return "Joystick Axis: " + string(key & 0xff) + " (inverted)";
         case joystick_button_mask:
             return "Joystick Button: " + string(key & 0xff);
         case mouse_wheel_mask:
             switch(key & ~type_mask)
             {
             case 0: return "Mouse Wheel Sideways";
-            case 1: return "Mouse Wheel Sideways";
-            case 2: return "Mouse Wheel";
-            case 3: return "Mouse Wheel";
+            case 1: return "Mouse Wheel";
             }
             break;
         case game_controller_button_mask:
             return "Controller: " + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
         case game_controller_axis_mask:
-            return "Controller: " + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
-        case game_controller_axis_inverted_mask:
             return "Controller: " + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
         case virtual_mask:
             return "Virtual: " + string(key & 0xff);
@@ -337,7 +315,7 @@ void Keybinding::loadKeybindings(const string& filename)
         }
         else
         {
-            keybinding->key_number.clear();
+            keybinding->bindings.clear();
         }
     }
 }
@@ -349,7 +327,7 @@ void Keybinding::saveKeybindings(const string& filename)
     {
         json11::Json::object data;
         json11::Json::array keys;
-        for(unsigned int index=0; index<keybinding->key_number.size(); index++)
+        for(unsigned int index=0; index<keybinding->bindings.size(); index++)
             keys.push_back(keybinding->getKey(index).c_str());
         data["key"] = keys;
         obj[keybinding->name] = data;
@@ -464,18 +442,18 @@ void Keybinding::handleEvent(const SDL_Event& event)
         }
         if (event.wheel.x < 0)
         {
-            updateKeys(1 | mouse_wheel_mask, 1.0);
-            updateKeys(1 | mouse_wheel_mask, 0.0);
+            updateKeys(0 | mouse_wheel_mask, -1.0);
+            updateKeys(0 | mouse_wheel_mask, 0.0);
         }
         if (event.wheel.y > 0)
         {
-            updateKeys(2 | mouse_wheel_mask, 1.0);
-            updateKeys(2 | mouse_wheel_mask, 0.0);
+            updateKeys(1 | mouse_wheel_mask, 1.0);
+            updateKeys(1 | mouse_wheel_mask, 0.0);
         }
         if (event.wheel.y < 0)
         {
-            updateKeys(3 | mouse_wheel_mask, 1.0);
-            updateKeys(3 | mouse_wheel_mask, 0.0);
+            updateKeys(1 | mouse_wheel_mask, -1.0);
+            updateKeys(1 | mouse_wheel_mask, 0.0);
         }
         break;
     case SDL_FINGERDOWN:
@@ -494,7 +472,6 @@ void Keybinding::handleEvent(const SDL_Event& event)
         break;
     case SDL_JOYAXISMOTION:
         updateKeys(int(event.jaxis.axis) | int(event.jaxis.which) << 8 | joystick_axis_mask, float(event.jaxis.value) / 32768.0);
-        updateKeys(int(event.jaxis.axis) | int(event.jaxis.which) << 8 | joystick_axis_inverted_mask, -float(event.jaxis.value) / 32768.0);
         break;
     case SDL_JOYDEVICEADDED:
         if (!SDL_IsGameController(event.jdevice.which))
@@ -512,13 +489,11 @@ void Keybinding::handleEvent(const SDL_Event& event)
         for(int axis=0; axis<32; axis++)
         {
             updateKeys(int(axis) | int(event.jdevice.which) << 8 | joystick_axis_mask, 0.0);
-            updateKeys(int(axis) | int(event.jdevice.which) << 8 | joystick_axis_inverted_mask, 0.0);
         }
         SDL_JoystickClose(SDL_JoystickFromInstanceID(event.jdevice.which));
         break;
     case SDL_CONTROLLERAXISMOTION:
         updateKeys(int(event.caxis.axis) | int(event.caxis.which) << 8 | game_controller_axis_mask, float(event.caxis.value) / 32768.0);
-        updateKeys(int(event.caxis.axis) | int(event.caxis.which) << 8 | game_controller_axis_inverted_mask, -float(event.caxis.value) / 32768.0);
         break;
     case SDL_CONTROLLERBUTTONDOWN:
         updateKeys(int(event.cbutton.button) | int(event.cbutton.which) << 8 | game_controller_button_mask, 1.0);
@@ -541,7 +516,6 @@ void Keybinding::handleEvent(const SDL_Event& event)
         for(int axis=0; axis<SDL_CONTROLLER_AXIS_MAX; axis++)
         {
             updateKeys(int(axis) | int(event.cdevice.which) << 8 | game_controller_axis_mask, 0.0);
-            updateKeys(int(axis) | int(event.cdevice.which) << 8 | game_controller_axis_inverted_mask, 0.0);
         }
         SDL_GameControllerClose(SDL_GameControllerFromInstanceID(event.cdevice.which));
         break;
@@ -552,7 +526,7 @@ void Keybinding::handleEvent(const SDL_Event& event)
         {
             //Focus lost, release all keys.
             for(P<Keybinding> key : keybindings)
-                if (key->key_number.size() > 0)
+                if (key->bindings.size() > 0)
                     key->setValue(0.0);
         }
         break;
@@ -565,14 +539,23 @@ void Keybinding::updateKeys(int key_number, float value)
 {
     if (value > 0.5 && rebinding_key)
     {
-        rebinding_key->key_number.push_back(key_number);
+        rebinding_key->bindings.push_back({key_number, false});
         rebinding_key = nullptr;
     }
 
     for(P<Keybinding> key : keybindings)
-        for(int key_nr : key->key_number)
-            if (key_nr == key_number)
-                key->setValue(value);
+    {
+        for(const auto& bind : key->bindings)
+        {
+            if (bind.key == key_number)
+            {
+                if (bind.inverted)
+                    key->setValue(-value);
+                else
+                    key->setValue(value);
+            }
+        }
+    }
 }
 
 }//namespace io

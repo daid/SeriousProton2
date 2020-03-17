@@ -29,17 +29,15 @@ public:
     //  Key name should be one of the following:
     //  * name of a keyboard key ("Space", "Left", "A")
     //  * "joy:[id]:axis:[axis]" for a joystick axis, where id is the index of the joystick. And axis is the axis number.
-    //  * "joy:[id]:invertedaxis:[axis]" for a joystick axis, where id is the index of the joystick. And axis is the axis number.
     //  * "joy:[id]:button:[button]" for a joystick button, where id is the index of the joystick. And axis is the button number.
     //  * "gamecontroller:[id]:axis:[axis], where axis is "leftx", "lefty", "rightx", "righty", "lefttrigger" or "righttrigger"
-    //  * "gamecontroller:[id]:invertedaxis:[axis], where axis is "leftx", "lefty", "rightx", "righty", "lefttrigger" or "righttrigger"
     //  * "gamecontroller:[id]:button:[button], where button is one of "a", "b", "x", "y", "back", "guide", "start", "leftstick", "rightstick", "leftshoulder", "rightshoulder", "dpup", "dpdown", "dpleft", "dpright"
     //  * "pointer:[id], where id is 0 to 4 for left,right,middle mouse button, or a touch screen press.
-    //  * "wheel:[dir], where dir is one of "x+", "x-", "y+", "y-" for mouse wheel binding. Note that these are never helt down. Only generate up&down events.
+    //  * "wheel:[dir], where dir is one of "x", "y" for mouse wheel binding. Note that these are never helt down. Only generate up&down events.
     //  * "virtual:[id], where id is the number of a virtual key, controlled by setVirtualKey, and the virtual touchscreen controls.
     void setKey(const string& key);
     void setKeys(const std::initializer_list<const string>& keys);
-    void addKey(const string& key);
+    void addKey(const string& key, bool inverted=false);
     void clearKeys();
 
     // Get the name of the key in the same format as used for setKey and friends. Returns empty string if the index as no set key.
@@ -73,7 +71,12 @@ private:
     string name;
     string label;
 
-    std::vector<int> key_number;
+    struct Binding
+    {
+        int key;
+        bool inverted;
+    };
+    std::vector<Binding> bindings;
 
     float value;
     bool down_event;
@@ -99,13 +102,11 @@ private:
     static constexpr int pointer_mask =  (0x02 << 16);
     static constexpr int joystick_button_mask = (0x03 << 16);
     static constexpr int joystick_axis_mask = (0x04 << 16);
-    static constexpr int joystick_axis_inverted_mask = (0x05 << 16);
-    static constexpr int mouse_wheel_mask = (0x06 << 16);
-    static constexpr int game_controller_button_mask = (0x07 << 16);
-    static constexpr int game_controller_axis_mask = (0x08 << 16);
-    static constexpr int game_controller_axis_inverted_mask = (0x09 << 16);
+    static constexpr int mouse_wheel_mask = (0x05 << 16);
+    static constexpr int game_controller_button_mask = (0x06 << 16);
+    static constexpr int game_controller_axis_mask = (0x07 << 16);
     static constexpr int virtual_mask = (0x0f << 16);
-    
+
     friend class sp::Engine;
 };
 
