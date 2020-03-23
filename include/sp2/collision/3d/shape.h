@@ -13,6 +13,8 @@ class Shape3D : public Shape
 private:
     virtual void create(Node* node) const override;
     virtual btCollisionShape* createShape() const = 0;
+
+    friend class Compound3D;
 };
 
 }//namespace collision
