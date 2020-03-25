@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_MESH_OBJ_H
 
 #include <sp2/graphics/meshdata.h>
+#include <sp2/math/quaternion.h>
 #include <sp2/io/directLoader.h>
 
 namespace sp {
@@ -23,8 +24,21 @@ protected:
     virtual std::shared_ptr<MeshData> load(const string& name) override;
 
 private:
+    class Info
+    {
+    public:
+        Texture* texture = nullptr;
+        class Point
+        {
+        public:
+            string name;
+            Vector3d position;
+            Quaterniond rotation;
+        };
+        std::vector<Point> points;
+    };
     Mode mode;
-    std::unordered_map<string, Texture*> texture_cache;
+    std::unordered_map<string, Info> obj_info;
 };
 
 extern ObjLoader obj_loader;

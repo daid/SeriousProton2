@@ -156,6 +156,7 @@ public:
         * Smoke: global
     */
     ParticleEmitter(P<Node> parent, int initial_buffer_size=16, Origin origin=Origin::Local);
+
     template<typename T, typename... ARGS> void addEffector(ARGS... args)
     {
         effectors.emplace_back(std::unique_ptr<Effector>(new T(args...)));
