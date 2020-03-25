@@ -300,11 +300,11 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
 
                     vertices.push_back(v);
                 }
-                for(unsigned int n=3; n<polygon.size(); n++)
+                for(unsigned int n=2; n<polygon.size(); n++)
                 {
                     indices.push_back(indices_start);
+                    indices.push_back(indices_start + n);
                     indices.push_back(indices_start + n - 1);
-                    indices.push_back(indices_start + n - 2);
                 }
             }
         }
