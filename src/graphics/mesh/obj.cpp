@@ -270,11 +270,23 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                     }
                     up -= position;
                     forward -= position;
+                    up = up.normalized();
+                    forward = forward.normalized();
 
                     if (forward.dot(up) > 0.001)
                         LOG(Warning, "Triangle for point definition not a 90 degree corner:", group.name);
 
-                    //TODO: Calculate rotation
+                    auto rotation = Quaterniond::fromVectorToVector(Vector3d(1, 0, 0), Vector3d(forward));
+                    rotation = rotation * Quaterniond::fromVectorToVector(rotation * Vector3d(0, 0, 1), Vector3d(up));
+
+                    Info::Point point;
+                    point.name = group.name.substr(group.name.find("[SP2]") + 5);
+                    point.position = Vector3d(position);
+                    point.rotation = rotation;
+                    LOG(Debug, point.name, point.position, point.rotation);
+                    LOG(Debug, rotation * Vector3d(1, 0, 0), forward);
+                    LOG(Debug, rotation * Vector3d(0, 0, 1), up);
+                    obj_info[resource_name].points.push_back(point);
                 }
             }
         }
