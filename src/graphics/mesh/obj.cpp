@@ -6,6 +6,7 @@
 #include <sp2/io/resourceProvider.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/math/matrix4x4.h>
+#include <sp2/assert.h>
 
 
 namespace sp {
@@ -277,15 +278,18 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                         LOG(Warning, "Triangle for point definition not a 90 degree corner:", group.name);
 
                     auto rotation = Quaterniond::fromVectorToVector(Vector3d(1, 0, 0), Vector3d(forward));
-                    rotation = rotation * Quaterniond::fromVectorToVector(rotation * Vector3d(0, 0, 1), Vector3d(up));
+                    auto tmp_up = rotation * Vector3d(0, 0, 1);
+                    if (Vector3d(up).dot(tmp_up) <= -1.0 + 1e-6) //180 deg, make sure we introduce a roll.
+                        rotation = Quaterniond::fromAxisAngle(Vector3d(forward), 180.0) * rotation;
+                    else
+                        rotation = Quaterniond::fromVectorToVector(tmp_up, Vector3d(up)) * rotation;
+                    sp2assert((Vector3d(forward) - (rotation * Vector3d(1, 0, 0))).length() < 0.001, "Rotation calculation problem");
+                    sp2assert((Vector3d(up) - (rotation * Vector3d(0, 0, 1))).length() < 0.001, "Rotation calculation problem");
 
                     Info::Point point;
                     point.name = group.name.substr(group.name.find("[SP2]") + 5);
                     point.position = Vector3d(position);
                     point.rotation = rotation;
-                    LOG(Debug, point.name, point.position, point.rotation);
-                    LOG(Debug, rotation * Vector3d(1, 0, 0), forward);
-                    LOG(Debug, rotation * Vector3d(0, 0, 1), up);
                     obj_info[resource_name].points.push_back(point);
                 }
             }
@@ -322,7 +326,7 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
         }
     }
 
-    LOG(Info, "Loaded:", resource_name, vertices.size(), "vertices");
+    LOG(Info, "Loaded:", resource_name, vertices.size(), "vertices", indices.size() / 3, "triangles");
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }
 
