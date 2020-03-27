@@ -3,6 +3,7 @@
 
 #include <sp2/scene/node.h>
 #include <sp2/tween.h>
+#include <sp2/timer.h>
 
 
 namespace sp {
@@ -155,6 +156,7 @@ public:
         * Laser beam: local
         * Smoke: global
     */
+    ParticleEmitter(P<Node> parent, string resource_name);
     ParticleEmitter(P<Node> parent, int initial_buffer_size=16, Origin origin=Origin::Local);
 
     template<typename T, typename... ARGS> void addEffector(ARGS... args)
@@ -175,6 +177,11 @@ public:
 
 private:
     Origin origin;
+
+    Timer spawn_timer;
+    Parameters spawn_min;
+    Parameters spawn_max;
+
     std::vector<Parameters> particles;
     std::vector<std::unique_ptr<Effector>> effectors;
 };
