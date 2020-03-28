@@ -195,7 +195,7 @@ public:
             }
             else
             {
-                LOG(Debug, "Unknown line in", name, ":", mtl_name, ":", line);
+                //LOG(Debug, "Unknown line in", name, ":", mtl_name, ":", line);
             }
         }
     }
@@ -266,7 +266,7 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                         forward = p1;
                         position = p0;
                         up = p2;
-                        if (s12 < s20)
+                        if (s12 > s20)
                             std::swap(position, up);
                     }
                     up -= position;
@@ -275,7 +275,10 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                     forward = forward.normalized();
 
                     if (forward.dot(up) > 0.001)
+                    {
                         LOG(Warning, "Triangle for point definition not a 90 degree corner:", group.name);
+                        LOG(Warning, position, forward, up);
+                    }
 
                     auto rotation = Quaterniond::fromVectorToVector(Vector3d(1, 0, 0), Vector3d(forward));
                     auto tmp_up = rotation * Vector3d(0, 0, 1);
@@ -283,8 +286,11 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                         rotation = Quaterniond::fromAxisAngle(Vector3d(forward), 180.0) * rotation;
                     else
                         rotation = Quaterniond::fromVectorToVector(tmp_up, Vector3d(up)) * rotation;
-                    sp2assert((Vector3d(forward) - (rotation * Vector3d(1, 0, 0))).length() < 0.001, "Rotation calculation problem");
-                    sp2assert((Vector3d(up) - (rotation * Vector3d(0, 0, 1))).length() < 0.001, "Rotation calculation problem");
+                    if (forward.dot(up) < 0.001)
+                    {
+                        sp2assert((Vector3d(forward) - (rotation * Vector3d(1, 0, 0))).length() < 0.001, "Rotation calculation problem");
+                        sp2assert((Vector3d(up) - (rotation * Vector3d(0, 0, 1))).length() < 0.001, "Rotation calculation problem");
+                    }
 
                     Info::Point point;
                     point.name = group.name.substr(group.name.find("[SP2]") + 5);
