@@ -18,6 +18,10 @@
 #define STB_IMAGE_WRITE_STATIC
 #define STBIWDEF static inline
 #include "stb/stb_image_write.h"
+#define NANOSVG_IMPLEMENTATION
+#define NANOSVGRAST_IMPLEMENTATION
+#include "nanosvg/nanosvg.h"
+#include "nanosvg/nanosvgrast.h"
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif//__GNUC__
@@ -116,31 +120,54 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
     {
         update(Vector2i(x, y), buffer);
         stbi_image_free(buffer);
-
-        if (stream->hasFlag("hq2x") || stream->hasFlag("hq3x") || stream->hasFlag("hq4x"))
-        {
-            image::HQ2xConfig config;
-            Vector2i tile_size(0, 0);
-            config.scale = 2;
-            if (stream->hasFlag("hq3x"))
-                config.scale = 3;
-            else if (stream->hasFlag("hq4x"))
-                config.scale = 4;
-            config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Clamp;
-            if (stream->hasFlag("wrap"))
-                config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Wrap;
-            else if (stream->hasFlag("wrap"))
-                config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Transparent;
-            if (stream->hasFlag("tiles"))
-                tile_size.x = tile_size.y = stringutil::convert::toInt(stream->getFlag("tiles"));
-            if (tile_size.x > 0 && tile_size.y > 0)
-                image::hq2xTiles(*this, tile_size, config);
-            else
-                image::hq2x(*this, config);
-        }
-        return true;
     }
-    return false;
+    else
+    {
+        char header[4] = {0};
+        stream->seek(0);
+        stream->read(&header, sizeof(header));
+        if (memcmp(header, "<svg", 4) == 0)
+        {
+            stream->seek(0);
+            string data = stream->readAll();
+            auto svg = nsvgParse(const_cast<char*>(data.c_str()), "px", 96);
+            x = std::ceil(svg->width);
+            y = std::ceil(svg->height);
+            struct NSVGrasterizer* rast = nsvgCreateRasterizer();
+            buffer = new uint32_t[x*y];
+        	nsvgRasterize(rast, svg, 0.0f, 0.0f, 1.0f, reinterpret_cast<unsigned char*>(buffer), x, y, x*sizeof(uint32_t));
+            update(Vector2i(x, y), buffer);
+            nsvgDeleteRasterizer(rast);
+            nsvgDelete(svg);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    if (stream->hasFlag("hq2x") || stream->hasFlag("hq3x") || stream->hasFlag("hq4x"))
+    {
+        image::HQ2xConfig config;
+        Vector2i tile_size(0, 0);
+        config.scale = 2;
+        if (stream->hasFlag("hq3x"))
+            config.scale = 3;
+        else if (stream->hasFlag("hq4x"))
+            config.scale = 4;
+        config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Clamp;
+        if (stream->hasFlag("wrap"))
+            config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Wrap;
+        else if (stream->hasFlag("wrap"))
+            config.out_of_bounds = image::HQ2xConfig::OutOfBounds::Transparent;
+        if (stream->hasFlag("tiles"))
+            tile_size.x = tile_size.y = stringutil::convert::toInt(stream->getFlag("tiles"));
+        if (tile_size.x > 0 && tile_size.y > 0)
+            image::hq2xTiles(*this, tile_size, config);
+        else
+            image::hq2x(*this, config);
+    }
+    return true;
 }
 
 bool Image::loadFromFile(const string& filename)
