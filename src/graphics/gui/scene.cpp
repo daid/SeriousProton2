@@ -167,7 +167,7 @@ void Scene::onTextInput(TextInputEvent e)
         focus_widget->onTextInput(e);
 }
 
-P<RootWidget> Scene::getRootWidget()
+P<Widget> Scene::getRootWidget()
 {
     return root_widget;
 }

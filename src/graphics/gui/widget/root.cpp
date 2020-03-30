@@ -12,6 +12,7 @@ RootWidget::RootWidget(P<Node> parent, Vector2d size)
 
 void RootWidget::onUpdate(float delta)
 {
+    layout.size = gui_size;
     updateLayout(Vector2d(0, 0), gui_size);
 }
 

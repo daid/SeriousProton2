@@ -22,7 +22,7 @@ public:
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
     
-    P<RootWidget> getRootWidget();
+    P<Widget> getRootWidget();
 private:
     static P<Scene> default_gui_scene;
     
