@@ -17,9 +17,17 @@ public:
         DiffuseMaterialColorToNormal,
         DiffuseMaterialColorToTexture,
     };
+    class Point
+    {
+    public:
+        string name;
+        Vector3d position;
+        Quaterniond rotation;
+    };
 
     void setMode(Mode mode) { ObjLoader::mode = mode; }
     Texture* getTextureFor(const string& name);
+    const std::vector<Point>& getPoints(const string& name);
 protected:
     virtual std::shared_ptr<MeshData> load(const string& name) override;
 
@@ -28,13 +36,6 @@ private:
     {
     public:
         Texture* texture = nullptr;
-        class Point
-        {
-        public:
-            string name;
-            Vector3d position;
-            Quaterniond rotation;
-        };
         std::vector<Point> points;
     };
     Mode mode;

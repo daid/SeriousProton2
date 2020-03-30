@@ -292,7 +292,7 @@ std::shared_ptr<MeshData> ObjLoader::load(const string& resource_name)
                         sp2assert((Vector3d(up) - (rotation * Vector3d(0, 0, 1))).length() < 0.001, "Rotation calculation problem");
                     }
 
-                    Info::Point point;
+                    Point point;
                     point.name = group.name.substr(group.name.find("[SP2]") + 5);
                     point.position = Vector3d(position);
                     point.rotation = rotation;
@@ -343,6 +343,11 @@ Texture* ObjLoader::getTextureFor(const string& name)
     if (it == obj_info.end())
         return nullptr;
     return it->second.texture;
+}
+
+const std::vector<ObjLoader::Point>& ObjLoader::getPoints(const string& name)
+{
+    return obj_info[name].points;
 }
 
 }//namespace sp
