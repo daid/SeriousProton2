@@ -257,7 +257,7 @@ endmacro()
 # Macro to build the android apk
 macro(android_apk NAME ASSETS_FOLDER)
     configure_file("${SP2_DIR}/cmake/android/AndroidManifest.xml.in" "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml")
-    configure_file("${SP2_DIR}/cmake/android/SDLActivity.java.in" "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
+    configure_file("${SP2_DIR}/cmake/android/SP2Activity.java.in" "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SP2Activity.java")
     # Generate the R.java file
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/R.java"
@@ -268,10 +268,10 @@ macro(android_apk NAME ASSETS_FOLDER)
     # Compile the java sources (TODO, warning about bootstrap classpath, rt.jar wrong version)
     file(GLOB JAVA_SOURCES "${SDL_SRC_PATH}/android-project/app/src/main/java/org/libsdl/app/*.java")
     list(APPEND JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/R.java")
-    list(APPEND JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SDLActivity.java")
+    list(APPEND JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/java_source/sp2/${NAME}/SP2Activity.java")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/")
     add_custom_command(
-        OUTPUT "java_compiled/sp2/Template/R.class"
+        OUTPUT "java_compiled/sp2/${NAME}/R.class"
         COMMAND ${Java_JAVAC_EXECUTABLE} ARGS -source 1.7 -target 1.7 -classpath "${ANDROID_PLATFORM_JAR}" ${JAVA_SOURCES} -d "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
         DEPENDS ${JAVA_SOURCES}
     )
@@ -279,7 +279,7 @@ macro(android_apk NAME ASSETS_FOLDER)
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/classes.dex"
         COMMAND "${DX}" ARGS "--dex" "--output=${CMAKE_CURRENT_BINARY_DIR}/apk_contents/classes.dex" "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
-        DEPENDS "java_compiled/sp2/Template/R.class"
+        DEPENDS "java_compiled/sp2/${NAME}/R.class"
     )
 
     file(COPY "${SDL_INSTALL_PATH}/lib/libSDL2.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
@@ -314,7 +314,7 @@ macro(android_apk NAME ASSETS_FOLDER)
     add_custom_target(apk ALL DEPENDS "${APK_ALIGNED}")
     add_custom_target(upload
         COMMAND ${ADB} install -r "${APK_ALIGNED}"
-        COMMAND ${ADB} shell am start -n "sp2.${NAME}/.SDLActivity"
+        COMMAND ${ADB} shell am start -n "sp2.${NAME}/.SP2Activity"
         DEPENDS "${APK_ALIGNED}" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 endmacro()
