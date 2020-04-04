@@ -131,11 +131,14 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
             stream->seek(0);
             string data = stream->readAll();
             auto svg = nsvgParse(const_cast<char*>(data.c_str()), "px", 96);
-            x = std::ceil(svg->width);
-            y = std::ceil(svg->height);
+            float scale = 1.0;
+            if (stream->hasFlag("scale"))
+                scale = stringutil::convert::toFloat(stream->getFlag("scale"));
+            x = std::ceil(svg->width * scale);
+            y = std::ceil(svg->height * scale);
             struct NSVGrasterizer* rast = nsvgCreateRasterizer();
             buffer = new uint32_t[x*y];
-        	nsvgRasterize(rast, svg, 0.0f, 0.0f, 1.0f, reinterpret_cast<unsigned char*>(buffer), x, y, x*sizeof(uint32_t));
+        	nsvgRasterize(rast, svg, 0.0f, 0.0f, float(x) / svg->width, reinterpret_cast<unsigned char*>(buffer), x, y, x*sizeof(uint32_t));
             update(Vector2i(x, y), buffer);
             nsvgDeleteRasterizer(rast);
             nsvgDelete(svg);

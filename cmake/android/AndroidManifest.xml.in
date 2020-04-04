@@ -19,6 +19,9 @@
     <!-- External mouse input events -->
     <uses-feature android:name="android.hardware.type.pc" android:required="false" />
 
+    <!-- Camera access -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <!-- Allow writing to external storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- Allow access to the vibrator -->
@@ -33,7 +36,7 @@
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:hardwareAccelerated="true" >
 
-        <activity android:name="SDLActivity"
+        <activity android:name="sp2.${PROJECT_NAME}.SP2Activity"
             android:label="${PROJECT_NAME}"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
