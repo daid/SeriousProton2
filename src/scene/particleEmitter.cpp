@@ -56,6 +56,8 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
             render_data.texture = texture_manager.get(root_node.items["texture"]);
         if (root_node.items["origin"].lower() == "local")
             origin = Origin::Local;
+        if (root_node.items["acceleration"] != "")
+            addEffector<ConstantAcceleration>(stringutil::convert::toVector3f(root_node.items["acceleration"]));
     }
     auto spawn_node = tree->findId("SPAWN");
     if (spawn_node)
@@ -68,6 +70,31 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
         parseParam(spawn_node->items["size"], spawn_min.size, spawn_max.size);
         parseParam(spawn_node->items["color"], spawn_min.color, spawn_max.color);
         parseParam(spawn_node->items["lifetime"], spawn_min.lifetime, spawn_max.lifetime);
+
+        int initial = stringutil::convert::toInt(spawn_node->items["initial"]);
+        if (initial > 0)
+        {
+            for(int n=0; n<initial; n++)
+            {
+                Parameters p;
+                p.position.x = random(spawn_min.position.x, spawn_max.position.x);
+                p.position.y = random(spawn_min.position.y, spawn_max.position.y);
+                p.position.z = random(spawn_min.position.z, spawn_max.position.z);
+                p.velocity.x = random(spawn_min.velocity.x, spawn_max.velocity.x);
+                p.velocity.y = random(spawn_min.velocity.y, spawn_max.velocity.y);
+                p.velocity.z = random(spawn_min.velocity.z, spawn_max.velocity.z);
+                p.size = random(spawn_min.size, spawn_max.size);
+                p.color.r = random(spawn_min.color.r, spawn_max.color.r);
+                p.color.g = random(spawn_min.color.g, spawn_max.color.g);
+                p.color.b = random(spawn_min.color.b, spawn_max.color.b);
+                p.color.a = random(spawn_min.color.a, spawn_max.color.a);
+                p.lifetime = random(spawn_min.lifetime, spawn_max.lifetime);
+                emit(p);
+            }
+
+            if (frequency <= 0.0)
+                auto_destroy = true;
+        }
     }
     auto size_node = tree->findId("SIZE");
     if (size_node)
