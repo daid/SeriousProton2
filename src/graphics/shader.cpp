@@ -73,6 +73,7 @@ bool Shader::bind()
     if (bound_shader == this)
         return false;
 
+    auto previous_shader = bound_shader;
     bound_shader = this;
 
     if (program == 0xffffffff)
@@ -119,9 +120,27 @@ bool Shader::bind()
     }
 
     glUseProgram(program);
-    if (vertex_attribute != -1) glEnableVertexAttribArray(vertex_attribute);
-    if (normal_attribute != -1) glEnableVertexAttribArray(normal_attribute);
-    if (uv_attribute != -1) glEnableVertexAttribArray(uv_attribute);
+    if (previous_shader)
+    {
+        if (vertex_attribute != -1 && previous_shader->vertex_attribute == -1)
+            glEnableVertexAttribArray(vertex_attribute);
+        if (vertex_attribute == -1 && previous_shader->vertex_attribute != -1)
+            glDisableVertexAttribArray(vertex_attribute);
+        if (normal_attribute != -1 && previous_shader->normal_attribute == -1)
+            glEnableVertexAttribArray(normal_attribute);
+        if (normal_attribute == -1 && previous_shader->normal_attribute != -1)
+            glDisableVertexAttribArray(normal_attribute);
+        if (uv_attribute != -1 && previous_shader->uv_attribute == -1)
+            glEnableVertexAttribArray(uv_attribute);
+        if (uv_attribute == -1 && previous_shader->uv_attribute != -1)
+            glDisableVertexAttribArray(uv_attribute);
+    }
+    else
+    {
+        if (vertex_attribute != -1) glEnableVertexAttribArray(vertex_attribute);
+        if (normal_attribute != -1) glEnableVertexAttribArray(normal_attribute);
+        if (uv_attribute != -1) glEnableVertexAttribArray(uv_attribute);
+    }
     return true;
 }
 
