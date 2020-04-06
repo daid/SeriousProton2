@@ -11,7 +11,6 @@ namespace sp {
 static void parseParam(const string& s, float& f_min, float& f_max)
 {
     auto p = s.partition("~");
-    std::pair<float, float> result;
     f_min = stringutil::convert::toFloat(p.first.strip());
     if (p.second.empty())
         f_max = f_min;
@@ -22,7 +21,6 @@ static void parseParam(const string& s, float& f_min, float& f_max)
 static void parseParam(const string& s, Color& c_min, Color& c_max)
 {
     auto p = s.partition("~");
-    std::pair<float, float> result;
     c_min = stringutil::convert::toColor(p.first.strip());
     if (p.second.empty())
         c_max = c_min;
