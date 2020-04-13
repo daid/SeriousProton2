@@ -123,10 +123,10 @@ bool Image::loadFromStream(io::ResourceStreamPtr stream)
     }
     else
     {
-        char header[4] = {0};
+        char header[5] = {0};
         stream->seek(0);
         stream->read(&header, sizeof(header));
-        if (memcmp(header, "<svg", 4) == 0)
+        if (memcmp(header, "<svg", 4) == 0 || memcmp(header, "<?xml", 5) == 0)
         {
             stream->seek(0);
             string data = stream->readAll();

@@ -56,6 +56,8 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
             origin = Origin::Local;
         if (root_node.items["acceleration"] != "")
             addEffector<ConstantAcceleration>(stringutil::convert::toVector3f(root_node.items["acceleration"]));
+        if (root_node.items["renderType"] == "additive")
+            render_data.type = RenderData::Type::Additive;
     }
     auto spawn_node = tree->findId("SPAWN");
     if (spawn_node)

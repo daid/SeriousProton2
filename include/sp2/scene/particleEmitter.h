@@ -173,7 +173,7 @@ public:
     
     virtual void onUpdate(float delta) override;
 
-    bool auto_destroy;
+    bool auto_destroy = false;
 
 private:
     Origin origin;

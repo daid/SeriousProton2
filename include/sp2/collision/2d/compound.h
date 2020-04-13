@@ -11,6 +11,8 @@ class Compound2D : public Shape2D
 {
 public:
     Compound2D(std::initializer_list<const Shape2D*> shapes);
+
+    void add(Shape2D* shape);
 private:
     virtual void createFixture(b2Body* body) const override;
 

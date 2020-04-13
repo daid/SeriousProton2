@@ -119,6 +119,7 @@ void RenderQueue::render(std::vector<Item>& list)
             switch(item.data.type)
             {
             case RenderData::Type::None:
+                break;
             case RenderData::Type::Normal:
             case RenderData::Type::Transparent:
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -12,6 +12,11 @@ Compound2D::Compound2D(std::initializer_list<const Shape2D*> shapes)
 {
 }
 
+void Compound2D::add(Shape2D* shape)
+{
+    shapes.push_back(shape);
+}
+
 void Compound2D::createFixture(b2Body* body) const
 {
     for(const auto shape : shapes)

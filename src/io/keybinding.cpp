@@ -355,7 +355,7 @@ void Keybinding::setVirtualKey(int index, float value)
 
 void Keybinding::setValue(float value)
 {
-    if (value < 0.01)//Add a tiny dead zone by default. Assists in gamepads that give off "almost zero" in neutral.
+    if (value < 0.01 && value > -0.01)//Add a tiny dead zone by default. Assists in gamepads that give off "almost zero" in neutral.
         value = 0.0;
     if (this->value < 0.5 && value >= 0.5)
         down_event = fixed_down_event = true;
@@ -380,10 +380,18 @@ void Keybinding::postFixedUpdate()
         fixed_up_event = false;
 }
 
+static int release_mouse_wheel = 0;
+
 void Keybinding::allPostUpdate()
 {
     for(P<Keybinding> key : keybindings)
         key->postUpdate();
+    
+    if (release_mouse_wheel & (1 << 0))
+        updateKeys(0 | mouse_wheel_mask, 0.0);
+    if (release_mouse_wheel & (1 << 1))
+        updateKeys(1 | mouse_wheel_mask, 0.0);
+    release_mouse_wheel = 0;
 }
 
 void Keybinding::allPostFixedUpdate()
@@ -438,22 +446,22 @@ void Keybinding::handleEvent(const SDL_Event& event)
         if (event.wheel.x > 0)
         {
             updateKeys(0 | mouse_wheel_mask, 1.0);
-            updateKeys(0 | mouse_wheel_mask, 0.0);
+            release_mouse_wheel |= 1 << 0;
         }
         if (event.wheel.x < 0)
         {
             updateKeys(0 | mouse_wheel_mask, -1.0);
-            updateKeys(0 | mouse_wheel_mask, 0.0);
+            release_mouse_wheel |= 1 << 0;
         }
         if (event.wheel.y > 0)
         {
             updateKeys(1 | mouse_wheel_mask, 1.0);
-            updateKeys(1 | mouse_wheel_mask, 0.0);
+            release_mouse_wheel |= 1 << 1;
         }
         if (event.wheel.y < 0)
         {
             updateKeys(1 | mouse_wheel_mask, -1.0);
-            updateKeys(1 | mouse_wheel_mask, 0.0);
+            release_mouse_wheel |= 1 << 1;
         }
         break;
     case SDL_FINGERDOWN:

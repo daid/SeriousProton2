@@ -14,6 +14,8 @@ public:
     {
     }
 
+    virtual ~Shape() = default;
+
     enum class Type
     {
         Sensor,    //No collision
