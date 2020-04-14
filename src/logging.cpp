@@ -38,14 +38,14 @@ void Logger::setOutputFile(const string& filename)
     }
 }
 
-void Logger::setOutputStream(std::ostream* stream)
+void Logger::setOutputStream(std::ostream* new_stream)
 {
-    Logger::stream = stream;
+    Logger::stream = new_stream;
 }
 
-void Logger::setFormat(Format format)
+void Logger::setFormat(Format new_format)
 {
-    Logger::format = format;
+    Logger::format = new_format;
 }
 
 void Logger::setLevel(Level log_level)
