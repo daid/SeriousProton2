@@ -28,9 +28,9 @@ public:
         Function,
         Full
     };
-    template<typename... ARGS> static void log(Level level, const char* filename, const char* function, int line_number, const ARGS&... args)
+    template<typename... ARGS> static void log(Level log_level, const char* filename, const char* function, int line_number, const ARGS&... args)
     {
-        logStart(level, filename, function, line_number);
+        logStart(log_level, filename, function, line_number);
         logArg(args...);
         logEnd();
     }
