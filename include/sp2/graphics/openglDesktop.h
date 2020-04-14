@@ -16,7 +16,11 @@
 extern "C" {
 #endif
 
+#ifdef EMSCRIPTEN
+#define GL_DEPTH_STENCIL 0x84f9
+#else
 #define GL_DEPTH24_STENCIL8 0x88F0
+#endif
 #define GL_DEPTH_STENCIL_ATTACHMENT 0x821A
 
 #ifdef __cplusplus

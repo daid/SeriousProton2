@@ -8,9 +8,7 @@
 #endif
 
 #include <sp2/graphics/opengles2.h>
-#ifndef EMSCRIPTEN
 #include <sp2/graphics/openglDesktop.h>
-#endif//EMSCRIPTEN
 
 namespace sp {
 void initOpenGL();
