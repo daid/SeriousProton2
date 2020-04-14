@@ -71,7 +71,7 @@ void AudioSource::startAudioSystem()
     SDL_AudioSpec want, have;
 
     memset(&want, 0, sizeof(want));
-    want.freq = 44100;
+    want.freq = 48000;
     want.format = AUDIO_F32;
     want.channels = 2;
 #ifdef EMSCRIPTEN
@@ -89,7 +89,7 @@ void AudioSource::startAudioSystem()
     }
     LOG(Info, "Opened audio:", have.freq, int(have.channels));
     sp2assert(have.format == AUDIO_F32, "Needs 32 float audio output.");
-    sp2assert(have.freq == 44100, "Needs 44100Hz audio output.");
+    sp2assert(have.freq == 48000, "Needs 48000Hz audio output.");
     sp2assert(have.channels == 2, "Needs 2 channel audio output.");
 
     //Check if any audio source was started before we opened our audio device.

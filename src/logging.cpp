@@ -48,16 +48,16 @@ void Logger::setFormat(Format format)
     Logger::format = format;
 }
 
-void Logger::setLevel(Level level)
+void Logger::setLevel(Level log_level)
 {
-    Logger::level = level;
+    Logger::level = log_level;
 }
 
-void Logger::logStart(Level level, const char* filename, const char* function, int line_number)
+void Logger::logStart(Level log_level, const char* filename, const char* function, int line_number)
 {
-    if (level < Logger::level)
+    if (log_level < Logger::level)
         return;
-    switch(level)
+    switch(log_level)
     {
     case Level::Debug:
         *stream << "[DEBUG] ";

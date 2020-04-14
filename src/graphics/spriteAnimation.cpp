@@ -296,9 +296,9 @@ void SpriteAnimation::Data::load(const string& resource_name)
 #endif
 }
 
-void SpriteAnimation::setAtlasManager(AtlasManager* atlas_manager)
+void SpriteAnimation::setAtlasManager(AtlasManager* new_atlas_manager)
 {
-    SpriteAnimation::atlas_manager = atlas_manager;
+    SpriteAnimation::atlas_manager = new_atlas_manager;
 }
 
 }//namespace sp
