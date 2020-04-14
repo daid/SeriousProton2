@@ -55,17 +55,21 @@ BitmapFont::BitmapFont(const string& name, io::ResourceStreamPtr stream)
     aspect_ratio = pixel_glyph_size.x / pixel_glyph_size.y;
     glyph_advance.x *= aspect_ratio;
     glyph_size = Vector2f(pixel_glyph_size.x / texture_size.x, pixel_glyph_size.y / texture_size.y);
-    int y = 0;
-    for(string line : lines)
+
     {
-        int x = 0;
-        for(int character : line)
+        int y = 0;
+        for(string line : lines)
         {
-            glyphs[character] = Vector2f(glyph_size.x * x, glyph_size.y * y);
-            x++;
+            int x = 0;
+            for(int character : line)
+            {
+                glyphs[character] = Vector2f(glyph_size.x * x, glyph_size.y * y);
+                x++;
+            }
+            y++;
         }
-        y++;
     }
+
     for(string line : special_lines)
     {
         std::vector<string> parts = line.split(",", 3);

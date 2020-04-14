@@ -20,8 +20,8 @@ void LazyLoaderManager::addWork(std::function<void()> f)
         {
             while(true)
             {
-                std::function<void()> f = queue.get();
-                f();
+                std::function<void()> workFunction = queue.get();
+                workFunction();
             }
         });
     }

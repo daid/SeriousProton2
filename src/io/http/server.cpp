@@ -221,11 +221,8 @@ bool Server::Connection::processIncommingData()
             request.headers.clear();
             for(unsigned int n=1; n<header_data.size(); n++)
             {
-                std::vector<string> parts = header_data[n].split(":", 1);
-                if (parts.size() != 2)
-                    return false;
-                else
-                    request.headers[parts[0].strip().lower()] = parts[1].strip();
+                auto header_entry = header_data[n].partition(":");
+                request.headers[header_entry.first.strip().lower()] = header_entry.second.strip();
             }
             int post_length = 0;
             if (request.headers.find("content-length") != request.headers.end())

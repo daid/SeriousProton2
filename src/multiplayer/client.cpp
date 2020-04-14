@@ -193,8 +193,8 @@ void Client::onUpdate(float delta)
     {
         for(auto& prepared_call : it->second->multiplayer.server_prepared_calls)
         {
-            io::DataBuffer packet(PacketIDs::call_on_server, it->first, prepared_call);
-            send(packet);
+            io::DataBuffer send_packet(PacketIDs::call_on_server, it->first, prepared_call);
+            send(send_packet);
         }
         it->second->multiplayer.server_prepared_calls.clear();
         it->second->multiplayer.client_prepared_calls.clear();

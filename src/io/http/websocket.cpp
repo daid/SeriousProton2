@@ -440,9 +440,8 @@ void Websocket::updateReceiveBuffer()
             std::unordered_map<string, string> headers;
             for(unsigned int n=1; n<header_data.size(); n++)
             {
-                std::vector<string> parts = header_data[n].split(":", 1);
-                if (parts.size() == 2)
-                    headers[parts[0].strip().lower()] = parts[1].strip();
+                auto header_parts = header_data[n].partition(":");
+                headers[header_parts.first.strip().lower()] = header_parts.second.strip();
             }
             if (headers.find("upgrade") == headers.end() || headers.find("connection") == headers.end() || headers.find("sec-websocket-accept") == headers.end())
             {
