@@ -121,15 +121,15 @@ void Win32StackWalkContext::fillAddressInfo(AddressInfo& info)
         {
             info.module = buffer;
             
-            DWORD64 displacement = 0;
+            DWORD64 displacement64 = 0;
             PSYMBOL_INFO symbol_info = reinterpret_cast<PSYMBOL_INFO>(buffer);
             symbol_info->SizeOfStruct = sizeof(SYMBOL_INFO);
             symbol_info->MaxNameLen = MAX_PATH - sizeof(SYMBOL_INFO);
-            if (SymFromAddr(exception_context.process, reinterpret_cast<DWORD64>(info.address), &displacement, symbol_info))
+            if (SymFromAddr(exception_context.process, reinterpret_cast<DWORD64>(info.address), &displacement64, symbol_info))
             {
                 info.symbol = symbol_info->Name;
-                info.symbol_offset = displacement;
-                
+                info.symbol_offset = displacement64;
+
                 DWORD displacement = 0;
                 IMAGEHLP_LINE64 line_info;
                 memset(&line_info, 0, sizeof(line_info));

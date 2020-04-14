@@ -9,6 +9,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wshadow-compatible-local"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif//__GNUC__
 #include "stb/stb_vorbis.h"

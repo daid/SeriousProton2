@@ -12,6 +12,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wshadow-compatible-local"
 #endif//__GNUC__
 #include "stb/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
