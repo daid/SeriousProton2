@@ -125,15 +125,15 @@ bool Shader::bind()
         if (vertex_attribute != -1 && previous_shader->vertex_attribute == -1)
             glEnableVertexAttribArray(vertex_attribute);
         if (vertex_attribute == -1 && previous_shader->vertex_attribute != -1)
-            glDisableVertexAttribArray(vertex_attribute);
+            glDisableVertexAttribArray(previous_shader->vertex_attribute);
         if (normal_attribute != -1 && previous_shader->normal_attribute == -1)
             glEnableVertexAttribArray(normal_attribute);
         if (normal_attribute == -1 && previous_shader->normal_attribute != -1)
-            glDisableVertexAttribArray(normal_attribute);
+            glDisableVertexAttribArray(previous_shader->normal_attribute);
         if (uv_attribute != -1 && previous_shader->uv_attribute == -1)
             glEnableVertexAttribArray(uv_attribute);
         if (uv_attribute == -1 && previous_shader->uv_attribute != -1)
-            glDisableVertexAttribArray(uv_attribute);
+            glDisableVertexAttribArray(previous_shader->uv_attribute);
     }
     else
     {
