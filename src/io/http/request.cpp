@@ -1,6 +1,10 @@
 #include <sp2/io/http/request.h>
 #include <sp2/stringutil/convert.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
+
 namespace sp {
 namespace io {
 namespace http {
@@ -28,8 +32,52 @@ Request::Response Request::post(const string& path, const string& data)
     return request("POST", path, data);
 }
 
+#ifdef EMSCRIPTEN
+EM_JS(char*, emHttpRequest, (const char* method, const char* url, const char* body, uint32_t* status_code), {
+    try
+    {
+        var request = new XMLHttpRequest();
+        request.open(UTF8ToString(method), UTF8ToString(url), false);
+        if (body)
+            request.send(UTF8ToString(body));
+        else
+            request.send();
+    }
+    catch(err)
+    {
+        return 0;
+    }
+    HEAP32[status_code>>2] = request.status;
+    var length = lengthBytesUTF8(request.responseText)+1;
+    var result = _malloc(length);
+    stringToUTF8(request.responseText, result, length);
+    return result;
+});
+#endif
+
 Request::Response Request::request(const string& method, const string& path, const string& data)
 {
+#ifdef EMSCRIPTEN
+    if (scheme == Scheme::Auto)
+        scheme = ((port == 443) ? Scheme::Https : Scheme::Http);
+
+    string url = scheme == Scheme::Http ? "http://" : "https://";
+    url += headers["Host"];
+    if ((scheme == Scheme::Http && port != 80) || (scheme == Scheme::Https && port != 443))
+        url += ":" + sp::string(port);
+    url += path;
+
+    Response response;
+    uint32_t status_code = 0;
+    auto body = emHttpRequest(method.c_str(), url.c_str(), data.empty() ? nullptr : data.c_str(), &status_code);
+    response.success = body != nullptr;
+    if (body)
+    {
+        response.status = status_code;
+        response.body = body;
+    }
+    free(body);
+#else
     if (!socket.isConnected())
     {
         if (scheme == Scheme::Auto)
@@ -117,6 +165,7 @@ Request::Response Request::request(const string& method, const string& path, con
     }
 
     response.success = true;
+#endif
     return response;
 }
 
