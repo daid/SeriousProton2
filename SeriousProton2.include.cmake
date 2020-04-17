@@ -31,15 +31,10 @@ endif()
 include(CPack)
 
 find_program(IMAGE_CONVERT convert)
+find_program(ICOTOOL icotool)
 if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND" AND CMAKE_HOST_WIN32)
     file(GLOB IMAGE_CONVERT_SEARCH_PATHS "C:/Program Files/ImageMagick-*")
     find_program(IMAGE_CONVERT magick PATHS ${IMAGE_CONVERT_SEARCH_PATHS})
-endif()
-if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND")
-    find_program(IMAGE_CONVERT gm)
-    if(NOT "${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND")
-        set(IMAGE_CONVERT "${IMAGE_CONVERT} convert")
-    endif()
 endif()
 
 macro(serious_proton2_executable EXECUTABLE_NAME)
@@ -136,11 +131,19 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND")
             message(WARNING "ImageMagick not found, cannot build icons. Which is fine for test builds. But release builds are better with icons.")
         elseif(WIN32)
-            add_custom_command(
-                OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
-                COMMAND "${IMAGE_CONVERT}" ARGS "${SP2_ICON}" -resize 256x256 -define icon:auto-resize="256,128,96,64,48,32,16" "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
-                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                DEPENDS "${SP2_ICON}")
+            if("${ICOTOOL}" STREQUAL "ICOTOOL-NOTFOUND")
+                add_custom_command(
+                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
+                    COMMAND "${IMAGE_CONVERT}" ARGS "${SP2_ICON}" -resize 256x256 -define icon:auto-resize="256,128,96,64,48,32,16" "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    DEPENDS "${SP2_ICON}")
+            else()
+                add_custom_command(
+                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
+                    COMMAND "${ICOTOOL}" ARGS -c -o "${CMAKE_CURRENT_BINARY_DIR}/icon.ico" "${SP2_ICON}"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    DEPENDS "${SP2_ICON}")
+            endif()
             file(GENERATE
                 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/win32.rc"
                 CONTENT "id ICON \"icon.ico\"")
