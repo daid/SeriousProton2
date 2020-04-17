@@ -32,6 +32,7 @@ public:
     Window(Vector2f size_factor, float aspect_ratio);
 
     void setFullScreen(bool fullscreen);
+    bool getFullScreen();
     void setClearColor(Color color);
     void hideCursor();
     void setDefaultCursor();

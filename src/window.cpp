@@ -169,10 +169,15 @@ void Window::initialize()
     render_window = nullptr;
 }
 
-void Window::setFullScreen(bool fullscreen)
+void Window::setFullScreen(bool new_fullscreen)
 {
-    this->fullscreen = fullscreen;
+    fullscreen = new_fullscreen;
     createRenderWindow();
+}
+
+bool Window::getFullScreen()
+{
+    return fullscreen;
 }
 
 void Window::setClearColor(sp::Color color)
