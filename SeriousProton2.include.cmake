@@ -30,11 +30,10 @@ if("${CPACK_PACKAGE_VERSION}" STREQUAL "")
 endif()
 include(CPack)
 
-if(CMAKE_HOST_WIN32)
+find_program(IMAGE_CONVERT convert)
+if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND" AND CMAKE_HOST_WIN32)
     file(GLOB IMAGE_CONVERT_SEARCH_PATHS "C:/Program Files/ImageMagick-*")
     find_program(IMAGE_CONVERT magick PATHS ${IMAGE_CONVERT_SEARCH_PATHS})
-else()
-    find_program(IMAGE_CONVERT convert)
 endif()
 
 macro(serious_proton2_executable EXECUTABLE_NAME)
