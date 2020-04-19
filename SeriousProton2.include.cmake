@@ -139,10 +139,15 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
                     DEPENDS "${SP2_ICON}")
             else()
                 add_custom_command(
-                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
-                    COMMAND "${ICOTOOL}" ARGS -c -o "${CMAKE_CURRENT_BINARY_DIR}/icon.ico" "${SP2_ICON}"
+                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.png"
+                    COMMAND "${IMAGE_CONVERT}" ARGS "${SP2_ICON}" -resize 64x64 "${CMAKE_CURRENT_BINARY_DIR}/icon.png"
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                     DEPENDS "${SP2_ICON}")
+                add_custom_command(
+                    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/icon.ico"
+                    COMMAND "${ICOTOOL}" ARGS -c -o "${CMAKE_CURRENT_BINARY_DIR}/icon.ico" "${CMAKE_CURRENT_BINARY_DIR}/icon.png"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/icon.png")
             endif()
             file(GENERATE
                 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/win32.rc"
