@@ -202,10 +202,11 @@ ResourceStreamPtr ResourceProvider::get(string filename)
         {
             for(auto item : flags.split(","))
             {
-                if (item.find("="))
-                    stream->flags[item.substr(0, item.find("="))] = item.substr(item.find("=") + 1);
-                else if (item.length() > 0)
-                    stream->flags[item] = "";
+                if (!item.empty())
+                {
+                    auto parts = item.partition("=");
+                    stream->flags[parts.first] = parts.second;
+                }
             }
             return stream;
         }
