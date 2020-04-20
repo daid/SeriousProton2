@@ -38,6 +38,7 @@ public:
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
     void setPosition(Vector2f position, int monitor_number=0);
+    Vector2i getSize();
     static int getMonitorCount();
 
     void addLayer(P<GraphicsLayer> layer);

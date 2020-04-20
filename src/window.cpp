@@ -229,6 +229,14 @@ void Window::setPosition(Vector2f position, int monitor_number)
     SDL_SetWindowPosition(render_window, rect.x + left + (rect.w - size.x) * position.x, rect.y + top + (rect.h - size.y) * position.y);
 }
 
+Vector2i Window::getSize()
+{
+    Vector2i size;
+    if (render_window)
+        SDL_GetWindowSize(render_window, &size.x, &size.y);
+    return size;
+}
+
 int Window::getMonitorCount()
 {
     return SDL_GetNumVideoDisplays();
