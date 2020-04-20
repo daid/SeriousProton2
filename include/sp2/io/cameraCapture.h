@@ -22,7 +22,7 @@ private:
     bool init(int index);
 
     class Data;
-    Data* data;
+    std::unique_ptr<Data> data;
     
     sp::Vector2i size;
 };

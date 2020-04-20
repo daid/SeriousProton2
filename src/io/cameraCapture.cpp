@@ -332,8 +332,14 @@ bool CameraCapture::init(int index)
         data->is_mjpg = true;
     }
 
-    data->media_control->Run();//For some reason, this reports failure, but the stream works...
+    auto result = data->media_control->Run();
+    if (FAILED(result))
+    {
+        LOG(Warning, "Could open camera, but failed to start the stream.");
+        return false;
+    }
 
+/*
     long buffer_size = -1;
     for(int n=0; n<10 && buffer_size == -1; n++)
     {
@@ -348,6 +354,7 @@ bool CameraCapture::init(int index)
         LOG(Warning, "Could open camera, but no images are captured after 1 second.");
         return false;
     }
+*/
     return true;
 }
 
@@ -432,19 +439,16 @@ Image CameraCapture::getFrame()
 CameraCapture::CameraCapture(int index)
 : data(nullptr)
 {
-    data = new Data();
+    data = std::unique_ptr<Data>(new Data());
     if (!init(index))
     {
         LOG(Warning, "Failed to open camera:", index);
-        delete data;
         data = nullptr;
     }
 }
 
 CameraCapture::~CameraCapture()
 {
-    if (data)
-        delete data;
 }
 
 bool CameraCapture::isOpen()
