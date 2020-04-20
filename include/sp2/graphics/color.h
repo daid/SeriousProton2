@@ -45,7 +45,10 @@ public:
     }
 
     explicit Color(uint32_t color)
-    : r(((color >> 24) & 0xFF) / 255.0f), g(((color >> 16) & 0xFF) / 255.0f), b(((color >> 8) & 0xFF) / 255.0f), a(((color >> 0) & 0xFF) / 255.0f)
+    : r(((color >> 0) & 0xFF) / 255.0f)
+    , g(((color >> 8) & 0xFF) / 255.0f)
+    , b(((color >> 16) & 0xFF) / 255.0f)
+    , a(((color >> 24) & 0xFF) / 255.0f)
     {
     }
 
@@ -53,7 +56,7 @@ public:
     : r(red), g(green), b(blue), a(alpha)
     {
     }
-    
+
     Color(const HsvColor& hsv)
     {
         double c = hsv.value / 100.0 * hsv.saturation / 100.0;
@@ -103,17 +106,17 @@ public:
     {
         if (a == 1.0f)
         {
-            return "#" + string::hex(toInt() >> 8, 6);
+            return "#" + string::hex(r * 255, 2) + string::hex(g * 255, 2) + string::hex(b * 255, 2);
         }
         else
         {
-            return "#" + string::hex(toInt(), 8);
+            return "#" + string::hex(r * 255, 2) + string::hex(g * 255, 2) + string::hex(b * 255, 2) + string::hex(a * 255, 2);
         }
     }
-    
+
     uint32_t toInt()
     {
-        return (int(r * 255) << 24) | (int(g * 255) << 16) | (int(b * 255) << 8) | int(a * 255);
+        return (int(a * 255) << 24) | (int(b * 255) << 16) | (int(g * 255) << 8) | int(r * 255);
     }
 private:
 };
