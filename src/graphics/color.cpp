@@ -8,7 +8,7 @@ HsvColor::HsvColor(const sp::Color& color)
     auto min = std::min(std::min(color.r, color.g), color.b);
     
     auto delta = max - min;
-    if (delta =< 0.0)
+    if (delta <= 0.0)
     {
         hue = 0.0;
         saturation = 0.0;
