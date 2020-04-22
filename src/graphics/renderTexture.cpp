@@ -100,7 +100,7 @@ void RenderTexture::setSize(Vector2i new_size)
     if (size != new_size)
     {
         size = new_size;
-        create_buffers;
+        create_buffers = true;
     }
 }
 
