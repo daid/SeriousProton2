@@ -243,7 +243,12 @@ public:
     uint8_t* buffer = nullptr;
     long buffer_size = 0;
     
-    bool is_mjpg = false;
+    enum class Type
+    {
+        MJPG,
+        RGB24,
+        YUY2,
+    } type;
 };
 
 bool CameraCapture::init(int index)
@@ -329,7 +334,20 @@ bool CameraCapture::init(int index)
     if (mt.pUnk) mt.pUnk->Release();
     if (mt.subtype == MEDIASUBTYPE_MJPG)
     {
-        data->is_mjpg = true;
+        data->type = Data::Type::MJPG;
+    }
+    else if (mt.subtype == MEDIASUBTYPE_RGB24)
+    {
+        data->type = Data::Type::RGB24;
+    }
+    else if (mt.subtype == MEDIASUBTYPE_YUY2)
+    {
+        data->type = Data::Type::YUY2;
+    }
+    else
+    {
+        LOG(Error, "Unknown MEDIASUBTYPE in camera settings: ", sp::string::hex(mt.subtype.Data1));
+        return false;
     }
 
     auto result = data->media_control->Run();
@@ -367,23 +385,22 @@ Image CameraCapture::getFrame()
     long buffer_size = -1;
     if (data->sample_grabber->GetCurrentBuffer(&buffer_size, nullptr))
         return result;
-    buffer_size = buffer_size * 4 / 3;
+    buffer_size = std::max(buffer_size, long(size.x*size.y*4));
     if (data->buffer_size != buffer_size)
     {
-        if (data->buffer) free(data->buffer);
         data->buffer = static_cast<uint8_t*>(malloc(buffer_size));
         data->buffer_size = buffer_size;
     }
     if (data->sample_grabber->GetCurrentBuffer(&buffer_size, reinterpret_cast<LONG*>(data->buffer)))
         return result;
     
-    if (data->is_mjpg)
+    switch(data->type)
     {
+    case Data::Type::MJPG:
         //As we have an JPG, we should be able to load it as resource stream.
         result.loadFromStream(std::make_shared<DataBufferResourceStream>(data->buffer, buffer_size));
-    }
-    else
-    {
+        break;
+    case Data::Type::RGB24:{
         if (buffer_size != 3 * size.x * size.y)
         {
             LOG(Warning, "Incorrect buffer size result on CameraCapture:", buffer_size, 3 * size.x * size.y);
@@ -409,6 +426,42 @@ Image CameraCapture::getFrame()
             memcpy(data->buffer + size.x * (size.y - 1 - n) * 4, tmp, size.x * 4);
         }
         result.update(size, reinterpret_cast<uint32_t*>(data->buffer));
+        }break;
+    case Data::Type::YUY2:{
+        if (buffer_size != 2 * size.x * size.y)
+        {
+            LOG(Warning, "Incorrect buffer size result on CameraCapture:", buffer_size, 2 * size.x * size.y);
+            return result;
+        }
+
+        uint8_t* src = data->buffer + (size.x * size.y) * 2;
+        uint8_t* dst = data->buffer + (size.x * size.y) * 4;
+        for(int n=0; n<size.x*size.y; n+=2)
+        {
+            src -= 4;
+            dst -= 8;
+
+            int y0 = src[0];
+            int u0 = src[1];
+            int y1 = src[2];
+            int v0 = src[3];
+
+            int c = y0 - 16;
+            int d = u0 - 128;
+            int e = v0 - 128;
+            dst[0] = std::min(255, std::max(0, ( 298 * c + 409 * e + 128) >> 8)); // red
+            dst[1] = std::min(255, std::max(0, ( 298 * c - 100 * d - 208 * e + 128) >> 8)); // green
+            dst[2] = std::min(255, std::max(0, ( 298 * c + 516 * d + 128) >> 8)); // blue
+            dst[3] = 0xff;
+            c = y1 - 16;
+            dst[4] = std::min(255, std::max(0, ( 298 * c + 409 * e + 128) >> 8)); // red
+            dst[5] = std::min(255, std::max(0, ( 298 * c - 100 * d - 208 * e + 128) >> 8)); // green
+            dst[6] = std::min(255, std::max(0, ( 298 * c + 516 * d + 128) >> 8)); // blue
+            dst[7] = 0xff;
+        }
+        
+        result.update(size, reinterpret_cast<uint32_t*>(data->buffer));
+        }break;
     }
     return result;
 }
