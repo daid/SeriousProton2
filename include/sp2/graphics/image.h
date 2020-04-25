@@ -33,7 +33,8 @@ public:
     void clear();
     
     Vector2i getSize() const { return size; }
-    const uint32_t* getPtr() const { return pixels.data(); }
+    const uint32_t* getPtr() const { return &pixels[0]; }
+    uint32_t* getPtr() { return &pixels[0]; }
     
     void draw(Ray2i ray, uint32_t color);
     void draw(Rect2i rect, uint32_t color);
