@@ -23,7 +23,7 @@ public:
     Environment();
     Environment(const SandboxConfig& sandbox_config);
     virtual ~Environment();
-    
+
     /** Bind a C function to lua. Use with care, as you need to manage the lua stack yourself */
     void setGlobal(const string& name, lua_CFunction function);
     /** Bind an object to this lua environment. */
@@ -32,29 +32,29 @@ public:
     void setGlobal(const string& name, bool value);
     void setGlobal(const string& name, int value);
     void setGlobal(const string& name, const string& value);
-    
+
     template<typename RET, typename... ARGS> void setGlobal(const string& name, RET(*func)(ARGS...))
     {
         typedef RET(*FT)(ARGS...);
 
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
-        
+
         FT* f = reinterpret_cast<FT*>(lua_newuserdata(lua, sizeof(FT)));
         *f = func;
-        
+
         lua_pushcclosure(lua, &script::callFunction<RET, ARGS...>, 1);
         lua_setfield(lua, -2, name.c_str());
-        
+
         //Pop the table
         lua_pop(lua, 1);
     }
-    
+
     bool load(const string& resource_name);
     bool load(io::ResourceStreamPtr resource);
     bool run(const string& code);
     CoroutinePtr runCoroutine(const string& code);
-    
+
     //Call a script function. Return true if the call was made, false on an error.
     template<typename... ARGS> bool call(const string& global_function, ARGS... args)
     {
@@ -62,7 +62,7 @@ public:
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
 
         lua_getfield(lua, -1, global_function.c_str());
-        
+
         last_error = "";
         if (lua_isfunction(lua, -1))
         {
@@ -81,6 +81,7 @@ public:
             lua_pop(lua, 1);
             return true;
         }
+        last_error = global_function + " is not a function but: " + luaL_typename(lua, -1);
         lua_pop(lua, 2);
         return false;
     }
@@ -95,14 +96,15 @@ public:
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         lua_getfield(lua, -1, global_function.c_str());
-        
+
         last_error = "";
         if (!lua_isfunction(lua, -1))
         {
+            last_error = global_function + " is not a function but: " + luaL_typename(lua, -1);
             lua_pop(lua, 2);
             return nullptr;
         }
-        
+
         lua_State* L = lua_newthread(lua);
         lua_pushvalue(lua, -2);
         lua_xmove(lua, L, 1);
@@ -120,7 +122,7 @@ public:
             lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
-        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(L);
+        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(lua, L);
         lua_pop(lua, 2); //remove environment, function, coroutine is removed by constructor of Coroutine object.
         return coroutine;
     }
@@ -149,7 +151,7 @@ private:
         pushToLua(L, arg);
         return 1 + pushArgs(L, args...);
     }
-    
+
     lua_State* lua;
     string last_error;
     AllocInfo alloc_info;

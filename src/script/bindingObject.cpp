@@ -1,6 +1,5 @@
 #include <sp2/script/bindingObject.h>
 #include <sp2/logging.h>
-#include <lua/lua.hpp>
 #include <typeinfo>
 
 namespace sp {

@@ -35,6 +35,8 @@ TEST_CASE("HueSaturation")
     {
         for(float s=10; s<100; s+=1)
         {
+            CAPTURE(h);
+            CAPTURE(s);
             float v = 100;
             sp::HsvColor hsv(sp::Color(sp::HsvColor(h, s, v)));
             CHECK(hsv.hue == doctest::Approx(h));

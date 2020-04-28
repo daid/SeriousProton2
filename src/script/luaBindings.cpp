@@ -16,7 +16,11 @@ static int luaLogFunction(lua_State* L)
     {
         lua_pushvalue(L, -1);  /* function to be called */
         lua_pushvalue(L, index);   /* value to print */
-        lua_call(L, 1, 1);
+        if (lua_pcall(L, 1, 1, 0) != LUA_OK)
+        {
+            lua_error(L);
+            return 0;
+        }
         size_t size;
         const char* s = lua_tolstring(L, -1, &size);  /* get result */
         if (s == nullptr)
@@ -52,7 +56,7 @@ lua_State* createLuaState(lua_State* lua)
     lua_pop(lua, 1);
     luaL_requiref(lua, LUA_MATHLIBNAME, luaopen_math, true);
     lua_pop(lua, 1);
-    
+
     //Remove unsafe base functions.
     lua_pushnil(lua);
     lua_setglobal(lua, "collectgarbage");
@@ -76,8 +80,6 @@ lua_State* createLuaState(lua_State* lua)
     //Override the print function from "base" with our own log function.
     lua_register(lua, "print", luaLogFunction);
     lua_register(lua, "log", luaLogFunction);
-    
-    lua_pop(lua, 1);
 
     addVectorMetatables(lua);
     return lua;

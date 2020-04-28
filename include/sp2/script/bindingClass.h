@@ -1,7 +1,6 @@
 #ifndef SP2_SCRIPT_BINDING_CLASS_H
 #define SP2_SCRIPT_BINDING_CLASS_H
 
-#include <lua/lua.hpp>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 #include <sp2/script/luaBindings.h>

@@ -13,7 +13,10 @@ static void* luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
     if (ptr)
         info->total -= osize;
     if (osize < nsize && info->total + nsize > info->max)
+    {
+        info->total += osize;
         return nullptr;
+    }
     info->total += nsize;
     if (nsize == 0)
     {
@@ -35,7 +38,7 @@ Environment::Environment()
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
     lua_newtable(lua); //environment
-    
+
     lua_newtable(lua); //environment metatable
     lua_pushstring(lua, "[environment]");
     lua_setfield(lua, -2, "__metatable");
@@ -46,8 +49,10 @@ Environment::Environment()
     lua_setfield(lua, -2, "environment_ptr");
 
     lua_setmetatable(lua, -2);
-    
+
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+
+    sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 }
 
 Environment::Environment(const SandboxConfig& sandbox_config)
@@ -62,7 +67,7 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
     lua_pushglobaltable(lua); //environment
-    
+
     lua_newtable(lua); //environment metatable
     lua_pushstring(lua, "[environment]");
     lua_setfield(lua, -2, "__metatable");
@@ -71,8 +76,10 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     lua_setfield(lua, -2, "environment_ptr");
 
     lua_setmetatable(lua, -2);
-    
+
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+
+    sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 }
 
 Environment::~Environment()
@@ -81,7 +88,9 @@ Environment::~Environment()
     //REGISTRY[this] = nil
     lua_pushnil(lua);
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
-    
+
+    sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
+
     if (lua != script::global_lua_state)
         lua_close(lua);
 }
@@ -90,7 +99,7 @@ void Environment::setGlobal(const string& name, lua_CFunction function)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
-    
+
     //Set our variable in this environment table, with our environment as first upvalue.
     if (function)
     {
@@ -102,7 +111,7 @@ void Environment::setGlobal(const string& name, lua_CFunction function)
         lua_pushnil(lua);
     }
     lua_setfield(lua, -2, name.c_str());
-    
+
     //Pop the table
     lua_pop(lua, 1);
 }
@@ -111,11 +120,11 @@ void Environment::setGlobal(const string& name, ScriptBindingObject* ptr)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
-    
+
     //Set our variable in this environment table
     pushToLua(lua, ptr);
     lua_setfield(lua, -2, name.c_str());
-    
+
     //Pop the table
     lua_pop(lua, 1);
 }
@@ -192,8 +201,9 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     last_error = "";
     if (luaL_loadbufferx(L, code.c_str(), code.length(), "=[string]", "t"))
     {
-        last_error = luaL_checkstring(lua, -1);
+        last_error = luaL_checkstring(L, -1);
         LOG(Error, "LUA: load:", last_error);
+        lua_pop(L, 1);
         lua_pop(lua, 1);
         return nullptr;
     }
@@ -202,24 +212,24 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     lua_rawgetp(L, LUA_REGISTRYINDEX, this);
     //set the environment table it as 1st upvalue
     lua_setupvalue(L, -2, 1);
-    
+
     //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
     lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
-    
+
     int result = lua_resume(L, nullptr, 0);
     if (result != LUA_OK && result != LUA_YIELD)
     {
         last_error = lua_tostring(L, -1);
         LOG(Error, "LUA: Run:", last_error);
-        lua_pop(L, 1); //remove coroutine
+        lua_pop(lua, 1); //remove coroutine
         return nullptr;
     }
     if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
     {
-        lua_pop(L, 1); //remove coroutine
+        lua_pop(lua, 1); //remove coroutine
         return nullptr;
     }
-    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(L);
+    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(lua, L);
     //coroutine is removed by constructor of Coroutine object.
     return coroutine;
 }
@@ -259,7 +269,7 @@ bool Environment::_run(const string& code, const string& name)
         lua_pop(lua, 1);
         return false;
     }
-    return true;    
+    return true;
 }
 
 }//namespace script

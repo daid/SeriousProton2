@@ -4,13 +4,13 @@
 namespace sp {
 namespace script {
 
-Coroutine::Coroutine(lua_State* L)
+Coroutine::Coroutine(lua_State* origin, lua_State* L)
 : L(L)
 {
     //When we enter this constructor, the coroutine is still on the stack of the global_lua_state.
     //So use that to store it in the registry, else the garbage collector will collect the coroutine.
-    sp2assert(lua_isthread(global_lua_state, -1), "Something is wrong with setting up the coroutine, coroutine not on stack?");
-    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    sp2assert(lua_isthread(origin, -1), "Something is wrong with setting up the coroutine, coroutine not on stack?");
+    lua_rawsetp(origin, LUA_REGISTRYINDEX, this);
 }
 
 Coroutine::~Coroutine()

@@ -1,7 +1,9 @@
 #ifndef SP2_SCRIPT_LUA_BINDINGS_H
 #define SP2_SCRIPT_LUA_BINDINGS_H
 
-#include <lua/lua.hpp>
+#include <lua/lua.h>
+#include <lua/lualib.h>
+#include <lua/lauxlib.h>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 #include <sp2/math/vector.h>

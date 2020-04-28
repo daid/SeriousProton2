@@ -11,7 +11,7 @@ namespace script {
 class Coroutine : NonCopyable
 {
 public:
-    Coroutine(lua_State* L);
+    Coroutine(lua_State* origin, lua_State* L);
     ~Coroutine();
 
     /** Resume the coroutine.
@@ -29,7 +29,7 @@ public:
 
         int arg_count = pushArgs(L, args...);
         int status = lua_resume(L, nullptr, arg_count);
-        
+
         if (status == LUA_YIELD)
             return true;
         if (status != LUA_OK)
@@ -45,13 +45,13 @@ public:
     {
         return last_error;
     }
-    
+
     //Get the current yielded location in the source code. Or -1 if that is not available, or the coroutine is no longer yielded.
     int getCurrentLineNumber();
     string getCurrentSource();
 private:
     void release();
-    
+
     int pushArgs(lua_State* L)
     {
         return 0;
@@ -65,7 +65,7 @@ private:
 
     lua_State* L;
     string last_error;
-    
+
     friend class Environment;
 };
 
