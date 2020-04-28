@@ -7,7 +7,7 @@ namespace script {
 
 lua_State* global_lua_state;
 
-static int luaLogFunction(lua_State* L)
+static int luaLogFunctionInternal(lua_State* L)
 {
     string log_line;
     int count = lua_gettop(L);  /* number of arguments */
@@ -17,20 +17,26 @@ static int luaLogFunction(lua_State* L)
         lua_pushvalue(L, -1);  /* function to be called */
         lua_pushvalue(L, index);   /* value to print */
         if (lua_pcall(L, 1, 1, 0) != LUA_OK)
-        {
-            lua_error(L);
-            return 0;
-        }
+            return 1;
         size_t size;
         const char* s = lua_tolstring(L, -1, &size);  /* get result */
         if (s == nullptr)
-            return luaL_error(L, "'tostring' must return a string to 'print'");
+        {
+            lua_pushstring(L, "'tostring' must return a string to 'print'");
+            return 1;
+        }
         if (index > 1)
             log_line += "\t";
         log_line += s;
         lua_pop(L, 1);  /* pop result */
     }
     LOG(Info, log_line);
+    return 0;
+}
+static int luaLogFunction(lua_State* L)
+{
+    if (luaLogFunctionInternal(L))
+        return lua_error(L);
     return 0;
 }
 
