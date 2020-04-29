@@ -42,7 +42,7 @@ TEST_CASE("coroutines")
 
     env.setGlobal("yield", luaYield);
     CHECK(env.call("yield") == false);
-    REQUIRE(env.callCoroutine("yield") != nullptr);
+    CHECK(env.callCoroutine("yield") != nullptr);
     CHECK(env.callCoroutine("yield")->resume() == false);
 
     CHECK(env.run("yield()") == false);
@@ -56,17 +56,17 @@ TEST_CASE("sandbox")
     sp::script::Environment::SandboxConfig config{1024 * 30, 100000};
     sp::script::Environment env(config);
     LOG(Info, "Sandbox test start");
-    REQUIRE(env.run("print(2)") == true);
+    CHECK(env.run("print(2)") == true);
     SUBCASE("endless") {
-        REQUIRE(env.run("while true do end") == false);
+        CHECK(env.run("while true do end") == false);
     }
     SUBCASE("memory") {
-        REQUIRE(env.run("a = {}; while true do a[#a + 1] = 1.1; end") == false);
+        CHECK(env.run("a = {}; while true do a[#a + 1] = 1.1; end") == false);
     }
     SUBCASE("coroutine memory") {
         env.setGlobal("yield", luaYield);
         auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end");
-        REQUIRE(co != nullptr);
+        CHECK(co != nullptr);
         while(co->resume()) {}
     }
 }
