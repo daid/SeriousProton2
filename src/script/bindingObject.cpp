@@ -1,5 +1,6 @@
 #include <sp2/script/bindingObject.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 #include <typeinfo>
 
 namespace sp {
@@ -63,7 +64,7 @@ void lazyLoading(int table_index, lua_State* L)
     //Get the object reference for this object.
     lua_getmetatable(L, table_index);
     lua_getfield(L, -1, "object_ptr");
-    sp::ScriptBindingObject* sbc = static_cast<sp::ScriptBindingObject*>(lua_touserdata(L, -1));
+    BindingObject* sbc = static_cast<BindingObject*>(lua_touserdata(L, -1));
     lua_pop(L, 1);
 
     //Create a new table to store functions and properties for this object.
@@ -74,7 +75,7 @@ void lazyLoading(int table_index, lua_State* L)
     lua_setfield(L, function_table_index, "valid");
     
     //Call the onRegisterScriptBindings which will register functions in the current __index table.
-    ScriptBindingClass script_binding_class(L, table_index, function_table_index);
+    BindingClass script_binding_class(L, table_index, function_table_index);
     sbc->onRegisterScriptBindings(script_binding_class);
     
     //Set the table as a field in the metatable so we can access it from our proxy function.
@@ -90,103 +91,54 @@ void lazyLoading(int table_index, lua_State* L)
     lua_pop(L, 1);
 }
 
-};
-
-ScriptBindingObject::ScriptBindingObject()
+BindingObject::BindingObject()
 {
-    if (!script::global_lua_state)
-        script::global_lua_state = script::createLuaState();
+}
+
+void BindingObject::registerToLua(lua_State* L)
+{
+    if (L == lua)
+        return;
+    sp2assert(lua == nullptr, "Can only register script objects to a single lua sandbox");
+    lua = L;
 
     //Add object to Lua registry, and register the lazy loader. This loads the bindings on first use, so we do not bind objects that we never use from the scripts.
     //REGISTY[this] = {"metatable": { "object_ptr": this, "__index": lazyLoadingIndex, "__newindex": lazyLoadingNewIndex} }
-    lua_newtable(script::global_lua_state);
-    lua_newtable(script::global_lua_state);
-    lua_pushstring(script::global_lua_state, "[object]");
-    lua_setfield(script::global_lua_state, -2, "__metatable");
-    lua_pushlightuserdata(script::global_lua_state, this);
-    lua_setfield(script::global_lua_state, -2, "object_ptr");
-    lua_pushcfunction(script::global_lua_state, script::lazyLoadingIndex);
-    lua_setfield(script::global_lua_state, -2, "__index");
-    lua_pushcfunction(script::global_lua_state, script::lazyLoadingNewIndex);
-    lua_setfield(script::global_lua_state, -2, "__newindex");
-    lua_setmetatable(script::global_lua_state, -2);
-    lua_rawsetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
+    lua_newtable(lua);
+    lua_newtable(lua);
+    lua_pushstring(lua, "[object]");
+    lua_setfield(lua, -2, "__metatable");
+    lua_pushlightuserdata(lua, this);
+    lua_setfield(lua, -2, "object_ptr");
+    lua_pushcfunction(lua, script::lazyLoadingIndex);
+    lua_setfield(lua, -2, "__index");
+    lua_pushcfunction(lua, script::lazyLoadingNewIndex);
+    lua_setfield(lua, -2, "__newindex");
+    lua_setmetatable(lua, -2);
+    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 }
 
-ScriptBindingObject::~ScriptBindingObject()
+BindingObject::~BindingObject()
 {
-    //Clear our pointer reference in our object table
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    //Clear the metatable of this object.
-    lua_pushnil(script::global_lua_state);
-    lua_setmetatable(script::global_lua_state, -2);
-    lua_pop(script::global_lua_state, 1);
+    if (lua)
+    {
+        //Clear our pointer reference in our object table
+        lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
+        //Clear the metatable of this object.
+        lua_pushnil(lua);
+        lua_setmetatable(lua, -2);
+        lua_pop(lua, 1);
 
-    //Remove object from Lua registry
-    //REGISTY[this] = nil
-    lua_pushnil(script::global_lua_state);
-    lua_rawsetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
+        //Remove object from Lua registry
+        //REGISTY[this] = nil
+        lua_pushnil(lua);
+        lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+    }
 }
 
-void ScriptBindingObject::setScriptMember(const string& name, int value)
-{
-    //REGISTY[this][name] = value
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_pushinteger(script::global_lua_state, value);
-    lua_setfield(script::global_lua_state, -2, name.c_str());
-    lua_pop(script::global_lua_state, 1);
-}
-
-void ScriptBindingObject::setScriptMember(const string& name, double value)
-{
-    //REGISTY[this][name] = value
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_pushnumber(script::global_lua_state, value);
-    lua_setfield(script::global_lua_state, -2, name.c_str());
-    lua_pop(script::global_lua_state, 1);
-}
-
-void ScriptBindingObject::setScriptMember(const string& name, const string& value)
-{
-    //REGISTY[this][name] = value
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_pushstring(script::global_lua_state, value.c_str());
-    lua_setfield(script::global_lua_state, -2, name.c_str());
-    lua_pop(script::global_lua_state, 1);
-}
-
-int ScriptBindingObject::getScriptMemberInteger(const string& name)
-{
-    //return REGISTY[this][name]
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_getfield(script::global_lua_state, -1, name.c_str());
-    int result = lua_tointeger(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 2);
-    return result;
-}
-
-double ScriptBindingObject::getScriptMemberDouble(const string& name)
-{
-    //return REGISTY[this][name]
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_getfield(script::global_lua_state, -1, name.c_str());
-    double result = lua_tonumber(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 2);
-    return result;
-}
-
-string ScriptBindingObject::getScriptMemberString(const string& name)
-{
-    //return REGISTY[this][name]
-    lua_rawgetp(script::global_lua_state, LUA_REGISTRYINDEX, this);
-    lua_getfield(script::global_lua_state, -1, name.c_str());
-    string result = lua_tostring(script::global_lua_state, -1);
-    lua_pop(script::global_lua_state, 2);
-    return result;
-}
-
-void ScriptBindingObject::onRegisterScriptBindings(ScriptBindingClass& script_binding_class)
+void BindingObject::onRegisterScriptBindings(BindingClass& script_binding_class)
 {
 }
 
+}//namespace script
 }//namespace sp

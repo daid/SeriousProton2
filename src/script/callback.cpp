@@ -9,8 +9,11 @@ Callback::Callback()
 
 Callback::~Callback()
 {
-    lua_pushnil(global_lua_state);
-    lua_rawsetp(global_lua_state, LUA_REGISTRYINDEX, this);
+    if (lua)
+    {
+        lua_pushnil(lua);
+        lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
+    }
 }
 
 }//namespace script

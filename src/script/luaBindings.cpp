@@ -1,11 +1,12 @@
 #include <sp2/script/luaBindings.h>
+#include <sp2/script/bindingObject.h>
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 
 namespace sp {
 namespace script {
 
-lua_State* global_lua_state;
+static lua_State* global_lua_state;
 
 static int luaLogFunctionInternal(lua_State* L)
 {
@@ -33,6 +34,7 @@ static int luaLogFunctionInternal(lua_State* L)
     LOG(Info, log_line);
     return 0;
 }
+
 static int luaLogFunction(lua_State* L)
 {
     if (luaLogFunctionInternal(L))
@@ -48,19 +50,35 @@ static int panic(lua_State *L)
 
 
 void addVectorMetatables(lua_State*);
-lua_State* createLuaState(lua_State* lua)
+static int setupGlobalFunctions(lua_State* L);
+
+lua_State* createLuaState(void* environment, lua_Alloc alloc_function, void* alloc_ptr)
 {
-    if (!lua)
-        lua = luaL_newstate();
+    if (!alloc_function)
+    {
+        if (!global_lua_state)
+        {
+            global_lua_state = luaL_newstate();
+            setupGlobalFunctions(global_lua_state);
+        }
+        return global_lua_state;
+    }
+    auto lua = lua_newstate(alloc_function, alloc_ptr);
+    setupGlobalFunctions(lua);
+    return lua;
+}
+
+void destroyLuaState(lua_State* lua)
+{
+    if (lua != global_lua_state)
+        lua_close(lua);
+}
+
+static int setupGlobalFunctions(lua_State* lua)
+{
     lua_atpanic(lua, &panic);
 
     luaL_requiref(lua, "_G", luaopen_base, true);
-    lua_pop(lua, 1);
-    luaL_requiref(lua, LUA_TABLIBNAME, luaopen_table, true);
-    lua_pop(lua, 1);
-    luaL_requiref(lua, LUA_STRLIBNAME, luaopen_string, true);
-    lua_pop(lua, 1);
-    luaL_requiref(lua, LUA_MATHLIBNAME, luaopen_math, true);
     lua_pop(lua, 1);
 
     //Remove unsafe base functions.
@@ -87,8 +105,16 @@ lua_State* createLuaState(lua_State* lua)
     lua_register(lua, "print", luaLogFunction);
     lua_register(lua, "log", luaLogFunction);
 
+    //Add extra libraries
+    luaL_requiref(lua, LUA_TABLIBNAME, luaopen_table, true);
+    lua_pop(lua, 1);
+    luaL_requiref(lua, LUA_STRLIBNAME, luaopen_string, true);
+    lua_pop(lua, 1);
+    luaL_requiref(lua, LUA_MATHLIBNAME, luaopen_math, true);
+    lua_pop(lua, 1);
+
     addVectorMetatables(lua);
-    return lua;
+    return 0;
 }
 
 int pushToLua(lua_State* L, bool b)
@@ -118,6 +144,21 @@ int pushToLua(lua_State* L, double f)
 int pushToLua(lua_State* L, const string& str)
 {
     lua_pushstring(L, str.c_str());
+    return 1;
+}
+
+int pushToLua(lua_State* L, BindingObject* ptr)
+{
+    if (ptr)
+    {
+        ptr->registerToLua(L);
+        lua_pushlightuserdata(L, ptr);
+        lua_gettable(L, LUA_REGISTRYINDEX);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
     return 1;
 }
 

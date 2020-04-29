@@ -5,18 +5,21 @@
 #include <sp2/string.h>
 #include <sp2/script/luaBindings.h>
 #include <sp2/logging.h>
+#include <sp2/attributes.h>
 
 namespace sp {
-namespace script { class Callback; };
-class ScriptBindingObject;
+namespace script {
 
-class ScriptBindingClass
+class Callback;
+class BindingObject;
+
+class BindingClass
 {
 public:
     template<class TYPE, typename RET, typename... ARGS> void bind(const string& name, RET(TYPE::*func)(ARGS...))
     {
         typedef RET(TYPE::*FT)(ARGS...);
-        
+
         FT* f = reinterpret_cast<FT*>(lua_newuserdata(L, sizeof(FT)));
         *f = func;
         lua_pushvalue(L, object_table_index); //push the table of this object
@@ -72,16 +75,18 @@ public:
         lua_setfield(L, function_table_index, name.c_str());
     }
 private:
-    ScriptBindingClass(lua_State* L, int object_table_index, int function_table_index)
+    BindingClass(lua_State* L, int object_table_index, int function_table_index)
     : L(L), object_table_index(object_table_index), function_table_index(function_table_index) {}
     
     lua_State* L;
     int object_table_index;
     int function_table_index;
     
-    friend void script::lazyLoading(int table_index, lua_State* L);
+    friend void lazyLoading(int table_index, lua_State* L);
 };
 
+}//namespace script
+using ScriptBindingClass SP2_DEPRECATED("Use sp::script::BindingClass instead") = script::BindingClass;
 }//namespace sp
 
 #include <sp2/script/callback.h>

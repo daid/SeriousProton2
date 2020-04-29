@@ -8,10 +8,11 @@
 namespace sp {
 namespace script {
 
+class Environment;
 class Coroutine : NonCopyable
 {
 public:
-    Coroutine(lua_State* origin, lua_State* L);
+    Coroutine(P<Environment> environment, lua_State* origin, lua_State* L);
     ~Coroutine();
 
     /** Resume the coroutine.
@@ -22,23 +23,11 @@ public:
     template<typename... ARGS> bool resume(ARGS... args)
     {
         last_error = "";
-        if (!L)
+        if (!environment || !L)
             return false;
-        //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
-        lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
 
         int arg_count = pushArgs(L, args...);
-        int status = lua_resume(L, nullptr, arg_count);
-
-        if (status == LUA_YIELD)
-            return true;
-        if (status != LUA_OK)
-        {
-            last_error = lua_tostring(L, -1);
-            LOG(Error, "Coroutine resume error:", last_error);
-        }
-        release();
-        return false;
+        return internalResume(arg_count);
     }
 
     const string& getLastError()
@@ -50,6 +39,7 @@ public:
     int getCurrentLineNumber();
     string getCurrentSource();
 private:
+    bool internalResume(int arg_count);
     void release();
 
     int pushArgs(lua_State* L)
@@ -67,6 +57,7 @@ private:
     string last_error;
 
     friend class Environment;
+    P<Environment> environment;
 };
 
 typedef std::shared_ptr<Coroutine> CoroutinePtr;

@@ -27,8 +27,8 @@ public:
     /** Bind a C function to lua. Use with care, as you need to manage the lua stack yourself */
     void setGlobal(const string& name, lua_CFunction function);
     /** Bind an object to this lua environment. */
-    void setGlobal(const string& name, ScriptBindingObject* ptr);
-    void setGlobal(const string& name, P<ScriptBindingObject> ptr);
+    void setGlobal(const string& name, BindingObject* ptr);
+    void setGlobal(const string& name, P<BindingObject> ptr);
     void setGlobal(const string& name, bool value);
     void setGlobal(const string& name, int value);
     void setGlobal(const string& name, const string& value);
@@ -70,11 +70,12 @@ public:
 
             //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
             lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
-
-            if (lua_pcall(lua, arg_count, 0, 0))
+            alloc_info.in_protected_call = true;
+            int result = lua_pcall(lua, arg_count, 0, 0);
+            alloc_info.in_protected_call = false;
+            if (result)
             {
                 last_error = lua_tostring(lua, -1);
-                LOG(Error, "Function call error:", global_function, ":", last_error);
                 lua_pop(lua, 2);
                 return false;
             }
@@ -109,11 +110,12 @@ public:
         lua_pushvalue(lua, -2);
         lua_xmove(lua, L, 1);
         int arg_count = pushArgs(L, args...);
+        alloc_info.in_protected_call = true;
         int result = lua_resume(L, nullptr, arg_count);
+        alloc_info.in_protected_call = false;
         if (result != LUA_OK && result != LUA_YIELD)
         {
             last_error = lua_tostring(L, -1);
-            LOG(Error, "Function call error:", global_function, ":", last_error);
             lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
@@ -122,7 +124,7 @@ public:
             lua_pop(lua, 3); //remove environment, function and coroutine
             return nullptr;
         }
-        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(lua, L);
+        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(this, lua, L);
         lua_pop(lua, 2); //remove environment, function, coroutine is removed by constructor of Coroutine object.
         return coroutine;
     }
@@ -134,6 +136,7 @@ public:
 
     struct AllocInfo
     {
+        bool in_protected_call;
         size_t total;
         size_t max;
     };
@@ -155,6 +158,8 @@ private:
     lua_State* lua;
     string last_error;
     AllocInfo alloc_info;
+
+    friend class Coroutine;
 };
 
 }//namespace script

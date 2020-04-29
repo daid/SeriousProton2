@@ -1,6 +1,7 @@
 #include <sp2/script/environment.h>
 #include <sp2/script/luaBindings.h>
 #include <sp2/assert.h>
+#include <lua/lstate.h>
 
 static void luaInstructionCountHook(lua_State *L, lua_Debug *ar)
 {
@@ -12,7 +13,7 @@ static void* luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
     sp::script::Environment::AllocInfo* info = static_cast<sp::script::Environment::AllocInfo*>(ud);
     if (ptr)
         info->total -= osize;
-    if (osize < nsize && info->total + nsize > info->max)
+    if (info->in_protected_call && osize < nsize && info->total + nsize > info->max)
     {
         info->total += osize;
         return nullptr;
@@ -31,9 +32,7 @@ namespace script {
 
 Environment::Environment()
 {
-    if (!script::global_lua_state)
-        script::global_lua_state = script::createLuaState();
-    lua = script::global_lua_state;
+    lua = createLuaState(this);
 
     //Create a new lua environment.
     //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
@@ -57,15 +56,16 @@ Environment::Environment()
 
 Environment::Environment(const SandboxConfig& sandbox_config)
 {
+    alloc_info.in_protected_call = false;
     alloc_info.total = 0;
     alloc_info.max = sandbox_config.memory_limit;
 
     lua = lua_newstate(luaAlloc, &alloc_info);
     sp2assert(lua, "Failed to create lua state for sandboxed environment. Not giving enough memory for basic state?");
-    lua = script::createLuaState(lua);
+    lua = createLuaState(this, luaAlloc, &alloc_info);
     lua_sethook(lua, luaInstructionCountHook, LUA_MASKCOUNT, sandbox_config.instruction_limit);
     //Create a new lua environment.
-    //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
+    //REGISTY[this] = {"metatable": {"environment_ptr": this}}
     lua_pushglobaltable(lua); //environment
 
     lua_newtable(lua); //environment metatable
@@ -91,8 +91,7 @@ Environment::~Environment()
 
     sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 
-    if (lua != script::global_lua_state)
-        lua_close(lua);
+    destroyLuaState(lua);
 }
 
 void Environment::setGlobal(const string& name, lua_CFunction function)
@@ -116,7 +115,7 @@ void Environment::setGlobal(const string& name, lua_CFunction function)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(const string& name, ScriptBindingObject* ptr)
+void Environment::setGlobal(const string& name, BindingObject* ptr)
 {
     //Get the environment table from the registry.
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -129,7 +128,7 @@ void Environment::setGlobal(const string& name, ScriptBindingObject* ptr)
     lua_pop(lua, 1);
 }
 
-void Environment::setGlobal(const string& name, P<ScriptBindingObject> ptr)
+void Environment::setGlobal(const string& name, P<BindingObject> ptr)
 {
     setGlobal(name, *ptr);
 }
@@ -199,10 +198,12 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     lua_State* L = lua_newthread(lua);
 
     last_error = "";
-    if (luaL_loadbufferx(L, code.c_str(), code.length(), "=[string]", "t"))
+    alloc_info.in_protected_call = true;
+    int result = luaL_loadbufferx(L, code.c_str(), code.length(), "=[string]", "t");
+    alloc_info.in_protected_call = false;
+    if (result)
     {
         last_error = luaL_checkstring(L, -1);
-        LOG(Error, "LUA: load:", last_error);
         lua_pop(L, 1);
         lua_pop(lua, 1);
         return nullptr;
@@ -216,11 +217,12 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
     lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
 
-    int result = lua_resume(L, nullptr, 0);
+    alloc_info.in_protected_call = true;
+    result = lua_resume(L, nullptr, 0);
+    alloc_info.in_protected_call = false;
     if (result != LUA_OK && result != LUA_YIELD)
     {
         last_error = lua_tostring(L, -1);
-        LOG(Error, "LUA: Run:", last_error);
         lua_pop(lua, 1); //remove coroutine
         return nullptr;
     }
@@ -229,7 +231,7 @@ CoroutinePtr Environment::runCoroutine(const string& code)
         lua_pop(lua, 1); //remove coroutine
         return nullptr;
     }
-    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(lua, L);
+    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(this, lua, L);
     //coroutine is removed by constructor of Coroutine object.
     return coroutine;
 }
@@ -246,10 +248,12 @@ bool Environment::_load(io::ResourceStreamPtr resource, const string& name)
 bool Environment::_run(const string& code, const string& name)
 {
     last_error = "";
-    if (luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t"))
+    alloc_info.in_protected_call = true;
+    int result = luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t");
+    alloc_info.in_protected_call = false;
+    if (result)
     {
         last_error = luaL_checkstring(lua, -1);
-        LOG(Error, "LUA: load:", last_error);
         lua_pop(lua, 1);
         return false;
     }
@@ -258,14 +262,16 @@ bool Environment::_run(const string& code, const string& name)
     lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
     //set the environment table it as 1st upvalue
     lua_setupvalue(lua, -2, 1);
-    
+
     //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
     lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
     //Call the actual code.
-    if (lua_pcall(lua, 0, 0, 0))
+    alloc_info.in_protected_call = true;
+    result = lua_pcall(lua, 0, 0, 0);
+    alloc_info.in_protected_call = false;
+    if (result)
     {
         last_error = luaL_checkstring(lua, -1);
-        LOG(Error, "LUA: run:", last_error);
         lua_pop(lua, 1);
         return false;
     }

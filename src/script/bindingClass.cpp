@@ -2,19 +2,22 @@
 #include <sp2/script/callback.h>
 
 namespace sp {
+namespace script {
 
 static int updateCallback(lua_State* L)
 {
     if (!lua_isnil(L, 1))
         luaL_checktype(L, 1, LUA_TFUNCTION);
-    
+
     lua_getmetatable(L, lua_upvalueindex(2));
     lua_getfield(L, -1, "object_ptr");
     void* obj = lua_touserdata(L, -1);
     lua_pop(L, 2);
     if (!obj)   //Object was destroyed.
         return 0;
-    
+
+    script::Callback* callback = reinterpret_cast<script::Callback*>(lua_touserdata(L, lua_upvalueindex(1)));
+    callback->lua = L;
     //REGISTRY[callback_ptr] = parameter(1)
     lua_pushvalue(L, lua_upvalueindex(1));//The pointer of this callback.
     lua_pushvalue(L, 1);
@@ -22,13 +25,14 @@ static int updateCallback(lua_State* L)
     return 0;
 }
 
-void ScriptBindingClass::bind(const string& name, sp::script::Callback& callback)
+void BindingClass::bind(const string& name, script::Callback& callback)
 {
     lua_pushlightuserdata(L, &callback);
     lua_pushvalue(L, object_table_index); //push the table of this object
-    
+
     lua_pushcclosure(L, updateCallback, 2);
     lua_setfield(L, function_table_index, name.c_str());
 }
 
+}//namespace script
 }//namespace sp

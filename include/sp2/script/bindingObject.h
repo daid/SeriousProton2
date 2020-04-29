@@ -4,27 +4,29 @@
 #include <sp2/pointer.h>
 #include <sp2/string.h>
 #include <sp2/script/bindingClass.h>
+#include <sp2/attributes.h>
 
 namespace sp {
+namespace script {
 
-class ScriptBindingObject : public AutoPointerObject
+class BindingObject : public AutoPointerObject
 {
 public:
-    ScriptBindingObject();
-    virtual ~ScriptBindingObject();
+    BindingObject();
+    virtual ~BindingObject();
 
-    void setScriptMember(const string& name, int value);
-    void setScriptMember(const string& name, double value);
-    void setScriptMember(const string& name, const string& value);
-    int getScriptMemberInteger(const string& name);
-    double getScriptMemberDouble(const string& name);
-    string getScriptMemberString(const string& name);
 protected:
-    virtual void onRegisterScriptBindings(ScriptBindingClass& script_binding_class);
-    
-    friend void script::lazyLoading(int table_index, lua_State* L);
+    virtual void onRegisterScriptBindings(BindingClass& script_binding_class);
+
+private:
+    void registerToLua(lua_State* L);
+
+    lua_State* lua = nullptr;
+    friend void lazyLoading(int table_index, lua_State* L);
+    friend int pushToLua(lua_State* L, BindingObject* ptr);
 };
 
+}//namespace script
 }//namespace sp
 
 #endif//SP2_SCRIPT_BINDING_OBJECT_H

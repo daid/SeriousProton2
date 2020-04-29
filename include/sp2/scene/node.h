@@ -33,7 +33,7 @@ public:
 };
 class Scene;
 class RenderData;
-class Node : public ScriptBindingObject
+class Node : public script::BindingObject
 {
 public:
     Node(P<Node> parent);

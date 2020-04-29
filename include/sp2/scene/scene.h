@@ -23,7 +23,7 @@ class Joint2D;
 
 class Node;
 class Camera;
-class Scene : public ScriptBindingObject
+class Scene : public script::BindingObject
 {
 public:
     Scene(const string& scene_name, int priority=0);

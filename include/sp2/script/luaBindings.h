@@ -10,15 +10,15 @@
 #include <tuple>
 
 namespace sp {
-class ScriptBindingObject;
 namespace script {
+class BindingObject;
 
-lua_State* createLuaState(lua_State* lua=nullptr);
+lua_State* createLuaState(void* environment, lua_Alloc alloc_function=nullptr, void* alloc_ptr=nullptr);
+void destroyLuaState(lua_State* L);
 
 int lazyLoadingIndex(lua_State* L);
 int lazyLoadingNewIndex(lua_State* L);
 void lazyLoading(int table_index, lua_State* L);
-extern lua_State* global_lua_state;
 
 template<typename T> struct typeIdentifier{};
 template<std::size_t ...> struct sequence{};
@@ -41,28 +41,25 @@ int pushToLua(lua_State* L, int i);
 int pushToLua(lua_State* L, float f);
 int pushToLua(lua_State* L, double f);
 int pushToLua(lua_State* L, const string& str);
+int pushToLua(lua_State* L, BindingObject* ptr);
 
-template<class T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> int pushToLua(lua_State* L, sp::P<T> obj)
+template<class T, class = typename std::enable_if<std::is_base_of<BindingObject, T>::value>::type> int pushToLua(lua_State* L, sp::P<T> obj)
 {
     if (obj)
     {
-        sp::ScriptBindingObject* ptr = *obj;
-        lua_pushlightuserdata(L, ptr);
-        lua_gettable(L, LUA_REGISTRYINDEX);
-        return 1;
+        BindingObject* ptr = *obj;
+        return pushToLua(L, ptr);
     }
     lua_pushnil(L);
     return 1;
 }
 
-template<class T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> int pushToLua(lua_State* L, T* obj)
+template<class T, class = typename std::enable_if<std::is_base_of<BindingObject, T>::value>::type> int pushToLua(lua_State* L, T* obj)
 {
     if (obj)
     {
-        sp::ScriptBindingObject* ptr = obj;
-        lua_pushlightuserdata(L, ptr);
-        lua_gettable(L, LUA_REGISTRYINDEX);
-        return 1;
+        BindingObject* ptr = obj;
+        return pushToLua(L, ptr);
     }
     lua_pushnil(L);
     return 1;
@@ -184,26 +181,26 @@ template<typename TYPE> int setProperty(lua_State* L)
     return 0;
 }
 
-template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
+template<typename T, class = typename std::enable_if<std::is_base_of<BindingObject, T>::value>::type> T* convertFromLua(lua_State* L, typeIdentifier<T*>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
     lua_getmetatable(L, index);
     lua_getfield(L, -1, "object_ptr");
     luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
-    T* obj = static_cast<T*>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
+    T* obj = static_cast<T*>(static_cast<BindingObject*>(lua_touserdata(L, -1)));
     lua_pop(L, 2);
     return obj;
 }
 
-template<typename T, class = typename std::enable_if<std::is_base_of<ScriptBindingObject, T>::value>::type> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
+template<typename T, class = typename std::enable_if<std::is_base_of<BindingObject, T>::value>::type> sp::P<T> convertFromLua(lua_State* L, typeIdentifier<sp::P<T>>, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
     lua_getmetatable(L, index);
     lua_getfield(L, -1, "object_ptr");
     luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 
-    sp::P<T> obj = sp::P<ScriptBindingObject>(static_cast<ScriptBindingObject*>(lua_touserdata(L, -1)));
+    sp::P<T> obj = sp::P<BindingObject>(static_cast<BindingObject*>(lua_touserdata(L, -1)));
     lua_pop(L, 2);
     return obj;
 }
