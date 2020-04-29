@@ -50,7 +50,8 @@ static int panic(lua_State *L)
 
 
 void addVectorMetatables(lua_State*);
-static int setupGlobalFunctions(lua_State* L);
+static void setupGlobalFunctions(lua_State* L);
+static void createEnvironmentTable(void* environment, lua_State* L, bool shared);
 
 lua_State* createLuaState(void* environment, lua_Alloc alloc_function, void* alloc_ptr)
 {
@@ -61,10 +62,12 @@ lua_State* createLuaState(void* environment, lua_Alloc alloc_function, void* all
             global_lua_state = luaL_newstate();
             setupGlobalFunctions(global_lua_state);
         }
+        createEnvironmentTable(environment, global_lua_state, true);
         return global_lua_state;
     }
     auto lua = lua_newstate(alloc_function, alloc_ptr);
     setupGlobalFunctions(lua);
+    createEnvironmentTable(environment, lua, false);
     return lua;
 }
 
@@ -74,7 +77,7 @@ void destroyLuaState(lua_State* lua)
         lua_close(lua);
 }
 
-static int setupGlobalFunctions(lua_State* lua)
+static void setupGlobalFunctions(lua_State* lua)
 {
     lua_atpanic(lua, &panic);
 
@@ -114,7 +117,29 @@ static int setupGlobalFunctions(lua_State* lua)
     lua_pop(lua, 1);
 
     addVectorMetatables(lua);
-    return 0;
+}
+
+static void createEnvironmentTable(void* environment, lua_State* lua, bool shared)
+{
+    //Create a new lua environment.
+    //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
+    if (shared)
+        lua_newtable(lua); //environment
+    else
+        lua_pushglobaltable(lua); //environment
+    lua_newtable(lua); //environment metatable
+    lua_pushstring(lua, "[environment]");
+    lua_setfield(lua, -2, "__metatable");
+    if (shared)
+    {
+        lua_pushglobaltable(lua);
+        lua_setfield(lua, -2, "__index");
+    }
+    //Set the ptr in the metatable.
+    lua_pushlightuserdata(lua, environment);
+    lua_setfield(lua, -2, "environment_ptr");
+    lua_setmetatable(lua, -2);
+    lua_rawsetp(lua, LUA_REGISTRYINDEX, environment);
 }
 
 int pushToLua(lua_State* L, bool b)

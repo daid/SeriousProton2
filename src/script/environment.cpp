@@ -34,23 +34,6 @@ Environment::Environment()
 {
     lua = createLuaState(this);
 
-    //Create a new lua environment.
-    //REGISTY[this] = {"metatable": {"__index": _G, "environment_ptr": this}}
-    lua_newtable(lua); //environment
-
-    lua_newtable(lua); //environment metatable
-    lua_pushstring(lua, "[environment]");
-    lua_setfield(lua, -2, "__metatable");
-    lua_pushglobaltable(lua);
-    lua_setfield(lua, -2, "__index");
-    //Set the ptr in the metatable.
-    lua_pushlightuserdata(lua, this);
-    lua_setfield(lua, -2, "environment_ptr");
-
-    lua_setmetatable(lua, -2);
-
-    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
-
     sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 }
 
@@ -64,20 +47,6 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     sp2assert(lua, "Failed to create lua state for sandboxed environment. Not giving enough memory for basic state?");
     lua = createLuaState(this, luaAlloc, &alloc_info);
     lua_sethook(lua, luaInstructionCountHook, LUA_MASKCOUNT, sandbox_config.instruction_limit);
-    //Create a new lua environment.
-    //REGISTY[this] = {"metatable": {"environment_ptr": this}}
-    lua_pushglobaltable(lua); //environment
-
-    lua_newtable(lua); //environment metatable
-    lua_pushstring(lua, "[environment]");
-    lua_setfield(lua, -2, "__metatable");
-    //Set the ptr in the metatable.
-    lua_pushlightuserdata(lua, this);
-    lua_setfield(lua, -2, "environment_ptr");
-
-    lua_setmetatable(lua, -2);
-
-    lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 
     sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 }

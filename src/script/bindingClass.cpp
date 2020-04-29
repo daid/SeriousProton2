@@ -1,13 +1,22 @@
 #include <sp2/script/bindingClass.h>
 #include <sp2/script/callback.h>
+#include <sp2/script/environment.h>
 
 namespace sp {
 namespace script {
 
 static int updateCallback(lua_State* L)
 {
+    Environment* env = nullptr;
     if (!lua_isnil(L, 1))
+    {
         luaL_checktype(L, 1, LUA_TFUNCTION);
+        lua_getupvalue(L, 1, 1);//Get the environment from the function.
+        lua_getmetatable(L, -1);
+        lua_getfield(L, -1, "environment_ptr");
+        env = reinterpret_cast<Environment*>(lua_touserdata(L, -1));
+        lua_pop(L, 3);
+    }
 
     lua_getmetatable(L, lua_upvalueindex(2));
     lua_getfield(L, -1, "object_ptr");
@@ -17,6 +26,7 @@ static int updateCallback(lua_State* L)
         return 0;
 
     script::Callback* callback = reinterpret_cast<script::Callback*>(lua_touserdata(L, lua_upvalueindex(1)));
+    callback->environment = env;
     callback->lua = L;
     //REGISTRY[callback_ptr] = parameter(1)
     lua_pushvalue(L, lua_upvalueindex(1));//The pointer of this callback.

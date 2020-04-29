@@ -75,11 +75,14 @@ public:
             lua_pop(lua, 2); //remove function and coroutine
             return nullptr;
         }
-        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(lua, L);
+
+        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(environment, lua, L);
         lua_pop(lua, 1); //remove function, coroutine is removed by constructor of Coroutine object.
         return coroutine;
     }
 
+//TODO: These should not be public
+    P<Environment> environment;
     lua_State* lua = nullptr;
 private:
     int pushArgs(lua_State* L)

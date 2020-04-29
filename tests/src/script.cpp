@@ -108,4 +108,10 @@ TEST_CASE("object")
     CHECK(test.callback.call() == false);
     CHECK(env.run("test.callback(function() print(1) end)") == true);
     CHECK(test.callback.call() == true);
+    CHECK(test.callback.callCoroutine() == nullptr);
+
+    env.setGlobal("yield", luaYield);
+    CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)") == true);
+    CHECK(test.callback.callCoroutine() != nullptr);
+    CHECK(test.callback.callCoroutine()->resume() == true);
 }
