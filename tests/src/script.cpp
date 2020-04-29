@@ -99,7 +99,8 @@ TEST_CASE("sandbox memory coroutine")
 
 TEST_CASE("object")
 {
-    sp::script::Environment env;
+    sp::script::Environment::SandboxConfig config{1024*1024, 100000};
+    sp::script::Environment env(config);
     TestObject test;
     env.setGlobal("test", &test);
     CHECK(env.run("test.test()") == true);
@@ -114,4 +115,8 @@ TEST_CASE("object")
     CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)") == true);
     CHECK(test.callback.callCoroutine() != nullptr);
     CHECK(test.callback.callCoroutine()->resume() == true);
+    CHECK(env.run("test.callback(function() while true do math.sin(0) end end)") == true);
+    CHECK(test.callback.callCoroutine() == nullptr);
+    CHECK(env.run("test.callback(function() yield() while true do math.sin(0) end end)") == true);
+    CHECK(test.callback.callCoroutine()->resume() == false);
 }
