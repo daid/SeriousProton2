@@ -24,20 +24,13 @@ public:
 
         //Get this callback from the registry
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
-        if (lua_isfunction(lua, -1))
+        if (!lua_isfunction(lua, -1))
         {
-            //If it exists, push the arguments with it, can run it.
-            int arg_count = pushArgs(lua, args...);
-            if (lua_pcall(lua, arg_count, 0, 0))
-            {
-                LOG(Error, "Callback function error:", lua_tostring(lua, -1));
-                lua_pop(lua, 1);
-                return false;
-            }
-            return true;
+            lua_pop(lua, 1);
+            return false;
         }
-        lua_pop(lua, 1);
-        return false;
+        //If it exists, push the arguments with it, can run it.
+        return callInternal(pushArgs(lua, args...));
     }
 
     /** Run the callback as coroutine.
@@ -62,29 +55,16 @@ public:
         lua_State* L = lua_newthread(lua);
         lua_pushvalue(lua, -2);
         lua_xmove(lua, L, 1);
-        int arg_count = pushArgs(L, args...);
-        int result = lua_resume(L, nullptr, arg_count);
-        if (result != LUA_OK && result != LUA_YIELD)
-        {
-            LOG(Error, "Callback call error:", lua_tostring(L, -1));
-            lua_pop(lua, 2); //remove function and coroutine
-            return nullptr;
-        }
-        if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
-        {
-            lua_pop(lua, 2); //remove function and coroutine
-            return nullptr;
-        }
-
-        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(environment, lua, L);
-        lua_pop(lua, 1); //remove function, coroutine is removed by constructor of Coroutine object.
-        return coroutine;
+        return callCoroutineInternal(L, pushArgs(L, args...));
     }
 
 //TODO: These should not be public
     P<Environment> environment;
     lua_State* lua = nullptr;
 private:
+    bool callInternal(int arg_count);
+    CoroutinePtr callCoroutineInternal(lua_State* L, int arg_count);
+
     int pushArgs(lua_State* L)
     {
         return 0;

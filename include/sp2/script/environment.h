@@ -160,6 +160,7 @@ private:
     AllocInfo alloc_info;
 
     friend class Coroutine;
+    friend class Callback;
 };
 
 }//namespace script
