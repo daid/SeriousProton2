@@ -4,7 +4,7 @@ namespace sp {
 namespace io {
 
 Twitch::Twitch(const string& nick, const string& password)
-: Irc("irc.chat.twitch.tv", nick, nick, password)
+: IrcClient("irc.chat.twitch.tv", nick, nick, password)
 {
 
 }
@@ -28,7 +28,7 @@ void Twitch::processLine(string prefix, string command, string params, string tr
     }
     else
     {
-        Irc::processLine(prefix, command, params, trailing);
+        IrcClient::processLine(prefix, command, params, trailing);
     }
 }
 

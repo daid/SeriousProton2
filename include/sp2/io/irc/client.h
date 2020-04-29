@@ -1,5 +1,5 @@
-#ifndef SP2_IO_IRC_IRC_H
-#define SP2_IO_IRC_IRC_H
+#ifndef SP2_IO_IRC_CLIENT_H
+#define SP2_IO_IRC_CLIENT_H
 
 #include <sp2/io/network/tcpSocket.h>
 #include <sp2/updatable.h>
@@ -7,10 +7,10 @@
 namespace sp {
 namespace io {
 
-class Irc : public Updatable
+class IrcClient : public Updatable
 {
 public:
-    Irc(const string& server, const string& user, const string& nick, const string& password, int port=6667);
+    IrcClient(const string& server, const string& user, const string& nick, const string& password, int port=6667);
 
     bool isConnected();
 

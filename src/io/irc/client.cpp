@@ -1,9 +1,9 @@
-#include <sp2/io/irc/irc.h>
+#include <sp2/io/irc/client.h>
 
 namespace sp {
 namespace io {
 
-Irc::Irc(const string& server, const string& user, const string& nick, const string& password, int port)
+IrcClient::IrcClient(const string& server, const string& user, const string& nick, const string& password, int port)
 {
     if (socket.connect(network::Address(server), port))
     {
@@ -14,12 +14,12 @@ Irc::Irc(const string& server, const string& user, const string& nick, const str
     }
 }
 
-bool Irc::isConnected()
+bool IrcClient::isConnected()
 {
     return socket.isConnected();
 }
 
-void Irc::onUpdate(float delta)
+void IrcClient::onUpdate(float delta)
 {
     char buffer[128];
     size_t received_size = socket.receive(buffer, sizeof(buffer));
@@ -38,7 +38,7 @@ void Irc::onUpdate(float delta)
     }
 }
 
-void Irc::processLine(string line)
+void IrcClient::processLine(string line)
 {
     string prefix;
     int idx;
@@ -63,7 +63,7 @@ void Irc::processLine(string line)
     processLine(prefix, command, line, trailing);
 }
 
-void Irc::processLine(string prefix, string command, string params, string trailing)
+void IrcClient::processLine(string prefix, string command, string params, string trailing)
 {
     LOG(Debug, "IRC: <", prefix, "#", command, "#", params, "#", trailing);
     if (command == "001")
@@ -84,30 +84,30 @@ void Irc::processLine(string prefix, string command, string params, string trail
     }
 }
 
-void Irc::sendRaw(const string& data)
+void IrcClient::sendRaw(const string& data)
 {
     socket.send(data.data(), data.length());
     socket.send("\r\n", 2);
 }
 
-void Irc::joinChannel(const string& channel)
+void IrcClient::joinChannel(const string& channel)
 {
     string command = "JOIN #" + channel + "\r\n";
     socket.send(command.data(), command.length());
 }
 
-void Irc::sendMessage(const string& channel, const string& message)
+void IrcClient::sendMessage(const string& channel, const string& message)
 {
     string command = "PRIVMSG #" + channel + " :" + message + "\r\n";
     socket.send(command.data(), command.length());
 }
 
-void Irc::onConnected(const string& welcome_message)
+void IrcClient::onConnected(const string& welcome_message)
 {
     LOG(Info, "IRC Connected:", welcome_message);
 }
 
-void Irc::onMessage(const string& channel, const string& user, const string& message)
+void IrcClient::onMessage(const string& channel, const string& user, const string& message)
 {
     LOG(Info, "IRC Message:", channel, user, message);
 }

@@ -1,13 +1,13 @@
 #ifndef SP2_IO_IRC_TWITCH_H
 #define SP2_IO_IRC_TWITCH_H
 
-#include <sp2/io/irc/irc.h>
+#include <sp2/io/irc/client.h>
 
 
 namespace sp {
 namespace io {
 
-class Twitch : public Irc
+class Twitch : public IrcClient
 {
 public:
     Twitch(const string& nick, const string& password);
