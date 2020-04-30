@@ -18,14 +18,19 @@ namespace collision {
 class Mesh3D : public Shape3D
 {
 public:
-    Mesh3D(std::vector<Vector3f>&& vertices, std::vector<int>&& indices);
+#ifdef BT_USE_DOUBLE_PRECISION
+    using Vector3 = Vector3d;
+#else
+    using Vector3 = Vector3f;
+#endif
+    Mesh3D(std::vector<Vector3>&& vertices, std::vector<int>&& indices);
 
 private:
     virtual btCollisionShape* createShape() const override;
     
     btTriangleIndexVertexArray* triangle_index_array = nullptr;
 
-    std::vector<Vector3f> vertices;
+    std::vector<Vector3> vertices;
     std::vector<int> indices;
 };
 
