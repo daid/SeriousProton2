@@ -166,13 +166,13 @@ CoroutinePtr Environment::runCoroutine(const string& code)
 {
     lua_State* L = lua_newthread(lua);
 
-    last_error = "";
+    setLastError("");
     alloc_info.in_protected_call = true;
     int result = luaL_loadbufferx(L, code.c_str(), code.length(), "=[string]", "t");
     alloc_info.in_protected_call = false;
     if (result)
     {
-        last_error = luaL_checkstring(L, -1);
+        setLastError(luaL_checkstring(L, -1));
         lua_pop(L, 1);
         lua_pop(lua, 1);
         return nullptr;
@@ -183,26 +183,7 @@ CoroutinePtr Environment::runCoroutine(const string& code)
     //set the environment table it as 1st upvalue
     lua_setupvalue(L, -2, 1);
 
-    //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
-    lua_sethook(L, lua_gethook(L), lua_gethookmask(L), lua_gethookcount(L));
-
-    alloc_info.in_protected_call = true;
-    result = lua_resume(L, nullptr, 0);
-    alloc_info.in_protected_call = false;
-    if (result != LUA_OK && result != LUA_YIELD)
-    {
-        last_error = lua_tostring(L, -1);
-        lua_pop(lua, 1); //remove coroutine
-        return nullptr;
-    }
-    if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
-    {
-        lua_pop(lua, 1); //remove coroutine
-        return nullptr;
-    }
-    std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(this, lua, L);
-    //coroutine is removed by constructor of Coroutine object.
-    return coroutine;
+    return callCoroutineInternal(L, 0);
 }
 
 
@@ -216,13 +197,13 @@ bool Environment::_load(io::ResourceStreamPtr resource, const string& name)
 
 bool Environment::_run(const string& code, const string& name)
 {
-    last_error = "";
+    setLastError("");
     alloc_info.in_protected_call = true;
     int result = luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t");
     alloc_info.in_protected_call = false;
     if (result)
     {
-        last_error = luaL_checkstring(lua, -1);
+        setLastError(luaL_checkstring(lua, -1));
         lua_pop(lua, 1);
         return false;
     }
@@ -232,19 +213,7 @@ bool Environment::_run(const string& code, const string& name)
     //set the environment table it as 1st upvalue
     lua_setupvalue(lua, -2, 1);
 
-    //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
-    lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
-    //Call the actual code.
-    alloc_info.in_protected_call = true;
-    result = lua_pcall(lua, 0, 0, 0);
-    alloc_info.in_protected_call = false;
-    if (result)
-    {
-        last_error = luaL_checkstring(lua, -1);
-        lua_pop(lua, 1);
-        return false;
-    }
-    return true;
+    return callInternal(0);
 }
 
 }//namespace script

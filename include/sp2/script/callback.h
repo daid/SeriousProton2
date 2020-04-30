@@ -5,17 +5,21 @@
 #include <sp2/string.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/script/bindingObject.h>
+#include <sp2/script/luaState.h>
 #include <sp2/script/coroutine.h>
 
 
 namespace sp {
 namespace script {
 
-class Callback : public NonCopyable
+class Callback : public LuaState
 {
 public:
     Callback();
     ~Callback();
+
+    //TODO: This should not be public.
+    void setLuaState(lua_State* L) { lua = L; }
 
     template<typename... ARGS> bool call(ARGS... args)
     {
@@ -53,27 +57,9 @@ public:
         }
 
         lua_State* L = lua_newthread(lua);
-        lua_pushvalue(lua, -2);
+        lua_rotate(lua, -2, 1);
         lua_xmove(lua, L, 1);
         return callCoroutineInternal(L, pushArgs(L, args...));
-    }
-
-//TODO: These should not be public
-    P<Environment> environment;
-    lua_State* lua = nullptr;
-private:
-    bool callInternal(int arg_count);
-    CoroutinePtr callCoroutineInternal(lua_State* L, int arg_count);
-
-    int pushArgs(lua_State* L)
-    {
-        return 0;
-    }
-
-    template<typename ARG, typename... ARGS> int pushArgs(lua_State* L, ARG arg, ARGS... args)
-    {
-        pushToLua(L, arg);
-        return 1 + pushArgs(L, args...);
     }
 };
 

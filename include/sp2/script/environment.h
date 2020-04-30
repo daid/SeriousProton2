@@ -5,12 +5,12 @@
 #include <sp2/string.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/script/bindingObject.h>
-#include <sp2/script/coroutine.h>
+#include <sp2/script/luaState.h>
 
 namespace sp {
 namespace script {
 
-class Environment : public AutoPointerObject
+class Environment : public AutoPointerObject, public LuaState
 {
 public:
     class SandboxConfig
@@ -62,28 +62,16 @@ public:
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
 
         lua_getfield(lua, -1, global_function.c_str());
+        lua_remove(lua, -2);
 
-        last_error = "";
+        setLastError("");
         if (lua_isfunction(lua, -1))
         {
             int arg_count = pushArgs(lua, args...);
-
-            //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
-            lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
-            alloc_info.in_protected_call = true;
-            int result = lua_pcall(lua, arg_count, 0, 0);
-            alloc_info.in_protected_call = false;
-            if (result)
-            {
-                last_error = lua_tostring(lua, -1);
-                lua_pop(lua, 2);
-                return false;
-            }
-            lua_pop(lua, 1);
-            return true;
+            return callInternal(arg_count);
         }
-        last_error = global_function + " is not a function but: " + luaL_typename(lua, -1);
-        lua_pop(lua, 2);
+        setLastError(global_function + " is not a function but: " + luaL_typename(lua, -1));
+        lua_pop(lua, 1);
         return false;
     }
 
@@ -97,41 +85,21 @@ public:
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         lua_getfield(lua, -1, global_function.c_str());
+        lua_remove(lua, -2);
 
-        last_error = "";
+        setLastError("");
         if (!lua_isfunction(lua, -1))
         {
-            last_error = global_function + " is not a function but: " + luaL_typename(lua, -1);
-            lua_pop(lua, 2);
+            setLastError(global_function + " is not a function but: " + luaL_typename(lua, -1));
+            lua_pop(lua, 1);
             return nullptr;
         }
 
         lua_State* L = lua_newthread(lua);
-        lua_pushvalue(lua, -2);
+        lua_rotate(lua, -2, 1);
         lua_xmove(lua, L, 1);
         int arg_count = pushArgs(L, args...);
-        alloc_info.in_protected_call = true;
-        int result = lua_resume(L, nullptr, arg_count);
-        alloc_info.in_protected_call = false;
-        if (result != LUA_OK && result != LUA_YIELD)
-        {
-            last_error = lua_tostring(L, -1);
-            lua_pop(lua, 3); //remove environment, function and coroutine
-            return nullptr;
-        }
-        if (result == LUA_OK) //Coroutine didn't yield. So no state to store for it.
-        {
-            lua_pop(lua, 3); //remove environment, function and coroutine
-            return nullptr;
-        }
-        std::shared_ptr<Coroutine> coroutine = std::make_shared<Coroutine>(this, lua, L);
-        lua_pop(lua, 2); //remove environment, function, coroutine is removed by constructor of Coroutine object.
-        return coroutine;
-    }
-
-    const string& getLastError()
-    {
-        return last_error;
+        return callCoroutineInternal(L, arg_count);
     }
 
     struct AllocInfo
@@ -144,19 +112,6 @@ private:
     bool _load(io::ResourceStreamPtr resource, const string& name);
     bool _run(const string& code, const string& name);
 
-    int pushArgs(lua_State* L)
-    {
-        return 0;
-    }
-
-    template<typename ARG, typename... ARGS> int pushArgs(lua_State* L, ARG arg, ARGS... args)
-    {
-        pushToLua(L, arg);
-        return 1 + pushArgs(L, args...);
-    }
-
-    lua_State* lua;
-    string last_error;
     AllocInfo alloc_info;
 
     friend class Coroutine;
