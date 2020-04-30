@@ -95,7 +95,7 @@ bool BasicNodeRenderPass::privateOnPointerMove(P<Scene> scene, P<Camera> camera,
 {
     if (!camera)
         camera = scene->getCamera();
-    if (!camera)
+    if (!camera || !scene->isEnabled())
         return false;
     if (scene->onPointerMove(camera->screenToWorldRay(Vector2f(position)), id))
     {
@@ -110,7 +110,7 @@ bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera,
 {
     if (!camera)
         camera = scene->getCamera();
-    if (!camera)
+    if (!camera || !scene->isEnabled())
         return false;
     if (scene->onPointerDown(button, camera->screenToWorldRay(Vector2f(position)), id))
     {
