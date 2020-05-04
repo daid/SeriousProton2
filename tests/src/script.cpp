@@ -16,9 +16,22 @@ public:
     {
     }
 
+    sp::Vector2d testVector2d(sp::Vector2d v)
+    {
+        return v + sp::Vector2d(1, 2);
+    }
+
+    sp::P<TestObject> testObj(sp::P<TestObject> in)
+    {
+        CHECK(in == this);
+        return this;
+    }
+
     void onRegisterScriptBindings(sp::script::BindingClass& script_binding_class) override
     {
         script_binding_class.bind("test", &TestObject::test);
+        script_binding_class.bind("testV2d", &TestObject::testVector2d);
+        script_binding_class.bind("testObj", &TestObject::testObj);
         script_binding_class.bind("callback", callback);
         script_binding_class.bindProperty("prop", prop);
     }
@@ -104,12 +117,17 @@ TEST_CASE("object")
     TestObject test;
     env.setGlobal("test", &test);
     CHECK(env.run("test.test()") == true);
+    test.prop = 2;
+    CHECK(env.run("assert(test.prop == 2)") == true);
     CHECK(env.run("test.prop = 1") == true);
     CHECK(test.prop == 1);
     CHECK(test.callback.call() == false);
     CHECK(env.run("test.callback(function() print(1) end)") == true);
     CHECK(test.callback.call() == true);
     CHECK(test.callback.callCoroutine() == nullptr);
+    CHECK(env.run("assert(test.testV2d({1, 1}).x == 2)") == true);
+    CHECK(env.run("assert(test.testV2d({1, 1}).y == 3)") == true);
+    CHECK(env.run("assert(test.testObj(test) == test)") == true);
 
     env.setGlobal("yield", luaYield);
     CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)") == true);
