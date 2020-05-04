@@ -153,9 +153,20 @@ void TextArea::onTextInput(TextInputEvent e)
 {
     switch(e)
     {
-    case TextInputEvent::Left: if (selection_start > 0) selection_start -= 1; selection_end = selection_start; break;
-    case TextInputEvent::Right: if (selection_start < int(value.length())) selection_start += 1; selection_end = selection_start; break;
+    case TextInputEvent::Left:
+    case TextInputEvent::LeftWithSelection:
+        if (selection_start > 0)
+            selection_start -= 1;
+        selection_end = selection_start;
+        break;
+    case TextInputEvent::Right:
+    case TextInputEvent::RightWithSelection:
+        if (selection_start < int(value.length()))
+            selection_start += 1;
+        selection_end = selection_start;
+        break;
     case TextInputEvent::WordLeft:
+    case TextInputEvent::WordLeftWithSelection:
         if (selection_start > 0)
             selection_start -= 1;
         while (selection_start > 0 && !isspace(value[selection_start - 1]))
@@ -163,13 +174,15 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_end = selection_start;
         break;
     case TextInputEvent::WordRight:
+    case TextInputEvent::WordRightWithSelection:
         while (selection_start < int(value.length()) && !isspace(value[selection_start]))
             selection_start += 1;
         if (selection_start < int(value.length()))
             selection_start += 1;
         selection_end = selection_start;
         break;
-    case TextInputEvent::Up:{
+    case TextInputEvent::Up:
+    case TextInputEvent::UpWithSelection:{
         int end_of_line = value.substr(0, selection_start).rfind("\n");
         if (end_of_line < 0) return;
         int start_of_line = value.substr(0, end_of_line).rfind("\n") + 1;
@@ -178,7 +191,8 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_start = start_of_line + std::min(line_length, offset);
         selection_end = selection_start;
         }break;
-    case TextInputEvent::Down:{
+    case TextInputEvent::Down:
+    case TextInputEvent::DownWithSelection:{
         int start_of_current_line = value.substr(0, selection_start).rfind("\n") + 1;
         int end_of_current_line = value.find("\n", selection_start);
         if (end_of_current_line < 0)
@@ -191,20 +205,24 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_end = selection_start;
         }break;
     case TextInputEvent::LineStart:
+    case TextInputEvent::LineStartWithSelection:
         selection_start = value.substr(0, selection_start).rfind("\n") + 1;
         selection_end = selection_start;
         break;
     case TextInputEvent::LineEnd:
+    case TextInputEvent::LineEndWithSelection:
         selection_start = value.find("\n", selection_start);
         if (selection_start == -1)
             selection_start = value.length();
         selection_end = selection_start;
         break;
     case TextInputEvent::TextStart:
+    case TextInputEvent::TextStartWithSelection:
         selection_start = 0;
         selection_end = selection_start;
         break;
     case TextInputEvent::TextEnd:
+    case TextInputEvent::TextEndWithSelection:
         selection_start = value.length();
         selection_end = selection_start;
         break;

@@ -15,9 +15,21 @@ enum class TextInputEvent
     LineEnd,
     TextStart,
     TextEnd,
+
+    LeftWithSelection,
+    RightWithSelection,
+    WordLeftWithSelection,
+    WordRightWithSelection,
+    UpWithSelection,
+    DownWithSelection,
+    LineStartWithSelection,
+    LineEndWithSelection,
+    TextStartWithSelection,
+    TextEndWithSelection,
+
     Delete,
     Backspace,
-    Return
+    Return,
 };
 
 }//namespace sp

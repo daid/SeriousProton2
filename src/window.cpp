@@ -522,8 +522,12 @@ void Window::handleEvent(const SDL_Event& event)
                     break;
                 //fallthrough
             case SDLK_LEFT:
-                if (event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::WordLeftWithSelection);
+                else if (event.key.keysym.mod & KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordLeft);
+                else if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::LeftWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Left);
                 break;
@@ -532,8 +536,12 @@ void Window::handleEvent(const SDL_Event& event)
                     break;
                 //fallthrough
             case SDLK_RIGHT:
-                if (event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::WordRightWithSelection);
+                else if (event.key.keysym.mod & KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordRight);
+                else if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::RightWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Right);
                 break;
@@ -542,22 +550,32 @@ void Window::handleEvent(const SDL_Event& event)
                     break;
                 //fallthrough
             case SDLK_UP:
-                focus_layer->onTextInput(TextInputEvent::Up);
+                if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::UpWithSelection);
+                else
+                    focus_layer->onTextInput(TextInputEvent::Up);
                 break;
             case SDLK_KP_2:
                 if (event.key.keysym.mod & KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_DOWN:
-                focus_layer->onTextInput(TextInputEvent::Down);
+                if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::DownWithSelection);
+                else
+                    focus_layer->onTextInput(TextInputEvent::Down);
                 break;
             case SDLK_KP_7:
                 if (event.key.keysym.mod & KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_HOME:
-                if (event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::TextStartWithSelection);
+                else if (event.key.keysym.mod & KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextStart);
+                else if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::LineStartWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::LineStart);
                 break;
@@ -566,8 +584,12 @@ void Window::handleEvent(const SDL_Event& event)
                     break;
                 //fallthrough
             case SDLK_END:
-                if (event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::TextEndWithSelection);
+                else if (event.key.keysym.mod & KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextEnd);
+                else if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::LineEndWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::LineEnd);
                 break;
