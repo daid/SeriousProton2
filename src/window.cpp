@@ -522,14 +522,20 @@ void Window::handleEvent(const SDL_Event& event)
                     break;
                 //fallthrough
             case SDLK_LEFT:
-                focus_layer->onTextInput(TextInputEvent::Left);
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::WordLeft);
+                else
+                    focus_layer->onTextInput(TextInputEvent::Left);
                 break;
             case SDLK_KP_6:
                 if (event.key.keysym.mod & KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_RIGHT:
-                focus_layer->onTextInput(TextInputEvent::Right);
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::WordRight);
+                else
+                    focus_layer->onTextInput(TextInputEvent::Right);
                 break;
             case SDLK_KP_8:
                 if (event.key.keysym.mod & KMOD_NUM)

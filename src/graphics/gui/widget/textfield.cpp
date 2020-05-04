@@ -122,6 +122,20 @@ void TextField::onTextInput(TextInputEvent e)
     {
     case TextInputEvent::Left: if (selection_start > 0) selection_start -= 1; selection_end = selection_start; break;
     case TextInputEvent::Right: if (selection_start < int(value.length())) selection_start += 1; selection_end = selection_start; break;
+    case TextInputEvent::WordLeft:
+        if (selection_start > 0)
+            selection_start -= 1;
+        while (selection_start > 0 && !isspace(value[selection_start - 1]))
+            selection_start -= 1;
+        selection_end = selection_start;
+        break;
+    case TextInputEvent::WordRight:
+        while (selection_start < int(value.length()) && !isspace(value[selection_start]))
+            selection_start += 1;
+        if (selection_start < int(value.length()))
+            selection_start += 1;
+        selection_end = selection_start;
+        break;
     case TextInputEvent::Up: break;
     case TextInputEvent::Down: break;
     case TextInputEvent::LineStart: selection_start = 0; selection_end = selection_start; break;

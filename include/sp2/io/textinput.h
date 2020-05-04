@@ -7,6 +7,8 @@ enum class TextInputEvent
 {
     Left,
     Right,
+    WordLeft,
+    WordRight,
     Up,
     Down,
     LineStart,
