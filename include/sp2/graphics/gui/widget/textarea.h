@@ -14,7 +14,7 @@ public:
     TextArea(P<Widget> parent);
 
     virtual void setAttribute(const string& key, const string& value) override;
-    
+
     virtual void updateRenderData() override;
     virtual void onUpdate(float delta) override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
@@ -25,12 +25,17 @@ public:
     virtual void onTextInput(TextInputEvent e) override;
 
 private:
+    int getTextOffsetForPosition(Vector2d position);
+
     sp::P<Slider> vertical_scroll;
+    sp::P<Widget> cursor_widget;
     float text_size;
     int texture_revision;
-    
+
     string value;
-    int cursor;
+    int selection_pointer_down = 0;
+    int selection_start = 0;
+    int selection_end = 0;
 };
 
 }//namespace gui

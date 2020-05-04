@@ -31,9 +31,9 @@ private:
     int texture_revision;
     
     string value;
-    int selecting_start_offset;
-    int selection_start;
-    int selection_end;
+    int selecting_pointer_down = 0;
+    int selection_start = 0;
+    int selection_end = 0;
     
     P<Widget> cursor_widget;
 };

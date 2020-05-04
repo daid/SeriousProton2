@@ -88,9 +88,9 @@ void TextField::onUpdate(float delta)
 
 bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    selecting_start_offset = getTextOffsetForPosition(position);
-    selection_start = selecting_start_offset;
-    selection_end = selecting_start_offset;
+    selecting_pointer_down = getTextOffsetForPosition(position);
+    selection_start = selecting_pointer_down;
+    selection_end = selecting_pointer_down;
     markRenderDataOutdated();
     return true;
 }
@@ -98,8 +98,8 @@ bool TextField::onPointerDown(io::Pointer::Button button, Vector2d position, int
 void TextField::onPointerDrag(Vector2d position, int id)
 {
     int new_offset = getTextOffsetForPosition(position);
-    selection_start = std::min(selecting_start_offset, new_offset);
-    selection_end = std::max(selecting_start_offset, new_offset);
+    selection_start = std::min(selecting_pointer_down, new_offset);
+    selection_end = std::max(selecting_pointer_down, new_offset);
     markRenderDataOutdated();
 }
 
