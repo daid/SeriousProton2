@@ -494,6 +494,23 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (check_next1(ls, '=')) return TK_NE;
         else return '~';
       }
+#ifdef SP2_LUA_EXTENTIONS
+      case '!': {
+        next(ls);
+        if (check_next1(ls, '=')) return TK_NE;
+        else return '!';
+      }
+      case '&': {
+        next(ls);
+        if (check_next1(ls, '&')) return TK_AND;
+        else return '&';
+      }
+      case '|': {
+        next(ls);
+        if (check_next1(ls, '|')) return TK_OR;
+        else return '|';
+      }
+#endif
       case ':': {
         next(ls);
         if (check_next1(ls, ':')) return TK_DBCOLON;

@@ -49,6 +49,19 @@ TEST_CASE("script")
     CHECK(env.call("test") == true);
 }
 
+TEST_CASE("lua language extentions")
+{
+    sp::script::Environment env;
+
+    //Allow != next to ~=
+    CHECK(env.run("assert(1 ~= 0)") == true);
+    CHECK(env.run("assert(1 != 0)") == true);
+
+    CHECK(env.run("assert(1 && 1)") == true);
+    CHECK(env.run("assert(1 || 1)") == true);
+    CHECK(env.run("assert(!false)") == true);
+}
+
 TEST_CASE("coroutines")
 {
     sp::script::Environment env;

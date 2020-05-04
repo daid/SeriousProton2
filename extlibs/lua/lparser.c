@@ -986,6 +986,9 @@ static void simpleexp (LexState *ls, expdesc *v) {
 static UnOpr getunopr (int op) {
   switch (op) {
     case TK_NOT: return OPR_NOT;
+#ifdef SP2_LUA_EXTENTIONS
+    case '!': return OPR_NOT;
+#endif
     case '-': return OPR_MINUS;
     case '~': return OPR_BNOT;
     case '#': return OPR_LEN;
