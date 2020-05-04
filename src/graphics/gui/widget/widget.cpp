@@ -127,6 +127,7 @@ void Widget::setPosition(Vector2d v, Alignment alignment)
 
 void Widget::setSize(float x, float y)
 {
+    layout.match_content_size = false;
     layout.size.x = x;
     layout.size.y = y;
 }

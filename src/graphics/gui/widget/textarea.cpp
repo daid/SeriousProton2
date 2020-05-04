@@ -16,6 +16,7 @@ TextArea::TextArea(P<Widget> parent)
     loadThemeStyle("textarea");
     text_size = -1;
     texture_revision = -1;
+    cursor = 0;
     setFocusable(true);
     
     setAttribute("order", "-1");
