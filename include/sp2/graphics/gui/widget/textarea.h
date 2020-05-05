@@ -33,7 +33,6 @@ private:
     int texture_revision;
 
     string value;
-    int selection_pointer_down = 0;
     int selection_start = 0;
     int selection_end = 0;
 };

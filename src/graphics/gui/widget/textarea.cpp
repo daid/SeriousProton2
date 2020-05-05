@@ -72,13 +72,15 @@ void TextArea::updateRenderData()
         {
             MeshBuilder mb;
             float start_x = -1;
+            int selection_min = std::min(selection_start, selection_end);
+            int selection_max = std::max(selection_start, selection_end);
             for(auto d : result.data)
             {
-                if (d.string_offset == selection_start)
+                if (d.string_offset == selection_min)
                 {
                     start_x = d.position.x;
                 }
-                if ((d.string_offset == selection_end) || (d.char_code == 0 && start_x > -1.0f))
+                if ((d.string_offset == selection_max) || (d.char_code == 0 && start_x > -1.0f))
                 {
                     float end_x = d.position.x;
                     float start_y = d.position.y;
@@ -90,17 +92,35 @@ void TextArea::updateRenderData()
                     start_y = std::max(0.0f, start_y);
                     end_x = std::min(float(getRenderSize().x), end_x);
                     end_y = std::min(float(getRenderSize().y), end_y);
-                    if (end_x == start_x)
-                        end_x += t_size * 0.1f;
-                    mb.addQuad(
-                        Vector3f(start_x, end_y, 0),
-                        Vector3f(start_x, start_y, 0),
-                        Vector3f(end_x, end_y, 0),
-                        Vector3f(end_x, start_y, 0));
-                    if (d.string_offset == selection_end)
+                    if (end_x != start_x)
+                    {
+                        mb.addQuad(
+                            Vector3f(start_x, end_y, 0),
+                            Vector3f(start_x, start_y, 0),
+                            Vector3f(end_x, end_y, 0),
+                            Vector3f(end_x, start_y, 0));
+                    }
+                    if (d.string_offset == selection_max)
                         start_x = -1.0f;
                     else
                         start_x = 0.0f;
+                }
+                if (d.string_offset == selection_end)
+                {
+                    float start_y = d.position.y;
+                    float end_y = start_y + t_size;
+                    if (end_y < 0.0)
+                        continue;
+                    if (start_y > getRenderSize().y)
+                        continue;
+                    start_y = std::max(0.0f, start_y);
+                    end_y = std::min(float(getRenderSize().y), end_y);
+
+                    mb.addQuad(
+                        Vector3f(d.position.x - t_size * 0.05f, end_y, 0),
+                        Vector3f(d.position.x - t_size * 0.05f, start_y, 0),
+                        Vector3f(d.position.x + t_size * 0.05f, end_y, 0),
+                        Vector3f(d.position.x + t_size * 0.05f, start_y, 0));
                 }
             }
             cursor_widget->render_data.shader = Shader::get("internal:color.shader");
@@ -122,18 +142,15 @@ void TextArea::onUpdate(float delta)
 
 bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int id)
 {
-    selection_pointer_down = getTextOffsetForPosition(position);
-    selection_start = selection_pointer_down;
-    selection_end = selection_pointer_down;
+    selection_start = getTextOffsetForPosition(position);
+    selection_end = selection_start;
     markRenderDataOutdated();
     return true;
 }
 
 void TextArea::onPointerDrag(Vector2d position, int id)
 {
-    int new_offset = getTextOffsetForPosition(position);
-    selection_start = std::min(selection_pointer_down, new_offset);
-    selection_end = std::max(selection_pointer_down, new_offset);
+    selection_end = getTextOffsetForPosition(position);
     markRenderDataOutdated();
 }
 
@@ -143,7 +160,7 @@ void TextArea::onPointerUp(Vector2d position, int id)
 
 void TextArea::onTextInput(const string& text)
 {
-    value = value.substr(0, selection_start) + text + value.substr(selection_end);
+    value = value.substr(0, std::min(selection_start, selection_end)) + text + value.substr(std::max(selection_start, selection_end));
     selection_start += text.length();
     selection_end = selection_start;
     markRenderDataOutdated();
@@ -155,89 +172,100 @@ void TextArea::onTextInput(TextInputEvent e)
     {
     case TextInputEvent::Left:
     case TextInputEvent::LeftWithSelection:
-        if (selection_start > 0)
-            selection_start -= 1;
-        selection_end = selection_start;
+        if (selection_end > 0)
+            selection_end -= 1;
+        if (e != TextInputEvent::LeftWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::Right:
     case TextInputEvent::RightWithSelection:
-        if (selection_start < int(value.length()))
-            selection_start += 1;
-        selection_end = selection_start;
+        if (selection_end < int(value.length()))
+            selection_end += 1;
+        if (e != TextInputEvent::RightWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::WordLeft:
     case TextInputEvent::WordLeftWithSelection:
-        if (selection_start > 0)
-            selection_start -= 1;
-        while (selection_start > 0 && !isspace(value[selection_start - 1]))
-            selection_start -= 1;
-        selection_end = selection_start;
+        if (selection_end > 0)
+            selection_end -= 1;
+        while (selection_end > 0 && !isspace(value[selection_end - 1]))
+            selection_end -= 1;
+        if (e != TextInputEvent::WordLeftWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::WordRight:
     case TextInputEvent::WordRightWithSelection:
-        while (selection_start < int(value.length()) && !isspace(value[selection_start]))
-            selection_start += 1;
-        if (selection_start < int(value.length()))
-            selection_start += 1;
-        selection_end = selection_start;
+        while (selection_end < int(value.length()) && !isspace(value[selection_end]))
+            selection_end += 1;
+        if (selection_end < int(value.length()))
+            selection_end += 1;
+        if (e != TextInputEvent::WordRightWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::Up:
     case TextInputEvent::UpWithSelection:{
-        int end_of_line = value.substr(0, selection_start).rfind("\n");
-        if (end_of_line < 0) return;
+        int end_of_line = value.substr(0, selection_end).rfind("\n");
+        if (end_of_line < 0)
+            return;
         int start_of_line = value.substr(0, end_of_line).rfind("\n") + 1;
-        int offset = selection_start - end_of_line - 1;
+        int offset = selection_end - end_of_line - 1;
         int line_length = end_of_line - start_of_line;
-        selection_start = start_of_line + std::min(line_length, offset);
-        selection_end = selection_start;
+        selection_end = start_of_line + std::min(line_length, offset);
+        if (e != TextInputEvent::UpWithSelection)
+            selection_start = selection_end;
         }break;
     case TextInputEvent::Down:
     case TextInputEvent::DownWithSelection:{
-        int start_of_current_line = value.substr(0, selection_start).rfind("\n") + 1;
-        int end_of_current_line = value.find("\n", selection_start);
+        int start_of_current_line = value.substr(0, selection_end).rfind("\n") + 1;
+        int end_of_current_line = value.find("\n", selection_end);
         if (end_of_current_line < 0)
             return;
         int end_of_end_line = value.find("\n", end_of_current_line + 1);
         if (end_of_end_line == -1)
             end_of_end_line = value.length();
-        int offset = selection_start - start_of_current_line;
-        selection_start = end_of_current_line + 1 + std::min(offset, end_of_end_line - (end_of_current_line + 1));
-        selection_end = selection_start;
+        int offset = selection_end - start_of_current_line;
+        selection_end = end_of_current_line + 1 + std::min(offset, end_of_end_line - (end_of_current_line + 1));
+        if (e != TextInputEvent::DownWithSelection)
+            selection_start = selection_end;
         }break;
     case TextInputEvent::LineStart:
     case TextInputEvent::LineStartWithSelection:
-        selection_start = value.substr(0, selection_start).rfind("\n") + 1;
-        selection_end = selection_start;
+        selection_end = value.substr(0, selection_end).rfind("\n") + 1;
+        if (e != TextInputEvent::LineStartWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::LineEnd:
     case TextInputEvent::LineEndWithSelection:
-        selection_start = value.find("\n", selection_start);
-        if (selection_start == -1)
-            selection_start = value.length();
-        selection_end = selection_start;
+        selection_end = value.find("\n", selection_start);
+        if (selection_end == -1)
+            selection_end = value.length();
+        if (e != TextInputEvent::LineEndWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::TextStart:
     case TextInputEvent::TextStartWithSelection:
-        selection_start = 0;
-        selection_end = selection_start;
+        selection_end = 0;
+        if (e != TextInputEvent::TextStartWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::TextEnd:
     case TextInputEvent::TextEndWithSelection:
-        selection_start = value.length();
-        selection_end = selection_start;
+        selection_end = value.length();
+        if (e != TextInputEvent::TextEndWithSelection)
+            selection_start = selection_end;
         break;
     case TextInputEvent::Delete:
         if (selection_start != selection_end)
-            value = value.substr(0, selection_start) + value.substr(selection_end);
+            value = value.substr(0, std::min(selection_start, selection_end)) + value.substr(std::max(selection_start, selection_end));
         else
-            value = value.substr(0, selection_start) + value.substr(selection_end + 1);
-        selection_end = selection_start;
+            value = value.substr(0, selection_start) + value.substr(selection_start + 1);
+        selection_start = selection_end = std::min(selection_start, selection_end);
         break;
     case TextInputEvent::Backspace:
         if (selection_start != selection_end)
         {
-            value = value.substr(0, selection_start) + value.substr(selection_end);
-            selection_end = selection_start;
+            onTextInput(TextInputEvent::Delete);
+            return;
         }
         else if (selection_start > 0)
         {
