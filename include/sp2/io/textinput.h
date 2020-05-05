@@ -29,6 +29,8 @@ enum class TextInputEvent
 
     Delete,
     Backspace,
+    Indent,
+    Unindent,
     Return,
 };
 

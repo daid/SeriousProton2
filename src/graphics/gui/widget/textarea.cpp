@@ -274,6 +274,17 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end = selection_start;
         }
         break;
+    case TextInputEvent::Indent:
+        if (selection_start == selection_end)
+        {
+            int start_of_line = value.substr(0, selection_end).rfind("\n") + 1;
+            int offset = selection_end - start_of_line;
+            int add = 4 - (offset % 4);
+            onTextInput(string(" ") * add);
+        }
+        break;
+    case TextInputEvent::Unindent:
+        break;
     case TextInputEvent::Return:
         onTextInput("\n");
         break;

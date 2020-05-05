@@ -607,6 +607,13 @@ void Window::handleEvent(const SDL_Event& event)
             case SDLK_RETURN:
                 focus_layer->onTextInput(TextInputEvent::Return);
                 break;
+            case SDLK_TAB:
+            case SDLK_KP_TAB:
+                if (event.key.keysym.mod & KMOD_SHIFT)
+                    focus_layer->onTextInput(TextInputEvent::Unindent);
+                else
+                    focus_layer->onTextInput(TextInputEvent::Indent);
+                break;
             }
         }
         break;
