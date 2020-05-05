@@ -301,6 +301,27 @@ void TextArea::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Unindent:
+        if (selection_start == selection_end)
+        {
+        }
+        else
+        {
+            int start_of_line = value.substr(0, std::min(selection_start, selection_end)).rfind("\n") + 1;
+            auto data = value.substr(start_of_line, std::max(selection_start, selection_end));
+            for(int n=0; n<4; n++)
+            {
+                if (data.startswith(" "))
+                    data = data.substr(1);
+                data = data.replace("\n ", "\n");
+            }
+            int removed_length = (std::max(selection_start, selection_end) - start_of_line) - data.length();
+            value = value.substr(0, start_of_line) + data + value.substr(std::max(selection_start, selection_end));
+
+            if (selection_start > selection_end)
+                selection_start -= removed_length;
+            else
+                selection_end -= removed_length;
+        }
         break;
     case TextInputEvent::Return:
         onTextInput("\n");
