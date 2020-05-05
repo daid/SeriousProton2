@@ -282,6 +282,23 @@ void TextArea::onTextInput(TextInputEvent e)
             int add = 4 - (offset % 4);
             onTextInput(string(" ") * add);
         }
+        else
+        {
+            int start_of_line = value.substr(0, std::min(selection_start, selection_end)).rfind("\n") + 1;
+            auto data = value.substr(start_of_line, std::max(selection_start, selection_end));
+            data = "    " + data.replace("\n", "\n    ");
+            int extra_length = data.length() - (std::max(selection_start, selection_end) - start_of_line) - 4;
+            value = value.substr(0, start_of_line) + data + value.substr(std::max(selection_start, selection_end));
+
+            if (start_of_line != selection_start)
+                selection_start += 4;
+            if (start_of_line != selection_end)
+                selection_end += 4;
+            if (selection_start > selection_end)
+                selection_start += extra_length;
+            else
+                selection_end += extra_length;
+        }
         break;
     case TextInputEvent::Unindent:
         break;
