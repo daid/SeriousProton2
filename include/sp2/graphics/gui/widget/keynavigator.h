@@ -24,6 +24,8 @@ private:
 
     P<io::Keybinding> up;
     P<io::Keybinding> down;
+    P<io::Keybinding> left;
+    P<io::Keybinding> right;
     P<io::Keybinding> select;
 
     bool skip = true;

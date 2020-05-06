@@ -1,5 +1,6 @@
 #include <sp2/graphics/gui/widget/keynavigator.h>
 #include <sp2/graphics/gui/widget/button.h>
+#include <sp2/graphics/gui/widget/slider.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/meshdata.h>
 #include <sp2/graphics/textureManager.h>
@@ -18,6 +19,8 @@ KeyNavigator::KeyNavigator(P<Widget> parent)
     loadThemeStyle("navigator");
     up = io::Keybinding::getByName("UP");
     down = io::Keybinding::getByName("DOWN");
+    left = io::Keybinding::getByName("LEFT");
+    right = io::Keybinding::getByName("RIGHT");
     select = io::Keybinding::getByName("START");
     hide();
 }
@@ -32,6 +35,14 @@ void KeyNavigator::setAttribute(const string& key, const string& value)
     {
         down = io::Keybinding::getByName(value);
     }
+    else if (key == "left")
+    {
+        left = io::Keybinding::getByName(value);
+    }
+    else if (key == "right")
+    {
+        right = io::Keybinding::getByName(value);
+    }
     else if (key == "select")
     {
         select = io::Keybinding::getByName(value);
@@ -44,9 +55,9 @@ void KeyNavigator::setAttribute(const string& key, const string& value)
 
 void KeyNavigator::updateRenderData()
 {
-    const sp::gui::ThemeStyle::StateStyle& t = theme->states[int(getState())];
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
 
-    render_data.shader = sp::Shader::get("internal:basic.shader");
+    render_data.shader = Shader::get("internal:basic.shader");
     render_data.mesh = createStretchedHV(getRenderSize(), t.size);
     render_data.texture = t.texture;
     render_data.color = t.color;
@@ -54,13 +65,15 @@ void KeyNavigator::updateRenderData()
 
 void KeyNavigator::onUpdate(float delta)
 {
-    sp::gui::Widget::onUpdate(delta);
+    Widget::onUpdate(delta);
 
     if (skip)
     {
         skip = false;
         return;
     }
+    if (!isEnabled())
+        return;
 
     if (up && up->getDown())
     {
@@ -89,6 +102,30 @@ void KeyNavigator::onUpdate(float delta)
             setParent(next);
         skip = true;
     }
+    if (left && left->getDown())
+    {
+        if (!isVisible())
+        {
+            show();
+            return;
+        }
+        P<Slider> slider = getParent();
+        if (slider)
+        {
+            slider->setValue(slider->getValue() - (slider->getMax() - slider->getMin()) * 0.1f, true);
+        }
+    }
+    if (right && right->getDown())
+    {
+        if (!isVisible())
+        {
+            show();
+            return;
+        }
+        P<Slider> slider = getParent();
+        if (slider)
+            slider->setValue(slider->getValue() + (slider->getMax() - slider->getMin()) * 0.1f, true);
+    }
     if (select && select->getDown())
     {
         if (!isVisible())
@@ -97,13 +134,16 @@ void KeyNavigator::onUpdate(float delta)
             return;
         }
 
-        sp::P<sp::gui::Widget> parent = getParent();
-        parent->onPointerDown(sp::io::Pointer::Button::Left, sp::Vector2d(0, 0), -2);
-        parent->onPointerUp(sp::Vector2d(0, 0), -2);
+        P<Button> button = getParent();
+        if (button)
+        {
+            button->onPointerDown(io::Pointer::Button::Left, Vector2d(0, 0), -2);
+            button->onPointerUp(Vector2d(0, 0), -2);
+        }
     }
 }
 
-sp::P<sp::gui::Widget> KeyNavigator::findFirstTarget(sp::P<sp::gui::Widget> w)
+P<Widget> KeyNavigator::findFirstTarget(P<Widget> w)
 {
     if (canTarget(w))
         return w;
@@ -116,12 +156,12 @@ sp::P<sp::gui::Widget> KeyNavigator::findFirstTarget(sp::P<sp::gui::Widget> w)
     return nullptr;
 }
 
-sp::P<sp::gui::Widget> KeyNavigator::findNextTarget(sp::P<sp::gui::Widget> w, sp::P<sp::gui::Widget> after)
+P<Widget> KeyNavigator::findNextTarget(P<Widget> w, P<Widget> after)
 {
     if (!w)
     {
         w = getParent();
-        while(sp::P<sp::gui::Widget>(w->getParent()))
+        while(P<Widget>(w->getParent()))
             w = w->getParent();
         return findFirstTarget(w);
     }
@@ -138,9 +178,11 @@ sp::P<sp::gui::Widget> KeyNavigator::findNextTarget(sp::P<sp::gui::Widget> w, sp
     return findNextTarget(w->getParent(), w);
 }
 
-bool KeyNavigator::canTarget(sp::P<sp::gui::Widget> w)
+bool KeyNavigator::canTarget(P<Widget> w)
 {
-    if (sp::P<sp::gui::Button>(w))
+    if (P<Button>(w))
+        return true;
+    if (P<Slider>(w))
         return true;
     return false;
 }

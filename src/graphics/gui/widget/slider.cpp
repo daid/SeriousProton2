@@ -69,7 +69,7 @@ void Slider::setAttribute(const string& key, const string& value)
     }
 }
 
-void Slider::setValue(float value)
+void Slider::setValue(float value, bool run_callback)
 {
     if (max_value < min_value)
         value = std::max(std::min(value, min_value), max_value);
@@ -79,6 +79,8 @@ void Slider::setValue(float value)
     {
         this->value = value;
         markRenderDataOutdated();
+        if (run_callback)
+            runCallback(value);
     }
 }
 

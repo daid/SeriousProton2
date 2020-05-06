@@ -14,15 +14,17 @@ public:
     Slider(P<Widget> parent);
 
     virtual void setAttribute(const string& key, const string& value) override;
-    
+
     virtual void updateRenderData() override;
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
-    
-    void setValue(float value);
+
+    void setValue(float value, bool run_callback=false);
     void setRange(float min, float max);
     float getValue() { return value; }
+    float getMin() { return min_value; }
+    float getMax() { return max_value; }
 private:
     float min_value, max_value;
     float value;
