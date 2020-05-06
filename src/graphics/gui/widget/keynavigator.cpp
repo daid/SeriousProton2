@@ -125,13 +125,15 @@ sp::P<sp::gui::Widget> KeyNavigator::findNextTarget(sp::P<sp::gui::Widget> w, sp
             w = w->getParent();
         return findFirstTarget(w);
     }
-    bool found = false;
+    bool found = !after;
     for(auto child : w->getChildren())
     {
         if (child == after)
             found = true;
         else if (found && canTarget(child))
             return child;
+        else if (found)
+            return findNextTarget(child, nullptr);
     }
     return findNextTarget(w->getParent(), w);
 }
