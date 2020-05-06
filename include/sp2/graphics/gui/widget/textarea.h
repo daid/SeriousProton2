@@ -30,6 +30,7 @@ private:
     sp::P<Slider> vertical_scroll;
     sp::P<Widget> cursor_widget;
     float text_size;
+    bool multiline = true;
     int texture_revision;
 
     string value;

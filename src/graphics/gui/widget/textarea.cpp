@@ -3,6 +3,7 @@
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/fontManager.h>
 #include <sp2/graphics/meshbuilder.h>
+#include <sp2/io/clipboard.h>
 #include <sp2/stringutil/convert.h>
 #include <sp2/engine.h>
 
@@ -25,12 +26,7 @@ TextArea::TextArea(P<Widget> parent)
     cursor_widget->layout.fill_width = true;
     cursor_widget->layout.fill_height = true;
 
-    vertical_scroll = new Slider(this);
-    vertical_scroll->setSize(theme->states[int(getState())].size, 0);
-    vertical_scroll->layout.alignment = Alignment::Right;
-    vertical_scroll->layout.fill_height = true;
-    vertical_scroll->setRange(100, 0);
-    vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
+    setAttribute("multiline", "true");
 }
 
 void TextArea::setAttribute(const string& key, const string& value)
@@ -38,12 +34,32 @@ void TextArea::setAttribute(const string& key, const string& value)
     if (key == "text")
     {
         this->value = value;
+        selection_start = std::min(int(value.length()), selection_start);
+        selection_end = std::min(int(value.length()), selection_end);
     }
     else if (key == "text_size" || key == "text.size")
     {
         text_size = stringutil::convert::toFloat(value);
-        vertical_scroll->setSize(text_size, 0);
+        if (vertical_scroll)
+            vertical_scroll->setSize(text_size, 0);
         markRenderDataOutdated();
+    }
+    else if (key == "multiline")
+    {
+        multiline = stringutil::convert::toBool(value);
+        if (!multiline)
+        {
+            vertical_scroll.destroy();
+        }
+        else if (!vertical_scroll)
+        {
+            vertical_scroll = new Slider(this);
+            vertical_scroll->setSize(theme->states[int(getState())].size, 0);
+            vertical_scroll->layout.alignment = Alignment::Right;
+            vertical_scroll->layout.fill_height = true;
+            vertical_scroll->setRange(100, 0);
+            vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
+        }
     }
     else
     {
@@ -59,10 +75,13 @@ void TextArea::updateRenderData()
     if (t.font)
     {
         float t_size = text_size < 0 ? t.size : text_size;
-        Font::PreparedFontString result = t.font->prepare(value, 64, t_size, getRenderSize(), Alignment::TopLeft, Font::FlagClip);
-        vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
-        for(auto& data : result.data)
-            data.position.y += vertical_scroll->getValue();
+        Font::PreparedFontString result = t.font->prepare(value, 64, t_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left, Font::FlagClip);
+        if (vertical_scroll)
+        {
+            vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
+            for(auto& data : result.data)
+                data.position.y += vertical_scroll->getValue();
+        }
         render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
@@ -161,8 +180,7 @@ void TextArea::onPointerUp(Vector2d position, int id)
 void TextArea::onTextInput(const string& text)
 {
     value = value.substr(0, std::min(selection_start, selection_end)) + text + value.substr(std::max(selection_start, selection_end));
-    selection_start += text.length();
-    selection_end = selection_start;
+    selection_end = selection_start = std::min(selection_start, selection_end) + text.length();
     markRenderDataOutdated();
 }
 
@@ -254,6 +272,10 @@ void TextArea::onTextInput(TextInputEvent e)
         if (e != TextInputEvent::TextEndWithSelection)
             selection_start = selection_end;
         break;
+    case TextInputEvent::SelectAll:
+        selection_end = 0;
+        selection_start = value.length();
+        break;
     case TextInputEvent::Delete:
         if (selection_start != selection_end)
             value = value.substr(0, std::min(selection_start, selection_end)) + value.substr(std::max(selection_start, selection_end));
@@ -324,7 +346,21 @@ void TextArea::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Return:
-        onTextInput("\n");
+        if (multiline)
+            onTextInput("\n");
+        else
+            runCallback(value);
+        break;
+    case TextInputEvent::Copy:
+        io::Clipboard::set(value.substr(std::min(selection_start, selection_end), std::max(selection_start, selection_end)));
+        break;
+    case TextInputEvent::Paste:
+        onTextInput(io::Clipboard::get());
+        break;
+    case TextInputEvent::Cut:
+        io::Clipboard::set(value.substr(std::min(selection_start, selection_end), std::max(selection_start, selection_end)));
+        if (selection_start != selection_end)
+            onTextInput(TextInputEvent::Delete);
         break;
     }
     markRenderDataOutdated();
@@ -332,12 +368,13 @@ void TextArea::onTextInput(TextInputEvent e)
 
 int TextArea::getTextOffsetForPosition(Vector2d position)
 {
-    int result = 0;
-    position.y -= vertical_scroll->getValue();
+    int result = value.size();
+    if (vertical_scroll)
+        position.y -= vertical_scroll->getValue();
     const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     if (t.font)
     {
-        Font::PreparedFontString pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), Alignment::TopLeft);
+        Font::PreparedFontString pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left);
         unsigned int n;
         for(n=0; n<pfs.data.size(); n++)
         {

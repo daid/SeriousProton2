@@ -614,6 +614,22 @@ void Window::handleEvent(const SDL_Event& event)
                 else
                     focus_layer->onTextInput(TextInputEvent::Indent);
                 break;
+            case SDLK_a:
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::SelectAll);
+                break;
+            case SDLK_c:
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::Copy);
+                break;
+            case SDLK_v:
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::Paste);
+                break;
+            case SDLK_x:
+                if (event.key.keysym.mod & KMOD_CTRL)
+                    focus_layer->onTextInput(TextInputEvent::Cut);
+                break;
             }
         }
         break;

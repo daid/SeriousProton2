@@ -27,11 +27,17 @@ enum class TextInputEvent
     TextStartWithSelection,
     TextEndWithSelection,
 
+    SelectAll,
+
     Delete,
     Backspace,
     Indent,
     Unindent,
     Return,
+
+    Copy,
+    Paste,
+    Cut,
 };
 
 }//namespace sp
