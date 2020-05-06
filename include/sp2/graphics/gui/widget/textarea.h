@@ -24,6 +24,7 @@ public:
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
 
+    const string& getValue() const;
 private:
     int getTextOffsetForPosition(Vector2d position);
 

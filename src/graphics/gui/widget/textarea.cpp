@@ -366,6 +366,11 @@ void TextArea::onTextInput(TextInputEvent e)
     markRenderDataOutdated();
 }
 
+const string& TextArea::getValue() const
+{
+    return value;
+}
+
 int TextArea::getTextOffsetForPosition(Vector2d position)
 {
     int result = value.size();
