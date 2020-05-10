@@ -99,6 +99,8 @@ void BindingObject::registerToLua(lua_State* L)
 {
     if (L == lua)
         return;
+    if (lua)//TOFIX: use LUA_RIDX_MAINTHREAD from the registry to find the main thread to store instead of a couroutine lua_State thread
+        return;
     sp2assert(lua == nullptr, "Can only register script objects to a single lua sandbox");
     lua = L;
 
