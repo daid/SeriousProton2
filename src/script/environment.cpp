@@ -43,9 +43,8 @@ Environment::Environment(const SandboxConfig& sandbox_config)
     alloc_info.total = 0;
     alloc_info.max = sandbox_config.memory_limit;
 
-    lua = lua_newstate(luaAlloc, &alloc_info);
-    sp2assert(lua, "Failed to create lua state for sandboxed environment. Not giving enough memory for basic state?");
     lua = createLuaState(this, luaAlloc, &alloc_info);
+    sp2assert(lua, "Failed to create lua state for sandboxed environment. Not giving enough memory for basic state?");
     lua_sethook(lua, luaInstructionCountHook, LUA_MASKCOUNT, sandbox_config.instruction_limit);
 
     sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");

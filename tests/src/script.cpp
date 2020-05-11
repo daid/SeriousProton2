@@ -151,3 +151,13 @@ TEST_CASE("object")
     CHECK(env.run("test.callback(function() yield() while true do math.sin(0) end end)") == true);
     CHECK(test.callback.callCoroutine()->resume() == false);
 }
+
+TEST_CASE("coroutine callback")
+{
+    sp::script::Environment env;
+
+    TestObject test;
+    env.setGlobal("test", &test);
+    CHECK(env.runCoroutine("test.callback(function() assert(true) end)") == nullptr);
+    test.callback.call();
+}
