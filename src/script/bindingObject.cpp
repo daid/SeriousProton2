@@ -97,12 +97,13 @@ BindingObject::BindingObject()
 
 void BindingObject::registerToLua(lua_State* L)
 {
-    if (L == lua)
-        return;
-    if (lua)//TOFIX: use LUA_RIDX_MAINTHREAD from the registry to find the main thread to store instead of a couroutine lua_State thread
+    lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+    lua_State* main_thread = lua_tothread(L, -1);
+    lua_pop(L, 1);
+    if (main_thread == lua)
         return;
     sp2assert(lua == nullptr, "Can only register script objects to a single lua sandbox");
-    lua = L;
+    lua = main_thread;
 
     //Add object to Lua registry, and register the lazy loader. This loads the bindings on first use, so we do not bind objects that we never use from the scripts.
     //REGISTY[this] = {"metatable": { "object_ptr": this, "__index": lazyLoadingIndex, "__newindex": lazyLoadingNewIndex} }

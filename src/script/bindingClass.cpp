@@ -19,8 +19,12 @@ static int updateCallback(lua_State* L)
     if (!obj)   //Object was destroyed.
         return 0;
 
+    lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+    lua_State* main_thread = lua_tothread(L, -1);
+    lua_pop(L, 1);
+
     script::Callback* callback = reinterpret_cast<script::Callback*>(lua_touserdata(L, lua_upvalueindex(1)));
-    callback->setLuaState(L);
+    callback->setLuaState(main_thread);
     //REGISTRY[callback_ptr] = parameter(1)
     lua_pushvalue(L, lua_upvalueindex(1));//The pointer of this callback.
     lua_pushvalue(L, 1);
