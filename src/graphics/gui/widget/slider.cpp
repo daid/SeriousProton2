@@ -95,15 +95,12 @@ void Slider::setRange(float min, float max)
 void Slider::updateRenderData()
 {
     Vector2d size(getRenderSize());
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.mesh = createStretched(size);
-    render_data.texture = t.texture;
-    render_data.color = t.color;
-    
+
+    updateRenderDataToThemeImage();
+
     float f = (value - min_value) / (max_value - min_value);
     dial->setVisible(max_value - min_value != 0.0);
-        
+
     if (size.x > size.y)
     {
         dial->layout.size.x = size.y;

@@ -60,16 +60,9 @@ void Tumbler::onUpdate(float delta)
 
 void Tumbler::updateRenderData()
 {
-    const ThemeStyle::StateStyle& bt = theme->states[int(getState())];
     const ThemeStyle::StateStyle& ft = text_theme->states[int(getState())];
 
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = bt.texture;
-    if (bt.texture)
-        render_data.mesh = createStretchedHV(getRenderSize(), bt.size);
-    else
-        render_data.mesh = nullptr;
-    render_data.color = bt.color;
+    updateRenderDataToThemeImage();
 
     if (ft.font)
     {

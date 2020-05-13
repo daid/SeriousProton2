@@ -55,12 +55,7 @@ void KeyNavigator::setAttribute(const string& key, const string& value)
 
 void KeyNavigator::updateRenderData()
 {
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
-
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.mesh = createStretchedHV(getRenderSize(), t.size);
-    render_data.texture = t.texture;
-    render_data.color = t.color;
+    updateRenderDataToThemeImage();
 }
 
 void KeyNavigator::onUpdate(float delta)

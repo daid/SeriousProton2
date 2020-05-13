@@ -60,18 +60,9 @@ void Listbox::updateRenderData()
     const ThemeStyle::StateStyle& ft = text_theme->states[int(getState())];
 
     double entry_height = (text_size > 0.0 ? text_size : ft.size) * 2.0;
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = bt.texture;
-    if (bt.texture)
-    {
-        Rect2d selection_area(0, getRenderSize().y + slider->getValue() - entry_height - active_index * entry_height, getRenderSize().x - bt.size, entry_height);
-        render_data.mesh = createStretchedHV(selection_area, Rect2d(0, 0, getRenderSize().x, getRenderSize().y), bt.size);
-    }
-    else
-    {
-        render_data.mesh = nullptr;
-    }
-    render_data.color = bt.color;
+
+    Rect2f selection_area(0, getRenderSize().y + slider->getValue() - entry_height - active_index * entry_height, getRenderSize().x - bt.size, entry_height);
+    updateRenderDataToThemeImage(selection_area, Rect2f(Vector2f(0, 0), Vector2f(getRenderSize())));
 
     slider->layout.size.x = bt.size;
 

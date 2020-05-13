@@ -11,38 +11,21 @@ ThemeImage::ThemeImage(P<Widget> parent, const string& theme_style_name)
 : Widget(parent)
 {
     loadThemeStyle(theme_style_name);
-    orientation = Orientation::Auto;
     setAttribute("order", "-2");
 }
 
-void ThemeImage::setOrientation(Orientation orientation)
+void ThemeImage::setFlags(int flags)
 {
-    if (this->orientation != orientation)
+    if (this->flags != flags)
     {
-        this->orientation = orientation;
+        this->flags = flags;
         markRenderDataOutdated();
     }
 }
 
 void ThemeImage::updateRenderData()
 {
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
-    
-    render_data.shader = Shader::get("internal:basic.shader");
-    switch(orientation)
-    {
-    case Orientation::Auto:
-        render_data.mesh = createStretched(getRenderSize());
-        break;
-    case Orientation::Horizontal:
-        render_data.mesh = createStretchedH(getRenderSize());
-        break;
-    case Orientation::Vertical:
-        render_data.mesh = createStretchedV(getRenderSize());
-        break;
-    }
-    render_data.texture = t.texture;
-    render_data.color = t.color;
+    updateRenderDataToThemeImage(flags);
 }
 
 }//namespace gui

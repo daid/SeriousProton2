@@ -75,15 +75,7 @@ void Button::onUpdate(float delta)
 
 void Button::updateRenderData()
 {
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
-
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = t.texture;
-    if (t.texture)
-        render_data.mesh = createStretched(getRenderSize());
-    else
-        render_data.mesh = nullptr;
-    render_data.color = t.color;
+    updateRenderDataToThemeImage();
 }
 
 bool Button::onPointerDown(io::Pointer::Button button, Vector2d position, int id)

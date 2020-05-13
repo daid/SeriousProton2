@@ -73,9 +73,9 @@ public:
     State getState() const;
     
     void setPosition(float x, float y, Alignment alignment);
-    void setPosition(sp::Vector2d v, Alignment alignment);
+    void setPosition(Vector2d v, Alignment alignment);
     void setSize(float x, float y);
-    void setSize(sp::Vector2d v);
+    void setSize(Vector2d v);
     void setVisible(bool visible);
     void show();
     void hide();
@@ -142,12 +142,12 @@ protected:
         render_data_outdated = true;
     }
 
-    std::shared_ptr<MeshData> createStretched(Vector2d size);
-    std::shared_ptr<MeshData> createStretchedH(Vector2d size);
-    std::shared_ptr<MeshData> createStretchedV(Vector2d size);
-    std::shared_ptr<MeshData> createStretchedHV(Vector2d size, double corner_size);
-    std::shared_ptr<MeshData> createStretchedHV(Rect2d size, double corner_size);
-    std::shared_ptr<MeshData> createStretchedHV(Rect2d size, Rect2d clip_rect, double corner_size);
+    static constexpr int render_flag_horizontal_corner_clip = 0x01;
+    static constexpr int render_flag_vertical_corner_clip = 0x02;
+    void updateRenderDataToThemeImage(int flags=0);
+    void updateRenderDataToThemeImage(Rect2f rect, int flags=0);
+    void updateRenderDataToThemeImage(Rect2f rect, Rect2f clip_rect, int flags=0);
+
 private:
     Widget(P<Node> parent);
 

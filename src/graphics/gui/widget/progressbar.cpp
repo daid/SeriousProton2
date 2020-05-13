@@ -77,10 +77,8 @@ void Progressbar::updateRenderData()
 {
     float f = (value - min_value) / (max_value - min_value);
     f = std::max(0.0f, std::min(f, 1.0f));
-    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
-    render_data.shader = Shader::get("internal:basic.shader");
-    render_data.texture = t.texture;
-    render_data.color = t.color;
+
+    updateRenderDataToThemeImage();
 
     fill->layout.size = getRenderSize();
     switch(fill->layout.alignment)
@@ -88,23 +86,17 @@ void Progressbar::updateRenderData()
     case Alignment::TopLeft:
     case Alignment::Top:
     case Alignment::TopRight:
-        render_data.mesh = createStretchedV(getRenderSize());
-        fill->layout.size.y *= f;
-        fill->setOrientation(ThemeImage::Orientation::Vertical);
-        break;
     case Alignment::BottomLeft:
     case Alignment::Bottom:
     case Alignment::BottomRight:
-        render_data.mesh = createStretchedV(getRenderSize());
         fill->layout.size.y *= f;
-        fill->setOrientation(ThemeImage::Orientation::Vertical);
+        fill->setFlags(render_flag_vertical_corner_clip);
         break;
     case Alignment::Left:
     case Alignment::Right:
     case Alignment::Center:
-        render_data.mesh = createStretchedH(getRenderSize());
         fill->layout.size.x *= f;
-        fill->setOrientation(ThemeImage::Orientation::Horizontal);
+        fill->setFlags(render_flag_horizontal_corner_clip);
         break;
     }
 }
