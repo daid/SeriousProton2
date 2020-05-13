@@ -9,6 +9,7 @@ Camera::Camera(P<Node> parent)
     field_of_view.x = 1.0;
     field_of_view.y = 1.0;
     view_distance = 1.0;
+    setProjectionMatrix(Matrix4x4f::identity());
 }
 
 void Camera::setOrtographic(sp::Vector2d view_size, double view_distance)
