@@ -32,6 +32,7 @@ private:
     sp::P<Widget> cursor_widget;
     float text_size;
     bool multiline = true;
+    bool readonly = false;
     int texture_revision;
 
     string value;

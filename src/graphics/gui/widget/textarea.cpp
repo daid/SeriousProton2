@@ -61,6 +61,10 @@ void TextArea::setAttribute(const string& key, const string& value)
             vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
         }
     }
+    else if (key == "readonly")
+    {
+        readonly = stringutil::convert::toBool(value);
+    }
     else
     {
         Widget::setAttribute(key, value);
@@ -179,6 +183,8 @@ void TextArea::onPointerUp(Vector2d position, int id)
 
 void TextArea::onTextInput(const string& text)
 {
+    if (readonly)
+        return;
     value = value.substr(0, std::min(selection_start, selection_end)) + text + value.substr(std::max(selection_start, selection_end));
     selection_end = selection_start = std::min(selection_start, selection_end) + text.length();
     markRenderDataOutdated();
@@ -277,6 +283,8 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_start = value.length();
         break;
     case TextInputEvent::Delete:
+        if (readonly)
+            return;
         if (selection_start != selection_end)
             value = value.substr(0, std::min(selection_start, selection_end)) + value.substr(std::max(selection_start, selection_end));
         else
@@ -284,6 +292,8 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_start = selection_end = std::min(selection_start, selection_end);
         break;
     case TextInputEvent::Backspace:
+        if (readonly)
+            return;
         if (selection_start != selection_end)
         {
             onTextInput(TextInputEvent::Delete);
@@ -297,6 +307,8 @@ void TextArea::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Indent:
+        if (readonly)
+            return;
         if (selection_start == selection_end)
         {
             int start_of_line = value.substr(0, selection_end).rfind("\n") + 1;
@@ -323,6 +335,8 @@ void TextArea::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Unindent:
+        if (readonly)
+            return;
         if (selection_start == selection_end)
         {
         }
@@ -346,6 +360,8 @@ void TextArea::onTextInput(TextInputEvent e)
         }
         break;
     case TextInputEvent::Return:
+        if (readonly)
+            return;
         if (multiline)
             onTextInput("\n");
         else
@@ -355,10 +371,14 @@ void TextArea::onTextInput(TextInputEvent e)
         io::Clipboard::set(value.substr(std::min(selection_start, selection_end), std::max(selection_start, selection_end)));
         break;
     case TextInputEvent::Paste:
+        if (readonly)
+            return;
         onTextInput(io::Clipboard::get());
         break;
     case TextInputEvent::Cut:
         io::Clipboard::set(value.substr(std::min(selection_start, selection_end), std::max(selection_start, selection_end)));
+        if (readonly)
+            return;
         if (selection_start != selection_end)
             onTextInput(TextInputEvent::Delete);
         break;
