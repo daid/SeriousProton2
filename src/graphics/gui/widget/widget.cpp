@@ -178,20 +178,21 @@ bool Widget::isVisible()
 
 void Widget::setEnable(bool enable)
 {
-    if (enabled != enable) markRenderDataOutdated();
-    enabled = enable;
+    if (enabled != enable)
+    {
+        enabled = enable;
+        markRenderDataOutdated();
+    }
 }
 
 void Widget::enable()
 {
-    if (!enabled) markRenderDataOutdated();
-    enabled = true;
+    setEnable(true);
 }
 
 void Widget::disable()
 {
-    if (enabled) markRenderDataOutdated();
-    enabled = false;
+    setEnable(false);
 }
 
 bool Widget::isEnabled()
