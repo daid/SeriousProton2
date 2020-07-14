@@ -19,11 +19,11 @@ commands =
     cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.win64.toolchain
     cmake --build .
 
-[build-pi]
-directory = _build_pi
-commands =
-    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/pi.toolchain
-    cmake --build .
+#[build-pi]
+#directory = _build_pi
+#commands =
+#    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/pi.toolchain
+#    cmake --build .
 
 [build-android]
 directory = _build_android
