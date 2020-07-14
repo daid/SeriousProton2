@@ -7,6 +7,12 @@ commands =
     cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/
     cmake --build .
 
+[build-native-debug]
+directory = _build_native_debug
+commands =
+    cmake ../template/ -G Ninja -DCMAKE_MODULE_PATH=../cmake/ -DCMAKE_BUILD_TYPE=Debug
+    cmake --build .
+
 [build-win32]
 directory = _build_win32
 commands =
