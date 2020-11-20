@@ -29,7 +29,7 @@ void VerticalLayout::update(P<Widget> container, Rect2d rect)
         if (w->layout.fill_height && fill_height > 0.0f)
             h += remaining_height * w->layout.size.y / fill_height;
         basicLayout(Rect2d(rect.position.x, y - h, rect.size.x, h), *w);
-        y = w->getPosition2D().y - w->layout.margin.top;
+        y = w->getPosition2D().y - w->layout.margin.bottom;
     }
 }
 

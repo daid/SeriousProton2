@@ -120,6 +120,13 @@ void Keybinding::addKey(const string& key, bool inverted)
         bindings.push_back({pointer_mask | stringutil::convert::toInt(key.substr(8)), inverted});
         return;
     }
+    if (key.startswith("mouse:"))
+    {
+        if (key == "mouse:x") bindings.push_back({mouse_movement_mask | 0, inverted});
+        else if (key == "mouse:y") bindings.push_back({mouse_movement_mask | 1, inverted});
+        else LOG(Warning, "Unknown mouse movement binding:", key);
+        return;
+    }
     if (key.startswith("wheel:"))
     {
         if (key == "wheel:x") bindings.push_back({mouse_wheel_mask | 0, inverted});
@@ -166,6 +173,13 @@ string Keybinding::getKey(int index) const
             return "joy:" + string((key >> 8) & 0xff) + ":axis:" + string(key & 0xff);
         case joystick_button_mask:
             return "joy:" + string((key >> 8) & 0xff) + ":button:" + string(key & 0xff);
+        case mouse_movement_mask:
+            switch(key & ~type_mask)
+            {
+            case 0: return "mouse:x";
+            case 1: return "mouse:y";
+            }
+            break;
         case mouse_wheel_mask:
             switch(key & ~type_mask)
             {
@@ -210,6 +224,13 @@ string Keybinding::getHumanReadableKeyName(int index) const
             return "Joystick Axis: " + string(key & 0xff);
         case joystick_button_mask:
             return "Joystick Button: " + string(key & 0xff);
+        case mouse_movement_mask:
+            switch(key & ~type_mask)
+            {
+            case 0: return "Mouse X";
+            case 1: return "Mouse Y";
+            }
+            break;
         case mouse_wheel_mask:
             switch(key & ~type_mask)
             {
@@ -380,18 +401,23 @@ void Keybinding::postFixedUpdate()
         fixed_up_event = false;
 }
 
-static int release_mouse_wheel = 0;
+static int release_mouse = 0;
 
 void Keybinding::allPostUpdate()
 {
     for(P<Keybinding> key : keybindings)
         key->postUpdate();
     
-    if (release_mouse_wheel & (1 << 0))
+    if (release_mouse & (1 << 0))
         updateKeys(0 | mouse_wheel_mask, 0.0);
-    if (release_mouse_wheel & (1 << 1))
+    if (release_mouse & (1 << 1))
         updateKeys(1 | mouse_wheel_mask, 0.0);
-    release_mouse_wheel = 0;
+
+    if (release_mouse & (1 << 2))
+        updateKeys(0 | mouse_movement_mask, 0.0);
+    if (release_mouse & (1 << 3))
+        updateKeys(1 | mouse_movement_mask, 0.0);
+    release_mouse = 0;
 }
 
 void Keybinding::allPostFixedUpdate()
@@ -442,26 +468,40 @@ void Keybinding::handleEvent(const SDL_Event& event)
                 updateKeys(int(button) | pointer_mask, 0.0);
         }
         break;
+    case SDL_MOUSEMOTION:{
+        int w, h;
+        SDL_GetWindowSize(SDL_GetWindowFromID(event.motion.windowID), &w, &h);
+        if (event.motion.xrel != 0)
+        {
+            updateKeys(0 | mouse_movement_mask, float(event.motion.xrel) / float(w) * 500.0);
+            release_mouse |= 1 << 2;
+        }
+        if (event.motion.yrel != 0)
+        {
+            updateKeys(1 | mouse_movement_mask, float(event.motion.yrel / float(h)) * 500.0);
+            release_mouse |= 1 << 3;
+        }
+        }break;
     case SDL_MOUSEWHEEL:
         if (event.wheel.x > 0)
         {
             updateKeys(0 | mouse_wheel_mask, 1.0);
-            release_mouse_wheel |= 1 << 0;
+            release_mouse |= 1 << 0;
         }
         if (event.wheel.x < 0)
         {
             updateKeys(0 | mouse_wheel_mask, -1.0);
-            release_mouse_wheel |= 1 << 0;
+            release_mouse |= 1 << 0;
         }
         if (event.wheel.y > 0)
         {
             updateKeys(1 | mouse_wheel_mask, 1.0);
-            release_mouse_wheel |= 1 << 1;
+            release_mouse |= 1 << 1;
         }
         if (event.wheel.y < 0)
         {
             updateKeys(1 | mouse_wheel_mask, -1.0);
-            release_mouse_wheel |= 1 << 1;
+            release_mouse |= 1 << 1;
         }
         break;
     case SDL_FINGERDOWN:
