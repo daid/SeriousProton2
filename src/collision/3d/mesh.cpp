@@ -1,5 +1,6 @@
 #include <sp2/collision/3d/mesh.h>
 #include <sp2/logging.h>
+#include <sp2/assert.h>
 
 #include <private/collision/bullet.h>
 
@@ -15,6 +16,7 @@ Mesh3D::Mesh3D(std::vector<Vector3>&& vertices, std::vector<int>&& indices)
 
 btCollisionShape* Mesh3D::createShape() const
 {
+    sp2assert(type != Type::Dynamic, "Mesh3D cannot be dynamic, bullet physics limitation.");
     return new btBvhTriangleMeshShape(triangle_index_array, false);
 }
 

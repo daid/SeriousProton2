@@ -20,7 +20,10 @@ public:
         sp::Quaterniond rotation;
     };
 
+    Compound3D();
     Compound3D(std::initializer_list<Entry> shapes);
+
+    void add(const Shape3D* shape, sp::Vector3d position, sp::Quaterniond rotation);
 private:
     btCollisionShape* createShape() const override;
 

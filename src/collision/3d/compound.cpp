@@ -14,9 +14,18 @@ public:
     std::vector<std::unique_ptr<btCollisionShape>> shapes;
 };
 
+Compound3D::Compound3D()
+{
+}
+
 Compound3D::Compound3D(std::initializer_list<Entry> shapes)
 : shapes(shapes)
 {
+}
+
+void Compound3D::add(const Shape3D* shape, sp::Vector3d position, sp::Quaterniond rotation)
+{
+    shapes.push_back({shape, position, rotation});
 }
 
 btCollisionShape* Compound3D::createShape() const

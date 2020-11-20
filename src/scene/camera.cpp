@@ -80,15 +80,15 @@ void Camera::setAspectRatio(double ratio)
         break;
     case Type::Perspective:
         if (ratio > field_of_view.x / field_of_view.y)
-            setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
+            setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 0.1f, view_distance));
         else
-            setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 1.0f, view_distance));        
+            setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 0.1f, view_distance));        
         break;
     case Type::PerspectiveVertical:
-        setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 1.0f, view_distance));
+        setProjectionMatrix(Matrix4x4f::perspective(field_of_view.y, ratio, 0.1f, view_distance));
         break;
     case Type::PerspectiveHorizontal:
-        setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 1.0f, view_distance));
+        setProjectionMatrix(Matrix4x4f::perspectiveH(field_of_view.x, ratio, 0.1f, view_distance));
         break;
     }
 }
