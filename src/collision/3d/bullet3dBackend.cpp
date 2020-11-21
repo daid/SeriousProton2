@@ -108,11 +108,28 @@ BulletBackend::~BulletBackend()
     delete configuration;
 }
 
+namespace {
+    class Collision
+    {
+    public:
+        P<Node> node_a;
+        P<Node> node_b;
+        float force;
+        sp::Vector3d position;
+        sp::Vector3d normal;
+
+        Collision(P<Node> node_a, P<Node> node_b, float force, sp::Vector3d position, sp::Vector3d normal)
+        : node_a(node_a), node_b(node_b), force(force), position(position), normal(normal)
+        {}
+    };
+}
+
 void BulletBackend::step(float time_delta)
 {
     world->stepSimulation(time_delta);
-        //TODO: Collisions events
-        /*
+
+    std::vector<Collision> collisions;
+
     int numManifolds = world->getDispatcher()->getNumManifolds();
     for (int i = 0; i < numManifolds; i++)
     {
@@ -124,14 +141,43 @@ void BulletBackend::step(float time_delta)
         for (int j = 0; j < numContacts; j++)
         {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
-            if (pt.getDistance() < 0.f)
+            if (pt.getDistance() <= 0.f)
             {
                 const btVector3& ptA = pt.getPositionWorldOnA();
-                const btVector3& ptB = pt.getPositionWorldOnB();
                 const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+
+                Node* node_a = static_cast<Node*>(obA->getUserPointer());
+                Node* node_b = static_cast<Node*>(obB->getUserPointer());
+
+                float collision_force = std::abs(pt.m_appliedImpulse);
+
+                collisions.emplace_back(node_a, node_b, collision_force, toVector<double>(ptA + ptA) * 0.5, toVector<double>(normalOnB));
             }
         }
-    }        */
+    }
+
+    for(auto& collision : collisions)
+    {
+        if (collision.node_a && collision.node_b)
+        {
+            CollisionInfo3D info;
+            info.other = collision.node_b;
+            info.force = collision.force;
+            info.position = collision.position;
+            info.normal = collision.normal;
+            collision.node_a->onCollision(info);
+        }
+        if (collision.node_a && collision.node_b)
+        {
+            CollisionInfo3D info;
+            info.other = collision.node_a;
+            info.force = collision.force;
+            info.position = collision.position;
+            info.normal = -collision.normal;
+            collision.node_b->onCollision(info);
+        }
+    }
 }
 
 void BulletBackend::postUpdate(float delta)

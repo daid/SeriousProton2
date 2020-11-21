@@ -154,19 +154,21 @@ class DestructionListener : public b2DestructionListener
 	}
 };
 
-class Collision
-{
-public:
-    P<Node> node_a;
-    P<Node> node_b;
-    float force;
-    sp::Vector2d position;
-    sp::Vector2d normal;
+namespace {
+    class Collision
+    {
+    public:
+        P<Node> node_a;
+        P<Node> node_b;
+        float force;
+        sp::Vector2d position;
+        sp::Vector2d normal;
 
-    Collision(P<Node> node_a, P<Node> node_b, float force, sp::Vector2d position, sp::Vector2d normal)
-    : node_a(node_a), node_b(node_b), force(force), position(position), normal(normal)
-    {}
-};
+        Collision(P<Node> node_a, P<Node> node_b, float force, sp::Vector2d position, sp::Vector2d normal)
+        : node_a(node_a), node_b(node_b), force(force), position(position), normal(normal)
+        {}
+    };
+}
 
 Box2DBackend::Box2DBackend()
 {

@@ -31,6 +31,14 @@ public:
     sp::Vector2d position;
     sp::Vector2d normal;
 };
+class CollisionInfo3D
+{
+public:
+    P<Node> other;
+    float force;
+    sp::Vector3d position;
+    sp::Vector3d normal;
+};
 class Scene;
 class RenderData;
 class Node : public script::BindingObject
@@ -103,6 +111,7 @@ public:
     virtual void onFixedUpdate() {}
     //Event called when 2 nodes collide. Not called when the game is paused.
     virtual void onCollision(CollisionInfo& info) {}
+    virtual void onCollision(CollisionInfo3D& info) {}
     
     RenderData render_data;
 
