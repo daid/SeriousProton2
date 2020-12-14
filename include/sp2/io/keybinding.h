@@ -17,6 +17,7 @@ class Keybinding : public AutoPointerObject
 {
 public:
     enum class Type {
+        None = 0,
         Keyboard = (1 << 0),
         Pointer = (1 << 1),
         JoystickButton = (1 << 2),
@@ -59,6 +60,7 @@ public:
 
     // Get the name of the key in the same format as used for setKey and friends. Returns empty string if the index as no set key.
     string getKey(int index) const;
+    Type getKeyType(int index) const;
     // Get a human readable name of the key for display purposes.
     string getHumanReadableKeyName(int index) const;
 
@@ -72,7 +74,7 @@ public:
 
     //Start a binding process from the user. The next button pressed by the user will be bound to this key.
     //Note that this will add on top of the already existing binds, so clearKeys() need to be called if you want to bind a single key.
-    void startUserRebind();
+    void startUserRebind(Type bind_type=Type::Default);
     bool isUserRebinding() const;
 
     static int joystickCount();
@@ -113,6 +115,7 @@ private:
     
     static PList<Keybinding> keybindings;
     static P<Keybinding> rebinding_key;
+    static Type rebinding_type;
     
     static constexpr int type_mask = 0xfff << 16;
     static constexpr int keyboard_mask = static_cast<int>(Type::Keyboard) << 16;
@@ -127,6 +130,8 @@ private:
 
     friend class sp::Engine;
 };
+
+bool operator&(const Keybinding::Type a, const Keybinding::Type b);
 
 }//namespace io
 }//namespace sp

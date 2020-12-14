@@ -13,6 +13,7 @@ namespace io {
 
 PList<Keybinding> Keybinding::keybindings SP2_INIT_EARLY;
 P<Keybinding> Keybinding::rebinding_key SP2_INIT_EARLY;
+Keybinding::Type Keybinding::rebinding_type;
 
 Keybinding::Keybinding(const string& name)
 : name(name), label(name.substr(0, 1).upper() + name.substr(1).lower())
@@ -199,51 +200,86 @@ string Keybinding::getKey(int index) const
     return "";
 }
 
+Keybinding::Type Keybinding::getKeyType(int index) const
+{
+    if (index < 0 || index >= int(bindings.size()))
+        return Type::None;
+    return static_cast<Type>((bindings[index].key & type_mask) >> 16);
+}
+
 string Keybinding::getHumanReadableKeyName(int index) const
 {
     if (index >= 0 && index < int(bindings.size()))
     {
         int key = bindings[index].key;
+        int data = key & ~type_mask;
         switch(key & type_mask)
         {
         case keyboard_mask:
-            return SDL_GetKeyName(key & ~type_mask);
+            return SDL_GetKeyName(data);
         case pointer_mask:
-            switch(Pointer::Button(key & ~type_mask))
+            switch(Pointer::Button(data))
             {
             case Pointer::Button::Touch: return "Touch Screen";
-            case Pointer::Button::Left: return "Left Mouse Button";
-            case Pointer::Button::Middle: return "Middle Mouse Button";
-            case Pointer::Button::Right: return "Right Mouse Button";
-            case Pointer::Button::Other1: return "Other1 Mouse Button";
-            case Pointer::Button::Other2: return "Other2 Mouse Button";
+            case Pointer::Button::Left: return "Left Button";
+            case Pointer::Button::Middle: return "Middle Button";
+            case Pointer::Button::Right: return "Right Button";
+            case Pointer::Button::X1: return "X1 Button";
+            case Pointer::Button::X2: return "X2 Button";
             default: break;
             }
             break;
         case joystick_axis_mask:
-            return "Joystick Axis: " + string(key & 0xff);
+            return "Axis: " + string(data & 0xff);
         case joystick_button_mask:
-            return "Joystick Button: " + string(key & 0xff);
+            return "Button: " + string(data & 0xff);
         case mouse_movement_mask:
-            switch(key & ~type_mask)
+            switch(data)
             {
-            case 0: return "Mouse X";
-            case 1: return "Mouse Y";
+            case 0: return "X";
+            case 1: return "Y";
             }
             break;
         case mouse_wheel_mask:
-            switch(key & ~type_mask)
+            switch(data)
             {
-            case 0: return "Mouse Wheel Sideways";
-            case 1: return "Mouse Wheel";
+            case 0: return "Wheel Sideways";
+            case 1: return "Wheel";
             }
             break;
         case game_controller_button_mask:
-            return "Controller: " + string(SDL_GameControllerGetStringForButton(SDL_GameControllerButton(key & 0xff)));
+            switch(data & 0xff)
+            {
+            case SDL_CONTROLLER_BUTTON_A: return "A";
+            case SDL_CONTROLLER_BUTTON_B: return "B";
+            case SDL_CONTROLLER_BUTTON_X: return "X";
+            case SDL_CONTROLLER_BUTTON_Y: return "Y";
+            case SDL_CONTROLLER_BUTTON_BACK: return "Back";
+            case SDL_CONTROLLER_BUTTON_GUIDE: return "Guide";
+            case SDL_CONTROLLER_BUTTON_START: return "Start";
+            case SDL_CONTROLLER_BUTTON_LEFTSTICK: return "LeftStick";
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK: return "RightStick";
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: return "LeftShoulder";
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return "RightShoulder";
+            case SDL_CONTROLLER_BUTTON_DPAD_UP: return "Up";
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: return "Down";
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: return "Left";
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return "Right";
+            }
+            break;
         case game_controller_axis_mask:
-            return "Controller: " + string(SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis(key & 0xff)));
+            switch(data & 0xff)
+            {
+            case SDL_CONTROLLER_AXIS_LEFTX: return "X Axis";
+            case SDL_CONTROLLER_AXIS_LEFTY: return "Y Axis";
+            case SDL_CONTROLLER_AXIS_RIGHTX: return "X Axis Right";
+            case SDL_CONTROLLER_AXIS_RIGHTY: return "Y Axis Right";
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT: return "Trigger Axis Left";
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: return "Trigger Axis Right";
+            }
+            break;
         case virtual_mask:
-            return "Virtual: " + string(key & 0xff);
+            return "Virtual-" + string(data & 0xff);
         }
         return "Unknown";
     }
@@ -276,9 +312,10 @@ float Keybinding::getValue() const
     return value;
 }
 
-void Keybinding::startUserRebind()
+void Keybinding::startUserRebind(Type bind_type)
 {
     rebinding_key = this;
+    rebinding_type = bind_type;
 }
 
 bool Keybinding::isUserRebinding() const
@@ -444,8 +481,8 @@ void Keybinding::handleEvent(const SDL_Event& event)
             case SDL_BUTTON_LEFT: button = io::Pointer::Button::Left; break;
             case SDL_BUTTON_MIDDLE: button = io::Pointer::Button::Middle; break;
             case SDL_BUTTON_RIGHT: button = io::Pointer::Button::Right; break;
-            case SDL_BUTTON_X1: button = io::Pointer::Button::Other1; break;
-            case SDL_BUTTON_X2: button = io::Pointer::Button::Other2; break;
+            case SDL_BUTTON_X1: button = io::Pointer::Button::X1; break;
+            case SDL_BUTTON_X2: button = io::Pointer::Button::X2; break;
             default: break;
             }
             if (button != io::Pointer::Button::Unknown)
@@ -460,8 +497,8 @@ void Keybinding::handleEvent(const SDL_Event& event)
             case SDL_BUTTON_LEFT: button = io::Pointer::Button::Left; break;
             case SDL_BUTTON_MIDDLE: button = io::Pointer::Button::Middle; break;
             case SDL_BUTTON_RIGHT: button = io::Pointer::Button::Right; break;
-            case SDL_BUTTON_X1: button = io::Pointer::Button::Other1; break;
-            case SDL_BUTTON_X2: button = io::Pointer::Button::Other2; break;
+            case SDL_BUTTON_X1: button = io::Pointer::Button::X1; break;
+            case SDL_BUTTON_X2: button = io::Pointer::Button::X2; break;
             default: break;
             }
             if (button != io::Pointer::Button::Unknown)
@@ -585,7 +622,7 @@ void Keybinding::handleEvent(const SDL_Event& event)
 
 void Keybinding::updateKeys(int key_number, float value)
 {
-    if (value > 0.5 && rebinding_key)
+    if (value > 0.5 && rebinding_key && (key_number & (static_cast<int>(rebinding_type) << 16)))
     {
         rebinding_key->bindings.push_back({key_number, false});
         rebinding_key = nullptr;
@@ -604,6 +641,11 @@ void Keybinding::updateKeys(int key_number, float value)
             }
         }
     }
+}
+
+bool operator&(const Keybinding::Type a, const Keybinding::Type b)
+{
+    return static_cast<int>(a) & static_cast<int>(b);
 }
 
 }//namespace io

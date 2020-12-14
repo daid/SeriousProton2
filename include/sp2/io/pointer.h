@@ -15,8 +15,8 @@ public:
         Left,
         Middle,
         Right,
-        Other1,
-        Other2,
+        X1,
+        X2,
         Unknown
     };
 private:
