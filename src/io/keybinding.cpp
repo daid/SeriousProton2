@@ -149,6 +149,13 @@ void Keybinding::addKey(const string& key, bool inverted)
         LOG(Warning, "Unknown key binding:", key);
 }
 
+void Keybinding::removeKey(int index)
+{
+    if (index < 0 || index >= int(bindings.size()))
+        return;
+    bindings.erase(bindings.begin() + index);
+}
+
 void Keybinding::clearKeys()
 {
     bindings.clear();

@@ -56,6 +56,7 @@ public:
     void setKey(const string& key);
     void setKeys(const std::initializer_list<const string>& keys);
     void addKey(const string& key, bool inverted=false);
+    void removeKey(int index);
     void clearKeys();
 
     // Get the name of the key in the same format as used for setKey and friends. Returns empty string if the index as no set key.
