@@ -16,6 +16,23 @@ namespace io {
 class Keybinding : public AutoPointerObject
 {
 public:
+    enum class Type {
+        Keyboard = (1 << 0),
+        Pointer = (1 << 1),
+        JoystickButton = (1 << 2),
+        JoystickAxis = (1 << 3),
+        MouseMovement = (1 << 4),
+        MouseWheel = (1 << 5),
+        ControllerButton = (1 << 6),
+        ControllerAxis = (1 << 7),
+        Virtual = (1 << 8),
+
+        Joystick = JoystickButton | JoystickAxis,
+        Controller = ControllerButton | ControllerAxis,
+
+        Default = Keyboard | Pointer | Joystick | Controller | Virtual,
+    };
+
     //Create a keybinding, and optionally set the default key(s). See setKey for documentation on key naming.
     Keybinding(const string& name);
     Keybinding(const string& name, const string& default_key);
@@ -97,16 +114,16 @@ private:
     static PList<Keybinding> keybindings;
     static P<Keybinding> rebinding_key;
     
-    static constexpr int type_mask = (0x0f << 16);
-    static constexpr int keyboard_mask = (0x01 << 16);
-    static constexpr int pointer_mask =  (0x02 << 16);
-    static constexpr int joystick_button_mask = (0x03 << 16);
-    static constexpr int joystick_axis_mask = (0x04 << 16);
-    static constexpr int mouse_movement_mask = (0x05 << 16);
-    static constexpr int mouse_wheel_mask = (0x06 << 16);
-    static constexpr int game_controller_button_mask = (0x07 << 16);
-    static constexpr int game_controller_axis_mask = (0x08 << 16);
-    static constexpr int virtual_mask = (0x0f << 16);
+    static constexpr int type_mask = 0xfff << 16;
+    static constexpr int keyboard_mask = static_cast<int>(Type::Keyboard) << 16;
+    static constexpr int pointer_mask = static_cast<int>(Type::Pointer) << 16;
+    static constexpr int joystick_button_mask = static_cast<int>(Type::JoystickButton) << 16;
+    static constexpr int joystick_axis_mask = static_cast<int>(Type::JoystickAxis) << 16;
+    static constexpr int mouse_movement_mask = static_cast<int>(Type::MouseMovement) << 16;
+    static constexpr int mouse_wheel_mask = static_cast<int>(Type::MouseWheel) << 16;
+    static constexpr int game_controller_button_mask = static_cast<int>(Type::ControllerButton) << 16;
+    static constexpr int game_controller_axis_mask = static_cast<int>(Type::ControllerAxis) << 16;
+    static constexpr int virtual_mask = static_cast<int>(Type::Virtual) << 16;
 
     friend class sp::Engine;
 };
