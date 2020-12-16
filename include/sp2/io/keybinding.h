@@ -104,6 +104,8 @@ private:
     bool fixed_down_event;
     bool fixed_up_event;
 
+    void addBinding(int key, bool inverted);
+
     void setValue(float value);
     void postUpdate();
     void postFixedUpdate();

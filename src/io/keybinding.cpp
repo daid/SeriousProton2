@@ -72,9 +72,9 @@ void Keybinding::addKey(const string& key, bool inverted)
             int joystick_id = stringutil::convert::toInt(parts[1]);
             int axis_button_id = stringutil::convert::toInt(parts[3]);
             if (parts[2] == "axis")
-                bindings.push_back({int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask, inverted});
+                addBinding(int(axis_button_id) | int(joystick_id) << 8 | joystick_axis_mask, inverted);
             else if (parts[2] == "button")
-                bindings.push_back({int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask, inverted});
+                addBinding(int(axis_button_id) | int(joystick_id) << 8 | joystick_button_mask, inverted);
             else
                 LOG(Warning, "Unknown joystick binding:", key);
         }
@@ -97,7 +97,7 @@ void Keybinding::addKey(const string& key, bool inverted)
                     LOG(Warning, "Unknown axis in game controller binding:", key);
                     return;
                 }
-                bindings.push_back({axis | int(controller_id) << 8 | game_controller_axis_mask, inverted});
+                addBinding(axis | int(controller_id) << 8 | game_controller_axis_mask, inverted);
             }
             else if (parts[2] == "button")
             {
@@ -107,7 +107,7 @@ void Keybinding::addKey(const string& key, bool inverted)
                     LOG(Warning, "Unknown button in game controller binding:", key);
                     return;
                 }
-                bindings.push_back({button | int(controller_id) << 8 | game_controller_button_mask, inverted});
+                addBinding(button | int(controller_id) << 8 | game_controller_button_mask, inverted);
             }
             else
             {
@@ -118,33 +118,33 @@ void Keybinding::addKey(const string& key, bool inverted)
     }
     if (key.startswith("pointer:"))
     {
-        bindings.push_back({pointer_mask | stringutil::convert::toInt(key.substr(8)), inverted});
+        addBinding(pointer_mask | stringutil::convert::toInt(key.substr(8)), inverted);
         return;
     }
     if (key.startswith("mouse:"))
     {
-        if (key == "mouse:x") bindings.push_back({mouse_movement_mask | 0, inverted});
-        else if (key == "mouse:y") bindings.push_back({mouse_movement_mask | 1, inverted});
+        if (key == "mouse:x") addBinding(mouse_movement_mask | 0, inverted);
+        else if (key == "mouse:y") addBinding(mouse_movement_mask | 1, inverted);
         else LOG(Warning, "Unknown mouse movement binding:", key);
         return;
     }
     if (key.startswith("wheel:"))
     {
-        if (key == "wheel:x") bindings.push_back({mouse_wheel_mask | 0, inverted});
-        else if (key == "wheel:y") bindings.push_back({mouse_wheel_mask | 1, inverted});
+        if (key == "wheel:x") addBinding(mouse_wheel_mask | 0, inverted);
+        else if (key == "wheel:y") addBinding(mouse_wheel_mask | 1, inverted);
         else LOG(Warning, "Unknown mouse wheel binding:", key);
         return;
     }
     if (key.startswith("virtual:"))
     {
         int index = stringutil::convert::toInt(key.substr(8));
-        bindings.push_back({virtual_mask | index, inverted});
+        addBinding(virtual_mask | index, inverted);
         return;
     }
 
     SDL_Keycode code = SDL_GetKeyFromName(key.c_str());
     if (code != SDLK_UNKNOWN)
-        bindings.push_back({code | keyboard_mask, inverted});
+        addBinding(code | keyboard_mask, inverted);
     else
         LOG(Warning, "Unknown key binding:", key);
 }
@@ -418,6 +418,19 @@ void Keybinding::setVirtualKey(int index, float value)
     updateKeys(virtual_mask | index, value);
 }
 
+void Keybinding::addBinding(int key, bool inverted)
+{
+    for(auto& bind : bindings)
+    {
+        if (bind.key == key)
+        {
+            bind.inverted = inverted;
+            return;
+        }
+    }
+    bindings.push_back({key, inverted});
+}
+
 void Keybinding::setValue(float value)
 {
     if (value < 0.01 && value > -0.01)//Add a tiny dead zone by default. Assists in gamepads that give off "almost zero" in neutral.
@@ -631,7 +644,7 @@ void Keybinding::updateKeys(int key_number, float value)
 {
     if (value > 0.5 && rebinding_key && (key_number & (static_cast<int>(rebinding_type) << 16)))
     {
-        rebinding_key->bindings.push_back({key_number, false});
+        rebinding_key->addBinding(key_number, false);
         rebinding_key = nullptr;
     }
 
