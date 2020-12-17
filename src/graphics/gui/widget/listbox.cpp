@@ -59,7 +59,7 @@ void Listbox::updateRenderData()
     const ThemeStyle::StateStyle& bt = theme->states[int(getState())];
     const ThemeStyle::StateStyle& ft = text_theme->states[int(getState())];
 
-    double entry_height = (text_size > 0.0 ? text_size : ft.size) * 2.0;
+    double entry_height = (text_size > 0.0 ? text_size : ft.size) * 1.5;
 
     Rect2f selection_area(0, getRenderSize().y + slider->getValue() - entry_height - active_index * entry_height, getRenderSize().x - bt.size, entry_height);
     updateRenderDataToThemeImage(selection_area, Rect2f(Vector2f(0, 0), Vector2f(getRenderSize())));
@@ -128,10 +128,14 @@ void Listbox::onPointerUp(Vector2d position, int id)
     if (position.x >= 0 && position.x <= getRenderSize().x && position.y >= 0 && position.y <= getRenderSize().y && isEnabled())
     {
         double offset = getRenderSize().y - position.y + slider->getValue();
-        double entry_height = (text_size > 0.0 ? text_size : text_theme->states[int(getState())].size) * 2.0;
-        setSelectedIndex(offset / entry_height);
-        playThemeSound(State::Hovered);
-        runCallback(active_index);
+        double entry_height = (text_size > 0.0 ? text_size : text_theme->states[int(getState())].size) * 1.5;
+        int index = offset / entry_height;
+        if (index >= 0 && index < int(items.size()))
+        {
+            setSelectedIndex(index);
+            playThemeSound(State::Hovered);
+            runCallback(active_index);
+        }
     }
 }
 
