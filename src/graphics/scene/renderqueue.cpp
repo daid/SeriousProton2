@@ -119,6 +119,14 @@ void RenderQueue::render(std::vector<Item>& list)
             switch(item.data.type)
             {
             case RenderData::Type::None:
+            case RenderData::Type::Custom1:
+            case RenderData::Type::Custom2:
+            case RenderData::Type::Custom3:
+            case RenderData::Type::Custom4:
+            case RenderData::Type::Custom5:
+            case RenderData::Type::Custom6:
+            case RenderData::Type::Custom7:
+            case RenderData::Type::Custom8:
                 break;
             case RenderData::Type::Normal:
             case RenderData::Type::Transparent:
