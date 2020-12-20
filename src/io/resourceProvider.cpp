@@ -160,7 +160,11 @@ string ResourceStream::readLine()
         if (read(&c, 1) < 1)
             return ret;
         if (c == '\n')
+        {
+            if (!ret.empty() && ret.back() == '\r')
+                ret.pop_back();
             return ret;
+        }
         ret += string(c);
     }
 }

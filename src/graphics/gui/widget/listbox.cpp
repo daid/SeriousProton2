@@ -106,6 +106,11 @@ void Listbox::updateRenderData()
             node->render_data.texture = ft.font->getTexture(32);
             index += 1;
         }
+        while(node_it != text_nodes.end())
+        {
+            (*node_it).destroy();
+            ++node_it;
+        }
 
         slider->setRange(std::max(0.0, entry_height * items.size() - getRenderSize().y), 0);
     }
