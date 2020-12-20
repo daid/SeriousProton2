@@ -36,6 +36,7 @@ void TextArea::setAttribute(const string& key, const string& value)
         this->value = value;
         selection_start = std::min(int(value.length()), selection_start);
         selection_end = std::min(int(value.length()), selection_end);
+        markRenderDataOutdated();
     }
     else if (key == "text_size" || key == "text.size")
     {
@@ -60,6 +61,7 @@ void TextArea::setAttribute(const string& key, const string& value)
             vertical_scroll->setRange(100, 0);
             vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
         }
+        markRenderDataOutdated();
     }
     else if (key == "readonly")
     {
