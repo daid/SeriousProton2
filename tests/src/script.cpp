@@ -41,12 +41,10 @@ TEST_CASE("script")
 {
     sp::script::Environment env;
 
-    CHECK(env.run("print(1)") == true);
-    CHECK(env.getLastError() == "");
-    CHECK(env.run("nofunc(1)") == false);
-    CHECK(env.getLastError() != "");
-    CHECK(env.run("function test() print(1) end") == true);
-    CHECK(env.call("test") == true);
+    CHECK(env.run("print(1)").isOk() == true);
+    CHECK(env.run("nofunc(1)").isOk() == false);
+    CHECK(env.run("function test() print(1) end").isOk() == true);
+    CHECK(env.call("test").isOk() == true);
 }
 
 TEST_CASE("lua language extentions")
@@ -67,14 +65,16 @@ TEST_CASE("coroutines")
     sp::script::Environment env;
 
     env.setGlobal("yield", luaYield);
-    CHECK(env.call("yield") == false);
-    CHECK(env.callCoroutine("yield") != nullptr);
-    CHECK(env.callCoroutine("yield")->resume() == false);
+    CHECK(env.call("yield").isOk() == false);
+    CHECK(env.callCoroutine("yield").value() != nullptr);
+    CHECK(env.callCoroutine("yield").value()->resume().isOk() == true);
+	CHECK(env.callCoroutine("yield").value()->resume().value() == false);
 
-    CHECK(env.run("yield()") == false);
-    CHECK(env.runCoroutine("yield()") != nullptr);
-    CHECK(env.runCoroutine("yield()")->resume() == false);
-    CHECK(env.runCoroutine("yield() yield()")->resume() == true);
+    CHECK(env.run("yield()").isOk() == false);
+    CHECK(env.runCoroutine("yield()").value() != nullptr);
+    CHECK(env.runCoroutine("yield()").value()->resume().isOk() == true);
+    CHECK(env.runCoroutine("yield()").value()->resume().value() == false);
+    CHECK(env.runCoroutine("yield() yield()").value()->resume().value() == true);
 }
 
 TEST_CASE("sandbox")
@@ -82,18 +82,18 @@ TEST_CASE("sandbox")
     sp::script::Environment::SandboxConfig config{1024 * 30, 100000};
     sp::script::Environment env(config);
     LOG(Info, "Sandbox test start");
-    CHECK(env.run("print(2)") == true);
+    CHECK(env.run("print(2)").isOk() == true);
     SUBCASE("endless") {
-        CHECK(env.run("while true do end") == false);
+        CHECK(env.run("while true do end").isOk() == false);
     }
     SUBCASE("memory") {
-        CHECK(env.run("a = {}; while true do a[#a + 1] = 1.1; end") == false);
+        CHECK(env.run("a = {}; while true do a[#a + 1] = 1.1; end").isOk() == false);
     }
     SUBCASE("coroutine memory") {
         env.setGlobal("yield", luaYield);
-        auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end");
+        auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end").value();
         CHECK(co != nullptr);
-        while(co->resume()) {}
+        while(co->resume().value()) {}
     }
 }
 
@@ -105,7 +105,7 @@ TEST_CASE("sandbox memory")
         sp::script::Environment::SandboxConfig config{mem, 100000};
         sp::script::Environment env(config);
 
-        CHECK(env.run("a = {}; while true do a[#a + 1] = tostring(1.1); end") == false);
+        CHECK(env.run("a = {}; while true do a[#a + 1] = tostring(1.1); end").isOk() == false);
     }
 }
 
@@ -118,8 +118,8 @@ TEST_CASE("sandbox memory coroutine")
         sp::script::Environment env(config);
 
         env.setGlobal("yield", luaYield);
-        auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end");
-        while(co && co->resume()) {}
+        auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end").value();
+        while(co && co->resume().value()) {}
     }
 }
 
@@ -129,27 +129,27 @@ TEST_CASE("object")
     sp::script::Environment env(config);
     TestObject test;
     env.setGlobal("test", &test);
-    CHECK(env.run("test.test()") == true);
+    CHECK(env.run("test.test()").isOk() == true);
     test.prop = 2;
-    CHECK(env.run("assert(test.prop == 2)") == true);
-    CHECK(env.run("test.prop = 1") == true);
+    CHECK(env.run("assert(test.prop == 2)").isOk() == true);
+    CHECK(env.run("test.prop = 1").isOk() == true);
     CHECK(test.prop == 1);
-    CHECK(test.callback.call() == false);
-    CHECK(env.run("test.callback(function() print(1) end)") == true);
-    CHECK(test.callback.call() == true);
-    CHECK(test.callback.callCoroutine() == nullptr);
-    CHECK(env.run("assert(test.testV2d({1, 1}).x == 2)") == true);
-    CHECK(env.run("assert(test.testV2d({1, 1}).y == 3)") == true);
-    CHECK(env.run("assert(test.testObj(test) == test)") == true);
+    CHECK(test.callback.call().isOk() == true);
+    CHECK(env.run("test.callback(function() print(1) end)").isOk() == true);
+    CHECK(test.callback.call().isOk() == true);
+    CHECK(test.callback.callCoroutine().value() == nullptr);
+    CHECK(env.run("assert(test.testV2d({1, 1}).x == 2)").isOk() == true);
+    CHECK(env.run("assert(test.testV2d({1, 1}).y == 3)").isOk() == true);
+    CHECK(env.run("assert(test.testObj(test) == test)").isOk() == true);
 
     env.setGlobal("yield", luaYield);
-    CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)") == true);
-    CHECK(test.callback.callCoroutine() != nullptr);
-    CHECK(test.callback.callCoroutine()->resume() == true);
-    CHECK(env.run("test.callback(function() while true do math.sin(0) end end)") == true);
-    CHECK(test.callback.callCoroutine() == nullptr);
-    CHECK(env.run("test.callback(function() yield() while true do math.sin(0) end end)") == true);
-    CHECK(test.callback.callCoroutine()->resume() == false);
+    CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)").isOk() == true);
+    CHECK(test.callback.callCoroutine().value() != nullptr);
+    CHECK(test.callback.callCoroutine().value()->resume().value() == true);
+    CHECK(env.run("test.callback(function() while true do math.sin(0) end end)").isOk() == true);
+    CHECK(test.callback.callCoroutine().value() == nullptr);
+    CHECK(env.run("test.callback(function() yield() while true do math.sin(0) end end)").isOk() == true);
+    CHECK(test.callback.callCoroutine().value()->resume().isOk() == false);
 }
 
 TEST_CASE("coroutine callback")
@@ -158,6 +158,6 @@ TEST_CASE("coroutine callback")
 
     TestObject test;
     env.setGlobal("test", &test);
-    CHECK(env.runCoroutine("test.callback(function() assert(true) end)") == nullptr);
+    CHECK(env.runCoroutine("test.callback(function() assert(true) end)").value() == nullptr);
     test.callback.call();
 }

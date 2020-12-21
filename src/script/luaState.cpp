@@ -25,7 +25,9 @@ Result<Variant> LuaState::callInternal(int arg_count)
         lua_pop(lua, 1);
         return Result<Variant>::makeError(std::move(err));
     }
-    return convertFromLua(lua, typeIdentifier<Variant>{}, -1);
+    auto return_value = convertFromLua(lua, typeIdentifier<Variant>{}, -1);
+    lua_pop(lua, 1);
+    return return_value;
 }
 
 Result<bool> LuaState::resumeInternal(int arg_count)
