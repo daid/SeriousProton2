@@ -21,17 +21,17 @@ public:
     //TODO: This should not be public.
     void setLuaState(lua_State* L) { lua = L; }
 
-    template<typename... ARGS> bool call(ARGS... args)
+    template<typename... ARGS> Result<Variant> call(ARGS... args)
     {
         if (!lua)
-            return false;
+            return Variant();
 
         //Get this callback from the registry
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         if (!lua_isfunction(lua, -1))
         {
             lua_pop(lua, 1);
-            return false;
+            return Variant();
         }
         //If it exists, push the arguments with it, can run it.
         return callInternal(pushArgs(lua, args...));
@@ -42,10 +42,10 @@ public:
         While they are yielded, other lua functions can run.
         This makes coroutines perfect for scripted sequences.
      */
-    template<typename... ARGS> CoroutinePtr callCoroutine(ARGS... args)
+    template<typename... ARGS> Result<CoroutinePtr> callCoroutine(ARGS... args)
     {
         if (!lua)
-            return nullptr;
+            return Result<CoroutinePtr>(nullptr);
 
         //Get the callback from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -53,7 +53,7 @@ public:
         if (!lua_isfunction(lua, -1))
         {
             lua_pop(lua, 1);
-            return nullptr;
+            return Result<CoroutinePtr>(nullptr);
         }
 
         lua_State* L = lua_newthread(lua);

@@ -25,7 +25,7 @@ public:
 
         int arg_count = pushArgs(lua, args...);
         auto result = resumeInternal(arg_count);
-        if (result.isErr() || !result.result())
+        if (result.isErr() || !result.value())
             release();
         return result;
     }

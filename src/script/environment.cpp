@@ -140,22 +140,22 @@ void Environment::setGlobal(const string& name, const string& value)
     lua_pop(lua, 1);
 }
 
-Result<sp::Variant> Environment::load(const string& resource_name)
+Result<Variant> Environment::load(const string& resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
     if (!stream)
     {
-        return Result<sp::Variant>::makeError("Failed to find script resource:" + resource_name);
+        return Result<Variant>::makeError("Failed to find script resource:" + resource_name);
     }
     return _load(stream, resource_name);
 }
 
-Result<sp::Variant> Environment::load(io::ResourceStreamPtr resource)
+Result<Variant> Environment::load(io::ResourceStreamPtr resource)
 {
     return _load(resource, "=[resource]");
 }
 
-Result<sp::Variant> Environment::run(const string& code)
+Result<Variant> Environment::run(const string& code)
 {
     return _run(code, "=[string]");
 }
@@ -169,7 +169,7 @@ Result<CoroutinePtr> Environment::runCoroutine(const string& code)
     alloc_info.in_protected_call = false;
     if (result)
     {
-        sp::string err = luaL_checkstring(L, -1);
+        string err = luaL_checkstring(L, -1);
         lua_pop(L, 1);
         lua_pop(lua, 1);
         return Result<CoroutinePtr>::makeError(std::move(err));
@@ -184,24 +184,24 @@ Result<CoroutinePtr> Environment::runCoroutine(const string& code)
 }
 
 
-Result<sp::Variant> Environment::_load(io::ResourceStreamPtr resource, const string& name)
+Result<Variant> Environment::_load(io::ResourceStreamPtr resource, const string& name)
 {
     if (!resource)
-        return Result<sp::Variant>::makeError("No resource provided");
+        return Result<Variant>::makeError("No resource provided");
 
     return _run(resource->readAll(), "@" + name);
 }
 
-Result<sp::Variant> Environment::_run(const string& code, const string& name)
+Result<Variant> Environment::_run(const string& code, const string& name)
 {
     alloc_info.in_protected_call = true;
     int result = luaL_loadbufferx(lua, code.c_str(), code.length(), name.c_str(), "t");
     alloc_info.in_protected_call = false;
     if (result)
     {
-        sp::string err = luaL_checkstring(lua, -1);
+        string err = luaL_checkstring(lua, -1);
         lua_pop(lua, 1);
-        return Result<sp::Variant>::makeError(std::move(err));
+        return Result<Variant>::makeError(std::move(err));
     }
 
     //Get the environment table from the registry.

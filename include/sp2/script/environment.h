@@ -50,13 +50,13 @@ public:
         lua_pop(lua, 1);
     }
 
-    Result<sp::Variant> load(const string& resource_name);
-    Result<sp::Variant> load(io::ResourceStreamPtr resource);
-    Result<sp::Variant> run(const string& code);
+    Result<Variant> load(const string& resource_name);
+    Result<Variant> load(io::ResourceStreamPtr resource);
+    Result<Variant> run(const string& code);
     Result<CoroutinePtr> runCoroutine(const string& code);
 
     //Call a script function. Return true if the call was made, false on an error.
-    template<typename... ARGS> Result<sp::Variant> call(const string& global_function, ARGS... args)
+    template<typename... ARGS> Result<Variant> call(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -71,7 +71,7 @@ public:
         }
         sp::string err = global_function + " is not a function but: " + luaL_typename(lua, -1);
         lua_pop(lua, 1);
-        return Result<sp::Variant>::makeError(std::move(err));
+        return Result<Variant>::makeError(std::move(err));
     }
 
     /** Run a function as coroutine.
@@ -107,8 +107,8 @@ public:
         size_t max;
     };
 private:
-    Result<sp::Variant> _load(io::ResourceStreamPtr resource, const string& name);
-    Result<sp::Variant> _run(const string& code, const string& name);
+    Result<Variant> _load(io::ResourceStreamPtr resource, const string& name);
+    Result<Variant> _run(const string& code, const string& name);
 
     AllocInfo alloc_info;
 

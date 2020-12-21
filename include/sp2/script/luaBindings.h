@@ -6,6 +6,7 @@
 #include <lua/lauxlib.h>
 #include <sp2/pointer.h>
 #include <sp2/string.h>
+#include <sp2/variant.h>
 #include <sp2/math/vector.h>
 #include <tuple>
 
@@ -282,6 +283,19 @@ template<typename T> Vector3<T> convertFromLua(lua_State* L, typeIdentifier<Vect
     T z = lua_tonumber(L, -1);
     lua_pop(L, 3);
     return Vector3<T>(x, y, z);
+}
+
+static inline Variant convertFromLua(lua_State* L, typeIdentifier<Variant>, int index)
+{
+    if (lua_isnoneornil(L, index))
+        return Variant();
+    if (lua_isinteger(L, index))
+        return int(lua_tointeger(L, index));
+    if (lua_isnumber(L, index))
+        return lua_tonumber(L, index);
+    if (lua_isstring(L, index))
+        return Variant(lua_tostring(L, index));
+    return Variant();
 }
 
 }//namespace script

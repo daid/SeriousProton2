@@ -6,7 +6,7 @@
 namespace sp {
 namespace script {
 
-Result<sp::Variant> LuaState::callInternal(int arg_count)
+Result<Variant> LuaState::callInternal(int arg_count)
 {
     Environment::AllocInfo* alloc_info;
     lua_getallocf(lua, reinterpret_cast<void**>(&alloc_info));
@@ -16,17 +16,16 @@ Result<sp::Variant> LuaState::callInternal(int arg_count)
         //Set the hook as it was already, so the internal counter gets reset for sandboxed environments.
         lua_sethook(lua, lua_gethook(lua), lua_gethookmask(lua), lua_gethookcount(lua));
     }
-    int result = lua_pcall(lua, arg_count, 0, 0);
+    int result = lua_pcall(lua, arg_count, 1, 0);
     if (alloc_info)
         alloc_info->in_protected_call = false;
     if (result)
     {
-        sp::string err = lua_tostring(lua, -1);
+        string err = lua_tostring(lua, -1);
         lua_pop(lua, 1);
-        return Result<sp::Variant>::makeError(std::move(err));
+        return Result<Variant>::makeError(std::move(err));
     }
-    //TODO: Convert result of call
-    return sp::Variant(true);
+    return convertFromLua(lua, typeIdentifier<Variant>{}, -1);
 }
 
 Result<bool> LuaState::resumeInternal(int arg_count)
