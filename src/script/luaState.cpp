@@ -21,9 +21,9 @@ Result<Variant> LuaState::callInternal(int arg_count)
         alloc_info->in_protected_call = false;
     if (result)
     {
-        string err = lua_tostring(lua, -1);
+        auto result = Result<Variant>::makeError(lua_tostring(lua, -1));
         lua_pop(lua, 1);
-        return Result<Variant>::makeError(std::move(err));
+        return result;
     }
     auto return_value = convertFromLua(lua, typeIdentifier<Variant>{}, -1);
     lua_pop(lua, 1);
@@ -47,9 +47,9 @@ Result<bool> LuaState::resumeInternal(int arg_count)
         return true;
     if (result != LUA_OK)
     {
-        sp::string err = lua_tostring(lua, -1);
+        auto res = Result<bool>::makeError(lua_tostring(lua, -1));
         lua_pop(lua, 1);
-        return Result<bool>::makeError(std::move(err));
+        return res;
     }
     return false;
 }

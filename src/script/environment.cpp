@@ -169,10 +169,10 @@ Result<CoroutinePtr> Environment::runCoroutine(const string& code)
     alloc_info.in_protected_call = false;
     if (result)
     {
-        string err = luaL_checkstring(L, -1);
+        auto res = Result<CoroutinePtr>::makeError(lua_tostring(L, -1));
         lua_pop(L, 1);
         lua_pop(lua, 1);
-        return Result<CoroutinePtr>::makeError(std::move(err));
+        return res;
     }
 
     //Get the environment table from the registry.
@@ -199,9 +199,9 @@ Result<Variant> Environment::_run(const string& code, const string& name)
     alloc_info.in_protected_call = false;
     if (result)
     {
-        string err = luaL_checkstring(lua, -1);
+        auto res = Result<Variant>::makeError(luaL_checkstring(lua, -1));
         lua_pop(lua, 1);
-        return Result<Variant>::makeError(std::move(err));
+        return res;
     }
 
     //Get the environment table from the registry.
