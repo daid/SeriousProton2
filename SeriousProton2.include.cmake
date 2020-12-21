@@ -112,7 +112,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG=1")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 
     add_library(box2d STATIC ${BOX2D_SOURCES})
     target_include_directories(box2d PUBLIC "${SERIOUS_PROTON2_BASE_DIR}/extlibs")
