@@ -54,12 +54,12 @@ TEST_CASE("lua language extentions")
     sp::script::Environment env;
 
     //Allow != next to ~=
-    CHECK(env.run("assert(1 ~= 0)") == true);
-    CHECK(env.run("assert(1 != 0)") == true);
+    CHECK(env.run("assert(1 ~= 0)").isOk() == true);
+    CHECK(env.run("assert(1 != 0)").isOk() == true);
 
-    CHECK(env.run("assert(1 && 1)") == true);
-    CHECK(env.run("assert(1 || 1)") == true);
-    CHECK(env.run("assert(!false)") == true);
+    CHECK(env.run("assert(1 && 1)").isOk() == true);
+    CHECK(env.run("assert(1 || 1)").isOk() == true);
+    CHECK(env.run("assert(!false)").isOk() == true);
 }
 
 TEST_CASE("coroutines")

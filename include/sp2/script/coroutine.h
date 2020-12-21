@@ -18,14 +18,14 @@ public:
      *  Returns true if the coroutine was still yielded.
      *  Returns false if the coroutine has ended.
      */
-    template<typename... ARGS> bool resume(ARGS... args)
+    template<typename... ARGS> Result<bool> resume(ARGS... args)
     {
         if (!lua)
             return false;
 
         int arg_count = pushArgs(lua, args...);
-        bool result = resumeInternal(arg_count);
-        if (!result)
+        auto result = resumeInternal(arg_count);
+        if (result.isErr() || !result.result())
             release();
         return result;
     }

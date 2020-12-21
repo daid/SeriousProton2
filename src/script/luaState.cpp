@@ -6,9 +6,8 @@
 namespace sp {
 namespace script {
 
-bool LuaState::callInternal(int arg_count)
+Result<sp::Variant> LuaState::callInternal(int arg_count)
 {
-    setLastError("");
     Environment::AllocInfo* alloc_info;
     lua_getallocf(lua, reinterpret_cast<void**>(&alloc_info));
     if (alloc_info)
@@ -22,16 +21,16 @@ bool LuaState::callInternal(int arg_count)
         alloc_info->in_protected_call = false;
     if (result)
     {
-        setLastError(lua_tostring(lua, -1));
+        sp::string err = lua_tostring(lua, -1);
         lua_pop(lua, 1);
-        return false;
+        return Result<sp::Variant>::makeError(std::move(err));
     }
-    return true;
+    //TODO: Convert result of call
+    return sp::Variant(true);
 }
 
-bool LuaState::resumeInternal(int arg_count)
+Result<bool> LuaState::resumeInternal(int arg_count)
 {
-    setLastError("");
     Environment::AllocInfo* alloc_info;
     lua_getallocf(lua, reinterpret_cast<void**>(&alloc_info));
     if (alloc_info)
@@ -47,15 +46,15 @@ bool LuaState::resumeInternal(int arg_count)
         return true;
     if (result != LUA_OK)
     {
-        setLastError(lua_tostring(lua, -1));
+        sp::string err = lua_tostring(lua, -1);
         lua_pop(lua, 1);
+        return Result<bool>::makeError(std::move(err));
     }
     return false;
 }
 
-CoroutinePtr LuaState::callCoroutineInternal(lua_State* L, int arg_count)
+Result<CoroutinePtr> LuaState::callCoroutineInternal(lua_State* L, int arg_count)
 {
-    setLastError("");
     Environment::AllocInfo* alloc_info;
     lua_getallocf(L, reinterpret_cast<void**>(&alloc_info));
     if (alloc_info)
@@ -71,17 +70,14 @@ CoroutinePtr LuaState::callCoroutineInternal(lua_State* L, int arg_count)
         return std::make_shared<Coroutine>(lua, L);
 
     if (result != LUA_OK && result != LUA_YIELD)
-        setLastError(lua_tostring(L, -1));
+    {
+        auto result = Result<CoroutinePtr>::makeError(lua_tostring(L, -1));
+        lua_pop(lua, 1);//pop the coroutine off the main stack.
+        return result;
+    }
     //Coroutine didn't yield. So no state to store for it.
     lua_pop(lua, 1);//pop the coroutine off the main stack.
-    return nullptr;
-}
-
-void LuaState::setLastError(string error)
-{
-    last_error = std::move(error);
-    if (!last_error.empty())
-        LOG(Error, "Lua:", last_error);
+    return Result<CoroutinePtr>(nullptr);
 }
 
 }//namespace script

@@ -2,7 +2,7 @@
 #define SP2_SCRIPT_ENVIRONMENT_H
 
 #include <sp2/pointer.h>
-#include <sp2/string.h>
+#include <sp2/result.h>
 #include <sp2/io/resourceProvider.h>
 #include <sp2/script/bindingObject.h>
 #include <sp2/script/luaState.h>
@@ -50,13 +50,13 @@ public:
         lua_pop(lua, 1);
     }
 
-    bool load(const string& resource_name);
-    bool load(io::ResourceStreamPtr resource);
-    bool run(const string& code);
-    CoroutinePtr runCoroutine(const string& code);
+    Result<sp::Variant> load(const string& resource_name);
+    Result<sp::Variant> load(io::ResourceStreamPtr resource);
+    Result<sp::Variant> run(const string& code);
+    Result<CoroutinePtr> runCoroutine(const string& code);
 
     //Call a script function. Return true if the call was made, false on an error.
-    template<typename... ARGS> bool call(const string& global_function, ARGS... args)
+    template<typename... ARGS> Result<sp::Variant> call(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -64,15 +64,14 @@ public:
         lua_getfield(lua, -1, global_function.c_str());
         lua_remove(lua, -2);
 
-        setLastError("");
         if (lua_isfunction(lua, -1))
         {
             int arg_count = pushArgs(lua, args...);
             return callInternal(arg_count);
         }
-        setLastError(global_function + " is not a function but: " + luaL_typename(lua, -1));
+        sp::string err = global_function + " is not a function but: " + luaL_typename(lua, -1);
         lua_pop(lua, 1);
-        return false;
+        return Result<sp::Variant>::makeError(std::move(err));
     }
 
     /** Run a function as coroutine.
@@ -80,19 +79,18 @@ public:
         While they are yielded, other lua functions can run.
         This makes coroutines perfect for scripted sequences.
      */
-    template<typename... ARGS> CoroutinePtr callCoroutine(const string& global_function, ARGS... args)
+    template<typename... ARGS> Result<CoroutinePtr> callCoroutine(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
         lua_getfield(lua, -1, global_function.c_str());
         lua_remove(lua, -2);
 
-        setLastError("");
         if (!lua_isfunction(lua, -1))
         {
-            setLastError(global_function + " is not a function but: " + luaL_typename(lua, -1));
+            sp::string err = global_function + " is not a function but: " + luaL_typename(lua, -1);
             lua_pop(lua, 1);
-            return nullptr;
+            return Result<CoroutinePtr>::makeError(std::move(err));
         }
 
         lua_State* L = lua_newthread(lua);
@@ -109,8 +107,8 @@ public:
         size_t max;
     };
 private:
-    bool _load(io::ResourceStreamPtr resource, const string& name);
-    bool _run(const string& code, const string& name);
+    Result<sp::Variant> _load(io::ResourceStreamPtr resource, const string& name);
+    Result<sp::Variant> _run(const string& code, const string& name);
 
     AllocInfo alloc_info;
 
