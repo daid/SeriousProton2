@@ -44,6 +44,13 @@ public:
         *this = stream.str();
     }
 
+    explicit string(const uint64_t nr) : std::string()
+    {
+        std::ostringstream stream;
+        stream << nr;
+        *this = stream.str();
+    }
+
     explicit string(const float nr, int decimals = 2) : std::string()
     {
         std::ostringstream stream;
