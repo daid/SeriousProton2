@@ -51,7 +51,7 @@ private:
     }
 
     bool success;
-    T ok_value;
+    T ok_value{};
     sp::string err_value;
 };
 
