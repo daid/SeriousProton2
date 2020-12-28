@@ -117,7 +117,6 @@ bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& 
     {
         FT_Face face = static_cast<FT_Face>(ft_face);
         
-        GlyphInfo info;
         info.bounds = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.uv_rect = Rect2f(Vector2f(0, 0), Vector2f(0, 0));
         info.advance = 0;
