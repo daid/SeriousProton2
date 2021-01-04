@@ -31,11 +31,13 @@ void Slider::setAttribute(const string& key, const string& value)
     if (key == "min" || key == "min_value")
     {
         min_value = stringutil::convert::toFloat(value);
+        setValue(this->value);
         markRenderDataOutdated();
     }
     else if (key == "max" || key == "max_value")
     {
         max_value = stringutil::convert::toFloat(value);
+        setValue(this->value);
         markRenderDataOutdated();
     }
     else if (key == "range")
@@ -51,6 +53,7 @@ void Slider::setAttribute(const string& key, const string& value)
             min_value = 0.0;
             max_value = stringutil::convert::toFloat(value);
         }
+        setValue(this->value);
         markRenderDataOutdated();
     }
     else if (key == "value")
