@@ -10,6 +10,8 @@ namespace collision {
 class Compound2D : public Shape2D
 {
 public:
+    Compound2D(const std::vector<const Shape2D*>& shapes);
+    Compound2D(std::vector<const Shape2D*>&& shapes);
     Compound2D(std::initializer_list<const Shape2D*> shapes);
 
     void add(Shape2D* shape);

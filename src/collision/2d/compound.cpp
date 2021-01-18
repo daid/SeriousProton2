@@ -7,6 +7,16 @@
 namespace sp {
 namespace collision {
 
+Compound2D::Compound2D(const std::vector<const Shape2D*>& shapes)
+: shapes(shapes)
+{
+}
+
+Compound2D::Compound2D(std::vector<const Shape2D*>&& shapes)
+: shapes(shapes)
+{
+}
+
 Compound2D::Compound2D(std::initializer_list<const Shape2D*> shapes)
 : shapes(shapes)
 {
