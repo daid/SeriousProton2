@@ -29,6 +29,8 @@ public:
     sp::Vector2f worldToScreen(sp::Vector2d position);
     //Convert a 2d screen position (-1.0 to 0.0) to a world position
     sp::Vector2d screenToWorld(sp::Vector2f position);
+    //Convert a 3d world position to a -1.0 to 1.0 screen view position
+    sp::Vector2f worldToScreen(sp::Vector3d position);
     //Convert a 2d screen position (-1.0 to 0.0) to a world ray
     sp::Ray3d screenToWorldRay(sp::Vector2f position);
 protected:

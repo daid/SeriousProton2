@@ -16,4 +16,6 @@
 #define SP2_PACKED __attribute__((__packed__, __gcc_struct__))
 #endif
 
+#define SP2_NO_RETURN __attribute__((noreturn))
+
 #endif//ATTRIBUTES_H
