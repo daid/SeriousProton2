@@ -107,6 +107,13 @@ Vector2d Camera::screenToWorld(Vector2f position)
     return getLocalPoint2D(Vector2d(world_position));
 }
 
+Vector2f Camera::worldToScreen(Vector3d position)
+{
+    auto world_position = getGlobalTransform().inverse() * Vector3f(position);
+    auto res = projection_matrix.multiply(world_position, 1.0f);
+    return Vector2f(res.x, res.y);
+}
+
 sp::Ray3d Camera::screenToWorldRay(sp::Vector2f position)
 {
     const auto project_inv = projection_matrix.inverse();
