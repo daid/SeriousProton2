@@ -13,14 +13,14 @@ public:
     Variant(double d) { type = Type::Double; data.d = d; }
     Variant(const string& s) { type = Type::String; str = s; }
 
-    inline bool isNone() { return type == Type::None; }
-    inline bool isInteger() { return type == Type::Integer; }
-    inline bool isDouble() { return type == Type::Double; }
-    inline bool isString() { return type == Type::String; }
+    inline bool isNone() const { return type == Type::None; }
+    inline bool isInteger() const { return type == Type::Integer; }
+    inline bool isDouble() const { return type == Type::Double; }
+    inline bool isString() const { return type == Type::String; }
 
-    inline int getInteger() { if (isInteger()) return data.i; else if (isDouble()) return data.d; return 0; }
-    inline double getDouble() { if (isDouble()) return data.d; else if (isInteger()) return data.i; return 0; }
-    inline string getString() { if (isString()) return str; if (isDouble()) return string(data.d); else if (isInteger()) return string(data.i); return ""; }
+    inline int getInteger() const { if (isInteger()) return data.i; else if (isDouble()) return data.d; return 0; }
+    inline double getDouble() const { if (isDouble()) return data.d; else if (isInteger()) return data.i; return 0; }
+    inline string getString() const { if (isString()) return str; if (isDouble()) return string(data.d); else if (isInteger()) return string(data.i); return ""; }
 
 private:
     enum class Type
