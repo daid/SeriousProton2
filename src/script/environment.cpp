@@ -34,7 +34,8 @@ Environment::Environment()
 {
     lua = createLuaState(this);
 
-    sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
+    //In case a environment is created from within a lua function this assert fails.
+    //sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 }
 
 Environment::Environment(const SandboxConfig& sandbox_config)
