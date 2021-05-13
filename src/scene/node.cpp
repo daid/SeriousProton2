@@ -36,10 +36,10 @@ Node::Node(Scene* scene)
 
 Node::~Node()
 {
-    if (collision_body)
-        scene->collision_backend->destroyBody(collision_body);
     for(P<Node> child : children)
         child.destroy();
+    if (collision_body)
+        scene->collision_backend->destroyBody(collision_body);
 }
 
 P<Node> Node::getParent() const

@@ -58,7 +58,8 @@ Environment::~Environment()
     lua_pushnil(lua);
     lua_rawsetp(lua, LUA_REGISTRYINDEX, this);
 
-    sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
+    //This assert fails if the environment gets destroyed from a different environments function.
+    //sp2assert(lua_gettop(lua) == 0, "Lua stack incorrect");
 
     destroyLuaState(lua);
 }
