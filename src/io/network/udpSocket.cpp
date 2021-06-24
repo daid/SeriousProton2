@@ -1,6 +1,6 @@
 #include <sp2/io/network/udpSocket.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 static constexpr int flags = 0;
@@ -108,7 +108,7 @@ void UdpSocket::close()
 {
     if (handle != -1)
     {
-#ifdef __WIN32
+#ifdef _WIN32
         closesocket(handle);
 #else
         ::close(handle);

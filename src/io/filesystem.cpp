@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <SDL.h>
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -18,7 +18,7 @@ static int lastPathSeperator(const string& path)
 {
     for(int n = path.length() - 1; n > 0; n--)
     {
-#ifdef __WIN32__
+#ifdef _WIN32
         if (path[n] == '/' || path[n] == '\\')
             return n;
 #else
@@ -56,7 +56,7 @@ bool makeDirectory(const string& path)
         if (!makeDirectory(base))
             return false;
     }
-#ifdef __WIN32__
+#ifdef _WIN32
     return mkdir(path.c_str()) == 0;
 #else
     return mkdir(path.c_str(), 0777) == 0;
@@ -149,7 +149,7 @@ const string& preferencePath()
             if (input_path)
                 input_path += 1;
         }
-#elif defined(__WIN32__)
+#elif defined(_WIN32)
         //On windows, we need our application name, we grab the name of our executable and use that.
         // And then use the SDL function to get our actual path.
         char executable_name[MAX_PATH] = {0};

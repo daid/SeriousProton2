@@ -1,7 +1,7 @@
 #ifndef SP2_GRAPHICS_OPENGL_H
 #define SP2_GRAPHICS_OPENGL_H
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define GL_APIENTRY __stdcall
 #else
 #define GL_APIENTRY

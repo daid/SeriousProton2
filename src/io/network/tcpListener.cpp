@@ -1,7 +1,7 @@
 #include <sp2/io/network/tcpListener.h>
 #include <sp2/io/network/tcpSocket.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -88,7 +88,7 @@ void TcpListener::close()
 {
     if (isListening())
     {
-#ifdef __WIN32
+#ifdef _WIN32
         closesocket(handle);
 #else
         ::close(handle);

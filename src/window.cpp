@@ -22,7 +22,7 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif//__GNUC__
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -141,7 +141,7 @@ void Window::initialize()
 {
     sp2assert(Engine::getInstance(), "The sp::Engine needs to be created before the sp::Window is created");
 
-#ifdef __WIN32__
+#ifdef _WIN32
     //On Vista or newer windows, let the OS know we are DPI aware, so we won't have odd scaling issues.
     void* user_dll = SDL_LoadObject("USER32.DLL");
     if (user_dll)

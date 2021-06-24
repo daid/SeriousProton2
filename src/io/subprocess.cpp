@@ -2,7 +2,7 @@
 #include <sp2/logging.h>
 #include <limits>
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #ifdef __linux__
@@ -17,7 +17,7 @@ namespace io {
 class Subprocess::Data
 {
 public:
-#ifdef __WIN32__
+#ifdef _WIN32
     HANDLE handle;
     int pid;
 #endif
@@ -30,7 +30,7 @@ Subprocess::Subprocess(std::vector<string> command, const string& working_direct
 {
     data = nullptr;
 
-#ifdef __WIN32__
+#ifdef _WIN32
     STARTUPINFO startup_info;
     PROCESS_INFORMATION process_information;
     
@@ -64,7 +64,7 @@ Subprocess::Subprocess(std::vector<string> command, const string& working_direct
     {
         LOG(Warning, "Failed to start:", command);
     }
-#endif//__WIN32__
+#endif//_WIN32
 #ifdef __linux__
     pid_t pid = fork();
     if (pid == 0)   //Child process.
@@ -104,7 +104,7 @@ int Subprocess::wait()
     if (!data)
         return std::numeric_limits<int>::min();
 
-#ifdef __WIN32__
+#ifdef _WIN32
     WaitForSingleObject(data->handle, INFINITE);
     DWORD exit_status;
     if (!GetExitCodeProcess(data->handle, &exit_status))
@@ -124,7 +124,7 @@ int Subprocess::wait()
 #endif
 }
 
-#ifdef __WIN32__
+#ifdef _WIN32
 static BOOL CALLBACK terminateApplicationWindows(HWND hwnd, LPARAM param)
 {
     DWORD id;
@@ -133,18 +133,18 @@ static BOOL CALLBACK terminateApplicationWindows(HWND hwnd, LPARAM param)
         PostMessage(hwnd, WM_CLOSE, 0, 0) ;
     return true;
 }
-#endif//__WIN32__
+#endif//_WIN32
 
 int Subprocess::kill(bool forcefuly)
 {
     if (!data)
         return std::numeric_limits<int>::min();
-#ifdef __WIN32__
+#ifdef _WIN32
     if (forcefuly)
         TerminateProcess(data->handle, -1);
     else
         EnumWindows(terminateApplicationWindows, static_cast<LPARAM>(data->pid));
-#endif//__WIN32__
+#endif//_WIN32
 #ifdef __linux__
     if (forcefuly)
         ::kill(data->pid, SIGKILL);
@@ -158,13 +158,13 @@ bool Subprocess::isRunning()
 {
     if (!data)
         return false;
-#ifdef __WIN32__
+#ifdef _WIN32
     DWORD exit_status;
     if (!GetExitCodeProcess(data->handle, &exit_status))
         exit_status = -1;
     if (exit_status == STILL_ACTIVE)
         return true;
-#endif//__WIN32__
+#endif//_WIN32
 #ifdef __linux__
     int exit_status;
     if (::waitpid(data->pid, &exit_status, WNOHANG) == 0)

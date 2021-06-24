@@ -1,6 +1,6 @@
 #include <sp2/io/fileSelectionDialog.h>
 
-#if defined(__WIN32__)
+#if defined(_WIN32)
 #include <windows.h>
 #elif defined(__linux__) && !defined(__ANDROID__) && 0
 #include <gtk/gtk.h>
@@ -16,7 +16,7 @@ namespace io {
 
 void openFileDialog(const sp::string& filter, std::function<void(const sp::string&)> callback)
 {
-#if defined(__WIN32__)
+#if defined(_WIN32)
     sp::string filter_string = "*" + filter + sp::string('\0') + "*" + filter + sp::string('\0');
 
     OPENFILENAMEA openfilename;

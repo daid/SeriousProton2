@@ -1,6 +1,6 @@
 #include <sp2/io/network/socketBase.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -25,7 +25,7 @@ void SocketBase::setBlocking(bool blocking)
     if (handle == -1)
         return;
 
-#ifdef __WIN32
+#ifdef _WIN32
    unsigned long mode = blocking ? 0 : 1;
    ::ioctlsocket(handle, FIONBIO, &mode);
 #else
@@ -40,7 +40,7 @@ void SocketBase::setBlocking(bool blocking)
 
 void SocketBase::setTimeout(int milliseconds)
 {
-#ifdef __WIN32
+#ifdef _WIN32
     DWORD timeout = milliseconds;
     ::setsockopt(handle, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof timeout);
 #else
@@ -53,7 +53,7 @@ void SocketBase::setTimeout(int milliseconds)
 
 bool SocketBase::isLastErrorNonBlocking()
 {
-#ifdef __WIN32
+#ifdef _WIN32
     int error = ::WSAGetLastError();
     if (error == WSAEWOULDBLOCK || error == WSAEALREADY)
         return true;

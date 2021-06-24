@@ -10,12 +10,12 @@
 #  include <linux/videodev2.h>
 #  include <string.h>
 #endif//__linux__
-#if defined(__WIN32)
+#if defined(_WIN32)
 #  include <dshow.h>
 #  include <qedit.h>
 DEFINE_GUID(CLSID_SampleGrabber,0xc1f400a0,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08,0x03,0x9e,0x37);
 DEFINE_GUID(CLSID_NullRenderer,0xc1f400a4,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08,0x03,0x9e,0x37);
-#endif//__WIN32
+#endif//_WIN32
 
 
 namespace sp {
@@ -209,7 +209,7 @@ Image CameraCapture::getFrame()
     return result;
 }
 
-#elif defined(__WIN32)
+#elif defined(_WIN32)
 
 class CameraCapture::Data
 {

@@ -4,9 +4,9 @@
 #include <sp2/io/filesystem.h>
 #include <sp2/attributes.h>
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
-#endif//__WIN32__
+#endif//_WIN32
 
 #ifdef ANDROID
 #include <SDL.h>
@@ -242,7 +242,7 @@ std::vector<string> ResourceProvider::find(const string& search_pattern)
 
 void ResourceProvider::createDefault()
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     // Check if our executable is possibly a zip file. And if it is, add a zipResourceProvider to read from it.
     char path[MAX_PATH];
     GetModuleFileNameA(GetModuleHandleA(NULL), path, sizeof(path));
@@ -261,7 +261,7 @@ void ResourceProvider::createDefault()
         }
         fclose(f);
     }
-#endif//__WIN32__
+#endif//_WIN32
 #ifdef ANDROID
     new AndroidAssetsResourceProvider("resources");
 #endif

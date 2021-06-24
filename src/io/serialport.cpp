@@ -1,7 +1,7 @@
 #include <sp2/io/serialport.h>
 #include <sp2/logging.h>
 
-#ifdef __WIN32__
+#ifdef _WIN32
     #include <windows.h>
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
@@ -42,7 +42,7 @@ SerialPort::SerialPort(const string& name)
         LOG(Info, "Selected port:", ports[0], "for pseudo name:", name);
         my_name = ports[0];
     }
-#ifdef __WIN32__
+#ifdef _WIN32
     handle = reinterpret_cast<uintptr_t>(CreateFile(("\\\\.\\" + my_name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if (isOpen())
     {
@@ -75,7 +75,7 @@ SerialPort::~SerialPort()
     if (!isOpen())
         return;
 
-#ifdef __WIN32__
+#ifdef _WIN32
     CloseHandle(reinterpret_cast<HANDLE>(handle));
     handle = reinterpret_cast<uintptr_t>(INVALID_HANDLE_VALUE);
 #endif
@@ -87,7 +87,7 @@ SerialPort::~SerialPort()
 
 bool SerialPort::isOpen()
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     return handle != reinterpret_cast<uintptr_t>(INVALID_HANDLE_VALUE);
 #endif
 #if (defined(__gnu_linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && defined(__MACH__))
@@ -100,7 +100,7 @@ void SerialPort::configure(int baudrate, int databits, EParity parity, EStopBits
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     FlushFileBuffers(reinterpret_cast<HANDLE>(handle));
 
     DCB dcb;
@@ -305,7 +305,7 @@ void SerialPort::send(void* data, int data_size)
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     while(data_size > 0)
     {
         DWORD written = 0;
@@ -337,7 +337,7 @@ int SerialPort::recv(void* data, int data_size)
     if (!isOpen())
         return 0;
 
-#ifdef __WIN32__
+#ifdef _WIN32
     DWORD read_size = 0;
     if (!ReadFile(reinterpret_cast<HANDLE>(handle), data, data_size, &read_size, NULL))
     {
@@ -361,7 +361,7 @@ void SerialPort::setDTR()
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     EscapeCommFunction(reinterpret_cast<HANDLE>(handle), SETDTR);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
@@ -377,7 +377,7 @@ void SerialPort::clearDTR()
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     EscapeCommFunction(reinterpret_cast<HANDLE>(handle), CLRDTR);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
@@ -393,7 +393,7 @@ void SerialPort::setRTS()
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     EscapeCommFunction(reinterpret_cast<HANDLE>(handle), SETRTS);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
@@ -409,7 +409,7 @@ void SerialPort::clearRTS()
 {
     if (!isOpen())
         return;
-#ifdef __WIN32__
+#ifdef _WIN32
     EscapeCommFunction(reinterpret_cast<HANDLE>(handle), CLRRTS);
 #endif
 #if defined(__gnu_linux__) && !defined(__ANDROID__)
@@ -423,7 +423,7 @@ void SerialPort::clearRTS()
 
 void SerialPort::sendBreak()
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     SetCommBreak(reinterpret_cast<HANDLE>(handle));
     Sleep(1);
     ClearCommBreak(reinterpret_cast<HANDLE>(handle));
@@ -436,7 +436,7 @@ void SerialPort::sendBreak()
 std::vector<string> SerialPort::getAvailablePorts()
 {
     std::vector<string> names;
-#ifdef __WIN32__
+#ifdef _WIN32
     HKEY key;
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ | KEY_QUERY_VALUE, &key) == ERROR_SUCCESS)
     {
@@ -482,7 +482,7 @@ std::vector<string> SerialPort::getAvailablePorts()
 
 string SerialPort::getPseudoDriverName(const string& port)
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     string ret;
     HKEY key;
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ | KEY_QUERY_VALUE, &key) == ERROR_SUCCESS)
