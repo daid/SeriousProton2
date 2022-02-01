@@ -6,7 +6,7 @@
 #include <sp2/engine.h>
 #include <sp2/assert.h>
 
-#include <json11/json11.hpp>
+#include <nlohmann/json.hpp>
 
 
 namespace sp {
@@ -51,13 +51,13 @@ bool Server::listen(int port_nr)
 
 bool Server::listenOnSwitchboard(const string& hostname, int port, const string& server_name, bool list_as_public_server)
 {
-    json11::Json::array address;
+    nlohmann::json address = nlohmann::json::array();
     if (new_connection_listener.isListening() && local_port > 0)
     {
         for(auto a : io::network::Address::getLocalAddress().getHumanReadable())
             address.push_back(a.c_str());
     }
-    json11::Json json = json11::Json::object{{
+    nlohmann::json json = {
         {"name", server_name.c_str()},
         {"game_name", game_name.c_str()},
         {"game_version", int(game_version)},
@@ -65,7 +65,7 @@ bool Server::listenOnSwitchboard(const string& hostname, int port, const string&
         {"public", list_as_public_server},
         {"address", address},
         {"port", local_port},
-    }};
+    };
     io::http::Request request(hostname, port);
     request.setHeader("Content-Type", "application/json");
     auto response = request.post("/game/register", json.dump());
@@ -75,14 +75,14 @@ bool Server::listenOnSwitchboard(const string& hostname, int port, const string&
         return false;
     }
     std::string err;
-    json11::Json response_json = json11::Json::parse(response.body, err);
+    nlohmann::json response_json = nlohmann::json::parse(response.body);
     if (err != "")
     {
         LOG(Warning, "Failed to decode json response from switchboard server:", err);
         return false;
     }
-    switchboard_key = response_json["key"].string_value();
-    switchboard_secret = response_json["secret"].string_value();
+    switchboard_key = response_json["key"];
+    switchboard_secret = response_json["secret"];
     if (switchboard_key == "" || switchboard_secret == "")
     {
         LOG(Warning, "No key/secret from switchboard.");

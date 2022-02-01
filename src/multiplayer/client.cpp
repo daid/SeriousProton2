@@ -8,7 +8,8 @@
 #include <sp2/scene/node.h>
 #include <private/multiplayer/packetIDs.h>
 
-#include <json11/json11.hpp>
+#include <nlohmann/json.hpp>
+
 
 namespace sp {
 namespace multiplayer {
@@ -48,14 +49,14 @@ bool Client::connectBySwitchboard(const string& hostname, int port_nr, const str
     if (response.status != 200)
         return false;
     std::string err;
-    auto json = json11::Json::parse(response.body, err);
+    auto json = nlohmann::json::parse(response.body);
     if (!err.empty())
         return false;
-    int server_port = json["port"].int_value();
-    for(auto json_address : json["address"].array_items())
+    int server_port = json["port"];
+    for(auto json_address : json["address"])
     {
-        LOG(Info, "Attempting to direct connect to", json_address.string_value(), "address aquired by switchboard");
-        if (socket.connect(io::network::Address(json_address.string_value()), server_port))
+        LOG(Info, "Attempting to direct connect to", json_address, "address aquired by switchboard");
+        if (socket.connect(io::network::Address(static_cast<std::string>(json_address)), server_port))
         {
             LOG(Info, "Direct connection worked.");
             state = State::Connecting;
@@ -68,7 +69,7 @@ bool Client::connectBySwitchboard(const string& hostname, int port_nr, const str
         return false;
     }
 
-    if (json["address"].array_items().size() > 0)
+    if (json["address"].size() > 0)
         LOG(Info, "No suitable address from switchboard. Using switchboard websocket connection");
     else
         LOG(Info, "Using switchboard websocket connection to connect to server.");

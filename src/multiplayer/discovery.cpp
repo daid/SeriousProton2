@@ -2,7 +2,7 @@
 #include <sp2/io/http/request.h>
 #include <sp2/assert.h>
 
-#include <json11/json11.hpp>
+#include <nlohmann/json.hpp>
 
 
 namespace sp {
@@ -29,7 +29,7 @@ void Discovery::scanSwitchboard(const string& hostname, int port)
     }
 
     std::string err;
-    auto json = json11::Json::parse(response.body, err);
+    auto json = nlohmann::json::parse(response.body);
     if (!err.empty())
     {
         LOG(Error, "Unknown response from switchboard server:", response.body);
@@ -42,15 +42,15 @@ void Discovery::scanSwitchboard(const string& hostname, int port)
             && i.switchboard_hostname == hostname
             && i.switchboard_port == port;
     }), servers.end());
-    for(auto& json_entry : json.array_items())
+    for(auto& json_entry : json)
     {
         servers.emplace_back();
         ServerInfo& info = servers.back();
         info.type = ServerInfo::Type::Switchboard;
-        info.name = json_entry["name"].string_value();
+        info.name = json_entry["name"];
         info.switchboard_hostname = hostname;
         info.switchboard_port = port;
-        info.switchboard_key = json_entry["key"].string_value();
+        info.switchboard_key = json_entry["key"];
     }
 }
 
