@@ -11,7 +11,7 @@ TEST_CASE("TcpSocket")
 
 #ifdef EMSCRIPTEN
     CHECK(socket.connect(sp::io::network::Address("daid.eu"), 80) == false);
-    CHECK(socket.connect(sp::io::network::Address("echo.websocket.org"), 80) == false);
+    CHECK(socket.connect(sp::io::network::Address("ws.ifelse.io"), 80) == false);
 #else
     CHECK(socket.connect(sp::io::network::Address("daid.eu"), 80));
     char buffer[128];
@@ -28,9 +28,9 @@ TEST_CASE("WebSocket")
     //TODO: Emscripten requires main loop updates before websockets work.
 #else
     sp::io::http::Websocket socket;
-    CHECK(socket.connect("ws://echo.websocket.org/"));
+    CHECK(socket.connect("ws://ws.ifelse.io/"));
     CHECK(socket.isConnecting() == true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     CHECK(socket.isConnected() == true);
 #endif
 }

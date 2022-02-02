@@ -38,7 +38,7 @@ if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND" AND CMAKE_HOST_WIN32)
     find_program(IMAGE_CONVERT magick PATHS ${IMAGE_CONVERT_SEARCH_PATHS})
 endif()
 
-find_package(nlohmann_json 3.2.0)
+find_package(nlohmann_json 3.2.0 QUIET)
 if (NOT nlohmann_json_FOUND)
     include(FetchContent)
 
