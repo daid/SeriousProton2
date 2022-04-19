@@ -2,6 +2,7 @@
 #define SP2_SCENE_TILEMAP_NODE_H
 
 #include <sp2/scene/node.h>
+#include <sp2/container/infinigrid.h>
 
 namespace sp {
 
@@ -23,22 +24,18 @@ public:
     
     void setTilemapSpacingMargin(float spacing, float margin);
     
-    void setTile(int x, int y, int index, Collision collision=Collision::Open);
-    void setTileZOffset(int x, int y, double z_offset);
-    int getTileIndex(int x, int y);//Returns -1 on out of range
-    Collision getTileCollision(int x, int y);//Returns Open on out of range
-    
-    Vector2i getSize();
+    void setTile(sp::Vector2i position, int index, Collision collision);
+    void setTile(sp::Vector2i position, int index, double z_offset=0.0, sp::Vector3f normal={0,0,1}, Collision collision=Collision::Open);
+    int getTileIndex(sp::Vector2i position);//Returns -1 on out of range
+    Collision getTileCollision(sp::Vector2i position);//Returns Open on out of range
     
     virtual void onFixedUpdate() override;
 private:
-    class Tile
+    struct Tile
     {
-    public:
-        Tile() : index(-1), z_offset(0), collision(Collision::Open) {}
-
         int index;
         double z_offset;
+        sp::Vector3f normal;
         Collision collision;
     };
 
@@ -47,7 +44,7 @@ private:
     Vector2i texture_tile_count;
     Vector2f texture_spacing;
     Vector2f texture_margin;
-    std::vector<std::vector<Tile>> tiles;
+    InfiniGrid<Tile> tiles;
     bool dirty;
     
     void updateMesh();

@@ -45,9 +45,9 @@ public:
     }
 
     explicit Color(uint32_t color)
-    : r(((color >> 0) & 0xFF) / 255.0f)
+    : r(((color >> 16) & 0xFF) / 255.0f)
     , g(((color >> 8) & 0xFF) / 255.0f)
-    , b(((color >> 16) & 0xFF) / 255.0f)
+    , b(((color >> 0) & 0xFF) / 255.0f)
     , a(((color >> 24) & 0xFF) / 255.0f)
     {
     }

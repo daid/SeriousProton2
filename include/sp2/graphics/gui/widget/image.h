@@ -15,6 +15,7 @@ public:
     virtual void setAttribute(const string& key, const string& value) override;
     
     virtual void updateRenderData() override;
+    void setUV(sp::Rect2d uv_rect) { uv = uv_rect; }
 private:
     string texture;
     Rect2d uv;

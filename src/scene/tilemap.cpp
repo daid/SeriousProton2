@@ -13,7 +13,7 @@ Tilemap::Tilemap(P<Node> parent, const string& texture, float tile_size, int tex
 }
 
 Tilemap::Tilemap(P<Node> parent, const string& texture, float tile_width, float tile_height, int texture_tile_count_x, int texture_tile_count_y)
-: Node(parent)
+: Node(parent), tiles({.index = -1, .z_offset = 0.0, .normal = {0,0,1}, .collision = Collision::Open})
 {
     sp2assert(tile_width > 0, "Tile width must be larger then zero");
     sp2assert(tile_height > 0, "Tile height must be larger then zero");
@@ -43,80 +43,25 @@ void Tilemap::setTilemapSpacingMargin(float spacing, float margin)
     dirty = true;
 }
 
-void Tilemap::setTile(int x, int y, int index, Collision collision)
+void Tilemap::setTile(sp::Vector2i position, int index, Collision collision)
 {
-    sp2assert(x >= 0, "Tile position must be equal or larger then zero");
-    sp2assert(y >= 0, "Tile position must be equal or larger then zero");
-    
-    int width = x + 1;
-    if (tiles.size())
-        width = std::max(int(tiles[0].size()), width);
-    if(int(tiles.size()) < y + 1)
-    {
-        int old_height = tiles.size();
-        tiles.resize(y + 1);
-        for(int n=old_height; n<int(tiles.size()); n++)
-            tiles[n].resize(width);
-    }
-    if (int(tiles[0].size()) != width)
-    {
-        for(int n=0; n<int(tiles.size()); n++)
-            tiles[n].resize(width);
-    }
-    
-    tiles[y][x].index = index;
-    tiles[y][x].collision = collision;
+    setTile(position, index, 0.0, {0, 0, 1}, collision);
+}
+
+void Tilemap::setTile(sp::Vector2i position, int index, double z_offset, sp::Vector3f normal, Collision collision)
+{
+    tiles.set(position, {.index = index, .z_offset = z_offset, .normal = normal, .collision = collision});
     dirty = true;
 }
 
-void Tilemap::setTileZOffset(int x, int y, double z_offset)
+int Tilemap::getTileIndex(sp::Vector2i position)
 {
-    sp2assert(x >= 0, "Tile position must be equal or larger then zero");
-    sp2assert(y >= 0, "Tile position must be equal or larger then zero");
-    
-    int width = x + 1;
-    if (tiles.size())
-        width = std::max(int(tiles[0].size()), width);
-    if(int(tiles.size()) < y + 1)
-    {
-        int old_height = tiles.size();
-        tiles.resize(y + 1);
-        for(int n=old_height; n<int(tiles.size()); n++)
-            tiles[n].resize(width);
-    }
-    if (int(tiles[0].size()) != width)
-    {
-        for(int n=0; n<int(tiles.size()); n++)
-            tiles[n].resize(width);
-    }
-    
-    tiles[y][x].z_offset = z_offset;
-    dirty = true;
+    return tiles.get(position).index;
 }
 
-int Tilemap::getTileIndex(int x, int y)
+Tilemap::Collision Tilemap::getTileCollision(Vector2i position)
 {
-    if (y < 0 || y >= int(tiles.size()))
-        return -1;
-    if (x < 0 || x >= int(tiles[0].size()))
-        return -1;
-    return tiles[y][x].index;
-}
-
-Tilemap::Collision Tilemap::getTileCollision(int x, int y)
-{
-    if (y < 0 || y >= int(tiles.size()))
-        return Collision::Open;
-    if (x < 0 || x >= int(tiles[0].size()))
-        return Collision::Open;
-    return tiles[y][x].collision;
-}
-
-Vector2i Tilemap::getSize()
-{
-    if (tiles.size() < 1)
-        return Vector2i(0, 0);
-    return Vector2i(tiles[0].size(), tiles.size());
+    return tiles.get(position).collision;
 }
 
 void Tilemap::onFixedUpdate()
@@ -137,51 +82,47 @@ void Tilemap::updateMesh()
 
     MeshData::Vertices vertices;
     MeshData::Indices indices;
-    for(unsigned int y=0; y<tiles.size(); y++)
-    {
-        for(unsigned int x=0; x<tiles[y].size(); x++)
+    for(auto it : tiles) {
+        const auto& tile = it.data;
+        if (tile.index < 0)
+            continue;
+        int tile_index = tile.index & ~(flip_horizontal | flip_vertical | flip_diagonal);
+        float px = it.position.x * tile_width;
+        float py = it.position.y * tile_height;
+        int u = tile_index % texture_tile_count.x;
+        int v = tile_index / texture_tile_count.x;
+        float u0 = texture_margin.x + u * uv_step_size.x;
+        float v0 = texture_margin.y + v * uv_step_size.y;
+        float u1 = u0 + uv_size.x;
+        float v1 = v0 + uv_size.y;
+
+        if (tile.index & flip_horizontal)
+            std::swap(u0, u1);
+        if (tile.index & flip_vertical)
+            std::swap(v0, v1);
+
+        indices.emplace_back(vertices.size() + 0);
+        indices.emplace_back(vertices.size() + 1);
+        indices.emplace_back(vertices.size() + 2);
+        indices.emplace_back(vertices.size() + 2);
+        indices.emplace_back(vertices.size() + 1);
+        indices.emplace_back(vertices.size() + 3);
+        
+        if (tile.index & flip_diagonal)
         {
-            const auto& tile = tiles[y][x];
-            if (tile.index < 0)
-                continue;
-            int tile_index = tile.index & ~(flip_horizontal | flip_vertical | flip_diagonal);
-            float px = x * tile_width;
-            float py = y * tile_height;
-            int u = tile_index % texture_tile_count.x;
-            int v = tile_index / texture_tile_count.x;
-            float u0 = texture_margin.x + u * uv_step_size.x;
-            float v0 = texture_margin.y + v * uv_step_size.y;
-            float u1 = u0 + uv_size.x;
-            float v1 = v0 + uv_size.y;
-
-            if (tile.index & flip_horizontal)
-                std::swap(u0, u1);
-            if (tile.index & flip_vertical)
-                std::swap(v0, v1);
-
-            indices.emplace_back(vertices.size() + 0);
-            indices.emplace_back(vertices.size() + 1);
-            indices.emplace_back(vertices.size() + 2);
-            indices.emplace_back(vertices.size() + 2);
-            indices.emplace_back(vertices.size() + 1);
-            indices.emplace_back(vertices.size() + 3);
-            
-            if (tile.index & flip_diagonal)
-            {
-                std::swap(u0, u1);
-                std::swap(v0, v1);
-                vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u1, v0));
-                vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
-                vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
-                vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u0, v1));
-            }
-            else
-            {
-                vertices.emplace_back(Vector3f(px, py, tile.z_offset), Vector2f(u0, v1));
-                vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), Vector2f(u1, v1));
-                vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), Vector2f(u0, v0));
-                vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), Vector2f(u1, v0));
-            }
+            std::swap(u0, u1);
+            std::swap(v0, v1);
+            vertices.emplace_back(Vector3f(px, py, tile.z_offset), tile.normal, Vector2f(u1, v0));
+            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), tile.normal, Vector2f(u1, v1));
+            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), tile.normal, Vector2f(u0, v0));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), tile.normal, Vector2f(u0, v1));
+        }
+        else
+        {
+            vertices.emplace_back(Vector3f(px, py, tile.z_offset), tile.normal, Vector2f(u0, v1));
+            vertices.emplace_back(Vector3f(px + tile_width, py, tile.z_offset), tile.normal, Vector2f(u1, v1));
+            vertices.emplace_back(Vector3f(px, py + tile_height, tile.z_offset), tile.normal, Vector2f(u0, v0));
+            vertices.emplace_back(Vector3f(px + tile_width, py + tile_height, tile.z_offset), tile.normal, Vector2f(u1, v0));
         }
     }
     
@@ -197,162 +138,120 @@ public:
     sp::collision::Chains2D result;
     
     TilemapCollisionBuilder(Tilemap& tilemap)
-    : tilemap(tilemap)
+    : solid(false), up(false), down(false), left(false), right(false), tilemap(tilemap)
     {
         result.type = collision::Shape::Type::Static;
-    
-        w = tilemap.tiles[0].size();
-        h = tilemap.tiles.size();
-        collision.resize(w);
-        for(int x=0; x<w; x++)
-            collision[x].resize(h);
 
-        for(int y=0; y<h; y++)
+        for(auto it : tilemap.tiles)
         {
-            for(int x=0; x<w; x++)
-            {
-                const auto& tile = tilemap.tiles[y][x];
-                
-                collision[x][y].solid = tile.collision == Tilemap::Collision::Solid;
-            }
+            if (it.data.collision == Tilemap::Collision::Solid)
+                solid.set(it.position, true);
         }
-        for(int y=0; y<h; y++)
+        for(auto it : solid)
         {
-            for(int x=0; x<w; x++)
-            {
-                auto& col = collision[x][y];
-                if (col.solid)
-                {
-                    col.up = (y + 1 == h || !collision[x][y+1].solid);
-                    col.down = (y == 0 || !collision[x][y-1].solid);
-                    col.right = (x + 1 == w || !collision[x+1][y].solid);
-                    col.left = (x == 0 || !collision[x-1][y].solid);
-                }
-                else
-                {
-                    col.up = col.down = col.left = col.right = false;
-                }
-            }
+            if (!it.data) continue;
+            if (!solid.get(it.position + Vector2i{0, 1})) up.set(it.position, true);
+            if (!solid.get(it.position + Vector2i{0,-1})) down.set(it.position, true);
+            if (!solid.get(it.position + Vector2i{1, 0})) right.set(it.position, true);
+            if (!solid.get(it.position + Vector2i{-1,0})) left.set(it.position, true);
         }
-        for(int y=0; y<h; y++)
+        for(auto it : up) {
+            if (!it.data) continue;
+            collision::Chains2D::Path path;
+            buildPathUp(path, it.position);
+            result.loops.emplace_back(std::move(path));
+        }
+        for(auto it : tilemap.tiles)
         {
-            for(int x=0; x<w; x++)
+            if (it.data.collision == Tilemap::Collision::Platform && tilemap.tiles.get(it.position - Vector2i{1, 0}).collision == Tilemap::Collision::Platform)
             {
-                auto& col = collision[x][y];
-                if (col.up)
+                int x0 = it.position.x;
+                while(tilemap.tiles.get(it.position).collision == Tilemap::Collision::Platform)
+                {
+                    it.position.x++;
+                }
+                if (x0 != it.position.x)
                 {
                     collision::Chains2D::Path path;
-                    buildPathUp(path, x, y);
-                    result.loops.emplace_back(std::move(path));
-                }
-            }
-        }
-        for(int y=0; y<h; y++)
-        {
-            for(int x=0; x<w; x++)
-            {
-                int x0 = x;
-                while(x<w && tilemap.tiles[y][x].collision == Tilemap::Collision::Platform)
-                {
-                    x++;
-                }
-                if (x0 != x)
-                {
-                    collision::Chains2D::Path path;
-                    path.emplace_back(x0, y+1);
-                    path.emplace_back(x, y+1);
+                    path.emplace_back(x0, it.position.y+1);
+                    path.emplace_back(it.position.x, it.position.y+1);
                     result.chains.emplace_back(std::move(path));
                 }
             }
         }
     }
 private:
-    class Info
-    {
-    public:
-        bool solid;
-        bool up, down, left, right;
-    };
-    std::vector<std::vector<Info>> collision;
+    InfiniGrid<bool> solid;
+    InfiniGrid<bool> up;
+    InfiniGrid<bool> down;
+    InfiniGrid<bool> left;
+    InfiniGrid<bool> right;
     Tilemap& tilemap;
-    int w, h;
 
-    void buildPathUp(collision::Chains2D::Path& path, int x, int y)
+    void buildPathUp(collision::Chains2D::Path& path, Vector2i position)
     {
-        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
-        for(; x<w && collision[x][y].up; x++)
+        for(;up.get(position); position.x++)
+            up.set(position, false);
+        path.emplace_back(position.x * tilemap.tile_width, (position.y + 1) * tilemap.tile_height);
+        if (right.get({position.x - 1, position.y}))
         {
-            collision[x][y].up = false;
-        }
-        path.emplace_back(x * tilemap.tile_width, (y + 1) * tilemap.tile_height);
-        if (x > 0 && collision[x - 1][y].right)
-        {
-            buildPathRight(path, x - 1, y);
+            buildPathRight(path, {position.x - 1, position.y});
             return;
         }
-        if (x<w && y + 1 < h && collision[x][y + 1].left)
+        if (left.get({position.x, position.y + 1}))
         {
-            buildPathLeft(path, x, y + 1);
+            buildPathLeft(path, {position.x, position.y + 1});
             return;
         }
     }
 
-    void buildPathLeft(collision::Chains2D::Path& path, int x, int y)
+    void buildPathLeft(collision::Chains2D::Path& path, Vector2i position)
     {
-        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
-        for(; y<h && collision[x][y].left; y++)
+        for(; left.get(position); position.y++)
+            left.set(position, false);
+        path.emplace_back(position.x * tilemap.tile_width, position.y * tilemap.tile_height);
+        if (up.get({position.x, position.y - 1}))
         {
-            collision[x][y].left = false;
-        }
-        path.emplace_back(x * tilemap.tile_width, y * tilemap.tile_height);
-        if (y > 0 && collision[x][y - 1].up)
-        {
-            buildPathUp(path, x, y - 1);
+            buildPathUp(path, {position.x, position.y - 1});
             return;
         }
-        if (x > 0 && y < h && collision[x - 1][y].down)
+        if (down.get({position.x - 1, position.y}))
         {
-            buildPathDown(path, x - 1, y);
+            buildPathDown(path, {position.x - 1, position.y});
             return;
         }
     }
 
-    void buildPathRight(collision::Chains2D::Path& path, int x, int y)
+    void buildPathRight(collision::Chains2D::Path& path, Vector2i position)
     {
-        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
-        for(; y>=0 && collision[x][y].right; y--)
+        for(; right.get(position); position.y--)
+            right.set(position, false);
+        path.emplace_back((position.x + 1) * tilemap.tile_width, (position.y + 1) * tilemap.tile_height);
+        if (down.get({position.x, position.y + 1}))
         {
-            collision[x][y].right = false;
-        }
-        path.emplace_back((x + 1) * tilemap.tile_width, (y + 1) * tilemap.tile_height);
-        if (y + 1 < h && collision[x][y + 1].down)
-        {
-            buildPathDown(path, x, y + 1);
+            buildPathDown(path, {position.x, position.y + 1});
             return;
         }
-        if (x + 1 < w && y >= 0 && collision[x + 1][y].up)
+        if (up.get({position.x + 1, position.y}))
         {
-            buildPathUp(path, x + 1, y);
+            buildPathUp(path, {position.x + 1, position.y});
             return;
         }
     }
 
-    void buildPathDown(collision::Chains2D::Path& path, int x, int y)
+    void buildPathDown(collision::Chains2D::Path& path, Vector2i position)
     {
-        sp2assert(x >= 0 && y >= 0 && x < w && y < h, "Internal logic error");
-        for(; x>=0 && collision[x][y].down; x--)
+        for(; down.get(position); position.x--)
+            down.set(position, false);
+        path.emplace_back((position.x + 1) * tilemap.tile_width, position.y * tilemap.tile_height);
+        if (right.get({position.x, position.y - 1}))
         {
-            collision[x][y].down = false;
-        }
-        path.emplace_back((x + 1) * tilemap.tile_width, y * tilemap.tile_height);
-        if (x >= 0 && y > 0 && collision[x][y - 1].right)
-        {
-            buildPathRight(path, x, y - 1);
+            buildPathRight(path, {position.x, position.y - 1});
             return;
         }
-        if (x + 1 < w && collision[x + 1][y].left)
+        if (left.get({position.x + 1, position.y}))
         {
-            buildPathLeft(path, x + 1, y);
+            buildPathLeft(path, {position.x + 1, position.y});
             return;
         }
     }
