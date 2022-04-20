@@ -13,9 +13,9 @@ TEST_CASE("color")
     CHECK(red.saturation == 100.0f);
     CHECK(red.value == 100.0f);
 
-    CHECK(sp::Color(0xFF0000).r == 0);
+    CHECK(sp::Color(0xFF0000).r == 1);
     CHECK(sp::Color(0xFF0000).g == 0);
-    CHECK(sp::Color(0xFF0000).b == 1);
+    CHECK(sp::Color(0xFF0000).b == 0);
     CHECK(sp::Color(0xFF0000).a == 0);
 
     CHECK(sp::stringutil::convert::toColor("#FF0000").r == 1);
