@@ -157,6 +157,36 @@ Result<Variant> Environment::load(io::ResourceStreamPtr resource)
     return _load(resource, "=[resource]");
 }
 
+Result<CoroutinePtr> Environment::loadCoroutine(const string& resource_name)
+{
+    io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
+    if (!stream)
+    {
+        return Result<CoroutinePtr>::makeError("Failed to find script resource:" + resource_name);
+    }
+    auto code = stream->readAll();
+    
+    lua_State* L = lua_newthread(lua);
+
+    alloc_info.in_protected_call = true;
+    int result = luaL_loadbufferx(L, code.c_str(), code.length(), ("@" + resource_name).c_str(), "t");
+    alloc_info.in_protected_call = false;
+    if (result)
+    {
+        auto res = Result<CoroutinePtr>::makeError(lua_tostring(L, -1));
+        lua_pop(L, 1);
+        lua_pop(lua, 1);
+        return res;
+    }
+
+    //Get the environment table from the registry.
+    lua_rawgetp(L, LUA_REGISTRYINDEX, this);
+    //set the environment table it as 1st upvalue
+    lua_setupvalue(L, -2, 1);
+
+    return callCoroutineInternal(L, 0);
+}
+
 Result<Variant> Environment::run(const string& code)
 {
     return _run(code, "=[string]");

@@ -52,6 +52,7 @@ public:
 
     Result<Variant> load(const string& resource_name);
     Result<Variant> load(io::ResourceStreamPtr resource);
+    Result<CoroutinePtr> loadCoroutine(const string& resource_name);
     Result<Variant> run(const string& code);
     Result<CoroutinePtr> runCoroutine(const string& code);
 
