@@ -41,6 +41,7 @@ public:
         {
             return false;
         }
+        this->loop = loop;
         //stb_vorbis_info info = stb_vorbis_get_info(vorbis);
         //TODO, if the vorbis file is not 44100Hz we need to convert the output.
         start();
