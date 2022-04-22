@@ -150,6 +150,16 @@ template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State* L
     return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
 }
 
+template<class TYPE> int callMemberLua(lua_State* L)
+{
+    typedef int(TYPE::*FT)(lua_State*);
+    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+    TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
+    if (!obj)
+        return 0;
+    return (obj->*(*f))(L);
+}
+
 template<class TYPE, typename RET, typename... ARGS> int callConstMember(lua_State* L)
 {
     typedef RET(TYPE::*FT)(ARGS...) const;

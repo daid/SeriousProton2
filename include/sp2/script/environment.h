@@ -32,6 +32,7 @@ public:
     void setGlobal(const string& name, bool value);
     void setGlobal(const string& name, int value);
     void setGlobal(const string& name, const string& value);
+    void setGlobal(const string& name, std::nullptr_t);
 
     template<typename RET, typename... ARGS> void setGlobal(const string& name, RET(*func)(ARGS...))
     {

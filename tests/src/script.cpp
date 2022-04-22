@@ -27,11 +27,18 @@ public:
         return this;
     }
 
+    int testLua(lua_State* L)
+    {
+        lua_pushnumber(L, 1);
+        return 1;
+    }
+
     void onRegisterScriptBindings(sp::script::BindingClass& script_binding_class) override
     {
         script_binding_class.bind("test", &TestObject::test);
         script_binding_class.bind("testV2d", &TestObject::testVector2d);
         script_binding_class.bind("testObj", &TestObject::testObj);
+        script_binding_class.bind("testLua", &TestObject::testLua);
         script_binding_class.bind("callback", callback);
         script_binding_class.bindProperty("prop", prop);
     }
@@ -93,7 +100,13 @@ TEST_CASE("sandbox")
         env.setGlobal("yield", luaYield);
         auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end").value();
         CHECK(co != nullptr);
-        while(co->resume().value()) {}
+        while(true) {
+            auto res = co->resume();
+            if (res.isErr())
+                break;
+            if (!res.value())
+                break;
+        }
     }
 }
 
@@ -118,8 +131,17 @@ TEST_CASE("sandbox memory coroutine")
         sp::script::Environment env(config);
 
         env.setGlobal("yield", luaYield);
-        auto co = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end").value();
-        while(co && co->resume().value()) {}
+        auto cores = env.runCoroutine("a = {}; while true do a[#a + 1] = 1; yield(); end");
+        if (cores.isOk()) {
+            auto co = cores.value();
+            while(true) {
+                auto res = co->resume();
+                if (res.isErr())
+                    break;
+                if (!res.value())
+                    break;
+            }
+        }
     }
 }
 
@@ -141,6 +163,7 @@ TEST_CASE("object")
     CHECK(env.run("assert(test.testV2d({1, 1}).x == 2)").isOk() == true);
     CHECK(env.run("assert(test.testV2d({1, 1}).y == 3)").isOk() == true);
     CHECK(env.run("assert(test.testObj(test) == test)").isOk() == true);
+    CHECK(env.run("assert(test.testLua()) == 1)").isOk() == true);
 
     env.setGlobal("yield", luaYield);
     CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)").isOk() == true);

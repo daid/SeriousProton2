@@ -142,6 +142,19 @@ void Environment::setGlobal(const string& name, const string& value)
     lua_pop(lua, 1);
 }
 
+void Environment::setGlobal(const string& name, std::nullptr_t)
+{
+    //Get the environment table from the registry.
+    lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
+    
+    //Set our variable in this environment table
+    lua_pushnil(lua);
+    lua_setfield(lua, -2, name.c_str());
+    
+    //Pop the table
+    lua_pop(lua, 1);
+}
+
 Result<Variant> Environment::load(const string& resource_name)
 {
     io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);

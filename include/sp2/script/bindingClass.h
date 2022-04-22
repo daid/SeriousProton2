@@ -16,6 +16,17 @@ class BindingObject;
 class BindingClass
 {
 public:
+    template<class TYPE> void bind(const string& name, int(TYPE::*func)(lua_State*))
+    {
+        typedef int(TYPE::*FT)(lua_State*);
+        FT* f = reinterpret_cast<FT*>(lua_newuserdata(L, sizeof(FT)));
+        *f = func;
+        lua_pushvalue(L, object_table_index); //push the table of this object
+
+        lua_pushcclosure(L, &script::callMemberLua<TYPE>, 2);
+        lua_setfield(L, function_table_index, name.c_str());
+    }
+
     template<class TYPE, typename RET, typename... ARGS> void bind(const string& name, RET(TYPE::*func)(ARGS...))
     {
         typedef RET(TYPE::*FT)(ARGS...);
