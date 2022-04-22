@@ -163,7 +163,7 @@ TEST_CASE("object")
     CHECK(env.run("assert(test.testV2d({1, 1}).x == 2)").isOk() == true);
     CHECK(env.run("assert(test.testV2d({1, 1}).y == 3)").isOk() == true);
     CHECK(env.run("assert(test.testObj(test) == test)").isOk() == true);
-    CHECK(env.run("assert(test.testLua()) == 1)").isOk() == true);
+    CHECK(env.run("assert(test.testLua() == 1)").isOk() == true);
 
     env.setGlobal("yield", luaYield);
     CHECK(env.run("test.callback(function() print('pre'); yield(); print('post'); yield(); end)").isOk() == true);
