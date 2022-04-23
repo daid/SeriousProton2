@@ -175,6 +175,8 @@ P<Widget> KeyNavigator::findNextTarget(P<Widget> w, P<Widget> after)
 
 bool KeyNavigator::canTarget(P<Widget> w)
 {
+    if (!w->isVisible())
+        return false;
     if (P<Button>(w))
         return true;
     if (P<Slider>(w))
