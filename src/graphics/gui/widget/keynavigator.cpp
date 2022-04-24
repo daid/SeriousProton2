@@ -121,7 +121,11 @@ void KeyNavigator::onUpdate(float delta)
         if (slider)
             slider->setValue(slider->getValue() + (slider->getMax() - slider->getMin()) * 0.1f, true);
     }
-    if (select && select->getDown())
+    if (select && select->getDown() && isVisible())
+    {
+        select_down_widget = getParent();
+    }
+    if (select && select->getUp())
     {
         if (!isVisible())
         {
@@ -129,11 +133,14 @@ void KeyNavigator::onUpdate(float delta)
             return;
         }
 
-        P<Button> button = getParent();
-        if (button)
+        if (getParent() == select_down_widget)
         {
-            button->onPointerDown(io::Pointer::Button::Left, Vector2d(0, 0), -2);
-            button->onPointerUp(Vector2d(0, 0), -2);
+            P<Button> button = getParent();
+            if (button)
+            {
+                button->onPointerDown(io::Pointer::Button::Left, Vector2d(0, 0), -2);
+                button->onPointerUp(Vector2d(0, 0), -2);
+            }
         }
     }
 }

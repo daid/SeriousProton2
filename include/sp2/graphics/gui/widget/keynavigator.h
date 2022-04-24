@@ -27,6 +27,7 @@ private:
     P<io::Keybinding> left;
     P<io::Keybinding> right;
     P<io::Keybinding> select;
+    P<Widget> select_down_widget;
 
     bool skip = true;
 };
