@@ -13,6 +13,8 @@
 namespace sp {
 namespace script {
 class BindingObject;
+// Special dummy object to return to yield the current script execution.
+class Yield{};
 
 lua_State* createLuaState(void* environment, lua_Alloc alloc_function=nullptr, void* alloc_ptr=nullptr);
 void destroyLuaState(lua_State* L);
@@ -42,6 +44,7 @@ int pushToLua(lua_State* L, int i);
 int pushToLua(lua_State* L, float f);
 int pushToLua(lua_State* L, double f);
 int pushToLua(lua_State* L, const string& str);
+int pushToLua(lua_State* L, Yield);
 int pushToLua(lua_State* L, BindingObject* ptr);
 
 template<class T, class = typename std::enable_if<std::is_base_of<BindingObject, T>::value>::type> int pushToLua(lua_State* L, sp::P<T> obj)
@@ -128,7 +131,6 @@ public:
         return pushToLua(L, (*f)(std::get<N>(args)...));
     }
 };
-
 template<> class callFunctionHelper<void>
 {
 public:
@@ -141,13 +143,19 @@ public:
 
 template<class TYPE, typename RET, typename... ARGS> int callMember(lua_State* L)
 {
-    typedef RET(TYPE::*FT)(ARGS...);
-    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
-    TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
-    if (!obj)
-        return 0;
-    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
-    return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    int result;
+    {
+        typedef RET(TYPE::*FT)(ARGS...);
+        FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+        TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
+        if (!obj)
+            return 0;
+        std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
+        result = callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    }
+    if constexpr (std::is_same_v<RET, Yield>)
+        return lua_yield(L, result);
+    return result;
 }
 
 template<class TYPE> int callMemberLua(lua_State* L)
@@ -162,21 +170,33 @@ template<class TYPE> int callMemberLua(lua_State* L)
 
 template<class TYPE, typename RET, typename... ARGS> int callConstMember(lua_State* L)
 {
-    typedef RET(TYPE::*FT)(ARGS...) const;
-    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
-    TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
-    if (!obj)
-        return 0;
-    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
-    return callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    int result;
+    {
+        typedef RET(TYPE::*FT)(ARGS...) const;
+        FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+        TYPE* obj = convertFromLua(L, typeIdentifier<TYPE*>{}, lua_upvalueindex(2));
+        if (!obj)
+            return 0;
+        std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
+        result = callClassHelper<TYPE, RET>::doCall(L, obj, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    }
+    if constexpr (std::is_same_v<RET, Yield>)
+        return lua_yield(L, result);
+    return result;
 }
 
 template<typename RET, typename... ARGS> int callFunction(lua_State* L)
 {
-    typedef RET(*FT)(ARGS...);
-    FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
-    std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
-    return callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    int result;
+    {
+        typedef RET(*FT)(ARGS...);
+        FT* f = reinterpret_cast<FT*>(lua_touserdata(L, lua_upvalueindex(1)));
+        std::tuple<remove_cvref<ARGS>...> args = getArgs<remove_cvref<ARGS>...>(L);
+        result = callFunctionHelper<RET>::doCall(L, *f, args, typename sequenceGenerator<sizeof...(ARGS)>::type());
+    }
+    if constexpr (std::is_same_v<RET, Yield>)
+        return lua_yield(L, result);
+    return result;
 }
 
 template<typename TYPE> int getProperty(lua_State* L)

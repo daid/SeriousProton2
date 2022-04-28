@@ -172,6 +172,11 @@ int pushToLua(lua_State* L, const string& str)
     return 1;
 }
 
+int pushToLua(lua_State* L, Yield)
+{
+    return 0;
+}
+
 int pushToLua(lua_State* L, BindingObject* ptr)
 {
     if (ptr)

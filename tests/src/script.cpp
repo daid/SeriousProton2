@@ -1,9 +1,20 @@
 #include <sp2/script/environment.h>
 #include "doctest.h"
 
-static int luaYield(lua_State* lua)
+class DestructorTest
 {
-    return lua_yield(lua, 0);
+public:
+    static inline int count = 0;
+
+    DestructorTest() { count += 1; }
+    DestructorTest(const DestructorTest& other) {}
+    ~DestructorTest() { count -= 1; }
+    DestructorTest& operator=(const DestructorTest& other) { return *this; }
+};
+
+static sp::script::Yield luaYield()
+{
+    return {};
 }
 
 class TestObject : public sp::script::BindingObject
@@ -29,6 +40,7 @@ public:
 
     int testLua(lua_State* L)
     {
+        INFO("testLua");
         lua_pushnumber(L, 1);
         return 1;
     }
@@ -173,6 +185,7 @@ TEST_CASE("object")
     CHECK(test.callback.callCoroutine().value() == nullptr);
     CHECK(env.run("test.callback(function() yield() while true do math.sin(0) end end)").isOk() == true);
     CHECK(test.callback.callCoroutine().value()->resume().isOk() == false);
+    CHECK(DestructorTest::count == 0);
 }
 
 TEST_CASE("coroutine callback")
