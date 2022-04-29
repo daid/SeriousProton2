@@ -217,6 +217,13 @@ void Engine::processEvents()
             window_id = event.window.windowID;
             break;
         case SDL_FINGERDOWN:
+#ifdef __EMSCRIPTEN__
+            if (!audio_started)
+            {
+                audio::AudioSource::startAudioSystem();
+                audio_started = true;
+            }
+#endif
         case SDL_FINGERUP:
         case SDL_FINGERMOTION:
             window_id = SDL_GetWindowID(SDL_GetMouseFocus());
