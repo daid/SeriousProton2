@@ -85,30 +85,32 @@ public:
     size_t buffer_length;
 };
 
-bool CameraCapture::init(int index)
+CameraCapture::State CameraCapture::init(int index, sp::Vector2i prefered_size)
 {
     data->fd = ::open(("/dev/video" + string(index)).c_str(), O_RDWR);
     if (data->fd == -1)
     {
         LOG(Warning, "Failed to open /dev/video" + string(index));
-        return false;
+        return State::Closed;
     }
     
     struct v4l2_capability cap;
     if(::ioctl(data->fd, VIDIOC_QUERYCAP, &cap) < 0)
     {
         LOG(Error, "VIDIOC_QUERYCAP failed");
-        return false;
+        return State::Closed;
     }
     
     if(!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
     {
         LOG(Error, "No V4L2_CAP_VIDEO_CAPTURE");
-        return false;
+        return State::Closed;
     }
     
     size.x = 640;
     size.y = 480;
+    if (prefered_size.x && prefered_size.y)
+        size = prefered_size;
 
     struct v4l2_format format;
     format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -119,7 +121,7 @@ bool CameraCapture::init(int index)
     if(::ioctl(data->fd, VIDIOC_S_FMT, &format) < 0)
     {
         LOG(Error, "VIDIOC_S_FMT failed");
-        return false;
+        return State::Closed;
     }
     
     struct v4l2_requestbuffers bufrequest;
@@ -130,7 +132,7 @@ bool CameraCapture::init(int index)
     if(::ioctl(data->fd, VIDIOC_REQBUFS, &bufrequest) < 0)
     {
         LOG(Error, "VIDIOC_REQBUFS failed");
-        return false;
+        return State::Closed;
     }
     
     struct v4l2_buffer bufferinfo;
@@ -142,7 +144,7 @@ bool CameraCapture::init(int index)
     if(::ioctl(data->fd, VIDIOC_QUERYBUF, &bufferinfo) < 0)
     {
         LOG(Error, "VIDIOC_QUERYBUF failed");
-        return false;
+        return State::Closed;
     }
     
     data->buffer = ::mmap(nullptr, bufferinfo.length, PROT_READ | PROT_WRITE, MAP_SHARED, data->fd, bufferinfo.m.offset);
@@ -150,7 +152,7 @@ bool CameraCapture::init(int index)
     if(data->buffer == MAP_FAILED)
     {
         LOG(Error, "mmap failed");
-        return false;
+        return State::Closed;
     }
     memset(data->buffer, 0, bufferinfo.length);
 
@@ -162,21 +164,21 @@ bool CameraCapture::init(int index)
     if(::ioctl(data->fd, VIDIOC_QBUF, &bufferinfo) < 0)
     {
         LOG(Error, "VIDIOC_QBUF failed");
-        return false;
+        return State::Closed;
     }
     
     int type = bufferinfo.type;
     if(::ioctl(data->fd, VIDIOC_STREAMON, &type) < 0)
     {
         LOG(Error, "VIDIOC_STREAMON failed");
-        return false;
+        return State::Closed;
     }
 
     int flags = ::fcntl(data->fd, F_GETFL, 0);
     flags |= O_NONBLOCK;
     ::fcntl(data->fd, F_SETFL, flags);
 
-    return true;
+    return State::Streaming;
 }
 
 Image CameraCapture::getFrame()
@@ -209,6 +211,11 @@ Image CameraCapture::getFrame()
         LOG(Warning, "VIDIOC_QBUF failed");
     }
     return result;
+}
+
+CameraCapture::State CameraCapture::getState()
+{
+    return state;
 }
 
 #elif defined(_WIN32)
@@ -253,13 +260,13 @@ public:
     } type;
 };
 
-bool CameraCapture::init(int index)
+CameraCapture::State CameraCapture::init(int index, sp::Vector2i prefered_size)
 {
     ICreateDevEnum* create_dev_enum = nullptr;
     HRESULT res;
     
     if (CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC, IID_ICreateDevEnum, reinterpret_cast<LPVOID*>(&create_dev_enum)))
-        return false;
+        return State::Closed;
     
     IEnumMoniker *enum_moniker = nullptr;
     res = create_dev_enum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &enum_moniker, 0);
@@ -267,7 +274,7 @@ bool CameraCapture::init(int index)
     {
         //Note: This happens if there are no cameras available.
         create_dev_enum->Release();
-        return false;
+        return State::Closed;
     }
     
     while(enum_moniker->Next(1, &data->moniker, nullptr) == S_OK)
@@ -284,23 +291,23 @@ bool CameraCapture::init(int index)
     create_dev_enum->Release();
 
     if (!data->moniker)
-        return false;
+        return State::Closed;
     
     if (CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, reinterpret_cast<LPVOID*>(&data->capture_graph_builder)))
-        return false;
+        return State::Closed;
     if (CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, IID_IGraphBuilder, reinterpret_cast<LPVOID*>(&data->graph_builder)))
-        return false;
+        return State::Closed;
     if (data->graph_builder->QueryInterface(IID_IMediaControl, reinterpret_cast<LPVOID*>(&data->media_control)))
-        return false;
+        return State::Closed;
     if (data->graph_builder->QueryInterface(IID_IMediaEventEx, reinterpret_cast<LPVOID*>(&data->media_event)))
-        return false;
+        return State::Closed;
 
     if (data->capture_graph_builder->SetFiltergraph(data->graph_builder))
-        return false;
+        return State::Closed;
     if (data->moniker->BindToObject(NULL, NULL, IID_IBaseFilter, reinterpret_cast<LPVOID*>(&data->base_filter_cam)))
-        return false;
+        return State::Closed;
     if (data->graph_builder->AddFilter(data->base_filter_cam, L"VideoCam"))
-        return false;
+        return State::Closed;
 
     CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, reinterpret_cast<LPVOID*>(&data->base_filter_sample_grabber));
     data->graph_builder->AddFilter(data->base_filter_sample_grabber, L"Sample Grabber");
@@ -349,14 +356,14 @@ bool CameraCapture::init(int index)
     else
     {
         LOG(Error, "Unknown MEDIASUBTYPE in camera settings: ", sp::string::hex(mt.subtype.Data1));
-        return false;
+        return State::Closed;
     }
 
     auto result = data->media_control->Run();
     if (FAILED(result))
     {
         LOG(Warning, "Could open camera, but failed to start the stream.");
-        return false;
+        return State::Closed;
     }
 
 /*
@@ -375,7 +382,7 @@ bool CameraCapture::init(int index)
         return false;
     }
 */
-    return true;
+    return State::Streaming;
 }
 
 Image CameraCapture::getFrame()
@@ -468,6 +475,11 @@ Image CameraCapture::getFrame()
     return result;
 }
 
+CameraCapture::State CameraCapture::getState()
+{
+    return state;
+}
+
 #elif defined(__EMSCRIPTEN__)
 
 class CameraCapture::Data
@@ -479,31 +491,38 @@ public:
             if (typeof(sp2_video_dom) != 'undefined') {
                 sp2_video_dom.srcObject.getTracks().forEach((t) => { t.stop(); });
                 sp2_video_dom.srcObject = null;
+                sp2_video_dom.remove();
+                sp2_canvas_dom.remove();
+                sp2_video_dom = undefined;
+                sp2_canvas_dom = undefined;
             }
+            sp2_video_state = 0;
         );
     }
 };
 
-bool CameraCapture::init(int index)
-{
-    //Note this always opens the primary camera, on android we might want the front facing as well.
-    EM_ASM(
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
-            if (typeof(sp2_video_dom) == 'undefined') {
-                sp2_video_dom = document.createElement("video");
-                sp2_canvas_dom = document.createElement("canvas");
-            }
+EM_JS(void, sp2_open_video_stream, (int index, int width, int height), {
+    sp2_video_state = 1;
+    var constraints = { video: true, audio: false };
+    if (width > 0 && height > 0) {
+        constraints.video = {width: width, height: height};
+    }
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        if (typeof(sp2_video_dom) == 'undefined') {
+            sp2_video_dom = document.createElement("video");
+            sp2_canvas_dom = document.createElement("canvas");
+        }
 
-            sp2_video_dom.srcObject = stream;
-            sp2_video_dom.play().then(() => {
-                sp2_canvas_dom.width = sp2_video_dom.videoWidth;
-                sp2_canvas_dom.height = sp2_video_dom.videoHeight;
-            });
+        sp2_video_dom.srcObject = stream;
+        sp2_video_dom.play().then(() => {
+            sp2_canvas_dom.width = sp2_video_dom.videoWidth;
+            sp2_canvas_dom.height = sp2_video_dom.videoHeight;
+            sp2_video_state = 2;
         });
-    );
-    //No way to indicate failure, as initialization happens async.
-    return true;
-}
+    }).catch(() => {
+        sp2_video_state = 0;
+    });
+});
 
 EM_JS(void, sp2_get_video_image, (uint32_t* image_ptr), {
     var ctx = sp2_canvas_dom.getContext('2d');
@@ -512,6 +531,12 @@ EM_JS(void, sp2_get_video_image, (uint32_t* image_ptr), {
     var buf = new Uint8ClampedArray(HEAP8.buffer, image_ptr, data.width * data.height * 4);
     buf.set(data.data);
 });
+
+CameraCapture::State CameraCapture::init(int index, sp::Vector2i prefered_size)
+{
+    sp2_open_video_stream(index, prefered_size.x, prefered_size.y);
+    return State::Opening;
+}
 
 Image CameraCapture::getFrame()
 {
@@ -525,6 +550,15 @@ Image CameraCapture::getFrame()
     return Image();
 }
 
+CameraCapture::State CameraCapture::getState()
+{
+    int sp2_video_state = EM_ASM_INT({ return sp2_video_state; });
+    if (sp2_video_state == 0) state = State::Closed;
+    if (sp2_video_state == 1) state = State::Opening;
+    if (sp2_video_state == 2) state = State::Streaming;
+    return state;
+}
+
 #else
 
 /** Dummy implementation if we do not have an OS specific implementation. */    
@@ -535,9 +569,9 @@ public:
     ~Data() {}
 };
 
-bool CameraCapture::init(int index)
+CameraCapture::State CameraCapture::init(int index)
 {
-    return false;
+    return State::Closed;
 }
 
 Image CameraCapture::getFrame()
@@ -548,24 +582,22 @@ Image CameraCapture::getFrame()
 #endif
 
 // Shared CameraCapture implementation
-CameraCapture::CameraCapture(int index)
+CameraCapture::CameraCapture(int index, sp::Vector2i prefered_size)
 : data(nullptr)
 {
     data = std::unique_ptr<Data>(new Data());
-    if (!init(index))
+    state = init(index, prefered_size);
+
+    if (state == State::Closed)
     {
         LOG(Warning, "Failed to open camera:", index);
         data = nullptr;
+        state = State::Closed;
     }
 }
 
 CameraCapture::~CameraCapture()
 {
-}
-
-bool CameraCapture::isOpen()
-{
-    return data != nullptr;
 }
 
 }//namespace io
