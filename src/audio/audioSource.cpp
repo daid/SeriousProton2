@@ -2,7 +2,7 @@
 #include <sp2/logging.h>
 #include <sp2/assert.h>
 #include <string.h>
-#include <SDL_audio.h>
+#include <SDL.h>
 
 
 namespace sp {
@@ -81,9 +81,11 @@ void AudioSource::startAudioSystem()
 #endif
     want.callback = audioCallback;
 
+    SDL_InitSubSystem(SDL_INIT_AUDIO);
     sdl_audio_device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
     if (sdl_audio_device == 0)
     {
+        LOG(Error, SDL_GetError());
         LOG(Warning, "Failed to open audio device, no audio available.");
         return;
     }
