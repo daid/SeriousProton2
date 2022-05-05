@@ -502,10 +502,17 @@ public:
 };
 
 EM_JS(void, sp2_open_video_stream, (int index, int width, int height), {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        //Not supported or not serving with https
+        sp2_video_state = 0;
+        return;
+    }
     sp2_video_state = 1;
-    var constraints = { video: true, audio: false };
+    var constraints = { video: {facingMode: "environment"}, audio: false };
+    if (index == 1) constraints.video.facingMode = "user";
     if (width > 0 && height > 0) {
-        constraints.video = {width: width, height: height};
+        constraints.video.width = width;
+        constraints.video.height = height;
     }
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         if (typeof(sp2_video_dom) == 'undefined') {
