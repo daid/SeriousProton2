@@ -16,7 +16,9 @@
 DEFINE_GUID(CLSID_SampleGrabber,0xc1f400a0,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08,0x03,0x9e,0x37);
 DEFINE_GUID(CLSID_NullRenderer,0xc1f400a4,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08,0x03,0x9e,0x37);
 #endif//_WIN32
-
+#if defined(__EMSCRIPTEN__)
+#  include <emscripten.h>
+#endif
 
 namespace sp {
 namespace io {
@@ -464,6 +466,63 @@ Image CameraCapture::getFrame()
         }break;
     }
     return result;
+}
+
+#elif defined(__EMSCRIPTEN__)
+
+class CameraCapture::Data
+{
+public:
+    Data() {}
+    ~Data() {
+        EM_ASM(
+            if (typeof(sp2_video_dom) != 'undefined') {
+                sp2_video_dom.srcObject.getTracks().forEach((t) => { t.stop(); });
+                sp2_video_dom.srcObject = null;
+            }
+        );
+    }
+};
+
+bool CameraCapture::init(int index)
+{
+    //Note this always opens the primary camera, on android we might want the front facing as well.
+    EM_ASM(
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
+            if (typeof(sp2_video_dom) == 'undefined') {
+                sp2_video_dom = document.createElement("video");
+                sp2_canvas_dom = document.createElement("canvas");
+            }
+
+            sp2_video_dom.srcObject = stream;
+            sp2_video_dom.play().then(() => {
+                sp2_canvas_dom.width = sp2_video_dom.videoWidth;
+                sp2_canvas_dom.height = sp2_video_dom.videoHeight;
+            });
+        });
+    );
+    //No way to indicate failure, as initialization happens async.
+    return true;
+}
+
+EM_JS(void, sp2_get_video_image, (uint32_t* image_ptr), {
+    var ctx = sp2_canvas_dom.getContext('2d');
+    ctx.drawImage(sp2_video_dom, 0, 0);
+    var data = ctx.getImageData(0, 0, sp2_canvas_dom.width, sp2_canvas_dom.height);
+    var buf = new Uint8ClampedArray(HEAP8.buffer, image_ptr, data.width * data.height * 4);
+    buf.set(data.data);
+});
+
+Image CameraCapture::getFrame()
+{
+    int width = EM_ASM_INT({ return typeof(sp2_video_dom) == 'undefined' ? 0 : sp2_canvas_dom.width;});
+    int height = EM_ASM_INT({ return typeof(sp2_video_dom) == 'undefined' ? 0 : sp2_canvas_dom.height;});
+    if (width && height) {
+        Image img{{width, height}};
+        sp2_get_video_image(img.getPtr());
+        return img;
+    }
+    return Image();
 }
 
 #else

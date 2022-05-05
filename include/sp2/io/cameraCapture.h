@@ -17,6 +17,8 @@ public:
     //Get a new frame from the camera stream.
     //Note: On windows this always returns the latest image,
     //      while on linux it might return a zero sized image when there is no new frame available.
+    //Note: On web builds, this returns empty images until the user accepted that the application can
+    //      use the camera. There is no way to detect a deny or no camera yet.
     Image getFrame();
 private:
     bool init(int index);
