@@ -259,12 +259,18 @@ void Window::close()
 void Window::createRenderWindow()
 {
     SDL_Rect display_mode;
+#ifdef __EMSCRIPTEN__
+    display_mode.w = EM_ASM_INT({ return window.innerWidth; });
+    display_mode.h = EM_ASM_INT({ return window.innerHeight; });
+#else
     if (SDL_GetDisplayBounds(0, &display_mode))
     {
         LOG(Warning, "Failed to get desktop size.");
         display_mode.w = 640;
         display_mode.h = 480;
     }
+#endif//__EMSCRIPTEN__
+
 #ifdef ANDROID
     fullscreen = true;
 #endif
@@ -288,12 +294,14 @@ void Window::createRenderWindow()
         }
         else
         {
+#ifndef __EMSCRIPTEN__
             //Make sure the window fits on the screen with some edge around it.
             while(window_width >= int(display_mode.w) || window_height >= int(display_mode.h))
             {
                 window_width *= 0.9;
                 window_height *= 0.9;
             }
+#endif
         }
 
         if (window_aspect_ratio != 0.0)
