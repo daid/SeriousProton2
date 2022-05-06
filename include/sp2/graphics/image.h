@@ -54,4 +54,4 @@ private:
 }//namespace sp
 
 
-#endif//SP2_GRAPHICS_SHADER_H
+#endif//SP2_GRAPHICS_IMAGE_H
