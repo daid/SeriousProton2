@@ -6,14 +6,6 @@
 #include <sp2/scene/camera.h>
 #include <sp2/logging.h>
 #include <sp2/io/keybinding.h>
-#include <sp2/collision/2d/box2dBackend.h>
-#include <sp2/collision/3d/bullet3dBackend.h>
-
-#include <private/collision/box2d.h>
-#include <private/collision/box2dVector.h>
-
-#include <private/collision/bullet.h>
-#include <private/collision/bulletVector.h>
 
 #include <SDL_keyboard.h>
 

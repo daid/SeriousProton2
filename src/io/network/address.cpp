@@ -103,9 +103,9 @@ Address Address::getLocalAddress()
         for(struct ifaddrs* addr = addrs; addr != nullptr; addr = addr->ifa_next)
         {
             if ((addr->ifa_flags & IFF_LOOPBACK) || !(addr->ifa_flags & IFF_UP))
-            {
                 continue;
-            }
+            if (addr->ifa_addr == nullptr)
+                continue
             if (addr->ifa_addr->sa_family == AF_INET)
             {
                 ::getnameinfo(addr->ifa_addr, sizeof(struct sockaddr_in), buffer, sizeof(buffer), nullptr, 0, NI_NUMERICHOST);
