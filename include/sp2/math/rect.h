@@ -77,6 +77,31 @@ public:
     
     Vector2<T> position;
     Vector2<T> size;
+
+    class Iterator
+    {
+    public:
+        Iterator(Vector2<T> _p, T _pitch) : p(_p), start(_p.x), pitch(_pitch) {}
+
+        Vector2<T> operator*() const { return p; }
+        Iterator& operator++() { p.x += 1; if (p.x >= start + pitch) { p.x = start; p.y += 1; } return *this; }
+
+        friend bool operator!= (const Iterator& a, const Iterator& b) { return a.p != b.p; };
+
+        Vector2<T> p;
+        T start;
+        T pitch;
+    };
+
+    Iterator begin()
+    {
+        return Iterator{position, size.x};
+    }
+
+    Iterator end()
+    {
+        return Iterator{position + Vector2<T>{0, size.y}, size.x};
+    }
 };
 
 typedef Rect<int> Rect2i;
