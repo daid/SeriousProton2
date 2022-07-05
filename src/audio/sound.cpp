@@ -78,38 +78,41 @@ void Sound::play(const string& resource_name)
     {
         data = new AudioBuffer();
         io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
-        SDL_RWops ops = {
-            .size = sdl_to_stream_size,
-            .seek = sdl_to_stream_seek,
-            .read = sdl_to_stream_read,
-            .write = sdl_to_stream_write,
-            .close = sdl_to_stream_close,
-            .type = SDL_RWOPS_UNKNOWN,
-            .hidden = {.unknown = { .data1 = stream.get() } },
-        };
-        SDL_AudioSpec spec;
-        uint8_t* buffer = nullptr;
-        uint32_t buffer_size = 0;
-        if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
+        if (stream)
         {
-            SDL_AudioCVT cvt;
-            SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 48000);
-            if (cvt.needed)
+            SDL_RWops ops = {
+                .size = sdl_to_stream_size,
+                .seek = sdl_to_stream_seek,
+                .read = sdl_to_stream_read,
+                .write = sdl_to_stream_write,
+                .close = sdl_to_stream_close,
+                .type = SDL_RWOPS_UNKNOWN,
+                .hidden = {.unknown = { .data1 = stream.get() } },
+            };
+            SDL_AudioSpec spec;
+            uint8_t* buffer = nullptr;
+            uint32_t buffer_size = 0;
+            if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
             {
-                cvt.len = buffer_size;
-                data->resize(cvt.len * cvt.len_mult / sizeof(float));
-                cvt.buf = reinterpret_cast<uint8_t*>(data->data());
-                memcpy(cvt.buf, buffer, buffer_size);
-                SDL_ConvertAudio(&cvt);
-                data->resize(cvt.len_cvt / sizeof(float));
-                data->shrink_to_fit();
+                SDL_AudioCVT cvt;
+                SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 48000);
+                if (cvt.needed)
+                {
+                    cvt.len = buffer_size;
+                    data->resize(cvt.len * cvt.len_mult / sizeof(float));
+                    cvt.buf = reinterpret_cast<uint8_t*>(data->data());
+                    memcpy(cvt.buf, buffer, buffer_size);
+                    SDL_ConvertAudio(&cvt);
+                    data->resize(cvt.len_cvt / sizeof(float));
+                    data->shrink_to_fit();
+                }
+                else
+                {
+                    data->resize(buffer_size / sizeof(float));
+                    memcpy(data->data(), buffer, buffer_size);
+                }
+                SDL_FreeWAV(buffer);
             }
-            else
-            {
-                data->resize(buffer_size / sizeof(float));
-                memcpy(data->data(), buffer, buffer_size);
-            }
-            SDL_FreeWAV(buffer);
 
             LOG(Info, "Loaded", resource_name, "with", data->size(), "samples", float(data->size()) / 2 / 44100);
         }
