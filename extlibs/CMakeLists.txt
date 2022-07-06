@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.8.0)
+
+
+file(GLOB_RECURSE LUA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lua/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/lua/*.h")
+file(GLOB_RECURSE MINIZ_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/miniz/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/miniz/*.h")
+file(GLOB_RECURSE BOX2D_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Box2D/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Box2D/*.h")
+file(GLOB_RECURSE BULLET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/bullet/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/bullet/*.h")
+file(GLOB_RECURSE FREETYPE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.9/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.9/src/*.h")
+
+add_library(box2d STATIC ${BOX2D_SOURCES})
+target_include_directories(box2d PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+add_library(bullet STATIC ${BULLET_SOURCES})
+target_include_directories(bullet PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/bullet")
+add_library(lua STATIC ${LUA_SOURCES})
+target_compile_options(lua PRIVATE -xc++ -DLUA_USE_LONGJMP=1 -DSP2_LUA_EXTENTIONS=1)
+target_include_directories(lua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+add_library(miniz STATIC ${MINIZ_SOURCES})
+target_include_directories(miniz PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/miniz")
+add_library(sp2freetype STATIC ${FREETYPE_SOURCES})
+target_include_directories(sp2freetype PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.9/include")
+target_compile_definitions(sp2freetype PRIVATE "-DFT2_BUILD_LIBRARY")
