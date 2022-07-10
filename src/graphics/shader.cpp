@@ -209,7 +209,7 @@ void Shader::setUniform(const string& s, float v)
     glUniform1f(location, v);
 }
 
-void Shader::setUniform(const string& s, Texture* texture)
+void Shader::setUniform(const string& s, Texture* texture, int texture_index)
 {
     sp2assert(bound_shader == this, "Shader needs to be bound before uniforms can be set");
     
@@ -219,9 +219,8 @@ void Shader::setUniform(const string& s, Texture* texture)
     int location = getUniformLocation(s);
     if (location == -1)
         return;
-    //TODO: This assumes we bind only 1 texture.
-    glUniform1i(location, 0);
-    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(location, texture_index);
+    glActiveTexture(GL_TEXTURE0 + texture_index);
     texture->bind();
 }
 

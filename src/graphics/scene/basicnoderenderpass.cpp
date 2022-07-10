@@ -176,7 +176,7 @@ void BasicNodeRenderPass::recursiveNodeRender(RenderQueue& queue, P<Node> node)
 
 void BasicNodeRenderPass::addNodeToRenderQueue(RenderQueue& queue, P<Node>& node)
 {
-    if (node->render_data.type != sp::RenderData::Type::None && node->render_data.mesh)
+    if (node->render_data.type > sp::RenderData::Type::None && node->render_data.type < sp::RenderData::Type::Custom1 && node->render_data.mesh)
         queue.add(node->getGlobalTransform(), node->render_data);
 }
 

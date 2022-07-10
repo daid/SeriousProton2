@@ -20,7 +20,7 @@ public:
     void setUniform(const string& s, const Vector3f& v);
     void setUniform(const string& s, const Color& v);
     void setUniform(const string& s, float v);
-    void setUniform(const string& s, Texture* v);
+    void setUniform(const string& s, Texture* v, int texture_index=0);
 
 private:
     Shader(const string& name);
