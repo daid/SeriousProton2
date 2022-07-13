@@ -4,6 +4,7 @@
 #include <sp2/string.h>
 #include <sp2/math/rect.h>
 #include <sp2/graphics/gui/widget/widget.h>
+#include <sp2/attributes.h>
 
 
 namespace sp {
@@ -41,7 +42,7 @@ public:
 };
 
 #define SP_REGISTER_LAYOUT(name, class_name) \
-    sp::gui::LayoutClassRegistry layout_class_registry ## class_name (name, []() { return new class_name(); });
+    sp::gui::LayoutClassRegistry SP2_STATIC_INIT layout_class_registry ## class_name (name, []() { return new class_name(); });
 
 }//namespace gui
 }//namespace sp

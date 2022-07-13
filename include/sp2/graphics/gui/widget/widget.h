@@ -9,6 +9,7 @@
 #include <sp2/alignment.h>
 #include <sp2/io/pointer.h>
 #include <sp2/io/textinput.h>
+#include <sp2/attributes.h>
 
 
 namespace sp {
@@ -205,7 +206,7 @@ public:
 };
 
 #define SP_REGISTER_WIDGET(name, class_name) \
-    sp::gui::WidgetClassRegistry widget_class_registry ## class_name (name, [](sp::P<sp::gui::Widget> parent) { return new class_name(parent); });
+    sp::gui::WidgetClassRegistry SP2_STATIC_INIT widget_class_registry ## class_name (name, [](sp::P<sp::gui::Widget> parent) { return new class_name(parent); });
 
 }//namespace gui
 }//namespace sp
