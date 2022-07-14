@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8.0)
 
 set(SP2_SINGLE_EXECUTABLE OFF CACHE BOOL "Pack the result as a single executable, which is staticly linked and contains resources files appended as zip format.")
 set(SP2_STATIC_LINK OFF CACHE BOOL "Link SDL and mingw DLLs static, so you do not need a copy of these.")
+set(SP2_OPTIMIZE_LIBS ON CACHE BOOL "Optimize extlibs and seriousproton2 library")
 
 if(NOT SP2_RESOURCE_PATHS)
     # Default resource path, main cmake file can customize this to include one or more paths.
@@ -26,15 +27,15 @@ endif()
 set(OPTIMIZER_FLAGS "")
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # On gcc, we want some general optimalizations that improve speed a lot.
-    set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions")
+    set(OPTIMIZER_FLAGS ${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions)
 
     # If we are compiling for a rasberry pi, we want to aggressively optimize for the CPU we are running on.
     # Note that this check only works if we are compiling directly on the pi, as it is a dirty way of checkif if we are on the pi.
     if(EXISTS /opt/vc/include/bcm_host.h OR COMPILE_FOR_PI)
-        set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -mcpu=native -mfpu=neon-vfpv4 -mfloat-abi=hard -DRASBERRY_PI=1 -DNO_ASSERT=1")
+        set(OPTIMIZER_FLAGS ${OPTIMIZER_FLAGS} -mcpu=native -mfpu=neon-vfpv4 -mfloat-abi=hard -DRASBERRY_PI=1 -DNO_ASSERT=1)
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    set(OPTIMIZER_FLAGS "${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions")
+    set(OPTIMIZER_FLAGS ${OPTIMIZER_FLAGS} -O3 -ffast-math -fno-exceptions)
 endif()
 
 set(WARNING_FLAGS -Wall)
@@ -46,10 +47,11 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OPTIMIZER_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPTIMIZER_FLAGS}")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS}")
+string(JOIN " " OPTIMIZER_FLAGS2 ${OPTIMIZER_FLAGS})
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OPTIMIZER_FLAGS2}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OPTIMIZER_FLAGS2}")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS2}")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g1 ${OPTIMIZER_FLAGS2}")
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG=1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")

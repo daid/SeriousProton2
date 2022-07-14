@@ -111,6 +111,11 @@ Vector2i RenderTexture::getSize() const
 
 void RenderTexture::activateRenderTarget()
 {
+    if (create_buffers)
+    {
+        create_buffers = false;
+        create();
+    }
     if (double_buffered)
         flipped = !flipped;
 
