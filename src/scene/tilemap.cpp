@@ -163,7 +163,7 @@ public:
         }
         for(auto it : tilemap.tiles)
         {
-            if (it.data.collision == Tilemap::Collision::Platform && tilemap.tiles.get(it.position - Vector2i{1, 0}).collision == Tilemap::Collision::Platform)
+            if (it.data.collision == Tilemap::Collision::Platform && tilemap.tiles.get(it.position - Vector2i{1, 0}).collision != Tilemap::Collision::Platform)
             {
                 int x0 = it.position.x;
                 while(tilemap.tiles.get(it.position).collision == Tilemap::Collision::Platform)
