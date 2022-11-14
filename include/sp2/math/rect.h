@@ -20,13 +20,13 @@ public:
     
     bool contains(Vector2<T> p) const
     {
-        return p.x >= position.x && p.x <= position.x + size.x && p.y >= position.y && p.y <= position.y + size.y;
+        return p.x >= position.x && p.x < position.x + size.x && p.y >= position.y && p.y < position.y + size.y;
     }
     
     bool overlaps(const Rect<T>& other) const
     {
-        return position.x + size.x >= other.position.x && other.position.x + other.size.x >= position.x &&
-            position.y + size.y >= other.position.y && other.position.y + other.size.y >= position.y;
+        return position.x + size.x > other.position.x && other.position.x + other.size.x > position.x &&
+            position.y + size.y > other.position.y && other.position.y + other.size.y > position.y;
     }
     
     void growToInclude(Vector2<T> p)
