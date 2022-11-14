@@ -173,6 +173,9 @@ public:
     
     virtual void onUpdate(float delta) override;
 
+    void startSpawn(float frequency) { spawn_timer.repeat(1.0f / frequency); }
+    void stopSpawn() { spawn_timer.stop(); }
+
     bool auto_destroy = false;
 
 private:

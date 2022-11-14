@@ -10,7 +10,7 @@ namespace exception {
 
 static LPTOP_LEVEL_EXCEPTION_FILTER next_unhandled_exception_filter;
 
-static string exceptionCodeToString(int code)
+static string exceptionCodeToString(unsigned int code)
 {
     switch(code)
     {
