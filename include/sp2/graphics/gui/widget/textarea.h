@@ -25,10 +25,13 @@ public:
     virtual void onTextInput(TextInputEvent e) override;
 
     const string& getValue() const;
+
+    void scrollIntoView(int offset);
 private:
     int getTextOffsetForPosition(Vector2d position);
 
     sp::P<Slider> vertical_scroll;
+    sp::P<Slider> horizontal_scroll;
     sp::P<Widget> cursor_widget;
     float text_size;
     bool multiline = true;

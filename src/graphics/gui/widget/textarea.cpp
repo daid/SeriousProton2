@@ -51,15 +51,24 @@ void TextArea::setAttribute(const string& key, const string& value)
         if (!multiline)
         {
             vertical_scroll.destroy();
+            horizontal_scroll.destroy();
         }
         else if (!vertical_scroll)
         {
             vertical_scroll = new Slider(this);
             vertical_scroll->setSize(theme->states[int(getState())].size, 0);
-            vertical_scroll->layout.alignment = Alignment::Right;
+            vertical_scroll->layout.alignment = Alignment::TopRight;
             vertical_scroll->layout.fill_height = true;
             vertical_scroll->setRange(100, 0);
             vertical_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
+
+            horizontal_scroll = new Slider(this);
+            horizontal_scroll->setSize(0, theme->states[int(getState())].size);
+            horizontal_scroll->layout.margin.right = theme->states[int(getState())].size;
+            horizontal_scroll->layout.alignment = Alignment::BottomLeft;
+            horizontal_scroll->layout.fill_width = true;
+            horizontal_scroll->setRange(100, 0);
+            horizontal_scroll->setEventCallback([this](Variant v) { markRenderDataOutdated(); });
         }
         markRenderDataOutdated();
     }
@@ -85,8 +94,20 @@ void TextArea::updateRenderData()
         if (vertical_scroll)
         {
             vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
+            vertical_scroll->setVisible(result.getUsedAreaSize().y > getRenderSize().y);
             for(auto& data : result.data)
                 data.position.y += vertical_scroll->getValue();
+        }
+        if (horizontal_scroll)
+        {
+            horizontal_scroll->setRange(0, std::max(0.0, result.getUsedAreaSize().x - getRenderSize().x));
+            horizontal_scroll->setVisible(result.getUsedAreaSize().x > getRenderSize().x);
+            for(auto& data : result.data)
+                data.position.x -= horizontal_scroll->getValue();
+            if (vertical_scroll->isVisible())
+                horizontal_scroll->layout.margin.right = vertical_scroll->layout.size.x;
+            else
+                horizontal_scroll->layout.margin.right = 0;
         }
         render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
@@ -96,7 +117,7 @@ void TextArea::updateRenderData()
         if (isFocused())
         {
             MeshBuilder mb;
-            float start_x = -1;
+            float start_x = -1.0f;
             int selection_min = std::min(selection_start, selection_end);
             int selection_max = std::max(selection_start, selection_end);
             for(auto d : result.data)
@@ -110,20 +131,19 @@ void TextArea::updateRenderData()
                     float end_x = d.position.x;
                     float start_y = d.position.y;
                     float end_y = start_y + t_size;
-                    if (end_y < 0.0)
-                        continue;
-                    if (start_y > getRenderSize().y)
-                        continue;
-                    start_y = std::max(0.0f, start_y);
-                    end_x = std::min(float(getRenderSize().x), end_x);
-                    end_y = std::min(float(getRenderSize().y), end_y);
-                    if (end_x != start_x)
+                    if (end_y >= 0.0 && start_y <= getRenderSize().y)
                     {
-                        mb.addQuad(
-                            Vector3f(start_x, end_y, 0),
-                            Vector3f(start_x, start_y, 0),
-                            Vector3f(end_x, end_y, 0),
-                            Vector3f(end_x, start_y, 0));
+                        start_y = std::max(0.0f, start_y);
+                        end_x = std::min(float(getRenderSize().x), end_x);
+                        end_y = std::min(float(getRenderSize().y), end_y);
+                        if (end_x != start_x)
+                        {
+                            mb.addQuad(
+                                Vector3f(start_x, end_y, 0),
+                                Vector3f(start_x, start_y, 0),
+                                Vector3f(end_x, end_y, 0),
+                                Vector3f(end_x, start_y, 0));
+                        }
                     }
                     if (d.string_offset == selection_max)
                         start_x = -1.0f;
@@ -169,6 +189,7 @@ bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int 
 {
     selection_start = getTextOffsetForPosition(position);
     selection_end = selection_start;
+    scrollIntoView(selection_end);
     markRenderDataOutdated();
     return true;
 }
@@ -176,6 +197,7 @@ bool TextArea::onPointerDown(io::Pointer::Button button, Vector2d position, int 
 void TextArea::onPointerDrag(Vector2d position, int id)
 {
     selection_end = getTextOffsetForPosition(position);
+    scrollIntoView(selection_end);
     markRenderDataOutdated();
 }
 
@@ -189,6 +211,7 @@ void TextArea::onTextInput(const string& text)
         return;
     value = value.substr(0, std::min(selection_start, selection_end)) + text + value.substr(std::max(selection_start, selection_end));
     selection_end = selection_start = std::min(selection_start, selection_end) + text.length();
+    scrollIntoView(selection_end);
     markRenderDataOutdated();
 }
 
@@ -202,6 +225,7 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end -= 1;
         if (e != TextInputEvent::LeftWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::Right:
     case TextInputEvent::RightWithSelection:
@@ -209,6 +233,7 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end += 1;
         if (e != TextInputEvent::RightWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::WordLeft:
     case TextInputEvent::WordLeftWithSelection:
@@ -218,6 +243,7 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end -= 1;
         if (e != TextInputEvent::WordLeftWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::WordRight:
     case TextInputEvent::WordRightWithSelection:
@@ -227,6 +253,7 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end += 1;
         if (e != TextInputEvent::WordRightWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::Up:
     case TextInputEvent::UpWithSelection:{
@@ -239,6 +266,7 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_end = start_of_line + std::min(line_length, offset);
         if (e != TextInputEvent::UpWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         }break;
     case TextInputEvent::Down:
     case TextInputEvent::DownWithSelection:{
@@ -253,12 +281,14 @@ void TextArea::onTextInput(TextInputEvent e)
         selection_end = end_of_current_line + 1 + std::min(offset, end_of_end_line - (end_of_current_line + 1));
         if (e != TextInputEvent::DownWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         }break;
     case TextInputEvent::LineStart:
     case TextInputEvent::LineStartWithSelection:
         selection_end = value.substr(0, selection_end).rfind("\n") + 1;
         if (e != TextInputEvent::LineStartWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::LineEnd:
     case TextInputEvent::LineEndWithSelection:
@@ -267,22 +297,26 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_end = value.length();
         if (e != TextInputEvent::LineEndWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::TextStart:
     case TextInputEvent::TextStartWithSelection:
         selection_end = 0;
         if (e != TextInputEvent::TextStartWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::TextEnd:
     case TextInputEvent::TextEndWithSelection:
         selection_end = value.length();
         if (e != TextInputEvent::TextEndWithSelection)
             selection_start = selection_end;
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::SelectAll:
         selection_end = 0;
         selection_start = value.length();
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::Delete:
         if (readonly)
@@ -292,6 +326,7 @@ void TextArea::onTextInput(TextInputEvent e)
         else
             value = value.substr(0, selection_start) + value.substr(selection_start + 1);
         selection_start = selection_end = std::min(selection_start, selection_end);
+        scrollIntoView(selection_end);
         break;
     case TextInputEvent::Backspace:
         if (readonly)
@@ -306,6 +341,7 @@ void TextArea::onTextInput(TextInputEvent e)
             value = value.substr(0, selection_start - 1) + value.substr(selection_start);
             selection_start -= 1;
             selection_end = selection_start;
+            scrollIntoView(selection_end);
         }
         break;
     case TextInputEvent::Indent:
@@ -393,6 +429,30 @@ const string& TextArea::getValue() const
     return value;
 }
 
+void TextArea::scrollIntoView(int offset)
+{
+    if ((vertical_scroll && vertical_scroll->getMin() > 0.0f) || (horizontal_scroll && horizontal_scroll->getMax() > 0.0f)) {
+        const ThemeStyle::StateStyle& t = theme->states[int(getState())];
+        if (!t.font) return;        
+        auto pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left);
+        for(auto g : pfs.data) {
+            if (g.string_offset == offset) {
+                vertical_scroll->setRange(std::max(0.0, pfs.getUsedAreaSize().y - getRenderSize().y), 0);
+                horizontal_scroll->setRange(0, std::max(0.0, pfs.getUsedAreaSize().x - getRenderSize().x));
+
+                float vmin = -g.position.y;
+                float vmax = getRenderSize().y - g.position.y - t.size;
+                vertical_scroll->setValue(std::clamp(vertical_scroll->getValue(), vmin, vmax));
+
+                float hmin = g.position.x - getRenderSize().x;
+                float hmax = g.position.x;
+                horizontal_scroll->setValue(std::clamp(horizontal_scroll->getValue(), hmin, hmax));
+                break;
+            }
+        }
+    }
+}
+
 int TextArea::getTextOffsetForPosition(Vector2d position)
 {
     int result = value.size();
@@ -401,7 +461,7 @@ int TextArea::getTextOffsetForPosition(Vector2d position)
     const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     if (t.font)
     {
-        Font::PreparedFontString pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left);
+        auto pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left);
         unsigned int n;
         for(n=0; n<pfs.data.size(); n++)
         {
