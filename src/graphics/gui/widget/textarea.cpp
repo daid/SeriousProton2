@@ -91,17 +91,18 @@ void TextArea::updateRenderData()
     {
         float t_size = text_size < 0 ? t.size : text_size;
         Font::PreparedFontString result = t.font->prepare(value, 64, t_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left, Font::FlagClip);
+        auto text_area_size = result.getUsedAreaSize();
         if (vertical_scroll)
         {
-            vertical_scroll->setRange(std::max(0.0, result.getUsedAreaSize().y - getRenderSize().y), 0);
-            vertical_scroll->setVisible(result.getUsedAreaSize().y > getRenderSize().y);
+            vertical_scroll->setRange(std::max(0.0, text_area_size.y - getRenderSize().y + t.size), 0);
+            vertical_scroll->setVisible(text_area_size.y > getRenderSize().y - t.size);
             for(auto& data : result.data)
                 data.position.y += vertical_scroll->getValue();
         }
         if (horizontal_scroll)
         {
-            horizontal_scroll->setRange(0, std::max(0.0, result.getUsedAreaSize().x - getRenderSize().x));
-            horizontal_scroll->setVisible(result.getUsedAreaSize().x > getRenderSize().x);
+            horizontal_scroll->setRange(0, std::max(0.0, text_area_size.x - getRenderSize().x + t.size));
+            horizontal_scroll->setVisible(text_area_size.x > getRenderSize().x - t.size);
             for(auto& data : result.data)
                 data.position.x -= horizontal_scroll->getValue();
             if (vertical_scroll->isVisible())
@@ -435,17 +436,22 @@ void TextArea::scrollIntoView(int offset)
         const ThemeStyle::StateStyle& t = theme->states[int(getState())];
         if (!t.font) return;        
         auto pfs = t.font->prepare(value, 64, text_size < 0 ? t.size : text_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left);
+        auto text_area_size = pfs.getUsedAreaSize();
         for(auto g : pfs.data) {
             if (g.string_offset == offset) {
-                vertical_scroll->setRange(std::max(0.0, pfs.getUsedAreaSize().y - getRenderSize().y), 0);
-                horizontal_scroll->setRange(0, std::max(0.0, pfs.getUsedAreaSize().x - getRenderSize().x));
+                vertical_scroll->setRange(std::max(0.0, text_area_size.y - getRenderSize().y + t.size), 0);
+                horizontal_scroll->setRange(0, std::max(0.0, text_area_size.x - getRenderSize().x + t.size));
 
                 float vmin = -g.position.y;
                 float vmax = getRenderSize().y - g.position.y - t.size;
+                if (horizontal_scroll->isVisible())
+                    vmin += t.size;
                 vertical_scroll->setValue(std::clamp(vertical_scroll->getValue(), vmin, vmax));
 
                 float hmin = g.position.x - getRenderSize().x;
                 float hmax = g.position.x;
+                if (vertical_scroll->isVisible())
+                    hmin += t.size;
                 horizontal_scroll->setValue(std::clamp(horizontal_scroll->getValue(), hmin, hmax));
                 break;
             }
@@ -458,6 +464,8 @@ int TextArea::getTextOffsetForPosition(Vector2d position)
     int result = value.size();
     if (vertical_scroll)
         position.y -= vertical_scroll->getValue();
+    if (horizontal_scroll)
+        position.x += horizontal_scroll->getValue();
     const ThemeStyle::StateStyle& t = theme->states[int(getState())];
     if (t.font)
     {
