@@ -24,6 +24,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual bool onWheelMove(Vector2d position, io::Pointer::Wheel direction) override;
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
     
@@ -39,6 +40,7 @@ private:
     
     bool privateOnPointerMove(P<Scene> scene, P<Camera> camera, Vector2d position, int id);
     bool privateOnPointerDown(P<Scene> scene, P<Camera> camera, io::Pointer::Button button, Vector2d position, int id);
+    bool privateOnWheelMove(P<Scene> scene, P<Camera> camera, Vector2d position, io::Pointer::Wheel direction);
     void renderScene(RenderQueue& queue, P<Scene> scene, P<Camera> camera);
     void recursiveNodeRender(RenderQueue& queue, P<Node> node);
 };

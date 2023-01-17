@@ -55,6 +55,45 @@ private:
     sp::string err_value;
 };
 
+template<> class Result<void>
+{
+public:
+    Result()
+    : success(true)
+    {
+    }
+
+    bool isOk()
+    {
+        return success;
+    }
+
+    bool isErr()
+    {
+        return !success;
+    }
+
+    const sp::string& error()
+    {
+        return err_value;
+    }
+
+    static Result<void> makeError(sp::string&& error)
+    {
+        return Result(std::forward<sp::string>(error), {});
+    }
+private:
+    class ErrorConstructor{};
+
+    Result(sp::string&& error, const ErrorConstructor&)
+    : success(false), err_value(std::forward<sp::string>(error))
+    {
+    }
+
+    bool success;
+    sp::string err_value;
+};
+
 }
 
 #endif//SP2_RESULT_H

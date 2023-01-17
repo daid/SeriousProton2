@@ -56,6 +56,9 @@ public:
     Result<CoroutinePtr> loadCoroutine(const string& resource_name);
     Result<Variant> run(const string& code);
     Result<CoroutinePtr> runCoroutine(const string& code);
+    
+    //Compile code without running it, just to see if there are syntax errors
+    Result<void> compile(const string& code);
 
     //Call a script function. Return true if the call was made, false on an error.
     template<typename... ARGS> Result<Variant> call(const string& global_function, ARGS... args)

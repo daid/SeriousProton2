@@ -46,6 +46,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id);
     virtual void onPointerDrag(Ray3d ray, int id);
     virtual void onPointerUp(Ray3d ray, int id);
+    virtual bool onWheelMove(Ray3d ray, io::Pointer::Wheel direction);
     virtual void onTextInput(const string& text) {}
     virtual void onTextInput(TextInputEvent e) {}
 

@@ -106,6 +106,21 @@ void SceneGraphicsLayer::onPointerUp(Vector2d position, int id)
     }
 }
 
+bool SceneGraphicsLayer::onWheelMove(Vector2d position, io::Pointer::Wheel direction)
+{
+    position = screenToViewportPosition(position);
+    if (position.x < -1.0 || position.y < -1.0 || position.x > 1.0 || position.y > 1.0)
+        return false;
+    for(P<RenderPass> pass : render_passes)
+    {
+        if (pass->onWheelMove(position, direction))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void SceneGraphicsLayer::onTextInput(const string& text)
 {
     if (focus_render_pass)

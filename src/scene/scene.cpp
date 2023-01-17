@@ -82,6 +82,11 @@ void Scene::onPointerUp(Ray3d ray, int id)
 {
 }
 
+bool Scene::onWheelMove(Ray3d ray, io::Pointer::Wheel direction)
+{
+    return false;
+}
+
 void Scene::fixedUpdate()
 {
     if (root)

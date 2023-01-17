@@ -31,6 +31,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) = 0;
     virtual void onPointerDrag(Vector2d position, int id) = 0;
     virtual void onPointerUp(Vector2d position, int id) = 0;
+    virtual bool onWheelMove(Vector2d position, io::Pointer::Wheel direction) = 0;
     virtual void onTextInput(const string& text) = 0;
     virtual void onTextInput(TextInputEvent e) = 0;
 

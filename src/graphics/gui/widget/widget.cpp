@@ -93,6 +93,11 @@ void Widget::onPointerUp(Vector2d position, int id)
 {
 }
 
+bool Widget::onWheelMove(Vector2d position, io::Pointer::Wheel direction)
+{
+    return false;
+}
+
 void Widget::onTextInput(const string& text)
 {
 }

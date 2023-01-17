@@ -19,6 +19,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Ray3d ray, int id) override;
     virtual void onPointerDrag(Ray3d ray, int id) override;
     virtual void onPointerUp(Ray3d ray, int id) override;
+    virtual bool onWheelMove(Ray3d ray, io::Pointer::Wheel direction) override;
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
     

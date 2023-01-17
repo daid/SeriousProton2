@@ -28,6 +28,11 @@ void RenderPass::onPointerUp(Vector2d position, int id)
 {
 }
 
+bool RenderPass::onWheelMove(Vector2d position, io::Pointer::Wheel direction)
+{
+    return false;
+}
+
 void RenderPass::onTextInput(const string& text)
 {
 }

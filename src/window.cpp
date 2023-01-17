@@ -505,6 +505,16 @@ void Window::handleEvent(const SDL_Event& event)
         if (focus_layer)
             focus_layer->onTextInput(event.text.text);
         break;
+    case SDL_MOUSEWHEEL:
+        if (event.wheel.y > 0)
+            mousewheelMove(io::Pointer::Wheel::Up);
+        else if (event.wheel.y < 0)
+            mousewheelMove(io::Pointer::Wheel::Down);
+        if (event.wheel.x > 0)
+            mousewheelMove(io::Pointer::Wheel::Right);
+        else if (event.wheel.x < 0)
+            mousewheelMove(io::Pointer::Wheel::Left);
+        break;
     case SDL_KEYDOWN:
 #ifdef DEBUG
         if (event.key.keysym.sym == SDLK_F3)
@@ -720,6 +730,19 @@ void Window::pointerUp(Vector2d position, int id)
     {
         it->second->onPointerUp(position, id);
         pointer_focus_layer.erase(it);
+    }
+}
+
+void Window::mousewheelMove(io::Pointer::Wheel direction)
+{
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    auto position = screenToGLPosition(x, y);
+    for(auto layer_iterator = graphics_layers.rbegin(); layer_iterator != graphics_layers.rend(); ++layer_iterator)
+    {
+        auto layer = *layer_iterator;
+        if (layer->onWheelMove(position, direction))
+            return;
     }
 }
 

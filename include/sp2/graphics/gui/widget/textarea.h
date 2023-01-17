@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_GUI_TEXTAREA_H
 
 #include <sp2/graphics/gui/widget/widget.h>
+#include <sp2/graphics/font.h>
 #include <sp2/string.h>
 
 namespace sp {
@@ -20,6 +21,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual bool onWheelMove(sp::Vector2d position, sp::io::Pointer::Wheel direction) override;
     virtual bool enableTextInputOnFocus() const override { return true; }
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
@@ -27,6 +29,8 @@ public:
     const string& getValue() const;
 
     void scrollIntoView(int offset);
+protected:
+    virtual void processPreparedFontString(Font::PreparedFontString& pfs);
 private:
     int getTextOffsetForPosition(Vector2d position);
 

@@ -19,6 +19,14 @@ public:
         X2,
         Unknown
     };
+
+    enum class Wheel
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+    };
 private:
 };
 

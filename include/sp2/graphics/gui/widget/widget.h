@@ -68,6 +68,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, sp::Vector2d position, int id);
     virtual void onPointerDrag(sp::Vector2d position, int id);
     virtual void onPointerUp(sp::Vector2d position, int id);
+    virtual bool onWheelMove(sp::Vector2d position, sp::io::Pointer::Wheel direction);
     virtual bool enableTextInputOnFocus() const { return false; }
     virtual void onTextInput(const string& text);
     virtual void onTextInput(TextInputEvent e);

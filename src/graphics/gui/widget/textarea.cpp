@@ -76,6 +76,12 @@ void TextArea::setAttribute(const string& key, const string& value)
     {
         readonly = stringutil::convert::toBool(value);
     }
+    else if (key == "theme_data" || key == "style")
+    {
+        Widget::setAttribute(key, value);
+        if (vertical_scroll) vertical_scroll->setSize(theme->states[int(getState())].size, 0);
+        if (horizontal_scroll) horizontal_scroll->setSize(0, theme->states[int(getState())].size);
+    }
     else
     {
         Widget::setAttribute(key, value);
@@ -91,25 +97,7 @@ void TextArea::updateRenderData()
     {
         float t_size = text_size < 0 ? t.size : text_size;
         Font::PreparedFontString result = t.font->prepare(value, 64, t_size, getRenderSize(), multiline ? Alignment::TopLeft : Alignment::Left, Font::FlagClip);
-        auto text_area_size = result.getUsedAreaSize();
-        if (vertical_scroll)
-        {
-            vertical_scroll->setRange(std::max(0.0, text_area_size.y - getRenderSize().y + t.size), 0);
-            vertical_scroll->setVisible(text_area_size.y > getRenderSize().y - t.size);
-            for(auto& data : result.data)
-                data.position.y += vertical_scroll->getValue();
-        }
-        if (horizontal_scroll)
-        {
-            horizontal_scroll->setRange(0, std::max(0.0, text_area_size.x - getRenderSize().x + t.size));
-            horizontal_scroll->setVisible(text_area_size.x > getRenderSize().x - t.size);
-            for(auto& data : result.data)
-                data.position.x -= horizontal_scroll->getValue();
-            if (vertical_scroll->isVisible())
-                horizontal_scroll->layout.margin.right = vertical_scroll->layout.size.x;
-            else
-                horizontal_scroll->layout.margin.right = 0;
-        }
+        processPreparedFontString(result);
         render_data.mesh = result.create();
         render_data.texture = t.font->getTexture(64);
         texture_revision = render_data.texture->getRevision();
@@ -179,6 +167,30 @@ void TextArea::updateRenderData()
     render_data.color = t.color;
 }
 
+void TextArea::processPreparedFontString(Font::PreparedFontString& pfs)
+{
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
+    auto text_area_size = pfs.getUsedAreaSize();
+    if (vertical_scroll)
+    {
+        vertical_scroll->setRange(std::max(0.0, text_area_size.y - getRenderSize().y + t.size), 0);
+        vertical_scroll->setVisible(text_area_size.y > getRenderSize().y - t.size);
+        for(auto& data : pfs.data)
+            data.position.y += vertical_scroll->getValue();
+    }
+    if (horizontal_scroll)
+    {
+        horizontal_scroll->setRange(0, std::max(0.0, text_area_size.x - getRenderSize().x + t.size));
+        horizontal_scroll->setVisible(text_area_size.x > getRenderSize().x - t.size);
+        for(auto& data : pfs.data)
+            data.position.x -= horizontal_scroll->getValue();
+        if (vertical_scroll->isVisible())
+            horizontal_scroll->layout.margin.right = vertical_scroll->layout.size.x;
+        else
+            horizontal_scroll->layout.margin.right = 0;
+    }
+}
+
 void TextArea::onUpdate(float delta)
 {
     if (render_data.texture && render_data.texture->getRevision() != texture_revision)
@@ -204,6 +216,19 @@ void TextArea::onPointerDrag(Vector2d position, int id)
 
 void TextArea::onPointerUp(Vector2d position, int id)
 {
+}
+
+bool TextArea::onWheelMove(sp::Vector2d position, sp::io::Pointer::Wheel direction)
+{
+    if (!multiline) return false;
+    const ThemeStyle::StateStyle& t = theme->states[int(getState())];
+    switch(direction) {
+    case sp::io::Pointer::Wheel::Up: vertical_scroll->setValue(vertical_scroll->getValue() - t.size, true); break;
+    case sp::io::Pointer::Wheel::Down: vertical_scroll->setValue(vertical_scroll->getValue() + t.size, true); break;
+    case sp::io::Pointer::Wheel::Left: horizontal_scroll->setValue(horizontal_scroll->getValue() - t.size, true); break;
+    case sp::io::Pointer::Wheel::Right: horizontal_scroll->setValue(horizontal_scroll->getValue() + t.size, true); break;
+    }
+    return true;
 }
 
 void TextArea::onTextInput(const string& text)

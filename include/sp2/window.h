@@ -60,6 +60,8 @@ private:
     void pointerDown(io::Pointer::Button button, Vector2d position, int id);
     void pointerDrag(Vector2d position, int id);
     void pointerUp(Vector2d position, int id);
+    void mousewheelMove(io::Pointer::Wheel direction);
+
     Vector2d screenToGLPosition(int x, int y);
 
     PList<GraphicsLayer> graphics_layers;

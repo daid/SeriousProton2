@@ -155,6 +155,19 @@ void Scene::onPointerUp(Ray3d ray, int id)
     }
 }
 
+bool Scene::onWheelMove(Ray3d ray, io::Pointer::Wheel direction)
+{
+    Vector2d position(ray.end.x, ray.end.y);
+    P<Widget> w = root_widget->getWidgetAt<Widget>(position);
+    while(w)
+    {
+        if (w->onWheelMove(position - w->getGlobalPosition2D(), direction))
+            return true;
+        w = w->getParent();
+    }
+    return false;
+}
+
 void Scene::onTextInput(const string& text)
 {
     if (focus_widget)

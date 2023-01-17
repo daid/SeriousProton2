@@ -141,6 +141,38 @@ void BasicNodeRenderPass::onPointerUp(Vector2d position, int id)
     }
 }
 
+bool BasicNodeRenderPass::onWheelMove(Vector2d position, io::Pointer::Wheel direction)
+{
+    if (!cameras.empty())
+    {
+        for(P<Camera> camera : cameras)
+        {
+            if (privateOnWheelMove(camera->getScene(), camera, position, direction))
+                return true;
+        }
+    }
+    else
+    {
+        for(P<Scene> scene : Scene::all())
+        {
+            if (privateOnWheelMove(scene, nullptr, position, direction))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool BasicNodeRenderPass::privateOnWheelMove(P<Scene> scene, P<Camera> camera, Vector2d position, io::Pointer::Wheel direction)
+{
+    if (!camera)
+        camera = scene->getCamera();
+    if (!camera || !scene->isEnabled())
+        return false;
+    if (scene->onWheelMove(camera->screenToWorldRay(Vector2f(position)), direction))
+        return true;
+    return false;
+}
+
 void BasicNodeRenderPass::onTextInput(const string& text)
 {
     if (focus_scene)

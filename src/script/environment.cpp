@@ -228,6 +228,20 @@ Result<CoroutinePtr> Environment::runCoroutine(const string& code)
     return callCoroutineInternal(L, 0);
 }
 
+Result<void> Environment::compile(const string& code)
+{
+    alloc_info.in_protected_call = true;
+    int result = luaL_loadbufferx(lua, code.c_str(), code.length(), "=[string]", "t");
+    alloc_info.in_protected_call = false;
+    if (result)
+    {
+        auto res = Result<void>::makeError(luaL_checkstring(lua, -1));
+        lua_pop(lua, 1);
+        return res;
+    }
+    lua_pop(lua, 1);
+    return {};
+}
 
 Result<Variant> Environment::_load(io::ResourceStreamPtr resource, const string& name)
 {

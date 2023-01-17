@@ -22,6 +22,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id);
     virtual void onPointerDrag(Vector2d position, int id);
     virtual void onPointerUp(Vector2d position, int id);
+    virtual bool onWheelMove(Vector2d position, io::Pointer::Wheel direction);
     virtual void onTextInput(const string& text);
     virtual void onTextInput(TextInputEvent e);
 };
