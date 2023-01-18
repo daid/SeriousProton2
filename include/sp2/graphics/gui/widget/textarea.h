@@ -29,6 +29,7 @@ public:
     const string& getValue() const;
 
     void scrollIntoView(int offset);
+    void setEditCallback(std::function<void(const string& value)> callback);
 protected:
     virtual void processPreparedFontString(Font::PreparedFontString& pfs);
 private:
@@ -45,6 +46,7 @@ private:
     string value;
     int selection_start = 0;
     int selection_end = 0;
+    std::function<void(const string& value)> edit_callback;
 };
 
 }//namespace gui

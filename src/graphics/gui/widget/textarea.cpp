@@ -238,6 +238,7 @@ void TextArea::onTextInput(const string& text)
     value = value.substr(0, std::min(selection_start, selection_end)) + text + value.substr(std::max(selection_start, selection_end));
     selection_end = selection_start = std::min(selection_start, selection_end) + text.length();
     scrollIntoView(selection_end);
+    if (edit_callback) edit_callback(value);
     markRenderDataOutdated();
 }
 
@@ -353,6 +354,7 @@ void TextArea::onTextInput(TextInputEvent e)
             value = value.substr(0, selection_start) + value.substr(selection_start + 1);
         selection_start = selection_end = std::min(selection_start, selection_end);
         scrollIntoView(selection_end);
+        if (edit_callback) edit_callback(value);
         break;
     case TextInputEvent::Backspace:
         if (readonly)
@@ -368,6 +370,7 @@ void TextArea::onTextInput(TextInputEvent e)
             selection_start -= 1;
             selection_end = selection_start;
             scrollIntoView(selection_end);
+            if (edit_callback) edit_callback(value);
         }
         break;
     case TextInputEvent::Indent:
@@ -396,6 +399,7 @@ void TextArea::onTextInput(TextInputEvent e)
                 selection_start += extra_length;
             else
                 selection_end += extra_length;
+            if (edit_callback) edit_callback(value);
         }
         break;
     case TextInputEvent::Unindent:
@@ -421,6 +425,7 @@ void TextArea::onTextInput(TextInputEvent e)
                 selection_start -= removed_length;
             else
                 selection_end -= removed_length;
+            if (edit_callback) edit_callback(value);
         }
         break;
     case TextInputEvent::Return:
@@ -482,6 +487,11 @@ void TextArea::scrollIntoView(int offset)
             }
         }
     }
+}
+
+void TextArea::setEditCallback(std::function<void(const string& value)> callback)
+{
+    edit_callback = callback;
 }
 
 int TextArea::getTextOffsetForPosition(Vector2d position)
