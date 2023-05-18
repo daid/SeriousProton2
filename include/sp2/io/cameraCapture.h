@@ -11,7 +11,7 @@ class CameraCapture : sp::NonCopyable
 public:
     CameraCapture(int index, sp::Vector2i prefered_size={0, 0});
     ~CameraCapture();
-    
+
     enum class State
     {
         Closed,
@@ -19,13 +19,22 @@ public:
         Streaming,
     };
     State getState();
-    
+
     //Get a new frame from the camera stream.
     //Note: On windows this always returns the latest image,
     //      while on linux it might return a zero sized image when there is no new frame available.
     //Note: On web builds, this returns empty images until the user accepted that the application can
     //      use the camera. There is no way to detect a deny or no camera yet.
     Image getFrame();
+
+    struct Control {
+        string name;
+        int value;
+        int min, max;
+    };
+
+    std::vector<Control> getControls();
+    void setControl(const string& name, int value);
 private:
     State init(int index, sp::Vector2i prefered_size);
 

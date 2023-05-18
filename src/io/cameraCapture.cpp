@@ -218,6 +218,60 @@ CameraCapture::State CameraCapture::getState()
     return state;
 }
 
+std::vector<CameraCapture::Control> CameraCapture::getControls()
+{
+    if (!data)
+        return {};
+    std::vector<Control> results;
+
+    struct v4l2_queryctrl queryctrl;
+    struct v4l2_control control;
+    memset(&queryctrl, 0, sizeof(queryctrl));
+    queryctrl.id = V4L2_CTRL_CLASS_USER | V4L2_CTRL_FLAG_NEXT_CTRL;
+    while (0 == ioctl(data->fd, VIDIOC_QUERYCTRL, &queryctrl)) {
+        if (V4L2_CTRL_ID2CLASS(queryctrl.id) != V4L2_CTRL_CLASS_USER)
+            break;
+        if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
+            continue;
+
+        //if (queryctrl.type == V4L2_CTRL_TYPE_MENU)
+        //    enumerate_menu();
+        control.id = queryctrl.id;
+        ioctl(data->fd, VIDIOC_G_CTRL, &control);
+        results.push_back({string(reinterpret_cast<const char*>(queryctrl.name)), control.value, queryctrl.minimum, queryctrl.maximum});
+
+        queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
+
+    return results;
+}
+
+void CameraCapture::setControl(const string& name, int value)
+{
+    if (!data)
+        return;
+
+    struct v4l2_queryctrl queryctrl;
+    struct v4l2_control control;
+    memset(&queryctrl, 0, sizeof(queryctrl));
+    queryctrl.id = V4L2_CTRL_CLASS_USER | V4L2_CTRL_FLAG_NEXT_CTRL;
+    while (0 == ioctl(data->fd, VIDIOC_QUERYCTRL, &queryctrl)) {
+        if (V4L2_CTRL_ID2CLASS(queryctrl.id) != V4L2_CTRL_CLASS_USER)
+            break;
+        if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
+            continue;
+
+        if (string(reinterpret_cast<const char*>(queryctrl.name)) == name) {
+            control.id = queryctrl.id;
+            ioctl(data->fd, VIDIOC_G_CTRL, &control);
+            control.value = value;
+            ioctl(data->fd, VIDIOC_S_CTRL, &control);
+        }
+
+        queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
+}
+
 #elif defined(_WIN32)
 
 class CameraCapture::Data
