@@ -35,6 +35,7 @@ public:
     virtual bool onPointerDown(io::Pointer::Button button, Vector2d position, int id) override;
     virtual void onPointerDrag(Vector2d position, int id) override;
     virtual void onPointerUp(Vector2d position, int id) override;
+    virtual bool onWheelMove(Vector2d position, io::Pointer::Wheel direction) override;
     virtual void onTextInput(const string& text) override;
     virtual void onTextInput(TextInputEvent e) override;
 private:

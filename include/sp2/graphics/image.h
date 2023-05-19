@@ -46,6 +46,7 @@ public:
     void drawFilledPolygon(const std::vector<Vector2i>& polygon, uint32_t color);
     
     Image subImage(Rect2i area) const;
+    Image copy() const;
 private:
     Vector2i size;
     std::vector<uint32_t> pixels;

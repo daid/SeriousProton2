@@ -424,4 +424,11 @@ Image Image::subImage(Rect2i area) const
     return result;
 }
 
+Image Image::copy() const
+{
+    Image result;
+    result.update(size, pixels.data());
+    return result;
+}
+
 }//namespace sp

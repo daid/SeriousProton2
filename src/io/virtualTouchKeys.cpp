@@ -56,6 +56,7 @@ void VirtualTouchKeyLayer::onPointerUp(Vector2d position, int id)
     }
 }
 
+bool VirtualTouchKeyLayer::onWheelMove(Vector2d position, io::Pointer::Wheel direction) { return false; }
 void VirtualTouchKeyLayer::onTextInput(const string& text) {}
 void VirtualTouchKeyLayer::onTextInput(TextInputEvent e) {}
 
