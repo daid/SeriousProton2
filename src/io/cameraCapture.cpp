@@ -529,6 +529,114 @@ Image CameraCapture::getFrame()
     return result;
 }
 
+std::vector<CameraCapture::Control> CameraCapture::getControls()
+{
+    if (!data)
+        return {};
+    std::vector<Control> results;
+
+    IAMVideoProcAmp* pProcAmp = nullptr;
+    if (data->base_filter_cam->QueryInterface(IID_IAMVideoProcAmp, reinterpret_cast<void**>(&pProcAmp)) >= 0) {
+
+        auto check_prop = [&](VideoProcAmpProperty prop, const string& name) {
+            long min, max, step, default_value, flags, val;
+            if (pProcAmp->GetRange(prop, &min, &max, &step, &default_value, &flags) >= 0) {
+                if (pProcAmp->Get(prop, &val, &flags) >= 0) {
+                    results.push_back({name, val, min, max});
+                }
+            }
+        };
+
+        check_prop(VideoProcAmp_Brightness, "Brightness");
+        check_prop(VideoProcAmp_Contrast, "Contrast");
+        check_prop(VideoProcAmp_Hue, "Hue");
+        check_prop(VideoProcAmp_Saturation, "Saturation");
+        check_prop(VideoProcAmp_Sharpness, "Sharpness");
+        check_prop(VideoProcAmp_Gamma, "Gamma");
+        check_prop(VideoProcAmp_ColorEnable, "ColorEnable");
+        check_prop(VideoProcAmp_WhiteBalance, "WhiteBalance");
+        check_prop(VideoProcAmp_BacklightCompensation, "BacklightCompensation");
+        check_prop(VideoProcAmp_Gain, "Gain");
+
+        pProcAmp->Release();
+    }
+
+    IAMCameraControl* pCamControl = nullptr;
+    if (data->base_filter_cam->QueryInterface(IID_IAMCameraControl, reinterpret_cast<void**>(&pCamControl)) >= 0) {
+
+        auto check_prop = [&](CameraControlProperty prop, const string& name) {
+            long min, max, step, default_value, flags, val;
+            if (pCamControl->GetRange(prop, &min, &max, &step, &default_value, &flags) >= 0) {
+                if (pCamControl->Get(prop, &val, &flags) >= 0) {
+                    results.push_back({name, val, min, max});
+                }
+            }
+        };
+
+        check_prop(CameraControl_Pan, "Pan");
+        check_prop(CameraControl_Tilt, "Tilt");
+        check_prop(CameraControl_Roll, "Roll");
+        check_prop(CameraControl_Zoom, "Zoom");
+        check_prop(CameraControl_Exposure, "Exposure");
+        check_prop(CameraControl_Iris, "Iris");
+        check_prop(CameraControl_Focus, "Focus");
+
+        pCamControl->Release();
+    }
+
+    return results;
+}
+
+void CameraCapture::setControl(const string& name, int value)
+{
+    if (!data)
+        return;
+
+    auto check_propA = [&](VideoProcAmpProperty prop, const string& prop_name) {
+        if (prop_name == name) {
+            IAMVideoProcAmp* pProcAmp = nullptr;
+            if (data->base_filter_cam->QueryInterface(IID_IAMVideoProcAmp, reinterpret_cast<void**>(&pProcAmp)) >= 0) {
+                long min, max, step, default_value, flags;
+                if (pProcAmp->GetRange(prop, &min, &max, &step, &default_value, &flags) >= 0) {
+                    pProcAmp->Set(prop, value, flags);
+                }
+                pProcAmp->Release();
+            }
+        }
+    };
+    auto check_propB = [&](CameraControlProperty prop, const string& prop_name) {
+        if (prop_name == name) {
+            IAMCameraControl* pCamControl = nullptr;
+            if (data->base_filter_cam->QueryInterface(IID_IAMCameraControl, reinterpret_cast<void**>(&pCamControl)) >= 0) {
+                long min, max, step, default_value, flags;
+                if (pCamControl->GetRange(prop, &min, &max, &step, &default_value, &flags) >= 0) {
+                    pCamControl->Set(prop, value, flags);
+                }
+                pCamControl->Release();
+            }
+        }
+    };
+
+    check_propA(VideoProcAmp_Brightness, "Brightness");
+    check_propA(VideoProcAmp_Contrast, "Contrast");
+    check_propA(VideoProcAmp_Hue, "Hue");
+    check_propA(VideoProcAmp_Saturation, "Saturation");
+    check_propA(VideoProcAmp_Sharpness, "Sharpness");
+    check_propA(VideoProcAmp_Gamma, "Gamma");
+    check_propA(VideoProcAmp_ColorEnable, "ColorEnable");
+    check_propA(VideoProcAmp_WhiteBalance, "WhiteBalance");
+    check_propA(VideoProcAmp_BacklightCompensation, "BacklightCompensation");
+    check_propA(VideoProcAmp_Gain, "Gain");
+
+    check_propB(CameraControl_Pan, "Pan");
+    check_propB(CameraControl_Tilt, "Tilt");
+    check_propB(CameraControl_Roll, "Roll");
+    check_propB(CameraControl_Zoom, "Zoom");
+    check_propB(CameraControl_Exposure, "Exposure");
+    check_propB(CameraControl_Iris, "Iris");
+    check_propB(CameraControl_Focus, "Focus");
+}
+
 CameraCapture::State CameraCapture::getState()
 {
     return state;
@@ -620,6 +728,15 @@ CameraCapture::State CameraCapture::getState()
     return state;
 }
 
+std::vector<CameraCapture::Control> CameraCapture::getControls()
+{
+    return {};
+}
+
+void CameraCapture::setControl(const string& name, int value)
+{
+}
+
 #else
 
 /** Dummy implementation if we do not have an OS specific implementation. */    
@@ -638,6 +755,15 @@ CameraCapture::State CameraCapture::init(int index)
 Image CameraCapture::getFrame()
 {
     return Image();
+}
+
+std::vector<CameraCapture::Control> CameraCapture::getControls()
+{
+    return {};
+}
+
+void CameraCapture::setControl(const string& name, int value)
+{
 }
 
 #endif
