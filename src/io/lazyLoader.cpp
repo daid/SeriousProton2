@@ -3,6 +3,7 @@
 namespace sp {
 namespace io {
 
+static bool running = true;
 std::thread* LazyLoaderManager::thread;
 sp::threading::Queue<std::function<void()>> LazyLoaderManager::queue;
 
@@ -16,9 +17,13 @@ void LazyLoaderManager::addWork(std::function<void()> f)
 
     if (!thread)
     {
+        atexit([](){
+            running = false;
+            queue.put([](){});
+        });
         thread = new std::thread([]()
         {
-            while(true)
+            while(running)
             {
                 std::function<void()> workFunction = queue.get();
                 workFunction();
