@@ -134,12 +134,12 @@ protected:
     void playThemeSound(State state);
     void markRenderDataOutdated()
     {
-        if (slave_widget)
+        for(auto s = slave_widget; s; s = s->slave_widget)
         {
-            slave_widget->enabled = enabled;
-            slave_widget->focus = focus;
-            slave_widget->hover = hover;
-            slave_widget->markRenderDataOutdated();
+            s->enabled = enabled;
+            s->focus = focus;
+            s->hover = hover;
+            s->markRenderDataOutdated();
         }
         render_data_outdated = true;
     }
