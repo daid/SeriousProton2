@@ -51,7 +51,7 @@ P<Widget> Loader::load(const string& resource_name, const string& root_id, P<Wid
 Loader::SubLoader::SubLoader(Loader& loader, const string& resource_name)
 : loader(loader)
 {
-    tree = io::KeyValueTreeLoader::load(resource_name);
+    tree = io::KeyValueTreeLoader::loadResource(resource_name);
 }
 
 P<Widget> Loader::SubLoader::createWidget(P<Widget> parent, KeyValueTreeNode& node, std::map<string, string>& parameters)

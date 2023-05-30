@@ -45,7 +45,7 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
 {
     render_data.type = RenderData::Type::Transparent;
 
-    auto tree = io::KeyValueTreeLoader::load(resource_name);
+    auto tree = io::KeyValueTreeLoader::loadResource(resource_name);
     if (!tree)
         return;
     for(auto& root_node : tree->root_nodes)

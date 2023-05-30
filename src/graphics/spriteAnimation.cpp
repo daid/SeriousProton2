@@ -139,7 +139,7 @@ void SpriteAnimation::Data::load(const string& resource_name)
 #ifdef DEBUG
     revision++;
 #endif
-    KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
+    KeyValueTreePtr tree = io::KeyValueTreeLoader::loadResource(resource_name);
     if (!tree)
     {
 #ifdef DEBUG

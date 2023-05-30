@@ -7,53 +7,50 @@
 namespace sp {
 namespace io {
 
-class FileResourceStream : public ResourceStream
+FileResourceStream::FileResourceStream(const string& filename)
 {
-private:
-    FILE* f;
-    int64_t size;
-public:
-    FileResourceStream(const string& filename)
+    f = fopen(filename.c_str(), "rb");
+    size = -1;
+}
+
+FileResourceStream::~FileResourceStream()
+{
+    if (f)
+        fclose(f);
+}
+
+bool FileResourceStream::isOpen()
+{
+    return f != nullptr;
+}
+
+int64_t FileResourceStream::read(void* data, int64_t size)
+{
+    return fread(data, 1, size, f);
+}
+
+int64_t FileResourceStream::seek(int64_t position)
+{
+    fseek(f, position, SEEK_SET);
+    return tell();
+}
+
+int64_t FileResourceStream::tell()
+{
+    return ftell(f);
+}
+
+int64_t FileResourceStream::getSize()
+{
+    if (size == -1)
     {
-        f = fopen(filename.c_str(), "rb");
-        size = -1;
+        int64_t pos = tell();
+        fseek(f, 0, SEEK_END);
+        size = tell();
+        seek(pos);
     }
-    virtual ~FileResourceStream()
-    {
-        if (f)
-            fclose(f);
-    }
-    
-    bool isOpen()
-    {
-        return f != nullptr;
-    }
-    
-    virtual int64_t read(void* data, int64_t size) override
-    {
-        return fread(data, 1, size, f);
-    }
-    virtual int64_t seek(int64_t position) override
-    {
-        fseek(f, position, SEEK_SET);
-        return tell();
-    }
-    virtual int64_t tell() override
-    {
-        return ftell(f);
-    }
-    virtual int64_t getSize() override
-    {
-        if (size == -1)
-        {
-            int64_t pos = tell();
-            fseek(f, 0, SEEK_END);
-            size = tell();
-            seek(pos);
-        }
-        return size;
-    }
-};
+    return size;
+}
 
 
 DirectoryResourceProvider::DirectoryResourceProvider(const string& base_path, int priority)

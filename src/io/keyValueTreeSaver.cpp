@@ -4,11 +4,11 @@
 namespace sp {
 namespace io {
 
-void KeyValueTreeSaver::save(const string& filename, KeyValueTreePtr tree)
+void KeyValueTreeSaver::save(const string& filename, const KeyValueTree& tree)
 {
     KeyValueTreeSaver saver(filename);
     
-    for(const auto& it : tree->root_nodes)
+    for(const auto& it : tree.root_nodes)
     {
         saver.saveNode(it, 0);
     }

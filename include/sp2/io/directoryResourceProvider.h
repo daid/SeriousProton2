@@ -6,6 +6,21 @@
 namespace sp {
 namespace io {
 
+class FileResourceStream : public ResourceStream
+{
+private:
+    FILE* f;
+    int64_t size;
+public:
+    FileResourceStream(const string& filename);
+    virtual ~FileResourceStream();
+    bool isOpen();
+    virtual int64_t read(void* data, int64_t size) override;
+    virtual int64_t seek(int64_t position) override;
+    virtual int64_t tell() override;
+    virtual int64_t getSize() override;
+};
+
 class DirectoryResourceProvider : public ResourceProvider
 {
 public:

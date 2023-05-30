@@ -9,7 +9,7 @@ namespace io {
 class KeyValueTreeSaver
 {
 public:
-    static void save(const string& filename, KeyValueTreePtr tree);
+    static void save(const string& filename, const KeyValueTree& tree);
 
 private:
     FILE* f;

@@ -42,7 +42,7 @@ void Theme::loadTheme(const string& name, const string& resource_name)
 {
     P<Theme> theme = new Theme(name);
 
-    KeyValueTreePtr tree = io::KeyValueTreeLoader::load(resource_name);
+    KeyValueTreePtr tree = io::KeyValueTreeLoader::loadResource(resource_name);
     if (!tree)
         return;
     for(auto& it : tree->getFlattenNodesByIds())

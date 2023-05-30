@@ -1,26 +1,37 @@
 #include <sp2/io/keyValueTreeLoader.h>
+#include <sp2/io/directoryResourceProvider.h>
 #include <sp2/logging.h>
 
 namespace sp {
 namespace io {
 
-KeyValueTreePtr KeyValueTreeLoader::load(const string& resource_name)
+KeyValueTreePtr KeyValueTreeLoader::loadResource(const string& resource_name)
 {
-    KeyValueTreeLoader loader(resource_name);
-    return loader.result;
-}
-
-KeyValueTreeLoader::KeyValueTreeLoader(const string& resource_name)
-{
-    stream = ResourceProvider::get(resource_name);
+    auto stream = ResourceProvider::get(resource_name);
     if (!stream)
     {
         LOG(Error, "Failed to open " + resource_name + " for tree loading");
-        return;
+        return nullptr;
     }
-    result = std::make_shared<KeyValueTree>();
 
     LOG(Info, "Loading tree", resource_name);
+    KeyValueTreeLoader loader(stream);
+    return loader.result;
+}
+
+KeyValueTreePtr KeyValueTreeLoader::loadFile(const string& filename)
+{
+    auto stream = std::make_shared<FileResourceStream>(filename);
+    if (!stream->isOpen())
+        return nullptr;
+    KeyValueTreeLoader loader(stream);
+    return loader.result;
+}
+
+KeyValueTreeLoader::KeyValueTreeLoader(ResourceStreamPtr stream)
+: stream(stream)
+{
+    result = std::make_shared<KeyValueTree>();
 
     while(stream->tell() < stream->getSize())
     {
@@ -44,7 +55,7 @@ KeyValueTreeLoader::KeyValueTreeLoader(const string& resource_name)
         }
         else if (line == "}")
         {
-            LOG(Error, "Failed to parse key value tree: Node close while no node open.", resource_name);
+            LOG(Error, "Failed to parse key value tree: Node close while no node open");
             result = nullptr;
             return;
         }

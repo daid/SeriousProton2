@@ -29,6 +29,11 @@ public:
         }
     }
 
+    void clear()
+    {
+        chunks.clear();
+    }
+
     void clear(Vector2i position)
     {
         auto it = chunks.find({position.x >> CHUNK_SIZE_SHIFT, position.y >> CHUNK_SIZE_SHIFT});
