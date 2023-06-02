@@ -59,7 +59,12 @@
       var spinnerElement = document.getElementById('spinner');
 
       var Module = {
-        preRun: [],
+        preRun: [function() {
+            addRunDependency('syncfs')
+            FS.mkdir('/preferences')
+            FS.mount(IDBFS, {}, '/preferences');
+            FS.syncfs(true, function (err) { removeRunDependency('syncfs'); })
+        }],
         postRun: [],
         print: console.log,
         printErr: console.error,

@@ -3,7 +3,9 @@
 namespace sp {
 namespace io {
 
+#ifndef __EMSCRIPTEN__
 static bool running = true;
+#endif
 std::thread* LazyLoaderManager::thread;
 sp::threading::Queue<std::function<void()>> LazyLoaderManager::queue;
 

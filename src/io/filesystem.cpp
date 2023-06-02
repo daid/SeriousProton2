@@ -9,7 +9,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace sp {
 namespace io {
@@ -107,6 +109,9 @@ bool saveFileContents(const string& filename, const string& contents)
         return false;
     }
     fclose(f);
+#ifdef __EMSCRIPTEN__
+    EM_ASM(FS.syncfs(false, function(err) {}));
+#endif
     return true;
 }
 
@@ -135,8 +140,9 @@ const string& preferencePath()
     {
         const char* input_path = nullptr;
 #ifdef EMSCRIPTEN
-        //For emscripten, we have a virtual filesystem, so we do not really care.
-        input_path = "preferences";
+        //For emscripten, we have a virtual filesystem, so we do not really care on the exact location.
+        preference_path = "/preferences/";
+        return preference_path;
 #elif defined(ANDROID)
         //For android, we have local storage per app. SDL_GetPrefPath handles this.
         input_path = nullptr;

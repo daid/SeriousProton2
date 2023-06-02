@@ -1,5 +1,8 @@
 #include <sp2/io/keyValueTreeSaver.h>
 #include <sp2/logging.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace sp {
 namespace io {
@@ -21,8 +24,12 @@ KeyValueTreeSaver::KeyValueTreeSaver(const string& filename)
 
 KeyValueTreeSaver::~KeyValueTreeSaver()
 {
-    if (f)
+    if (f) {
         fclose(f);
+#ifdef __EMSCRIPTEN__
+        EM_ASM(FS.syncfs(false, function(err) {}));
+#endif
+    }
 }
 
 void KeyValueTreeSaver::saveNode(const KeyValueTreeNode& node, int indent)
