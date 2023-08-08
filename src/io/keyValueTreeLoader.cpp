@@ -109,7 +109,18 @@ void KeyValueTreeLoader::parseNode(KeyValueTreeNode* node)
                 line = line.substr(0, -1) + "\n" + stream->readLine().strip();
             string key = line.substr(0, line.find(":")).strip();
             string value = line.substr(line.find(":") + 1).strip();
-            node->items[key] = value;
+            if (key == "@include") {
+                auto stream_backup = stream;
+                stream = ResourceProvider::get(value);
+                if (!stream) {
+                    LOG(Error, "Failed to open " + value + " for tree loading");
+                } else {
+                    parseNode(node);
+                }
+                stream = stream_backup;
+            } else {
+                node->items[key] = value;
+            }
         }
         else if (line.length() > 0)
         {
