@@ -44,10 +44,11 @@ void Scene::onUpdate(float delta)
 bool Scene::onPointerMove(Ray3d ray, int id)
 {
     Vector2d position(ray.end.x, ray.end.y);
-    P<Widget> w = root_widget->getWidgetAt<Widget>(position);
+    Vector2d local_position;
+    P<Widget> w = root_widget->getWidgetAt<Widget>(position, &local_position);
     while(w)
     {
-        if (w->onPointerMove(position - w->getGlobalPosition2D(), id))
+        if (w->onPointerMove(local_position, id))
         {
             auto it = pointer_widget.find(id);
             if (it != pointer_widget.end() && it->second && it->second != w)
@@ -62,6 +63,7 @@ bool Scene::onPointerMove(Ray3d ray, int id)
             }
             return true;
         }
+        local_position = w->getLocalPoint2D(local_position);
         w = w->getParent();
     }
     return false;
@@ -82,10 +84,11 @@ void Scene::onPointerLeave(int id)
 bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
 {
     Vector2d position(ray.end.x, ray.end.y);
-    P<Widget> w = root_widget->getWidgetAt<Widget>(position);
+    Vector2d local_position;
+    P<Widget> w = root_widget->getWidgetAt<Widget>(position, &local_position);
     while(w)
     {
-        if (w->onPointerDown(button, position - w->getGlobalPosition2D(), id))
+        if (w->onPointerDown(button, local_position, id))
         {
             if (focus_widget)
             {
@@ -111,6 +114,7 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
             w->markRenderDataOutdated();
             return true;
         }
+        local_position = w->getLocalPoint2D(local_position);
         w = w->getParent();
     }
     if (focus_widget)
@@ -129,7 +133,7 @@ void Scene::onPointerDrag(Ray3d ray, int id)
     Vector2d position(ray.end.x, ray.end.y);
     auto it = pointer_widget.find(id);
     if (it != pointer_widget.end() && it->second)
-        it->second->onPointerDrag(position - it->second->getGlobalPosition2D(), id);
+        it->second->onPointerDrag(sp::Vector2d(it->second->getGlobalTransform().inverse() * sp::Vector2f(position)), id);
 }
 
 void Scene::onPointerUp(Ray3d ray, int id)
@@ -138,7 +142,7 @@ void Scene::onPointerUp(Ray3d ray, int id)
     auto it = pointer_widget.find(id);
     if (it != pointer_widget.end() && it->second)
     {
-        it->second->onPointerUp(position - it->second->getGlobalPosition2D(), id);
+        it->second->onPointerUp(sp::Vector2d(it->second->getGlobalTransform().inverse() * sp::Vector2f(position)), id);
         if (it->second) //The widget might have been deleted by the pointer-up event.
         {
             bool dehover = true;
@@ -158,11 +162,13 @@ void Scene::onPointerUp(Ray3d ray, int id)
 bool Scene::onWheelMove(Ray3d ray, io::Pointer::Wheel direction)
 {
     Vector2d position(ray.end.x, ray.end.y);
-    P<Widget> w = root_widget->getWidgetAt<Widget>(position);
+    Vector2d local_position;
+    P<Widget> w = root_widget->getWidgetAt<Widget>(position, &local_position);
     while(w)
     {
-        if (w->onWheelMove(position - w->getGlobalPosition2D(), direction))
+        if (w->onWheelMove(local_position, direction))
             return true;
+        local_position = w->getLocalPoint2D(local_position);
         w = w->getParent();
     }
     return false;

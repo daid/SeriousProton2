@@ -111,7 +111,7 @@ void Serializer::initialRead()
     if (!f)
         return;
 
-    if (fseeko(f, sizeof(uint64_t) * -4, SEEK_END))
+    if (fseeko(f, static_cast<int>(sizeof(uint64_t) * -4), SEEK_END))
         return;
 
     off_t header_start = ftello(f);

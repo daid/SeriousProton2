@@ -97,9 +97,9 @@ public:
     
     P<Widget> getWidgetWithID(const string& id);
 
-    template<class T, class = typename std::enable_if<std::is_base_of<Widget, T>::value>::type> P<T> getWidgetAt(sp::Vector2d position)
+    template<class T, class = typename std::enable_if<std::is_base_of<Widget, T>::value>::type> P<T> getWidgetAt(sp::Vector2d position, sp::Vector2d* local_position=nullptr)
     {
-        position -= getPosition2D();
+        position = sp::Vector2d(getLocalTransform().inverse() * sp::Vector2f(position));
         if (position.x >= 0 && position.x <= render_size.x && position.y >= 0 && position.y <= render_size.y)
         {
             for(PList<Node>::ReverseIterator it = getChildren().rbegin(); it != getChildren().rend(); ++it)
@@ -107,11 +107,13 @@ public:
                 P<Widget> w = P<Node>(*it);
                 if (w && w->isVisible())
                 {
-                    P<T> result = w->getWidgetAt<T>(position);
+                    P<T> result = w->getWidgetAt<T>(position, local_position);
                     if (result)
                         return result;
                 }
             }
+            if (local_position)
+                *local_position = position;
             return P<Widget>(this);
         }
         return nullptr;
