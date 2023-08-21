@@ -208,7 +208,7 @@ template<typename TYPE> int getProperty(lua_State* L)
 template<typename TYPE> int setProperty(lua_State* L)
 {
     TYPE* t = reinterpret_cast<TYPE*>(lua_touserdata(L, lua_upvalueindex(1)));
-    *t = convertFromLua(L, typeIdentifier<TYPE>{}, -1);
+    *t = convertFromLua(L, typeIdentifier<TYPE>{}, lua_absindex(L, -1));
     return 0;
 }
 
