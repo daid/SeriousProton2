@@ -256,6 +256,40 @@ public:
         }
         return ret;
     }
+    string format(string(*mapping)(const string&)) const
+    {
+        string ret;
+
+        ret.reserve(length());
+
+        //Run through the source String, find matching brackets.
+        for(unsigned int n=0; n<length(); n++)
+        {
+            char c = this->operator[](n);
+            if (c == '{')
+            {
+                unsigned int end = n;
+                while(end < length() && at(end) != '}')
+                {
+                    end++;
+                }
+                string key = substr(n + 1, end);
+                ret += mapping(key);
+
+                n = end;
+            }
+            else if (c == '\\')
+            {
+                n++;
+                ret.push_back(this->operator[](n));
+            }
+            else
+            {
+                ret.push_back(c);
+            }
+        }
+        return ret;
+    }
 
     /*
         Return True if all characters in S are alphanumeric

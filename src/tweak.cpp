@@ -13,14 +13,12 @@ public:
     TweakEntry(P<Widget> parent, const string& name, T value, T min, T max)
     : Widget(parent), name(name)
     {
-        layout.match_content_size = true;
-
         label = new sp::gui::Label(this);
-        label->layout.size = Vector2d(128, 16);
+        label->setSize(128, 16);
         label->setLabel(name + ": " + string(value));
 
         slider = new sp::gui::Slider(this);
-        slider->layout.size = Vector2d(128, 16);
+        slider->setSize(128, 16);
         slider->layout.position = Vector2d(0, 16);
         slider->setAttribute("min", string(min));
         slider->setAttribute("max", string(max));
@@ -50,7 +48,6 @@ public:
     : gui::Scene(sp::Vector2d(640, 480), "TWEAK_GUI", 101)
     {
         getRootWidget()->setAttribute("layout", "vertical");
-        getRootWidget()->setAttribute("stretch", "true");
     }
 
     static P<TweakScene> get()

@@ -30,6 +30,7 @@ protected:
     string name;
     int revision;
     bool smooth = false;
+    bool repeat = false;
 };
 
 class OpenGLTexture : public Texture

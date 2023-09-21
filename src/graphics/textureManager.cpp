@@ -26,6 +26,11 @@ public:
     {
         smooth = value;
     }
+
+    void setRepeat(bool value)
+    {
+        repeat = value;
+    }
 };
 
 TextureManager::TextureManager()
@@ -63,6 +68,8 @@ void TextureManager::backgroundLoader(Texture* texture, io::ResourceStreamPtr st
             tmt->setSmooth(true);
         if (stream->hasFlag("pixel") || stream->getFlag("filter") == "nearest")
             tmt->setSmooth(false);
+        if (stream->hasFlag("repeat"))
+            tmt->setRepeat(true);
         tmt->transferImageFromThread(std::move(image));
     }
 }
