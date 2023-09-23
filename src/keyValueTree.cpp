@@ -39,6 +39,21 @@ KeyValueTreeNode* KeyValueTree::findId(const string& id)
     return nullptr;
 }
 
+static void searchAndAdd(std::vector<KeyValueTreeNode>& nodes, std::vector<KeyValueTreeNode*>& result, const string& id) {
+    for(auto& node : nodes) {
+        if (node.id == id)
+            result.push_back(&node);
+        searchAndAdd(node.child_nodes, result, id);
+    }
+}
+
+std::vector<KeyValueTreeNode*> KeyValueTree::findAllId(const string& id)
+{
+    std::vector<KeyValueTreeNode*> result;
+    searchAndAdd(root_nodes, result, id);
+    return result;
+}
+
 std::map<string, std::map<string, string>> KeyValueTree::getFlattenNodesByIds()
 {
     std::map<string, std::map<string, string>> results;

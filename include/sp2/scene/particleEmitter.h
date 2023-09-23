@@ -173,18 +173,20 @@ public:
     
     virtual void onUpdate(float delta) override;
 
-    void startSpawn(float frequency) { spawn_timer.repeat(1.0f / frequency); }
-    void stopSpawn() { spawn_timer.stop(); }
+    void startSpawn(float frequency);
+    void stopSpawn();
 
     bool auto_destroy = false;
 
 private:
     Origin origin;
 
-    Timer spawn_timer;
-    Parameters spawn_min;
-    Parameters spawn_max;
-
+    struct Spawner {
+        Timer timer;
+        Parameters min;
+        Parameters max;
+    };
+    std::vector<Spawner> spawners;
     std::vector<Parameters> particles;
     std::vector<std::unique_ptr<Effector>> effectors;
 };

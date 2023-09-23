@@ -59,17 +59,18 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
         if (root_node.items["renderType"] == "additive")
             render_data.type = RenderData::Type::Additive;
     }
-    auto spawn_node = tree->findId("SPAWN");
-    if (spawn_node)
+    for(auto spawn_node : tree->findAllId("SPAWN"))
     {
+        spawners.emplace_back();
+        auto& spawner = spawners.back();
         float frequency = stringutil::convert::toFloat(spawn_node->items["frequency"]);
         if (frequency > 0)
-            spawn_timer.repeat(1.0f / frequency);
-        parseParam(spawn_node->items["position"], spawn_min.position, spawn_max.position);
-        parseParam(spawn_node->items["velocity"], spawn_min.velocity, spawn_max.velocity);
-        parseParam(spawn_node->items["size"], spawn_min.size, spawn_max.size);
-        parseParam(spawn_node->items["color"], spawn_min.color, spawn_max.color);
-        parseParam(spawn_node->items["lifetime"], spawn_min.lifetime, spawn_max.lifetime);
+            spawner.timer.repeat(1.0f / frequency);
+        parseParam(spawn_node->items["position"], spawner.min.position, spawner.max.position);
+        parseParam(spawn_node->items["velocity"], spawner.min.velocity, spawner.max.velocity);
+        parseParam(spawn_node->items["size"], spawner.min.size, spawner.max.size);
+        parseParam(spawn_node->items["color"], spawner.min.color, spawner.max.color);
+        parseParam(spawn_node->items["lifetime"], spawner.min.lifetime, spawner.max.lifetime);
 
         int initial = stringutil::convert::toInt(spawn_node->items["initial"]);
         if (initial > 0)
@@ -77,18 +78,18 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
             for(int n=0; n<initial; n++)
             {
                 Parameters p;
-                p.position.x = random(spawn_min.position.x, spawn_max.position.x);
-                p.position.y = random(spawn_min.position.y, spawn_max.position.y);
-                p.position.z = random(spawn_min.position.z, spawn_max.position.z);
-                p.velocity.x = random(spawn_min.velocity.x, spawn_max.velocity.x);
-                p.velocity.y = random(spawn_min.velocity.y, spawn_max.velocity.y);
-                p.velocity.z = random(spawn_min.velocity.z, spawn_max.velocity.z);
-                p.size = random(spawn_min.size, spawn_max.size);
-                p.color.r = random(spawn_min.color.r, spawn_max.color.r);
-                p.color.g = random(spawn_min.color.g, spawn_max.color.g);
-                p.color.b = random(spawn_min.color.b, spawn_max.color.b);
-                p.color.a = random(spawn_min.color.a, spawn_max.color.a);
-                p.lifetime = random(spawn_min.lifetime, spawn_max.lifetime);
+                p.position.x = random(spawner.min.position.x, spawner.max.position.x);
+                p.position.y = random(spawner.min.position.y, spawner.max.position.y);
+                p.position.z = random(spawner.min.position.z, spawner.max.position.z);
+                p.velocity.x = random(spawner.min.velocity.x, spawner.max.velocity.x);
+                p.velocity.y = random(spawner.min.velocity.y, spawner.max.velocity.y);
+                p.velocity.z = random(spawner.min.velocity.z, spawner.max.velocity.z);
+                p.size = random(spawner.min.size, spawner.max.size);
+                p.color.r = random(spawner.min.color.r, spawner.max.color.r);
+                p.color.g = random(spawner.min.color.g, spawner.max.color.g);
+                p.color.b = random(spawner.min.color.b, spawner.max.color.b);
+                p.color.a = random(spawner.min.color.a, spawner.max.color.a);
+                p.lifetime = random(spawner.min.lifetime, spawner.max.lifetime);
                 emit(p);
             }
 
@@ -172,22 +173,24 @@ void ParticleEmitter::emit(const Parameters& parameters)
 
 void ParticleEmitter::onUpdate(float delta)
 {
-    while(spawn_timer.isExpired())
-    {
-        Parameters p;
-        p.position.x = random(spawn_min.position.x, spawn_max.position.x);
-        p.position.y = random(spawn_min.position.y, spawn_max.position.y);
-        p.position.z = random(spawn_min.position.z, spawn_max.position.z);
-        p.velocity.x = random(spawn_min.velocity.x, spawn_max.velocity.x);
-        p.velocity.y = random(spawn_min.velocity.y, spawn_max.velocity.y);
-        p.velocity.z = random(spawn_min.velocity.z, spawn_max.velocity.z);
-        p.size = random(spawn_min.size, spawn_max.size);
-        p.color.r = random(spawn_min.color.r, spawn_max.color.r);
-        p.color.g = random(spawn_min.color.g, spawn_max.color.g);
-        p.color.b = random(spawn_min.color.b, spawn_max.color.b);
-        p.color.a = random(spawn_min.color.a, spawn_max.color.a);
-        p.lifetime = random(spawn_min.lifetime, spawn_max.lifetime);
-        emit(p);
+    for(auto& spawner : spawners) {
+        while(spawner.timer.isExpired())
+        {
+            Parameters p;
+            p.position.x = random(spawner.min.position.x, spawner.max.position.x);
+            p.position.y = random(spawner.min.position.y, spawner.max.position.y);
+            p.position.z = random(spawner.min.position.z, spawner.max.position.z);
+            p.velocity.x = random(spawner.min.velocity.x, spawner.max.velocity.x);
+            p.velocity.y = random(spawner.min.velocity.y, spawner.max.velocity.y);
+            p.velocity.z = random(spawner.min.velocity.z, spawner.max.velocity.z);
+            p.size = random(spawner.min.size, spawner.max.size);
+            p.color.r = random(spawner.min.color.r, spawner.max.color.r);
+            p.color.g = random(spawner.min.color.g, spawner.max.color.g);
+            p.color.b = random(spawner.min.color.b, spawner.max.color.b);
+            p.color.a = random(spawner.min.color.a, spawner.max.color.a);
+            p.lifetime = random(spawner.min.lifetime, spawner.max.lifetime);
+            emit(p);
+        }
     }
 
     MeshData::Vertices vertices;
@@ -249,6 +252,18 @@ void ParticleEmitter::onUpdate(float delta)
         render_data.mesh = MeshData::create(std::move(vertices), std::move(indices), MeshData::Type::Dynamic);
     else
         render_data.mesh->update(std::move(vertices), std::move(indices));
+}
+
+void ParticleEmitter::startSpawn(float frequency)
+{
+    for(auto& spawner : spawners)
+        spawner.timer.repeat(1.0f / frequency);
+}
+
+void ParticleEmitter::stopSpawn()
+{
+    for(auto& spawner : spawners)
+        spawner.timer.stop();
 }
 
 }//namespace sp

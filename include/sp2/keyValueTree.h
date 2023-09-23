@@ -29,6 +29,7 @@ public:
     std::vector<KeyValueTreeNode> root_nodes;
     
     KeyValueTreeNode* findId(const string& id);
+    std::vector<KeyValueTreeNode*> findAllId(const string& id);
     std::map<string, std::map<string, string>> getFlattenNodesByIds();
 private:
     void buildFlattenNodesByIds(std::map<string, std::map<string, string>>& results, const KeyValueTreeNode& node, std::map<string, string> key_values);
