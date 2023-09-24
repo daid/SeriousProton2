@@ -76,22 +76,7 @@ ParticleEmitter::ParticleEmitter(P<Node> parent, string resource_name)
         if (initial > 0)
         {
             for(int n=0; n<initial; n++)
-            {
-                Parameters p;
-                p.position.x = random(spawner.min.position.x, spawner.max.position.x);
-                p.position.y = random(spawner.min.position.y, spawner.max.position.y);
-                p.position.z = random(spawner.min.position.z, spawner.max.position.z);
-                p.velocity.x = random(spawner.min.velocity.x, spawner.max.velocity.x);
-                p.velocity.y = random(spawner.min.velocity.y, spawner.max.velocity.y);
-                p.velocity.z = random(spawner.min.velocity.z, spawner.max.velocity.z);
-                p.size = random(spawner.min.size, spawner.max.size);
-                p.color.r = random(spawner.min.color.r, spawner.max.color.r);
-                p.color.g = random(spawner.min.color.g, spawner.max.color.g);
-                p.color.b = random(spawner.min.color.b, spawner.max.color.b);
-                p.color.a = random(spawner.min.color.a, spawner.max.color.a);
-                p.lifetime = random(spawner.min.lifetime, spawner.max.lifetime);
-                emit(p);
-            }
+                spawnParticle(spawner);
 
             if (frequency <= 0.0)
                 auto_destroy = true;
@@ -175,22 +160,7 @@ void ParticleEmitter::onUpdate(float delta)
 {
     for(auto& spawner : spawners) {
         while(spawner.timer.isExpired())
-        {
-            Parameters p;
-            p.position.x = random(spawner.min.position.x, spawner.max.position.x);
-            p.position.y = random(spawner.min.position.y, spawner.max.position.y);
-            p.position.z = random(spawner.min.position.z, spawner.max.position.z);
-            p.velocity.x = random(spawner.min.velocity.x, spawner.max.velocity.x);
-            p.velocity.y = random(spawner.min.velocity.y, spawner.max.velocity.y);
-            p.velocity.z = random(spawner.min.velocity.z, spawner.max.velocity.z);
-            p.size = random(spawner.min.size, spawner.max.size);
-            p.color.r = random(spawner.min.color.r, spawner.max.color.r);
-            p.color.g = random(spawner.min.color.g, spawner.max.color.g);
-            p.color.b = random(spawner.min.color.b, spawner.max.color.b);
-            p.color.a = random(spawner.min.color.a, spawner.max.color.a);
-            p.lifetime = random(spawner.min.lifetime, spawner.max.lifetime);
-            emit(p);
-        }
+            spawnParticle(spawner);
     }
 
     MeshData::Vertices vertices;
@@ -264,6 +234,24 @@ void ParticleEmitter::stopSpawn()
 {
     for(auto& spawner : spawners)
         spawner.timer.stop();
+}
+
+void ParticleEmitter::spawnParticle(const Spawner& spawner)
+{
+    Parameters p;
+    p.position.x = random(spawner.min.position.x, spawner.max.position.x);
+    p.position.y = random(spawner.min.position.y, spawner.max.position.y);
+    p.position.z = random(spawner.min.position.z, spawner.max.position.z);
+    p.velocity.x = random(spawner.min.velocity.x, spawner.max.velocity.x);
+    p.velocity.y = random(spawner.min.velocity.y, spawner.max.velocity.y);
+    p.velocity.z = random(spawner.min.velocity.z, spawner.max.velocity.z);
+    p.size = random(spawner.min.size, spawner.max.size);
+    p.color.r = random(spawner.min.color.r, spawner.max.color.r);
+    p.color.g = random(spawner.min.color.g, spawner.max.color.g);
+    p.color.b = random(spawner.min.color.b, spawner.max.color.b);
+    p.color.a = random(spawner.min.color.a, spawner.max.color.a);
+    p.lifetime = random(spawner.min.lifetime, spawner.max.lifetime);
+    emit(p);
 }
 
 }//namespace sp

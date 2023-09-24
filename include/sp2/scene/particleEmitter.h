@@ -186,6 +186,7 @@ private:
         Parameters min;
         Parameters max;
     };
+    void spawnParticle(const Spawner& spawner);
     std::vector<Spawner> spawners;
     std::vector<Parameters> particles;
     std::vector<std::unique_ptr<Effector>> effectors;
