@@ -311,6 +311,7 @@ public:
         MJPG,
         RGB24,
         YUY2,
+        NV12,
     } type;
 };
 
@@ -407,6 +408,10 @@ CameraCapture::State CameraCapture::init(int index, sp::Vector2i prefered_size)
     {
         data->type = Data::Type::YUY2;
     }
+    else if (mt.subtype == MEDIASUBTYPE_NV12)
+    {
+        data->type = Data::Type::NV12;
+    }
     else
     {
         LOG(Error, "Unknown MEDIASUBTYPE in camera settings: ", sp::string::hex(mt.subtype.Data1));
@@ -487,6 +492,34 @@ Image CameraCapture::getFrame()
             memcpy(tmp, data->buffer + size.x * n * 4, size.x * 4);
             memcpy(data->buffer + size.x * n * 4, data->buffer + size.x * (size.y - 1 - n) * 4, size.x * 4);
             memcpy(data->buffer + size.x * (size.y - 1 - n) * 4, tmp, size.x * 4);
+        }
+        result.update(size, reinterpret_cast<uint32_t*>(data->buffer));
+        }break;
+    case Data::Type::NV12:{
+        if (buffer_size != size.x * size.y + (size.x * size.y / 2))
+        {
+            LOG(Warning, "Incorrect buffer size result on CameraCapture:", buffer_size, 2 * size.x * size.y);
+            return result;
+        }
+        uint8_t* ptr_y = data->buffer;
+        uint8_t* ptr_u = data->buffer + size.x*size.y;
+        uint8_t* ptr_v = data->buffer + size.x*size.y + 1;
+
+        //TODO: This still corrupts the top part of the image.
+        for(int py=size.y-1; py>=0; py--)
+        for(int px=0; px<size.x; px++)
+        {
+            int y = ptr_y[px + py * size.x];
+            int u = ptr_u[(px/2 + py/2 * size.x/2)*2];
+            int v = ptr_v[(px/2 + py/2 * size.x/2)*2];
+
+            u -= 128;
+            v -= 128;
+
+            data->buffer[(px+py*size.x)*4+0] = std::clamp(int(y + 1.402 * v), 0, 255);
+            data->buffer[(px+py*size.x)*4+1] = std::clamp(int(y - 0.34414 * u - 0.71414 * v), 0, 255);
+            data->buffer[(px+py*size.x)*4+2] = std::clamp(int(y + 1.772 * u), 0, 255);
+            data->buffer[(px+py*size.x)*4+3] = 255;
         }
         result.update(size, reinterpret_cast<uint32_t*>(data->buffer));
         }break;
