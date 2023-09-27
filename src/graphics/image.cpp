@@ -217,6 +217,9 @@ void Image::draw(Ray2i ray, uint32_t color)
         std::swap(ray.start.x, ray.start.y);
         std::swap(ray.end.x, ray.end.y);
         std::swap(dx, dy);
+
+        if (ray.end.x < ray.start.x)
+            std::swap(ray.start, ray.end);
     }
     int sy = ray.start.y < ray.end.y ? 1 : -1;
     int err = 2*dy - dx;

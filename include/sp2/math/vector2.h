@@ -28,12 +28,12 @@ public:
     {
     }
 
-    inline T length()
+    inline T length() const
     {
         return std::sqrt(x * x + y * y);
     }
     
-    inline Vector2<T> normalized()
+    inline Vector2<T> normalized() const
     {
         T f = length();
         if (f < 0.000001)
@@ -41,22 +41,22 @@ public:
         return *this / f;
     }
     
-    inline T cross(const Vector2<T>& v)
+    inline T cross(const Vector2<T>& v) const
     {
         return x * v.y - y * v.x;
     }
 
-    inline T dot(const Vector2<T>& v)
+    inline T dot(const Vector2<T>& v) const
     {
         return x * v.x + y * v.y;
     }
 
-    T angle()
+    T angle() const
     {
         return std::atan2(y, x) / pi * 180.0;
     }
 
-    inline Vector2<T> rotate(T angle)
+    inline Vector2<T> rotate(T angle) const
     {
         angle = angle / 180.0 * pi;
         T s = std::sin(angle);
