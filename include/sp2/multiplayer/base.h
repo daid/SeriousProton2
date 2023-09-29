@@ -2,6 +2,7 @@
 #define SP2_MULTIPLAYER_BASE_H
 
 #include <sp2/pointer.h>
+#include <stdint.h>
 #include <unordered_map>
 
 namespace sp {
