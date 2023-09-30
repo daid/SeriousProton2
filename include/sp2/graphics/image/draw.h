@@ -247,7 +247,7 @@ template<typename T> void drawFilledPolygon(ImageBase<T>& img, const std::vector
 
 #undef PUT_PIXEL
 
-}//namespace sp
+}//namespace sp::image
 
 
 #endif//SP2_GRAPHICS_IMAGE_DRAW_H

@@ -74,6 +74,7 @@ protected:
 };
 
 using Image = ImageBase<uint32_t>;
+using Image8 = ImageBase<uint8_t>;
 
 template<> bool Image::loadFromStream(io::ResourceStreamPtr stream);
 template<> bool Image::loadFromFile(const string& filename);
