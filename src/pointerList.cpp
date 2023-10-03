@@ -45,10 +45,11 @@ _PListEntry* _PListBase::removeEntry(_PListEntry* e)
     _PListEntry* next = e->object_next;
     if (next)
         next->object_prev = e->object_prev;
-    if (e->object_prev)
+    if (e->object_prev) {
         e->object_prev->object_next = next;
-    else
+    } else {
         e->object->pointer_list_entry_list_start = next;
+    }
 
     next = e->list_next;
     if (next)
@@ -67,6 +68,13 @@ void _PListEntry::free()
 {
     list_next = free_list;
     free_list = this;
+#ifdef DEBUG
+    object = nullptr;
+    object_prev = nullptr;
+    object_next = nullptr;
+
+    list = nullptr;
+#endif
 }
 
 _PListEntry* _PListEntry::create()
@@ -89,6 +97,8 @@ void _PListBase::insert(AutoPointerObject* item)
     new_entry->object = item;
     new_entry->object_prev = nullptr;
     new_entry->object_next = new_entry->object->pointer_list_entry_list_start;
+    if (new_entry->object_next)
+        new_entry->object_next->object_prev = new_entry;
     new_entry->object->pointer_list_entry_list_start = new_entry;
     
     new_entry->list = this;
