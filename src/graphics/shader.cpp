@@ -119,8 +119,6 @@ bool Shader::bind()
             LOG(Warning, "Shader:", name, "has no attribute for a_vertex, this is odd... (legacy shader with gl_Vertex?)");
     }
 
-    glUseProgram(program);
-
     if (previous_shader)
     {
         if (previous_shader->vertex_attribute != -1)
@@ -130,6 +128,7 @@ bool Shader::bind()
         if (previous_shader->uv_attribute != -1)
             glDisableVertexAttribArray(previous_shader->uv_attribute);
     }
+    glUseProgram(program);
 
     if (vertex_attribute != -1) glEnableVertexAttribArray(vertex_attribute);
     if (normal_attribute != -1) glEnableVertexAttribArray(normal_attribute);
@@ -239,6 +238,15 @@ int Shader::getUniformLocation(const string& s)
 
 void Shader::unbind()
 {
+    if (bound_shader)
+    {
+        if (bound_shader->vertex_attribute != -1)
+            glDisableVertexAttribArray(bound_shader->vertex_attribute);
+        if (bound_shader->normal_attribute != -1)
+            glDisableVertexAttribArray(bound_shader->normal_attribute);
+        if (bound_shader->uv_attribute != -1)
+            glDisableVertexAttribArray(bound_shader->uv_attribute);
+    }
     glUseProgram(0);
     bound_shader = nullptr;
 }
