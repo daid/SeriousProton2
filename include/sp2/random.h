@@ -2,6 +2,7 @@
 #define SP2_RANDOM_H
 
 #include <iterator>
+#include <sp2/pointerList.h>
 
 namespace sp {
 
@@ -18,6 +19,20 @@ template<typename Iter> Iter randomSelect(Iter start, Iter end)
 template<typename Container> typename Container::iterator randomSelect(Container& container)
 {
     return randomSelect(container.begin(), container.end());
+}
+
+template<typename Container> typename Container::const_iterator randomSelect(const Container& container)
+{
+    return randomSelect(container.begin(), container.end());
+}
+
+template<typename T> P<T> randomSelect(PList<T>& container)
+{
+    auto n = irandom(0, container.size() - 1);
+    for(auto t : container) {
+        if (n) n--; else return t;
+    }
+    return nullptr;
 }
 
 }//namespace sp
