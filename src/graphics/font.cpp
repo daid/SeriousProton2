@@ -76,6 +76,7 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
         if ((flags & FlagLineWrap) && position.x > area_size.x)
         {
             //Try to wrap the line by going back to the last space character and replace that with a newline.
+            // Or wrap at a dash without replacement
             for(int n=result.data.size()-2; (n > 0) && (result.data[n].char_code != 0); n--)
             {
                 if (result.data[n].char_code == ' ')
@@ -85,6 +86,16 @@ Font::PreparedFontString Font::prepare(const string& s, int pixel_size, float te
                     result.data.resize(n + 1);
                     position.x = 0.0f;
                     position.y -= line_spacing;
+                    break;
+                }
+                if (result.data[n].char_code == '-')
+                {
+                    index = result.data[n + 1].string_offset;
+                    result.data.resize(n + 1);
+                    result.data.push_back(result.data.back());
+                    result.data.back().char_code = 0;
+                    position.x = 0.0f;
+                    position.y += line_spacing;
                     break;
                 }
             }
