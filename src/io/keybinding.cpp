@@ -610,19 +610,23 @@ void Keybinding::handleEvent(const SDL_Event& event)
         {
             SDL_GameController* gc = SDL_GameControllerOpen(event.cdevice.which);
             if (gc)
-                LOG(Info, "Found game controller:", SDL_GameControllerName(gc));
+                LOG(Info, "Found game controller:", SDL_JoystickGetDeviceInstanceID(event.cdevice.which), SDL_GameControllerName(gc));
             else
                 LOG(Warning, "Failed to open game controller...");
         }
         break;
     case SDL_CONTROLLERDEVICEREMOVED:
-        for(int button=0; button<SDL_CONTROLLER_BUTTON_MAX; button++)
-            updateKeys(int(button) | int(event.cdevice.which) << 8 | game_controller_button_mask, 0.0);
-        for(int axis=0; axis<SDL_CONTROLLER_AXIS_MAX; axis++)
         {
-            updateKeys(int(axis) | int(event.cdevice.which) << 8 | game_controller_axis_mask, 0.0);
+            auto gc = SDL_GameControllerFromInstanceID(event.cdevice.which);
+            LOG(Info, "Game controller removed: ", event.cdevice.which, SDL_GameControllerName(gc));
+            for(int button=0; button<SDL_CONTROLLER_BUTTON_MAX; button++)
+                updateKeys(int(button) | int(event.cdevice.which) << 8 | game_controller_button_mask, 0.0);
+            for(int axis=0; axis<SDL_CONTROLLER_AXIS_MAX; axis++)
+            {
+                updateKeys(int(axis) | int(event.cdevice.which) << 8 | game_controller_axis_mask, 0.0);
+            }
+            SDL_GameControllerClose(gc);
         }
-        SDL_GameControllerClose(SDL_GameControllerFromInstanceID(event.cdevice.which));
         break;
     case SDL_CONTROLLERDEVICEREMAPPED:
         break;
