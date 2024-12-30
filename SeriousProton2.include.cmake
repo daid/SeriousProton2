@@ -296,7 +296,7 @@ macro(android_apk NAME ASSETS_FOLDER)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/")
     add_custom_command(
         OUTPUT "java_compiled/sp2/${NAME}/R.class"
-        COMMAND ${Java_JAVAC_EXECUTABLE} ARGS -source 1.7 -target 1.7 -classpath "${ANDROID_PLATFORM_JAR}" ${JAVA_SOURCES} -d "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
+        COMMAND ${Java_JAVAC_EXECUTABLE} ARGS -source 1.8 -target 1.8 -classpath "${ANDROID_PLATFORM_JAR}" ${JAVA_SOURCES} -d "${CMAKE_CURRENT_BINARY_DIR}/java_compiled/"
         DEPENDS ${JAVA_SOURCES}
     )
     # Convert sources into dex file
