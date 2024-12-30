@@ -3,6 +3,9 @@
 
 namespace sp {
 
+std::unordered_map<string, GLBLoader::GLBFile> GLBLoader::fileCache;
+std::unordered_map<string, std::shared_ptr<MeshData>> GLBLoader::meshCache;
+
 std::shared_ptr<MeshData> GLBLoader::GLBFile::flatMesh() const {
     sp::MeshData::Vertices vertices;
     sp::MeshData::Indices indices;
@@ -32,12 +35,22 @@ void GLBLoader::GLBFile::addToFlat(sp::MeshData::Vertices& vertices, sp::MeshDat
         addToFlat(vertices, indices, child, transform);
 }
 
-const GLBLoader::GLBFile& GLBLoader::get(string resource_name) {
-    auto it = files.find(resource_name);
-    if (it != files.end())
+const GLBLoader::GLBFile& GLBLoader::get(string resource_name)
+{
+    auto it = fileCache.find(resource_name);
+    if (it != fileCache.end())
         return it->second;
-    files[resource_name] = GLBLoader(resource_name).result;
+    fileCache[resource_name] = GLBLoader(resource_name).result;
     return get(resource_name);
+}
+
+std::shared_ptr<MeshData> GLBLoader::getMesh(string resource_name)
+{
+    auto it = meshCache.find(resource_name);
+    if (it != meshCache.end())
+        return it->second;
+    meshCache[resource_name] = get(resource_name).flatMesh();
+    return getMesh(resource_name);
 }
 
 GLBLoader::GLBLoader(string resource_name)

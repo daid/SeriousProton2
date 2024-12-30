@@ -20,6 +20,12 @@ add_library(sp2freetype STATIC ${FREETYPE_SOURCES})
 target_include_directories(sp2freetype PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.9/include")
 target_compile_definitions(sp2freetype PRIVATE "-DFT2_BUILD_LIBRARY")
 
+target_compile_options(box2d PRIVATE -fPIC)
+target_compile_options(bullet PRIVATE -fPIC)
+target_compile_options(lua PRIVATE -fPIC)
+target_compile_options(miniz PRIVATE -fPIC)
+target_compile_options(sp2freetype PRIVATE -fPIC)
+
 if(SP2_OPTIMIZE_LIBS)
     target_compile_options(box2d PRIVATE ${OPTIMIZER_FLAGS})
     target_compile_options(bullet PRIVATE ${OPTIMIZER_FLAGS})

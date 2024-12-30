@@ -31,6 +31,7 @@ public:
     };
 
     static const GLBFile& get(string resource_name);
+    static std::shared_ptr<MeshData> getMesh(string resource_name);
 private:
     GLBLoader(string resource_name);
     void handleNode(int node_id, GLBFile::Node& node);
@@ -43,7 +44,8 @@ private:
     nlohmann::json json;
     std::vector<uint8_t> bindata;
 
-    static inline std::unordered_map<string, GLBFile> files;
+    static std::unordered_map<string, GLBFile> fileCache;
+    static std::unordered_map<string, std::shared_ptr<MeshData>> meshCache;
 };
 
 }//namespace sp
