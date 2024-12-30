@@ -63,6 +63,10 @@ static void initializeLibSSL()
 #else
     void* libcrypto = SDL_LoadObject("libcrypto.so.1.1");
     void* libssl = SDL_LoadObject("libssl.so.1.1");
+    if (!libcrypto)
+        libcrypto = SDL_LoadObject("libcrypto.so.3");
+    if (!libssl)
+        libssl = SDL_LoadObject("libssl.so.3");
 #endif
     if (!libcrypto || !libssl)
         return;
