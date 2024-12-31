@@ -179,6 +179,44 @@ public:
         result.normalize();
         return result;
     }
+
+    static Quaternion lookAt(Vector3<T> forward, Vector3<T> up)
+    {
+        forward = forward.normalized();
+        auto side = forward.cross(up).normalized();
+        up = side.cross(forward);
+
+        Quaternion<T> q;
+        auto trace = side.x + forward.y + up.z;
+        if (trace > 0.0) {
+            auto s = 0.5 / std::sqrt(trace + static_cast<T>(1.0));
+            q.w = 0.25 / s;
+            q.x = (forward.z - up.y) * s;
+            q.y = (up.x - side.z) * s;
+            q.z = (side.y - forward.x) * s;
+        } else {
+            if (side.x > forward.y && side.x > up.z) {
+                auto s = 2.0 * std::sqrt(static_cast<T>(1.0) + side.x - forward.y - up.z);
+                q.w = (forward.z - up.y) / s;
+                q.x = 0.25 * s;
+                q.y = (forward.x + side.y) / s;
+                q.z = (up.x + side.z) / s;
+            } else if (forward.y > up.z) {
+                auto s = 2.0 * std::sqrt(static_cast<T>(1.0) + forward.y - side.x - up.z);
+                q.w = (up.x - side.z) / s;
+                q.x = (forward.x + side.y) / s;
+                q.y = 0.25 * s;
+                q.z = (up.y + forward.z) / s;
+            } else {
+                auto s = 2.0 * std::sqrt(1.0 + up.z - side.x - forward.y);
+                q.w = (side.y - forward.x) / s;
+                q.x = (up.x + side.z) / s;
+                q.y = (up.y + forward.z) / s;
+                q.z = 0.25 * s;
+            }
+        }
+        return q;
+    }
 };
 
 typedef Quaternion<float> Quaternionf;
