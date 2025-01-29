@@ -18,10 +18,11 @@ void Chains2D::createFixture(b2Body* body) const
     for(auto chain : chains)
     {
         b2ChainShape shape;
-        b2Vec2 verts[chain.size()];
+        std::vector<b2Vec2> verts;
+        verts.reserve(chain.size());
         for(unsigned int n=0; n<chain.size(); n++)
-            verts[n] = toVector(chain[n]);
-        shape.CreateChain(verts, chain.size());
+            verts.push_back(toVector(chain[n]));
+        shape.CreateChain(verts.data(), chain.size());
 
         createFixtureOnBody(body, &shape);
     }
@@ -29,10 +30,11 @@ void Chains2D::createFixture(b2Body* body) const
     for(auto loop : loops)
     {
         b2ChainShape shape;
-        b2Vec2 verts[loop.size()];
+        std::vector<b2Vec2> verts;
+        verts.reserve(loop.size());
         for(unsigned int n=0; n<loop.size(); n++)
-            verts[n] = toVector(loop[n]);
-        shape.CreateLoop(verts, loop.size());
+            verts.push_back(toVector(loop[n]));
+        shape.CreateLoop(verts.data(), loop.size());
 
         createFixtureOnBody(body, &shape);
     }

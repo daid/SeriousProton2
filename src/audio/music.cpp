@@ -51,8 +51,10 @@ public:
 protected:
     virtual void onMixSamples(float* stream, int sample_count) override
     {
-        float buffer[sample_count];
-        int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer, sample_count);
+        static std::vector<float> buffer;
+        if (buffer.size() < sample_count)
+            buffer.resize(sample_count);
+        int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer.data(), sample_count);
         if (vorbis_samples == 0)
         {
             if (loop)
@@ -60,7 +62,7 @@ protected:
             else
                 stop();
         }
-        mix(stream, buffer, vorbis_samples * 2, mix_volume);
+        mix(stream, buffer.data(), vorbis_samples * 2, mix_volume);
     }
 
 private:

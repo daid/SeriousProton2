@@ -22,8 +22,10 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
         max_span = std::max(max_span, span.y);
     }
 
-    float col_width[grid_size.x];
-    float row_height[grid_size.y];
+    std::vector<float> col_width;
+    col_width.resize(grid_size.x, 0.0f);
+    std::vector<float> row_height;
+    row_height.resize(grid_size.y, 0.0f);
     for(int n=0; n<grid_size.x; n++)
         col_width[n] = 0.0;
     for(int n=0; n<grid_size.y; n++)
@@ -77,8 +79,10 @@ void GridLayout::update(P<Widget> container, Rect2d rect)
         }
     }
 
-    float col_x[grid_size.x];
-    float row_y[grid_size.y];
+    std::vector<float> col_x;
+    col_x.resize(grid_size.x, 0.0f);
+    std::vector<float> row_y;
+    row_y.resize(grid_size.y, 0.0f);
     for(int n=0; n<grid_size.x; n++)
     {
         col_x[n] = rect.position.x;

@@ -27,10 +27,8 @@ public:
         case 'R': {
             int32_t length;
             stream->read(&length, 4);
-            char buffer[length + 1];
-            stream->read(buffer, length);
-            buffer[length] = 0;
-            str = buffer;
+            str.resize(length);
+            stream->read(str.data(), length);
             }break;
         case 'b': readArray<uint8_t>(stream); break;
         case 'i': readArray<int32_t>(stream); break;
@@ -53,12 +51,13 @@ public:
         numbers.reserve(element_count);
         if (encoding)
         {
-            uint8_t buffer[encoded_size];
-            stream->read(buffer, encoded_size);
+            std::vector<uint8_t> buffer;
+            buffer.resize(encoded_size);
+            stream->read(buffer.data(), encoded_size);
             std::vector<T> tmp;
             tmp.resize(element_count);
             unsigned long size = element_count * sizeof(T);
-            mz_uncompress(reinterpret_cast<unsigned char*>(tmp.data()), &size, buffer, encoded_size);
+            mz_uncompress(reinterpret_cast<unsigned char*>(tmp.data()), &size, buffer.data(), encoded_size);
             for(int n=0; n<element_count; n++)
                 numbers.emplace_back(tmp[n]);
         }
@@ -170,9 +169,9 @@ public:
         if (end_offset >= stream->getSize() || end_offset == 0)
             return false;
         
-        char name[name_len + 1];
-        stream->read(name, name_len);
-        name[name_len] = 0;
+        string name;
+        name.resize(name_len);
+        stream->read(name.data(), name_len);
         node.name = name;
         node.properties.resize(num_properties);
         
