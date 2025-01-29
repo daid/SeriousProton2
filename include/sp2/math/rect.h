@@ -74,7 +74,27 @@ public:
             size.y = 0;
         }
     }
-    
+
+    Rect<T> expand(T amount)
+    {
+        return grow({amount, amount});
+    }
+
+    Rect<T> expand(Vector2<T> amount)
+    {
+        return Rect(position - amount, size + amount * T(2));
+    }
+
+    Rect<T> contract(T amount)
+    {
+        return contract({amount, amount});
+    }
+
+    Rect<T> contract(Vector2<T> amount)
+    {
+        return Rect(position + amount, size - amount * T(2));
+    }
+
     Vector2<T> position;
     Vector2<T> size;
 
