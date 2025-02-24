@@ -3,7 +3,7 @@
 #include <sp2/scene/camera.h>
 #include <sp2/math/plane.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 
 namespace sp {
@@ -95,7 +95,7 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
                 focus_widget->focus = false;
                 focus_widget->markRenderDataOutdated();
                 if (focus_widget->enableTextInputOnFocus())
-                    SDL_StopTextInput();
+                    SDL_StopTextInput(nullptr); //TODO
             }
             if (w->focusable)
             {
@@ -103,7 +103,7 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
                 focus_widget->focus = true;
                 focus_widget->markRenderDataOutdated();
                 if (focus_widget->enableTextInputOnFocus())
-                    SDL_StartTextInput();
+                    SDL_StartTextInput(nullptr); //TODO
             }
             else
             {
@@ -122,7 +122,7 @@ bool Scene::onPointerDown(io::Pointer::Button button, Ray3d ray, int id)
         focus_widget->focus = false;
         focus_widget->markRenderDataOutdated();
         if (focus_widget->enableTextInputOnFocus())
-            SDL_StopTextInput();
+            SDL_StopTextInput(nullptr); //TODO
         focus_widget = nullptr;
     }
     return false;

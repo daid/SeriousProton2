@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <limits.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #ifdef _WIN32
 #include <windows.h>

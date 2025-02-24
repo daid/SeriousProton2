@@ -2,8 +2,6 @@
 #include <sp2/audio/audioSource.h>
 #include <sp2/io/resourceProvider.h>
 
-#include <SDL_audio.h>
-
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PUSHDATA_API
 #if defined(__GNUC__) && !defined(__clang__)
@@ -21,7 +19,7 @@
 namespace sp {
 namespace audio {
 
-static int mix_volume = SDL_MIX_MAXVOLUME;
+static float mix_volume = 1.0;
 
 class MusicSource : public AudioSource
 {
@@ -99,12 +97,12 @@ void Music::stop()
 
 void Music::setVolume(float volume)
 {
-    mix_volume = volume * SDL_MIX_MAXVOLUME / 100.0f;
+    mix_volume = volume / 100.0f;
 }
 
 float Music::getVolume()
 {
-    return float(mix_volume) * 100.0f / SDL_MIX_MAXVOLUME;
+    return float(mix_volume) * 100.0f;
 }
 
 }//namespace audio

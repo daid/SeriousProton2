@@ -2,7 +2,7 @@
 #include <sp2/audio/audioSource.h>
 #include <sp2/io/resourceProvider.h>
 
-#include <SDL_audio.h>
+#include <SDL3/SDL.h>
 
 #include <unordered_map>
 #include <string.h>
@@ -12,7 +12,7 @@ namespace audio {
 
 typedef std::vector<float> AudioBuffer;
 
-static int mix_volume = SDL_MIX_MAXVOLUME;
+static float mix_volume = 1.0f;
 
 class SoundSource : public AudioSource
 {
@@ -37,38 +37,39 @@ static std::unordered_map<string, AudioBuffer*> sound_cache;
 static const int slot_count = 32;
 static SoundSource slot[slot_count];
 
-static Sint64 SDLCALL sdl_to_stream_size(struct SDL_RWops * context)
+static Sint64 SDLCALL sdl_to_stream_size(void* userdata)
 {
-    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(userdata);
     return stream->getSize();
 }
 
-static Sint64 SDLCALL sdl_to_stream_seek(struct SDL_RWops * context, Sint64 offset, int whence)
+static Sint64 SDLCALL sdl_to_stream_seek(void* userdata, Sint64 offset, SDL_IOWhence whence)
 {
-    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(userdata);
     switch(whence)
     {
-    case RW_SEEK_SET: stream->seek(offset); break;
-    case RW_SEEK_CUR: stream->seek(stream->tell() + offset); break;
-    case RW_SEEK_END: stream->seek(stream->getSize() + offset); break;
+    case SDL_IO_SEEK_SET: stream->seek(offset); break;
+    case SDL_IO_SEEK_CUR: stream->seek(stream->tell() + offset); break;
+    case SDL_IO_SEEK_END: stream->seek(stream->getSize() + offset); break;
     }
     return stream->tell();
 }
 
-static size_t SDLCALL sdl_to_stream_read(struct SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
+static size_t SDLCALL sdl_to_stream_read(void* userdata, void *ptr, size_t size, SDL_IOStatus* status)
 {
-    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(context->hidden.unknown.data1);
-    return stream->read(ptr, size * maxnum) / size;
+    sp::io::ResourceStream* stream = static_cast<sp::io::ResourceStream*>(userdata);
+    return stream->read(ptr, size);
 }
 
-static size_t SDLCALL sdl_to_stream_write(struct SDL_RWops * context, const void *ptr, size_t size, size_t num)
+static size_t SDLCALL sdl_to_stream_write(void* userdata, const void *ptr, size_t size, SDL_IOStatus* status)
 {
+    *status = SDL_IO_STATUS_READONLY;
     return 0;
 }
 
-static int SDLCALL sdl_to_stream_close(struct SDL_RWops * context)
+static bool SDLCALL sdl_to_stream_close(void* userdata)
 {
-    return 0;
+    return true;
 }
 
 void Sound::play(const string& resource_name)
@@ -80,39 +81,35 @@ void Sound::play(const string& resource_name)
         io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
         if (stream)
         {
-            SDL_RWops ops = {
-                .size = sdl_to_stream_size,
-                .seek = sdl_to_stream_seek,
-                .read = sdl_to_stream_read,
-                .write = sdl_to_stream_write,
-                .close = sdl_to_stream_close,
-                .type = SDL_RWOPS_UNKNOWN,
-                .hidden = {.unknown = { .data1 = stream.get() } },
-            };
+            SDL_IOStreamInterface interface;
+            SDL_INIT_INTERFACE(&interface);
+            interface.size = sdl_to_stream_size;
+            interface.seek = sdl_to_stream_seek;
+            interface.read = sdl_to_stream_read;
+            interface.write = sdl_to_stream_write;
+            interface.close = sdl_to_stream_close;
+
+            auto sdl_stream = SDL_OpenIO(&interface, stream.get());
+
             SDL_AudioSpec spec;
             uint8_t* buffer = nullptr;
             uint32_t buffer_size = 0;
-            if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
+            if (SDL_LoadWAV_IO(sdl_stream, false, &spec, &buffer, &buffer_size))
             {
-                SDL_AudioCVT cvt;
-                SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 48000);
-                if (cvt.needed)
-                {
-                    cvt.len = buffer_size;
-                    data->resize(cvt.len * cvt.len_mult / sizeof(float));
-                    cvt.buf = reinterpret_cast<uint8_t*>(data->data());
-                    memcpy(cvt.buf, buffer, buffer_size);
-                    SDL_ConvertAudio(&cvt);
-                    data->resize(cvt.len_cvt / sizeof(float));
-                    data->shrink_to_fit();
-                }
-                else
-                {
-                    data->resize(buffer_size / sizeof(float));
-                    memcpy(data->data(), buffer, buffer_size);
-                }
-                SDL_FreeWAV(buffer);
+                uint8_t* target_buffer = nullptr;
+                int target_buffer_size = 0;
+                SDL_AudioSpec target_spec;
+                target_spec.format = SDL_AUDIO_F32LE;
+                target_spec.channels = 2;
+                target_spec.freq = 48000;
+                SDL_ConvertAudioSamples(&spec, buffer, buffer_size, &target_spec, &target_buffer, &target_buffer_size);
+
+                data->resize(target_buffer_size / sizeof(float));
+                memcpy(data->data(), target_buffer, target_buffer_size);
+                SDL_free(target_buffer);
+                SDL_free(buffer);
             }
+            SDL_CloseIO(sdl_stream);
 
             LOG(Info, "Loaded", resource_name, "with", data->size(), "samples", float(data->size()) / 2 / 44100);
         }
@@ -133,12 +130,12 @@ void Sound::play(const string& resource_name)
 
 void Sound::setVolume(float volume)
 {
-    mix_volume = volume * SDL_MIX_MAXVOLUME / 100.0f;
+    mix_volume = volume / 100.0f;
 }
 
 float Sound::getVolume()
 {
-    return float(mix_volume) * 100.0f / SDL_MIX_MAXVOLUME;
+    return float(mix_volume) * 100.0f;
 }
 
 }//namespace audio

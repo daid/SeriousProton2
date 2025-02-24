@@ -5,7 +5,7 @@
 #include <sp2/assert.h>
 #include <sp2/graphics/texture.h>
 
-#include <SDL_messagebox.h>
+#include <SDL3/SDL.h>
 
 namespace sp {
 

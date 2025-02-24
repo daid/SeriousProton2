@@ -3,6 +3,8 @@
 
 #include <sp2/string.h>
 
+struct SDL_AudioStream;
+
 namespace sp {
 class Engine;
 namespace audio {
@@ -22,7 +24,7 @@ public:
 
 protected:
     virtual void onMixSamples(float* stream, int sample_count) = 0;
-    static void mix(float* stream, const float* source, int sample_count, int volume);
+    static void mix(float* stream, const float* source, int sample_count, float volume);
 private:
     bool active = false;
     AudioSource* next;
@@ -34,7 +36,7 @@ private:
     static void onAudioCallback(float* stream, int sample_count);
     
     friend class sp::Engine;
-    friend void audioCallback(void* userdata, uint8_t* stream, int length);
+    friend void audioCallback(void* userdata, SDL_AudioStream *stream, int additional_amount, int total_amount);
 };
 
 }//namespace audio

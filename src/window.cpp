@@ -7,7 +7,7 @@
 #include <sp2/graphics/scene/renderqueue.h>
 #include <sp2/graphics/opengl.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -187,21 +187,21 @@ void Window::setClearColor(sp::Color color)
 
 void Window::hideCursor()
 {
-    SDL_ShowCursor(false); //TODO: This is global and not per window...
+    SDL_HideCursor();
     cursor_texture = nullptr;
     cursor_mesh = nullptr;
 }
 
 void Window::setDefaultCursor()
 {
-    SDL_ShowCursor(false); //TODO: This is global and not per window...
+    SDL_ShowCursor();
     cursor_texture = nullptr;
     cursor_mesh = nullptr;
 }
 
 void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
 {
-    SDL_ShowCursor(false); //TODO: This is global and not per window...
+    SDL_HideCursor();
     cursor_texture = texture;
     cursor_mesh = mesh;
 }
@@ -212,9 +212,9 @@ void Window::setPosition(Vector2f position, int monitor_number)
         return;
 
     SDL_Rect rect;
-    if (SDL_GetDisplayUsableBounds(monitor_number, &rect) < 0)
+    if (!SDL_GetDisplayUsableBounds(monitor_number, &rect))
     {
-        SDL_GetDisplayUsableBounds(0, &rect);
+        SDL_GetDisplayUsableBounds(1, &rect);
     }
 
     Vector2i size;
@@ -239,7 +239,9 @@ Vector2i Window::getSize()
 
 int Window::getMonitorCount()
 {
-    return SDL_GetNumVideoDisplays();
+    int count = 0;
+    SDL_free(SDL_GetDisplays(&count));
+    return count;
 }
 
 void Window::addLayer(P<GraphicsLayer> layer)
@@ -263,7 +265,7 @@ void Window::createRenderWindow()
     display_mode.w = EM_ASM_INT({ return window.innerWidth; });
     display_mode.h = EM_ASM_INT({ return window.innerHeight; });
 #else
-    if (SDL_GetDisplayBounds(0, &display_mode))
+    if (SDL_GetDisplayBounds(1, &display_mode))
     {
         LOG(Warning, "Failed to get desktop size.");
         display_mode.w = 640;
@@ -279,7 +281,7 @@ void Window::createRenderWindow()
     float window_height = display_mode.h;
     if (!fullscreen)
     {
-        SDL_GetDisplayUsableBounds(0, &display_mode);
+        SDL_GetDisplayUsableBounds(1, &display_mode);
 #ifdef __EMSCRIPTEN__
         display_mode.w = EM_ASM_INT({ return window.innerWidth; });
         display_mode.h = EM_ASM_INT({ return window.innerHeight; });
@@ -353,11 +355,11 @@ void Window::createRenderWindow()
     if (render_window)
     {
         SDL_SetWindowSize(render_window, window_width, window_height);
-        SDL_SetWindowFullscreen(render_window, flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP));
+        SDL_SetWindowFullscreen(render_window, flags & SDL_WINDOW_FULLSCREEN);
     }
     else
     {
-        render_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0), window_width, window_height, flags);
+        render_window = SDL_CreateWindow("", window_width, window_height, flags);
     }
     if (!render_window)
     {
@@ -395,7 +397,7 @@ void Window::render()
 
     queue.add([this, window_size]()
     {
-        SDL_GL_MakeCurrent(render_window, shared_render_context);
+        SDL_GL_MakeCurrent(render_window, reinterpret_cast<SDL_GLContextState*>(shared_render_context));
         glViewport(0, 0, window_size.x, window_size.y);
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -431,11 +433,11 @@ void Window::render()
     {
         queue.add([this, window_size]()
         {
-            SDL_GL_MakeCurrent(render_window, shared_render_context);
+            SDL_GL_MakeCurrent(render_window, reinterpret_cast<SDL_GLContextState*>(shared_render_context));
             glViewport(0, 0, window_size.x, window_size.y);
         });
 
-        Vector2i mouse_pos;
+        Vector2f mouse_pos;
         SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
 
         Vector2d position(mouse_pos.x, mouse_pos.y);
@@ -464,7 +466,7 @@ void Window::handleEvent(const SDL_Event& event)
 {
     switch(event.type)
     {
-    case SDL_MOUSEBUTTONDOWN:
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
             io::Pointer::Button button = io::Pointer::Button::Unknown;
             switch(event.button.button)
@@ -478,13 +480,13 @@ void Window::handleEvent(const SDL_Event& event)
             pointerDown(button, screenToGLPosition(event.button.x, event.button.y), -1);
         }
         break;
-    case SDL_MOUSEMOTION:
+    case SDL_EVENT_MOUSE_MOTION:
         if (mouse_button_down_mask)
             pointerDrag(screenToGLPosition(event.motion.x, event.motion.y), -1);
         else
             pointerMove(screenToGLPosition(event.motion.x, event.motion.y), -1);
         break;
-    case SDL_MOUSEBUTTONUP:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
         mouse_button_down_mask &=~(1 << int(event.button.button));
         if (!mouse_button_down_mask)
         {
@@ -492,20 +494,20 @@ void Window::handleEvent(const SDL_Event& event)
             pointerMove(screenToGLPosition(event.button.x, event.button.y), -1);
         }
         break;
-    case SDL_FINGERDOWN:
-        pointerDown(io::Pointer::Button::Touch, Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
+    case SDL_EVENT_FINGER_DOWN:
+        pointerDown(io::Pointer::Button::Touch, Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerID);
         break;
-    case SDL_FINGERMOTION:
-        pointerDrag(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
+    case SDL_EVENT_FINGER_MOTION:
+        pointerDrag(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerID);
         break;
-    case SDL_FINGERUP:
-        pointerUp(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerId);
+    case SDL_EVENT_FINGER_UP:
+        pointerUp(Vector2d(event.tfinger.x * 2.0 - 1.0, 1.0 - event.tfinger.y * 2.0), event.tfinger.fingerID);
         break;
-    case SDL_TEXTINPUT:
+    case SDL_EVENT_TEXT_INPUT:
         if (focus_layer)
             focus_layer->onTextInput(event.text.text);
         break;
-    case SDL_MOUSEWHEEL:
+    case SDL_EVENT_MOUSE_WHEEL:
         if (event.wheel.y > 0)
             mousewheelMove(io::Pointer::Wheel::Up);
         else if (event.wheel.y < 0)
@@ -515,9 +517,9 @@ void Window::handleEvent(const SDL_Event& event)
         else if (event.wheel.x < 0)
             mousewheelMove(io::Pointer::Wheel::Left);
         break;
-    case SDL_KEYDOWN:
+    case SDL_EVENT_KEY_DOWN:
 #ifdef DEBUG
-        if (event.key.keysym.sym == SDLK_F3)
+        if (event.key.key == SDLK_F3)
         {
             if (recorder)
             {
@@ -533,86 +535,86 @@ void Window::handleEvent(const SDL_Event& event)
 #endif
         if (focus_layer)
         {
-            switch(event.key.keysym.sym)
+            switch(event.key.key)
             {
             case SDLK_KP_4:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_LEFT:
-                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.mod & SDL_KMOD_SHIFT && event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordLeftWithSelection);
-                else if (event.key.keysym.mod & KMOD_CTRL)
+                else if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordLeft);
-                else if (event.key.keysym.mod & KMOD_SHIFT)
+                else if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::LeftWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Left);
                 break;
             case SDLK_KP_6:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_RIGHT:
-                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.mod & SDL_KMOD_SHIFT && event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordRightWithSelection);
-                else if (event.key.keysym.mod & KMOD_CTRL)
+                else if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::WordRight);
-                else if (event.key.keysym.mod & KMOD_SHIFT)
+                else if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::RightWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Right);
                 break;
             case SDLK_KP_8:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_UP:
-                if (event.key.keysym.mod & KMOD_SHIFT)
+                if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::UpWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Up);
                 break;
             case SDLK_KP_2:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_DOWN:
-                if (event.key.keysym.mod & KMOD_SHIFT)
+                if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::DownWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::Down);
                 break;
             case SDLK_KP_7:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_HOME:
-                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.mod & SDL_KMOD_SHIFT && event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextStartWithSelection);
-                else if (event.key.keysym.mod & KMOD_CTRL)
+                else if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextStart);
-                else if (event.key.keysym.mod & KMOD_SHIFT)
+                else if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::LineStartWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::LineStart);
                 break;
             case SDLK_KP_1:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_END:
-                if (event.key.keysym.mod & KMOD_SHIFT && event.key.keysym.mod & KMOD_CTRL)
+                if (event.key.mod & SDL_KMOD_SHIFT && event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextEndWithSelection);
-                else if (event.key.keysym.mod & KMOD_CTRL)
+                else if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::TextEnd);
-                else if (event.key.keysym.mod & KMOD_SHIFT)
+                else if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::LineEndWithSelection);
                 else
                     focus_layer->onTextInput(TextInputEvent::LineEnd);
                 break;
             case SDLK_KP_PERIOD:
-                if (event.key.keysym.mod & KMOD_NUM)
+                if (event.key.mod & SDL_KMOD_NUM)
                     break;
                 //fallthrough
             case SDLK_DELETE:
@@ -627,45 +629,40 @@ void Window::handleEvent(const SDL_Event& event)
                 break;
             case SDLK_TAB:
             case SDLK_KP_TAB:
-                if (event.key.keysym.mod & KMOD_SHIFT)
+                if (event.key.mod & SDL_KMOD_SHIFT)
                     focus_layer->onTextInput(TextInputEvent::Unindent);
                 else
                     focus_layer->onTextInput(TextInputEvent::Indent);
                 break;
-            case SDLK_a:
-                if (event.key.keysym.mod & KMOD_CTRL)
+            case SDLK_A:
+                if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::SelectAll);
                 break;
-            case SDLK_c:
-                if (event.key.keysym.mod & KMOD_CTRL)
+            case SDLK_C:
+                if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::Copy);
                 break;
-            case SDLK_v:
-                if (event.key.keysym.mod & KMOD_CTRL)
+            case SDLK_B:
+                if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::Paste);
                 break;
-            case SDLK_x:
-                if (event.key.keysym.mod & KMOD_CTRL)
+            case SDLK_X:
+                if (event.key.mod & SDL_KMOD_CTRL)
                     focus_layer->onTextInput(TextInputEvent::Cut);
                 break;
             }
         }
         break;
-    case SDL_WINDOWEVENT:
-        switch(event.window.event)
+    case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+        if (!SDL_GetMouseState(nullptr, nullptr))
         {
-        case SDL_WINDOWEVENT_LEAVE:
-            if (!SDL_GetMouseState(nullptr, nullptr))
-            {
-                pointerLeave(-1);
-            }
-            break;
-        case SDL_WINDOWEVENT_CLOSE:
-            close();
-            break;
+            pointerLeave(-1);
         }
         break;
-    case SDL_QUIT:
+    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+        close();
+        break;
+    case SDL_EVENT_QUIT:
         close();
         break;
     default:
@@ -735,7 +732,7 @@ void Window::pointerUp(Vector2d position, int id)
 
 void Window::mousewheelMove(io::Pointer::Wheel direction)
 {
-    int x, y;
+    float x, y;
     SDL_GetMouseState(&x, &y);
     auto position = screenToGLPosition(x, y);
     for(auto layer_iterator = graphics_layers.rbegin(); layer_iterator != graphics_layers.rend(); ++layer_iterator)
@@ -746,7 +743,7 @@ void Window::mousewheelMove(io::Pointer::Wheel direction)
     }
 }
 
-Vector2d Window::screenToGLPosition(int x, int y)
+Vector2d Window::screenToGLPosition(float x, float y)
 {
     Vector2i size;
     SDL_GetWindowSize(render_window, &size.x, &size.y);

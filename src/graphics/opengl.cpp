@@ -1,6 +1,6 @@
 #include <sp2/graphics/opengl.h>
 #include <sp2/logging.h>
-#include <SDL_video.h>
+#include <SDL3/SDL.h>
 
 static bool init_done = false;
 

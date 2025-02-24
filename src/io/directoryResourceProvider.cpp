@@ -2,7 +2,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 namespace sp {
 namespace io {

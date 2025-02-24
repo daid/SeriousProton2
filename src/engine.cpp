@@ -11,7 +11,7 @@
 #include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif//__EMPSCRIPTEN__
@@ -66,7 +66,7 @@ Engine::Engine()
     elapsed_game_time = 0.0;
 
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+    //SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
 #ifdef SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH
     SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
 #elif defined(SDL_HINT_MOUSE_TOUCH_EVENTS)
@@ -74,7 +74,7 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 #endif
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
     signal(SIGTERM, requestShutdownSignal);
     atexit(SDL_Quit);
 }
@@ -185,7 +185,7 @@ void Engine::processEvents()
         unsigned int window_id = 0;
         switch(event.type)
         {
-        case SDL_KEYDOWN:
+        case SDL_EVENT_KEY_DOWN:
 #ifdef __EMSCRIPTEN__
             if (!audio_started)
             {
@@ -193,13 +193,13 @@ void Engine::processEvents()
                 audio_started = true;
             }
 #endif
-        case SDL_KEYUP:
+        case SDL_EVENT_KEY_UP:
             window_id = event.key.windowID;
             break;
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION:
             window_id = event.motion.windowID;
             break;
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
 #ifdef __EMSCRIPTEN__
             if (!audio_started)
             {
@@ -207,16 +207,17 @@ void Engine::processEvents()
                 audio_started = true;
             }
 #endif
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
             window_id = event.button.windowID;
             break;
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL:
             window_id = event.wheel.windowID;
             break;
-        case SDL_WINDOWEVENT:
+        case SDL_EVENT_WINDOW_RESIZED:
+        case SDL_EVENT_WINDOW_MOVED:
             window_id = event.window.windowID;
             break;
-        case SDL_FINGERDOWN:
+        case SDL_EVENT_FINGER_DOWN:
 #ifdef __EMSCRIPTEN__
             if (!audio_started)
             {
@@ -224,14 +225,14 @@ void Engine::processEvents()
                 audio_started = true;
             }
 #endif
-        case SDL_FINGERUP:
-        case SDL_FINGERMOTION:
+        case SDL_EVENT_FINGER_UP:
+        case SDL_EVENT_FINGER_MOTION:
             window_id = SDL_GetWindowID(SDL_GetMouseFocus());
             break;
-        case SDL_TEXTEDITING:
+        case SDL_EVENT_TEXT_EDITING:
             window_id = event.edit.windowID;
             break;
-        case SDL_TEXTINPUT:
+        case SDL_EVENT_TEXT_INPUT:
             window_id = event.text.windowID;
             break;
         }

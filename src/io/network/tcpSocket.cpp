@@ -49,7 +49,7 @@ extern "C" {
 # define SSL_OP_NO_TLSv1_2                               0x08000000L
 # define SSL_OP_NO_TLSv1_1                               0x10000000L
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 static void initializeLibSSL()
 {
@@ -58,11 +58,11 @@ static void initializeLibSSL()
     initialized = true;
 
 #ifdef _WIN32
-    void* libcrypto = SDL_LoadObject("libcrypto-1_1.dll");
-    void* libssl = SDL_LoadObject("libssl-1_1.dll");
+    SDL_SharedObject* libcrypto = SDL_LoadObject("libcrypto-1_1.dll");
+    SDL_SharedObject* libssl = SDL_LoadObject("libssl-1_1.dll");
 #else
-    void* libcrypto = SDL_LoadObject("libcrypto.so.1.1");
-    void* libssl = SDL_LoadObject("libssl.so.1.1");
+    SDL_SharedObject* libcrypto = SDL_LoadObject("libcrypto.so.1.1");
+    SDL_SharedObject* libssl = SDL_LoadObject("libssl.so.1.1");
     if (!libcrypto)
         libcrypto = SDL_LoadObject("libcrypto.so.3");
     if (!libssl)

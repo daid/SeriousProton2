@@ -62,7 +62,7 @@ private:
     void pointerUp(Vector2d position, int id);
     void mousewheelMove(io::Pointer::Wheel direction);
 
-    Vector2d screenToGLPosition(int x, int y);
+    Vector2d screenToGLPosition(float x, float y);
 
     PList<GraphicsLayer> graphics_layers;
 

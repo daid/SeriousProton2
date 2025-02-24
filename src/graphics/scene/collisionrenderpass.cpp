@@ -7,7 +7,7 @@
 #include <sp2/logging.h>
 #include <sp2/io/keybinding.h>
 
-#include <SDL_keyboard.h>
+#include <SDL3/SDL.h>
 
 
 namespace sp {
