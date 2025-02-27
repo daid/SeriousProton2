@@ -219,6 +219,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         # For Android, we need a libmain.so, which is packed into an android APK, and loaded from java sources
         set(SP2_TARGET_NAME main)
         add_library(${SP2_TARGET_NAME} SHARED ${ARGN})
+        target_link_libraries(${SP2_TARGET_NAME} PUBLIC log)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -frtti")
         android_apk(${EXECUTABLE_NAME} ${SP2_RESOURCE_PATHS})
     else()
