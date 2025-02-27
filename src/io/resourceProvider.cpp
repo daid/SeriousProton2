@@ -54,8 +54,8 @@ public:
     AndroidAssetsResourceProvider(const sp::string& base_path, int priority=0)
     : ResourceProvider(priority), base_path(base_path)
     {
-        JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
-        jobject activity = (jobject)SDL_AndroidGetActivity();
+        JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
+        jobject activity = (jobject)SDL_GetAndroidActivity();
         jclass clazz(env->GetObjectClass(activity));
         jmethodID method_id = env->GetMethodID(clazz, "getAssets", "()Landroid/content/res/AssetManager;");
         asset_manager_jobject = env->CallObjectMethod(activity, method_id);
@@ -67,7 +67,7 @@ public:
 
     virtual ~AndroidAssetsResourceProvider()
     {
-        JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+        JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
         env->DeleteLocalRef(asset_manager_jobject);
     }
     
