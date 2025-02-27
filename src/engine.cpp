@@ -35,23 +35,14 @@ static void requestShutdownSignal(int signal)
     Engine::getInstance()->shutdown();
 }
 
-#ifdef ANDROID
-#undef main
-extern "C" int main(int argc, char *argv[]);
-extern "C" DECLSPEC int SDL_main(int argc, char *argv[])
-{
-    if (Engine::getInstance())
-        return 0;
-    chdir(SDL_AndroidGetInternalStoragePath());
-    exit(main(argc, argv));
-    return 0;
-}
-#endif
-
 Engine::Engine()
 {
     sp2assert(!engine, "SP2 does not support more then 1 engine.");
     engine = this;
+
+#ifdef ANDROID
+    chdir(SDL_GetAndroidInternalStoragePath());
+#endif
 
     game_speed = 1.0;
     paused = false;
