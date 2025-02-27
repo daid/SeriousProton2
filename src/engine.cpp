@@ -67,7 +67,7 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
     SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
     signal(SIGTERM, requestShutdownSignal);
-    atexit(SDL_Quit);
+    //atexit(SDL_Quit);
 }
 
 Engine::~Engine()

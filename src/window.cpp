@@ -265,7 +265,9 @@ void Window::createRenderWindow()
     display_mode.w = EM_ASM_INT({ return window.innerWidth; });
     display_mode.h = EM_ASM_INT({ return window.innerHeight; });
 #else
-    if (SDL_GetDisplayBounds(1, &display_mode))
+    int display_count = 0;
+    auto displays = SDL_GetDisplays(&display_count);
+    if (display_count == 0 || !SDL_GetDisplayBounds(displays[0], &display_mode))
     {
         LOG(Warning, "Failed to get desktop size.");
         display_mode.w = 640;
@@ -281,8 +283,9 @@ void Window::createRenderWindow()
     float window_height = display_mode.h;
     if (!fullscreen)
     {
-        SDL_GetDisplayUsableBounds(1, &display_mode);
-#ifdef __EMSCRIPTEN__
+#ifndef __EMSCRIPTEN__
+        SDL_GetDisplayUsableBounds(displays[0], &display_mode);
+#else
         display_mode.w = EM_ASM_INT({ return window.innerWidth; });
         display_mode.h = EM_ASM_INT({ return window.innerHeight; });
 #endif//__EMSCRIPTEN__
@@ -314,6 +317,9 @@ void Window::createRenderWindow()
                 window_height = window_width / window_aspect_ratio;
         }
     }
+#ifndef __EMSCRIPTEN__
+    SDL_free(displays);
+#endif
 
     if (window_aspect_ratio != 0.0)
     {
