@@ -206,7 +206,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
         endif()
     else()
         if(ANDROID)
-            message(WARNING "No icon specified, using SDL2 default icon. As android requires an icon.")
+            message(WARNING "No icon specified, using SDL3 default icon. As android requires an icon.")
             file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi")
             file(COPY "${SDL_SRC_PATH}/android-project/app/src/main/res/mipmap-mdpi/ic_launcher.png"
                 DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/android_resources/mipmap-mdpi/")
@@ -300,8 +300,7 @@ macro(android_apk NAME ASSETS_FOLDER)
         DEPENDS "java_compiled/sp2/${NAME}/R.class"
     )
 
-    file(COPY "${SDL_INSTALL_PATH}/lib/libSDL2.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
-    file(COPY "${SDL_INSTALL_PATH}/lib/libhidapi.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
+    file(COPY "${SDL_INSTALL_PATH}/lib/libSDL3.so" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/")
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/libmain.so"
         COMMAND "${CMAKE_COMMAND}" ARGS -E copy "$<TARGET_FILE:main>" "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/lib/${ANDROID_ABI}/libmain.so"
@@ -317,7 +316,7 @@ macro(android_apk NAME ASSETS_FOLDER)
         OUTPUT "${APK}"
         COMMAND "${AAPT}" ARGS package -f -M "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml" -S "${CMAKE_CURRENT_BINARY_DIR}/android_resources" -I "${ANDROID_PLATFORM_JAR}" -F "${APK}"
         COMMAND "${AAPT}" ARGS add "${APK}" classes.dex
-        COMMAND "${AAPT}" ARGS add "${APK}" lib/${ANDROID_ABI}/libmain.so lib/${ANDROID_ABI}/libSDL2.so lib/${ANDROID_ABI}/libhidapi.so
+        COMMAND "${AAPT}" ARGS add "${APK}" lib/${ANDROID_ABI}/libSDL3.so
         COMMAND "${AAPT}" ARGS add "${APK}" ${ASSETS}
         COMMAND "${Java_JARSIGNER_EXECUTABLE}" ARGS -verbose -sigalg SHA1withRSA -digestalg SHA1 -storepass "${ANDROID_SIGN_KEY_PASSWORD}" "${APK}" "${ANDROID_SIGN_KEY_NAME}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/apk_contents/"
