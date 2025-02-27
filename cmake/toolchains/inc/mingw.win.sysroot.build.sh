@@ -17,9 +17,9 @@ fi
 rm -rf mingw.win.${ARCH}.sysroot
 mkdir -p mingw.win.${ARCH}.sysroot/usr
 
-${DOWNLOAD} https://www.libsdl.org/release/SDL2-devel-2.0.9-mingw.tar.gz | tar -xz -C mingw.win.${ARCH}.sysroot/usr SDL2-2.0.9/${ARCH}-w64-mingw32 --strip-components 2
+${DOWNLOAD} https://github.com/libsdl-org/SDL/releases/download/release-3.2.4/SDL3-devel-3.2.4-mingw.tar.gz | tar -xz -C mingw.win.${ARCH}.sysroot/usr SDL3-3.2.4/${ARCH}-w64-mingw32 --strip-components 2
 
 # Fix the sdl2-config file, which contains the wrong paths.
-sed -i "s|/opt/local/${ARCH}-w64-mingw32|$(pwd)/mingw.win.${ARCH}.sysroot/usr|" ./mingw.win.${ARCH}.sysroot/usr/lib/cmake/SDL2/sdl2-config.cmake
+#sed -i "s|/opt/local/${ARCH}-w64-mingw32|$(pwd)/mingw.win.${ARCH}.sysroot/usr|" ./mingw.win.${ARCH}.sysroot/usr/lib/cmake/SDL2/sdl2-config.cmake
 
 echo "Done with sysroot for mingw.win.${ARCH}.toolchain"

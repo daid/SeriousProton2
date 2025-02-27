@@ -143,7 +143,7 @@ void Window::initialize()
 
 #ifdef _WIN32
     //On Vista or newer windows, let the OS know we are DPI aware, so we won't have odd scaling issues.
-    void* user_dll = SDL_LoadObject("USER32.DLL");
+    auto user_dll = SDL_LoadObject("USER32.DLL");
     if (user_dll)
     {
         BOOL(WINAPI *SetProcessDPIAware)(void);

@@ -257,7 +257,7 @@ macro(serious_proton2_executable EXECUTABLE_NAME)
                 execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread-1.dll OUTPUT_VARIABLE MINGW_PTHREAD_DLL OUTPUT_STRIP_TRAILING_WHITESPACE)
 
                 install(FILES ${MINGW_PTHREAD_DLL} DESTINATION .)
-                install(FILES ${SDL2_PREFIX}/bin/SDL2.dll DESTINATION .)
+                install(FILES $<TARGET_FILE:SDL3::SDL3-shared> DESTINATION .)
             endif()
             foreach(RESOURCE_PATH ${SP2_RESOURCE_PATHS})
                 install(DIRECTORY "${RESOURCE_PATH}" DESTINATION ./)
