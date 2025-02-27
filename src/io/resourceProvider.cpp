@@ -9,7 +9,7 @@
 #endif//_WIN32
 
 #ifdef ANDROID
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <jni.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
