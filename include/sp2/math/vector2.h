@@ -13,12 +13,12 @@ template<typename T> class Vector2
 public:
     T x, y;
     
-    inline Vector2()
+    inline constexpr Vector2()
     : x(0), y(0)
     {
     }
     
-    inline Vector2(T x, T y)
+    inline constexpr Vector2(T x, T y)
     : x(x), y(y)
     {
     }

@@ -41,9 +41,11 @@ Shader* Shader::get(const string& name)
             else if (line == "[FRAGMENT]")
                 type = 2;
             else if (type == 1)
-                vertex_shader += line + "\n";
+                vertex_shader += line;
             else if (type == 2)
-                fragment_shader += line + "\n";
+                fragment_shader += line;
+            vertex_shader += "\n";
+            fragment_shader += "\n";
         }
         new_shader = new Shader(name, std::move(vertex_shader), std::move(fragment_shader));
     }
