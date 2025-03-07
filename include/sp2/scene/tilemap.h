@@ -28,6 +28,7 @@ public:
     void setTile(sp::Vector2i position, int index, double z_offset=0.0, sp::Vector3f normal={0,0,1}, Collision collision=Collision::Open);
     int getTileIndex(sp::Vector2i position);//Returns -1 on out of range
     Collision getTileCollision(sp::Vector2i position);//Returns Open on out of range
+    sp::Rect2i getEnclosingRect();
     
     virtual void onFixedUpdate() override;
 private:

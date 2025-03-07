@@ -64,6 +64,22 @@ Tilemap::Collision Tilemap::getTileCollision(Vector2i position)
     return tiles.get(position).collision;
 }
 
+sp::Rect2i Tilemap::getEnclosingRect()
+{
+    sp::Rect2i r;
+    for(auto p : tiles) {
+        if (p.data.index >= 0) {
+            if (r.size.x == 0) {
+                r.position = p.position;
+                r.size = {1, 1};
+            }
+            r.growToInclude(p.position);
+            r.growToInclude(p.position + sp::Vector2i(1, 1));
+        }
+    }
+    return r;
+}
+
 void Tilemap::onFixedUpdate()
 {
     if (!dirty)
