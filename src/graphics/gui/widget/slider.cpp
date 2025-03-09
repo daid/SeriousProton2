@@ -8,8 +8,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("slider", Slider);
-
 Slider::Slider(P<Widget> parent)
 : Widget(parent)
 {

@@ -12,8 +12,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("tumbler", Tumbler);
-
 Tumbler::Tumbler(P<Widget> parent)
 : ItemList(parent)
 {

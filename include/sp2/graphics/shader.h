@@ -31,9 +31,9 @@ private:
     int getUniformLocation(const string& s);
 
     unsigned int program;
-    int vertex_attribute;
-    int normal_attribute;
-    int uv_attribute;
+    int vertex_attribute = -1;
+    int normal_attribute = -1;
+    int uv_attribute = -1;
     std::map<string, int> uniform_mapping;
 
     string name;

@@ -4,8 +4,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_LAYOUT("verticalflow", VerticalFlowLayout);
-
 void VerticalFlowLayout::update(P<Widget> container, Rect2d rect)
 {
     float y = rect.position.y + rect.size.y;

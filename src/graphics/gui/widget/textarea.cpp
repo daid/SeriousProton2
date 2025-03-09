@@ -10,8 +10,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("textarea", TextArea);
-
 TextArea::TextArea(P<Widget> parent)
 : Widget(parent)
 {

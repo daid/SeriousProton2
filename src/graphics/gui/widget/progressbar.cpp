@@ -8,8 +8,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("progressbar", Progressbar);
-
 Progressbar::Progressbar(P<Widget> parent)
 : Widget(parent)
 {

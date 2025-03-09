@@ -11,8 +11,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("button", Button);
-
 Button::Button(P<Widget> parent)
 : Widget(parent)
 {

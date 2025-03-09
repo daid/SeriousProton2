@@ -42,7 +42,7 @@ public:
 };
 
 #define SP_REGISTER_LAYOUT(name, class_name) \
-    sp::gui::LayoutClassRegistry SP2_STATIC_INIT layout_class_registry ## class_name (name, []() { return new class_name(); });
+    new sp::gui::LayoutClassRegistry(name, []() { return new class_name(); });
 
 }//namespace gui
 }//namespace sp

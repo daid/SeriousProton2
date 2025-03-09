@@ -10,6 +10,7 @@
 #include <sp2/multiplayer/client.h>
 #include <sp2/multiplayer/registry.h>
 #include <sp2/io/keybinding.h>
+#include <sp2/io/internalResourceProvider.h>
 
 #include <SDL.h>
 #ifdef __EMSCRIPTEN__
@@ -20,6 +21,9 @@
 
 
 namespace sp {
+
+void createDefaultBuildinResources();
+namespace gui { void registerDefaultWidgetsAndLayouts(); }
 
 P<Engine> Engine::engine;
 
@@ -74,9 +78,12 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 #endif
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_SENSOR);
     signal(SIGTERM, requestShutdownSignal);
     atexit(SDL_Quit);
+
+    createDefaultBuildinResources();
+    gui::registerDefaultWidgetsAndLayouts();
 }
 
 Engine::~Engine()

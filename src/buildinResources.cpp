@@ -3,7 +3,12 @@
 
 namespace sp {
 
-static io::InternalResourceProvider SP2_STATIC_INIT buildin_resources({
+static io::InternalResourceProvider* buildinResources = nullptr;
+
+void createDefaultBuildinResources()
+{
+    if (buildinResources) return;
+    buildinResources = new io::InternalResourceProvider({
     {"basic.shader", R"EOS(
 [VERTEX]
 attribute vec3 a_vertex;
@@ -292,5 +297,7 @@ void main()
 )EOS"},
 
 });
+
+}
 
 }//namespace sp

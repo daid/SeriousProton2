@@ -1,5 +1,5 @@
-#ifndef SP2_GRAPHICS_GUI_LAYOUT_VERTICAL_H
-#define SP2_GRAPHICS_GUI_LAYOUT_VERTICAL_H
+#ifndef SP2_GRAPHICS_GUI_LAYOUT_HORIZONTAL_H
+#define SP2_GRAPHICS_GUI_LAYOUT_HORIZONTAL_H
 
 #include <sp2/graphics/gui/layout/layout.h>
 
@@ -15,4 +15,4 @@ public:
 }//namespace gui
 }//namespace sp
 
-#endif//SP2_GRAPHICS_GUI_LAYOUT_VERTICAL_H
+#endif//SP2_GRAPHICS_GUI_LAYOUT_HORIZONTAL_H

@@ -4,8 +4,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_LAYOUT("grid", GridLayout);
-
 void GridLayout::update(P<Widget> container, Rect2d rect)
 {
     Vector2i grid_size;

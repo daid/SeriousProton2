@@ -15,8 +15,6 @@ namespace gui {
 
 WidgetClassRegistry* WidgetClassRegistry::first;
 
-SP_REGISTER_WIDGET("", Widget);
-
 Widget::Widget(P<Widget> parent)
 : Node(parent)
 {

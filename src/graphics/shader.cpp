@@ -130,6 +130,8 @@ bool Shader::bind()
         if (previous_shader->uv_attribute != -1)
             glDisableVertexAttribArray(previous_shader->uv_attribute);
     }
+    if (program == 0)
+        return false;
     glUseProgram(program);
 
     if (vertex_attribute != -1) glEnableVertexAttribArray(vertex_attribute);

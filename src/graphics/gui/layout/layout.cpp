@@ -5,8 +5,6 @@ namespace gui {
 
 LayoutClassRegistry* LayoutClassRegistry::first;
 
-SP_REGISTER_LAYOUT("default", Layout);
-
 void Layout::updateLoop(P<Widget> container, Rect2d rect)
 {
     do

@@ -209,7 +209,7 @@ public:
 };
 
 #define SP_REGISTER_WIDGET(name, class_name) \
-    sp::gui::WidgetClassRegistry SP2_STATIC_INIT widget_class_registry ## class_name (name, [](sp::P<sp::gui::Widget> parent) { return new class_name(parent); });
+    new sp::gui::WidgetClassRegistry(name, [](sp::P<sp::gui::Widget> parent) { return new class_name(parent); });
 
 }//namespace gui
 }//namespace sp

@@ -7,8 +7,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("label", Label);
-
 Label::Label(P<Widget> parent, const string& theme_style_name)
 : Widget(parent)
 {

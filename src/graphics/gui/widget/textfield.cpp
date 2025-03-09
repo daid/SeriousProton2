@@ -7,8 +7,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("textfield", TextField);
-
 TextField::TextField(P<Widget> parent)
 : TextArea(parent)
 {

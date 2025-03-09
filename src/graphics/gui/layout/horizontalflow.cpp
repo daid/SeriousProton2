@@ -4,8 +4,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_LAYOUT("horizontalflow", HorizontalFlowLayout);
-
 void HorizontalFlowLayout::update(P<Widget> container, Rect2d rect)
 {
     double x = rect.position.x;

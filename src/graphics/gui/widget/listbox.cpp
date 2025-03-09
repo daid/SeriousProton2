@@ -12,8 +12,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("listbox", Listbox);
-
 Listbox::Listbox(P<Widget> parent)
 : ItemList(parent)
 {

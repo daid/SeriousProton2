@@ -11,8 +11,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("togglebutton", ToggleButton);
-
 ToggleButton::ToggleButton(P<Widget> parent)
 : Widget(parent)
 {

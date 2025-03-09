@@ -8,8 +8,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("image", Image);
-
 Image::Image(P<Widget> parent)
 : Widget(parent), uv(0, 0, 1, 1)
 {

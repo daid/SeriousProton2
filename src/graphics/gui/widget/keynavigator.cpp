@@ -11,8 +11,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("keynavigator", KeyNavigator);
-
 KeyNavigator::KeyNavigator(P<Widget> parent)
 : Widget(parent)
 {

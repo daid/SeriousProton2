@@ -7,8 +7,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_WIDGET("panel", Panel);
-
 Panel::Panel(P<Widget> parent)
 : Widget(parent)
 {

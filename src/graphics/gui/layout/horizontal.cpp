@@ -4,8 +4,6 @@
 namespace sp {
 namespace gui {
 
-SP_REGISTER_LAYOUT("horizontal", HorizontalLayout);
-
 void HorizontalLayout::update(P<Widget> container, Rect2d rect)
 {
     float total_width = 0.0f;
