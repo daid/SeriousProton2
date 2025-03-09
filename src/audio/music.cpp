@@ -52,7 +52,7 @@ protected:
     virtual void onMixSamples(float* stream, int sample_count) override
     {
         static std::vector<float> buffer;
-        if (buffer.size() < sample_count)
+        if (int(buffer.size()) < sample_count)
             buffer.resize(sample_count);
         int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, buffer.data(), sample_count);
         if (vorbis_samples == 0)
