@@ -1,5 +1,6 @@
 #include <sp2/graphics/gui/widget/keynavigator.h>
 #include <sp2/graphics/gui/widget/button.h>
+#include <sp2/graphics/gui/widget/togglebutton.h>
 #include <sp2/graphics/gui/widget/slider.h>
 #include <sp2/graphics/gui/theme.h>
 #include <sp2/graphics/meshdata.h>
@@ -133,11 +134,14 @@ void KeyNavigator::onUpdate(float delta)
 
         if (getParent() == select_down_widget)
         {
-            P<Button> button = getParent();
-            if (button)
+            if (P<Button> button = getParent())
             {
                 button->onPointerDown(io::Pointer::Button::Left, Vector2d(0, 0), -2);
                 button->onPointerUp(Vector2d(0, 0), -2);
+            } else if (P<ToggleButton> tbutton = getParent())
+            {
+                tbutton->onPointerDown(io::Pointer::Button::Left, Vector2d(0, 0), -2);
+                tbutton->onPointerUp(Vector2d(0, 0), -2);
             }
         }
     }
@@ -145,6 +149,7 @@ void KeyNavigator::onUpdate(float delta)
 
 P<Widget> KeyNavigator::findFirstTarget(P<Widget> w)
 {
+    if (!w) return nullptr;
     if (canTarget(w))
         return w;
     for(auto child : w->getChildren())
@@ -183,6 +188,8 @@ bool KeyNavigator::canTarget(P<Widget> w)
     if (!w->isVisible())
         return false;
     if (P<Button>(w))
+        return true;
+    if (P<ToggleButton>(w))
         return true;
     if (P<Slider>(w))
         return true;
