@@ -83,11 +83,11 @@ if("${IMAGE_CONVERT}" STREQUAL "IMAGE_CONVERT-NOTFOUND" AND CMAKE_HOST_WIN32)
     find_program(IMAGE_CONVERT magick PATHS ${IMAGE_CONVERT_SEARCH_PATHS})
 endif()
 
-find_package(nlohmann_json 3.2.0 QUIET)
+find_package(nlohmann_json 3.12.0 QUIET)
 if (NOT nlohmann_json_FOUND)
     include(FetchContent)
 
-    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
     FetchContent_GetProperties(json)
     if(NOT json_POPULATED)
       FetchContent_Populate(json)
