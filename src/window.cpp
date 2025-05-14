@@ -206,6 +206,11 @@ void Window::setCursor(Texture* texture, std::shared_ptr<MeshData> mesh)
     cursor_mesh = mesh;
 }
 
+void Window::setRelativeMouseMode(bool enabled)
+{
+    SDL_SetRelativeMouseMode(enabled ? SDL_TRUE : SDL_FALSE);
+}
+
 void Window::setPosition(Vector2f position, int monitor_number)
 {
     if (!render_window)

@@ -37,6 +37,7 @@ public:
     void hideCursor();
     void setDefaultCursor();
     void setCursor(Texture* texture, std::shared_ptr<MeshData> mesh);
+    void setRelativeMouseMode(bool enabled);
     void setPosition(Vector2f position, int monitor_number=0);
     Vector2i getSize();
     static int getMonitorCount();
