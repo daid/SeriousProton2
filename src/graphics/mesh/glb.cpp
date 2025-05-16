@@ -1,7 +1,22 @@
 #include <sp2/graphics/mesh/glb.h>
 #include <sp2/io/resourceProvider.h>
+#include <sp2/graphics/image.h>
+#include <sp2/io/bufferResourceStream.h>
+
 
 namespace sp {
+
+namespace {
+    class GLBTexture : public OpenGLTexture
+    {
+    public:
+        GLBTexture(const string& name, Image&& image)
+        : OpenGLTexture(Type::Static, name)
+        {
+            setImage(std::move(image));
+        }
+    };
+}
 
 std::unordered_map<string, GLBLoader::GLBFile> GLBLoader::fileCache;
 std::unordered_map<string, std::shared_ptr<MeshData>> GLBLoader::meshCache;
@@ -90,6 +105,15 @@ GLBLoader::GLBLoader(string resource_name)
             handleNode(static_cast<int>(node_id), result.roots.back());
         }
     }
+    for(auto& json_image : json["images"]) {
+        auto& bufferview = json["bufferViews"][static_cast<int>(json_image["bufferView"])];
+        auto ptr = bindata.data() + bufferview.value("byteOffset", 0);
+        auto size = bufferview.value("byteLength", 0);
+
+        Image image;
+        image.loadFromStream(std::make_shared<io::DataBufferResourceStream>(ptr, size));
+        result.textures.push_back(new GLBTexture(resource_name, std::move(image)));
+    }
 }
 
 void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
@@ -101,41 +125,42 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
         node.translation.z = node_json["translation"][2];
         node.translation = swap_axis(node.translation);
     }
-    auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
-    for(auto& primitive : mesh["primitives"]) {
-        auto& p_a = json["accessors"][static_cast<int>(primitive["attributes"]["POSITION"])];
-        auto& p_b = json["bufferViews"][static_cast<int>(p_a["bufferView"])];
-        auto& n_a = json["accessors"][static_cast<int>(primitive["attributes"]["NORMAL"])];
-        auto& n_b = json["bufferViews"][static_cast<int>(n_a["bufferView"])];
-        auto& t_a = json["accessors"][static_cast<int>(primitive["attributes"]["TEXCOORD_0"])];
-        auto& t_b = json["bufferViews"][static_cast<int>(t_a["bufferView"])];
-        auto& i_a = json["accessors"][static_cast<int>(primitive["indices"])];
-        auto& i_b = json["bufferViews"][static_cast<int>(i_a["bufferView"])];
-        
-        node.vertices.reserve(p_a.value("count", 0));
-        for(int vertex_offset=0; vertex_offset<p_a.value("count", 0); vertex_offset++) {
-            node.vertices.emplace_back(
-                swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + p_b.value("byteOffset", 0) + p_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
-                swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + n_b.value("byteOffset", 0) + n_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
-                *reinterpret_cast<sp::Vector2f*>(bindata.data() + t_b.value("byteOffset", 0) + t_b.value("byteStride", sizeof(sp::Vector2f)) * vertex_offset)
-            );
-        }
-        auto buffer = bindata.data() + i_b.value("byteOffset", 0);
-        node.indices.reserve(i_a.value("count", 0));
-        for(int indice_offset=0; indice_offset<i_a.value("count", 0); indice_offset++) {
-            int index = 0;
-            switch(static_cast<int>(i_a["componentType"])) {
-            case 5121:
-                index = buffer[indice_offset];
-                break;
-            case 5123:
-                index = buffer[indice_offset*2] | (buffer[indice_offset*2+1] << 8);
-                break;
+    if (node_json.find("mesh") != node_json.end()) {
+        auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
+        for(auto& primitive : mesh["primitives"]) {
+            auto& p_a = json["accessors"][static_cast<int>(primitive["attributes"]["POSITION"])];
+            auto& p_b = json["bufferViews"][static_cast<int>(p_a["bufferView"])];
+            auto& n_a = json["accessors"][static_cast<int>(primitive["attributes"]["NORMAL"])];
+            auto& n_b = json["bufferViews"][static_cast<int>(n_a["bufferView"])];
+            auto& t_a = json["accessors"][static_cast<int>(primitive["attributes"]["TEXCOORD_0"])];
+            auto& t_b = json["bufferViews"][static_cast<int>(t_a["bufferView"])];
+            auto& i_a = json["accessors"][static_cast<int>(primitive["indices"])];
+            auto& i_b = json["bufferViews"][static_cast<int>(i_a["bufferView"])];
+            
+            node.vertices.reserve(p_a.value("count", 0));
+            for(int vertex_offset=0; vertex_offset<p_a.value("count", 0); vertex_offset++) {
+                node.vertices.emplace_back(
+                    swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + p_b.value("byteOffset", 0) + p_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
+                    swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + n_b.value("byteOffset", 0) + n_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
+                    *reinterpret_cast<sp::Vector2f*>(bindata.data() + t_b.value("byteOffset", 0) + t_b.value("byteStride", sizeof(sp::Vector2f)) * vertex_offset)
+                );
             }
-            node.indices.push_back(index);
+            auto buffer = bindata.data() + i_b.value("byteOffset", 0);
+            node.indices.reserve(i_a.value("count", 0));
+            for(int indice_offset=0; indice_offset<i_a.value("count", 0); indice_offset++) {
+                int index = 0;
+                switch(static_cast<int>(i_a["componentType"])) {
+                case 5121:
+                    index = buffer[indice_offset];
+                    break;
+                case 5123:
+                    index = buffer[indice_offset*2] | (buffer[indice_offset*2+1] << 8);
+                    break;
+                }
+                node.indices.push_back(index);
+            }
         }
     }
-
     node.name = node_json.value("name", "no-name");
 
     if (node_json.find("children") != node_json.end()) {

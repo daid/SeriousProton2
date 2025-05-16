@@ -9,6 +9,7 @@
 #include <sp2/graphics/scene/basicnoderenderpass.h>
 #include <sp2/graphics/scene/collisionrenderpass.h>
 #include <sp2/graphics/textureManager.h>
+#include <sp2/graphics/mesh/glb.h>
 #include <sp2/scene/scene.h>
 #include <sp2/scene/node.h>
 #include <sp2/scene/camera.h>
@@ -42,7 +43,17 @@ int main(int argc, char** argv)
 #endif
     window->addLayer(scene_layer);
 
+    auto model = sp::GLBLoader::get("TestModel_binary.glb");
+
     //TODO: Create your own scene(s) here and populate them with nodes.
+    auto s = new sp::Scene("MAIN");
+    auto c = new sp::Camera(s->getRoot());
+    s->setDefaultCamera(c);
+    auto n = new sp::Node(s->getRoot());
+    n->render_data.type = sp::RenderData::Type::Normal;
+    n->render_data.shader = sp::Shader::get("internal:basic.shader");
+    n->render_data.mesh = sp::GLBLoader::getMesh("TestModel_binary.glb");
+    n->render_data.texture = model.textures[0];
 
     engine->run();
 

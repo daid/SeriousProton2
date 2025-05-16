@@ -3,6 +3,7 @@
 
 #include <sp2/graphics/meshdata.h>
 #include <sp2/math/matrix4x4.h>
+#include <sp2/graphics/texture.h>
 #include <nlohmann/json.hpp>
 
 
@@ -24,6 +25,7 @@ public:
             std::vector<Node> children;
         };
         std::vector<Node> roots;
+        std::vector<Texture*> textures;
 
         std::shared_ptr<MeshData> flatMesh() const;
     private:

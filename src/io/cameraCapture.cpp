@@ -1,4 +1,5 @@
 #include <sp2/io/cameraCapture.h>
+#include <sp2/io/bufferResourceStream.h>
 
 #if defined(__linux__)
 #  include <unistd.h>
@@ -22,49 +23,6 @@ DEFINE_GUID(CLSID_NullRenderer,0xc1f400a4,0x3f08,0x11d3,0x9f,0x0b,0x00,0x60,0x08
 
 namespace sp {
 namespace io {
-
-class DataBufferResourceStream : public ResourceStream
-{
-private:
-    void* buffer;
-    size_t buffer_length;
-    int64_t offset;
-    
-public:
-    DataBufferResourceStream(void* buffer, size_t buffer_length)
-    : buffer(buffer), buffer_length(buffer_length)
-    {
-        offset = 0;
-    }
-    
-    virtual ~DataBufferResourceStream()
-    {
-    }
-    
-    virtual int64_t read(void* data, int64_t size) override
-    {
-        size = std::min(int(buffer_length - offset), int(size));
-        memcpy(data, static_cast<char*>(buffer) + offset, size);
-        offset += size;
-        return size;
-    }
-    
-    virtual int64_t seek(int64_t position) override
-    {
-        offset = std::max(0, std::min(int(buffer_length), int(position)));
-        return offset;
-    }
-    
-    virtual int64_t tell() override
-    {
-        return offset;
-    }
-    
-    virtual int64_t getSize() override
-    {
-        return buffer_length;
-    }
-};
 
 #if defined(__linux__)
 
