@@ -125,6 +125,12 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
         node.translation.z = node_json["translation"][2];
         node.translation = swap_axis(node.translation);
     }
+    if (node_json.find("rotation") != node_json.end()) {
+        node.rotation.x = -static_cast<double>(node_json["rotation"][0]);
+        node.rotation.y = node_json["rotation"][2];
+        node.rotation.z = node_json["rotation"][1];
+        node.rotation.w = node_json["rotation"][3];
+    }
     if (node_json.find("mesh") != node_json.end()) {
         auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
         for(auto& primitive : mesh["primitives"]) {
