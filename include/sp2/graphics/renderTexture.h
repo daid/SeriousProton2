@@ -20,6 +20,7 @@ public:
             This will effectively create 2 textures, one for reading and writting, and flips the goals around each frame.
      */
     RenderTexture(const string& name, Vector2i size, bool double_buffered);
+    RenderTexture(const string& name, Vector2i size, int texture_count, bool double_buffered);
     virtual ~RenderTexture();
 
     //Get the texture for rendering to other targets.
@@ -28,13 +29,26 @@ public:
     void setSize(Vector2i size);
     Vector2i getSize() const;
 
+    Texture* getTexture(int index);
+
     //Active rendering towards this texture, if we are double buffered, this flips the buffers.
     void activateRenderTarget();
 private:
+    class ColorTexture : public Texture
+    {
+    public:
+        ColorTexture(const string& name);
+        virtual ~ColorTexture();
+
+        virtual void bind() override;
+
+        unsigned int handle = 0;
+    };
     void create();
 
     bool double_buffered;
     Vector2i size;
+    int texture_count=1;
 
     bool dirty[2];
     bool flipped;
@@ -42,9 +56,8 @@ private:
     bool create_buffers = true;
 
     unsigned int frame_buffer[2];
-    unsigned int color_buffer[2];
+    std::vector<ColorTexture*> color_buffer[2];
     unsigned int depth_buffer[2];
-    unsigned int stencil_buffer[2];
 };
 
 }//namespace sp

@@ -150,6 +150,10 @@ void (GL_APIENTRY * glVertexAttribPointer)(GLuint indx, GLint size, GLenum type,
 void (GL_APIENTRY * glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 #endif//SP2_GRAPHICS_OPENGLES2_H
 
+#ifdef  SP2_GRAPHICS_OPENGL_DESKTOP_H
+void (GL_APIENTRY * glDrawBuffers)(GLsizei n, const GLenum *bufs);
+#endif//SP2_GRAPHICS_OPENGL_DESKTOP_H
+
 namespace sp {
 
 void initOpenGL()
@@ -304,6 +308,10 @@ void initOpenGL()
     if ((glVertexAttribPointer = reinterpret_cast<decltype(glVertexAttribPointer)>(SDL_GL_GetProcAddress("glVertexAttribPointer"))) == nullptr) { LOG(Error, "Failed to find opengl function: glVertexAttribPointer"); failure = true; }
     if ((glViewport = reinterpret_cast<decltype(glViewport)>(SDL_GL_GetProcAddress("glViewport"))) == nullptr) { LOG(Error, "Failed to find opengl function: glViewport"); failure = true; }
 #endif//SP2_GRAPHICS_OPENGLES2_H
+
+#ifdef  SP2_GRAPHICS_OPENGL_DESKTOP_H
+    if ((glDrawBuffers = reinterpret_cast<decltype(glDrawBuffers)>(SDL_GL_GetProcAddress("glDrawBuffers"))) == nullptr) { LOG(Warning, "Failed to find opengl function: glDrawBuffers"); }
+#endif//SP2_GRAPHICS_OPENGL_DESKTOP_H
 
     if (failure)
         exit(1);

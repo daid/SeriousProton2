@@ -23,6 +23,8 @@ extern "C" {
 #endif
 #define GL_DEPTH_STENCIL_ATTACHMENT 0x821A
 
+extern void (GL_APIENTRY * glDrawBuffers)(GLsizei n, const GLenum *bufs);
+
 #ifdef __cplusplus
 }//extern "C"
 #endif

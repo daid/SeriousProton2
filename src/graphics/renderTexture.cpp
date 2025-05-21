@@ -6,7 +6,12 @@
 namespace sp {
 
 RenderTexture::RenderTexture(const string& name, Vector2i size, bool double_buffered)
-: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size)
+: RenderTexture(name, size, 1, double_buffered)
+{
+}
+
+RenderTexture::RenderTexture(const string& name, Vector2i size, int texture_count, bool double_buffered)
+: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size), texture_count(texture_count)
 {
     flipped = false;
     auto_clear = !double_buffered;
@@ -17,9 +22,10 @@ RenderTexture::RenderTexture(const string& name, Vector2i size, bool double_buff
         dirty[n] = false;
 
         frame_buffer[n] = 0;
-        color_buffer[n] = 0;
+        color_buffer[n].resize(texture_count, nullptr);
+        for(int idx=0; idx<texture_count; idx++)
+            color_buffer[n][idx] = new ColorTexture(name);
         depth_buffer[n] = 0;
-        stencil_buffer[n] = 0;
     }
 }
 
@@ -29,7 +35,12 @@ RenderTexture::~RenderTexture()
     if (frame_buffer[0])
     {
         glDeleteFramebuffers(count, frame_buffer);
-        glDeleteTextures(count, color_buffer);
+        for(int n=0;n<count; n++) {
+            for(auto ptr : color_buffer[n]) {
+                glDeleteTextures(1, &ptr->handle);
+                delete ptr;
+            }
+        }
         glDeleteRenderbuffers(count, depth_buffer);
     }
 }
@@ -41,7 +52,9 @@ void RenderTexture::create()
     if (!frame_buffer[0])
     {
         glGenFramebuffers(count, frame_buffer);
-        glGenTextures(count, color_buffer);
+        for(int n=0;n<count; n++)
+            for(int idx=0; idx<texture_count; idx++)
+                glGenTextures(1, &color_buffer[n][idx]->handle);
         glGenRenderbuffers(count, depth_buffer);
     }
 
@@ -49,13 +62,15 @@ void RenderTexture::create()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer[n]);
 
-        glBindTexture(GL_TEXTURE_2D, color_buffer[n]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer[n], 0);
+        for(int idx=0; idx<texture_count; idx++) {
+            glBindTexture(GL_TEXTURE_2D, color_buffer[n][idx]->handle);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, GL_TEXTURE_2D, color_buffer[n][idx]->handle, 0);
+        }
 
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer[n]);
 #if defined(GL_DEPTH24_STENCIL8) && defined(GL_DEPTH_STENCIL_ATTACHMENT)
@@ -94,7 +109,7 @@ void RenderTexture::bind()
         glFlush(); //Is this needed if we double buffer?
         dirty[index] = false;
     }
-    glBindTexture(GL_TEXTURE_2D, color_buffer[index]);
+    color_buffer[index][0]->bind();
 }
 
 void RenderTexture::setSize(Vector2i new_size)
@@ -104,6 +119,13 @@ void RenderTexture::setSize(Vector2i new_size)
         size = new_size;
         create_buffers = true;
     }
+}
+
+Texture* RenderTexture::getTexture(int index)
+{
+    if (index < 0 || index >= texture_count)
+        return nullptr;
+    return color_buffer[0][index];
 }
 
 Vector2i RenderTexture::getSize() const
@@ -125,11 +147,33 @@ void RenderTexture::activateRenderTarget()
 
     dirty[index] = true;
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer[index]);
+    if (glDrawBuffers) {
+        unsigned int buffers[8];
+        for(int n=0; n<texture_count; n++)
+            buffers[n] = GL_COLOR_ATTACHMENT0 + n;
+        glDrawBuffers(texture_count, buffers);
+    }
     if (auto_clear)
     {
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 }
+
+RenderTexture::ColorTexture::ColorTexture(const string& name)
+: Texture(Texture::Type::Dynamic, name)
+{
+}
+
+RenderTexture::ColorTexture::~ColorTexture()
+{
+}
+
+void RenderTexture::ColorTexture::bind()
+{
+    glBindTexture(GL_TEXTURE_2D, handle);
+}
+
+
 
 }//namespace sp
