@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.0)
+cmake_minimum_required(VERSION 3.10.0)
 
 
 file(GLOB_RECURSE LUA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lua/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/lua/*.h")
