@@ -71,6 +71,7 @@ std::shared_ptr<MeshData> GLBLoader::getMesh(string resource_name)
 GLBLoader::GLBLoader(string resource_name)
 {
     auto resource = io::ResourceProvider::get(resource_name);
+    if (!resource) return;
 
     uint32_t magic;
     resource->read(&magic, sizeof(magic));
