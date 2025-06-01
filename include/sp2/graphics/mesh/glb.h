@@ -32,10 +32,10 @@ public:
         void addToFlat(sp::MeshData::Vertices& vertices, sp::MeshData::Indices& indices, const Node& node, Matrix4x4f transform) const;
     };
 
-    static const GLBFile& get(string resource_name);
-    static std::shared_ptr<MeshData> getMesh(string resource_name);
+    static const GLBFile& get(const string& resource_name);
+    static std::shared_ptr<MeshData> getMesh(const string& resource_name);
 private:
-    GLBLoader(string resource_name);
+    GLBLoader(const string& resource_name);
     void handleNode(int node_id, GLBFile::Node& node);
 
     template<typename T> static sp::Vector3<T> swap_axis(sp::Vector3<T> v) {

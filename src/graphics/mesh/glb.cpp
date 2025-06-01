@@ -50,7 +50,7 @@ void GLBLoader::GLBFile::addToFlat(sp::MeshData::Vertices& vertices, sp::MeshDat
         addToFlat(vertices, indices, child, transform);
 }
 
-const GLBLoader::GLBFile& GLBLoader::get(string resource_name)
+const GLBLoader::GLBFile& GLBLoader::get(const string& resource_name)
 {
     auto it = fileCache.find(resource_name);
     if (it != fileCache.end())
@@ -59,7 +59,7 @@ const GLBLoader::GLBFile& GLBLoader::get(string resource_name)
     return get(resource_name);
 }
 
-std::shared_ptr<MeshData> GLBLoader::getMesh(string resource_name)
+std::shared_ptr<MeshData> GLBLoader::getMesh(const string& resource_name)
 {
     auto it = meshCache.find(resource_name);
     if (it != meshCache.end())
@@ -68,7 +68,7 @@ std::shared_ptr<MeshData> GLBLoader::getMesh(string resource_name)
     return getMesh(resource_name);
 }
 
-GLBLoader::GLBLoader(string resource_name)
+GLBLoader::GLBLoader(const string& resource_name)
 {
     auto resource = io::ResourceProvider::get(resource_name);
     if (!resource) return;
