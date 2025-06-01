@@ -754,6 +754,8 @@ void Window::mousewheelMove(io::Pointer::Wheel direction)
 Vector2d Window::screenToGLPosition(int x, int y)
 {
     Vector2i size;
+    if (SDL_GetRelativeMouseMode())
+        return {0.5, 0.5};
     SDL_GetWindowSize(render_window, &size.x, &size.y);
     return Vector2d((double(x) / double(size.x) - 0.5) * 2.0, (0.5 - double(y) / double(size.y)) * 2.0);
 }
