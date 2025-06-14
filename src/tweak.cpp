@@ -15,6 +15,7 @@ public:
     {
         label = new sp::gui::Label(this);
         label->setSize(128, 16);
+        label->setAttribute("text_size", "16");
         label->setLabel(name + ": " + string(value));
 
         slider = new sp::gui::Slider(this);
