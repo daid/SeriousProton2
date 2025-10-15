@@ -135,6 +135,7 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
     if (node_json.find("mesh") != node_json.end()) {
         auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
         for(auto& primitive : mesh["primitives"]) {
+            if (static_cast<int>(primitive["mode"]) != 4) continue; // Only import triangle primitives
             auto& p_a = json["accessors"][static_cast<int>(primitive["attributes"]["POSITION"])];
             auto& p_b = json["bufferViews"][static_cast<int>(p_a["bufferView"])];
             auto& n_a = json["accessors"][static_cast<int>(primitive["attributes"]["NORMAL"])];
