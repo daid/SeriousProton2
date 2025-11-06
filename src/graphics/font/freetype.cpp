@@ -1,6 +1,7 @@
 #include <sp2/graphics/font/freetype.h>
 #include <sp2/graphics/textureAtlas.h>
 #include <sp2/stringutil/utf8.h>
+#include <sp2/stringutil/convert.h>
 #include <sp2/assert.h>
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -10,6 +11,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#include FT_STROKER_H
 #if defined(__GNUC__) && !defined(__clang__)
 //#pragma GCC diagnostic pop
 #endif//__GNUC__
@@ -47,6 +49,11 @@ FreetypeFont::FreetypeFont(const string& name, io::ResourceStreamPtr stream)
     {
         LOG(Error, "Failed to initialize freetype library");
         return;
+    }
+
+    if (stream->hasFlag("border"))
+    {
+        border_size = stringutil::convert::toInt(stream->getFlag("border"));
     }
 
     FT_StreamRec* stream_rec = new FT_StreamRec;
@@ -131,37 +138,98 @@ bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& 
             FT_Glyph glyph;
             if (FT_Get_Glyph(face->glyph, &glyph) == 0)
             {
-                if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1) == 0)
+                if (border_size > 0)
                 {
-                    FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
-                    
-                    info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
-                    info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6);
-                    info.bounds.position.y = float(face->glyph->metrics.horiBearingY) / float(1 << 6);
-                    info.bounds.size.x = float(face->glyph->metrics.width) / float(1 << 6);
-                    info.bounds.size.y = float(face->glyph->metrics.height) / float(1 << 6);
-                    
-                    const uint8_t* src_pixels = bitmap.buffer;
-                    //We make a full white image, and then copy the alpha from the freetype render
-                    std::vector<uint32_t> image_pixels;
-                    image_pixels.resize(bitmap.width * bitmap.rows, 0xffffffff);
-                    if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+                    FT_Stroker stroker;
+                    FT_Stroker_New(static_cast<FT_Library>(ft_library), &stroker);
+                    FT_Stroker_Set(stroker, border_size * 64, FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0);
+                    FT_Glyph_Stroke(&glyph, stroker, 1);
+                    FT_Stroker_Done(stroker);
+
+                    if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1) == 0)
                     {
-                        sp2assert(false, "TODO");
-                    }
-                    else
-                    {
+                        FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
+
+                        info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
+                        info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6) + border_size;
+                        info.bounds.position.y = float(face->glyph->metrics.horiBearingY) / float(1 << 6) + border_size;
+                        info.bounds.size.x = float(face->glyph->metrics.width) / float(1 << 6) + border_size * 2;
+                        info.bounds.size.y = float(face->glyph->metrics.height) / float(1 << 6) + border_size * 2;
+
+                        const uint8_t* src_pixels = bitmap.buffer;
+                        //We make a full black image, and then copy the alpha from the freetype render
+                        std::vector<uint32_t> image_pixels;
+                        image_pixels.resize(bitmap.width * bitmap.rows, 0xFF000000);
+                        if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+                        {
+                            sp2assert(false, "TODO");
+                        }
+                        else
+                        {
+                            uint8_t* dst_pixels = reinterpret_cast<uint8_t*>(image_pixels.data());
+                            for(unsigned int y=0; y<bitmap.rows; y++)
+                            {
+                                for(unsigned int x=0; x<bitmap.width; x++)
+                                    dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
+                                src_pixels += bitmap.pitch - bitmap.width;
+                            }
+                        }
+                        FT_Get_Glyph(face->glyph, &glyph);
+                        FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+                        bitmap = FT_BitmapGlyph(glyph)->bitmap;
+                        src_pixels = bitmap.buffer;
                         uint8_t* dst_pixels = reinterpret_cast<uint8_t*>(image_pixels.data());
                         for(unsigned int y=0; y<bitmap.rows; y++)
                         {
-                            for(unsigned int x=0; x<bitmap.width; x++)
-                                dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
+                            for(unsigned int x=0; x<bitmap.width; x++) {
+                                dst_pixels[((x + border_size) + (y + border_size) * (bitmap.width+border_size*2)) * 4 + 0] = *src_pixels;
+                                dst_pixels[((x + border_size) + (y + border_size) * (bitmap.width+border_size*2)) * 4 + 1] = *src_pixels;
+                                dst_pixels[((x + border_size) + (y + border_size) * (bitmap.width+border_size*2)) * 4 + 2] = *src_pixels;
+                                if (*src_pixels)
+                                    dst_pixels[((x + border_size) + (y + border_size) * (bitmap.width+border_size*2)) * 4 + 3] = 255;
+                                src_pixels++;
+                            }
                             src_pixels += bitmap.pitch - bitmap.width;
                         }
-                    }
-                    Image image(Vector2i(bitmap.width, bitmap.rows), std::move(image_pixels));
 
-                    info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
+                        Image image(Vector2i(bitmap.width+border_size*2, bitmap.rows+border_size*2), std::move(image_pixels));
+                        info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
+                    }
+                }
+                else
+                {
+                    if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1) == 0)
+                    {
+                        FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
+                        
+                        info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
+                        info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6);
+                        info.bounds.position.y = float(face->glyph->metrics.horiBearingY) / float(1 << 6);
+                        info.bounds.size.x = float(face->glyph->metrics.width) / float(1 << 6);
+                        info.bounds.size.y = float(face->glyph->metrics.height) / float(1 << 6);
+                        
+                        const uint8_t* src_pixels = bitmap.buffer;
+                        //We make a full white image, and then copy the alpha from the freetype render
+                        std::vector<uint32_t> image_pixels;
+                        image_pixels.resize(bitmap.width * bitmap.rows, 0xffffffff);
+                        if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+                        {
+                            sp2assert(false, "TODO");
+                        }
+                        else
+                        {
+                            uint8_t* dst_pixels = reinterpret_cast<uint8_t*>(image_pixels.data());
+                            for(unsigned int y=0; y<bitmap.rows; y++)
+                            {
+                                for(unsigned int x=0; x<bitmap.width; x++)
+                                    dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
+                                src_pixels += bitmap.pitch - bitmap.width;
+                            }
+                        }
+                        Image image(Vector2i(bitmap.width, bitmap.rows), std::move(image_pixels));
+
+                        info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
+                    }
                 }
                 FT_Done_Glyph(glyph);
             }

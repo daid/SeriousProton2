@@ -27,6 +27,8 @@ private:
     void* ft_face;
     void* ft_stream_rec;
     
+    int border_size = 0;
+
     //We need to keep the resource stream open, as the freetype keeps it open as well.
     //So we store the reference here.
     io::ResourceStreamPtr font_resource_stream;
