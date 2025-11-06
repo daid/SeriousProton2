@@ -25,6 +25,7 @@ public:
     void setCamera(const Matrix4x4f& camera_projection, const Matrix4x4f& camera_transform);
     void add(std::function<void()> function);
     void add(const Matrix4x4f& transform, const RenderData& data);
+    void add(const Matrix4x4f& transform, const RenderData& data, std::function<void()> function);
     void render();
 private:
     class Item
@@ -45,6 +46,11 @@ private:
 
         Item(const Matrix4x4f& transform, const RenderData& data)
         : type(Type::RenderItem), transform(transform), data(data)
+        {
+        }
+
+        Item(const Matrix4x4f& transform, const RenderData& data, std::function<void()> function)
+        : type(Type::RenderItem), transform(transform), data(data), function(function)
         {
         }
 

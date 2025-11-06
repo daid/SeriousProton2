@@ -59,6 +59,13 @@ void RenderQueue::add(const Matrix4x4f& transform, const RenderData& data)
     render_list.emplace_back(transform, data);
 }
 
+void RenderQueue::add(const Matrix4x4f& transform, const RenderData& data, std::function<void()> function)
+{
+    if (!data.shader)
+        return;
+    render_list.emplace_back(transform, data, function);
+}
+
 void RenderQueue::render()
 {
     std::sort(render_list.begin() + render_list_sort_start, render_list.end());
@@ -127,6 +134,8 @@ void RenderQueue::render(std::vector<Item>& list)
             case RenderData::Type::Custom6:
             case RenderData::Type::Custom7:
             case RenderData::Type::Custom8:
+                if (item.function)
+                    item.function();
                 break;
             case RenderData::Type::Normal:
             case RenderData::Type::Transparent:
@@ -136,21 +145,24 @@ void RenderQueue::render(std::vector<Item>& list)
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                 break;
             }
-            if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
-                glDepthMask(false);
-            if (item.data.shader->bind() || force_camera_matrix_update)
+            if (item.data.mesh)
             {
-                item.data.shader->setUniform("projection_matrix", camera_projection);
-                item.data.shader->setUniform("camera_matrix", camera_transform);
-                force_camera_matrix_update = false;
+                if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
+                    glDepthMask(false);
+                if (item.data.shader->bind() || force_camera_matrix_update)
+                {
+                    item.data.shader->setUniform("projection_matrix", camera_projection);
+                    item.data.shader->setUniform("camera_matrix", camera_transform);
+                    force_camera_matrix_update = false;
+                }
+                item.data.shader->setUniform("object_matrix", item.transform);
+                item.data.shader->setUniform("object_scale", item.data.scale);
+                item.data.shader->setUniform("color", item.data.color);
+                item.data.shader->setUniform("texture_map", item.data.texture);
+                item.data.mesh->render();
+                if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
+                    glDepthMask(true);
             }
-            item.data.shader->setUniform("object_matrix", item.transform);
-            item.data.shader->setUniform("object_scale", item.data.scale);
-            item.data.shader->setUniform("color", item.data.color);
-            item.data.shader->setUniform("texture_map", item.data.texture);
-            item.data.mesh->render();
-            if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
-                glDepthMask(true);
             break;
         }
     }
