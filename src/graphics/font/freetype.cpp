@@ -149,6 +149,7 @@ bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& 
                     if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1) == 0)
                     {
                         FT_Bitmap& bitmap = FT_BitmapGlyph(glyph)->bitmap;
+                        Vector2i image_size{face->glyph->metrics.width / 64 + border_size * 2, face->glyph->metrics.height / 64 + border_size * 2};
 
                         info.advance = float(face->glyph->metrics.horiAdvance) / float(1 << 6);
                         info.bounds.position.x = float(face->glyph->metrics.horiBearingX) / float(1 << 6) + border_size;
@@ -159,7 +160,7 @@ bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& 
                         const uint8_t* src_pixels = bitmap.buffer;
                         //We make a full black image, and then copy the alpha from the freetype render
                         std::vector<uint32_t> image_pixels;
-                        image_pixels.resize(bitmap.width * bitmap.rows, 0xFF000000);
+                        image_pixels.resize(image_size.x * image_size.y, 0xFF000000);
                         if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
                         {
                             sp2assert(false, "TODO");
@@ -167,11 +168,11 @@ bool FreetypeFont::getGlyphInfo(int char_code, int pixel_size, Font::GlyphInfo& 
                         else
                         {
                             uint8_t* dst_pixels = reinterpret_cast<uint8_t*>(image_pixels.data());
-                            for(unsigned int y=0; y<bitmap.rows; y++)
+                            for(int y=0; y<image_size.y; y++)
                             {
-                                for(unsigned int x=0; x<bitmap.width; x++)
-                                    dst_pixels[(x + y * bitmap.width) * 4 + 3] = *src_pixels++;
-                                src_pixels += bitmap.pitch - bitmap.width;
+                                for(int x=0; x<image_size.x; x++)
+                                    dst_pixels[(x + y * image_size.x) * 4 + 3] = *src_pixels++;
+                                src_pixels += bitmap.pitch - image_size.x;
                             }
                         }
                         FT_Get_Glyph(face->glyph, &glyph);
