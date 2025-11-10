@@ -21,7 +21,7 @@ public:
     //TODO: This should not be public.
     void setLuaState(lua_State* L) { lua = L; }
 
-    template<typename... ARGS> Result<Variant> call(ARGS... args)
+    template<typename RET=Variant, typename... ARGS> Result<RET> call(ARGS... args)
     {
         if (!lua)
             return Variant();
@@ -34,7 +34,14 @@ public:
             return Variant();
         }
         //If it exists, push the arguments with it, can run it.
-        return callInternal(pushArgs(lua, args...));
+        if (callInternal(pushArgs(lua, args...))) {
+            auto return_value = convertFromLua(lua, typeIdentifier<RET>{}, -1);
+            lua_pop(lua, 1);
+            return return_value;
+        }
+        auto result = Result<RET>::makeError(lua_tostring(lua, -1));
+        lua_pop(lua, 1);
+        return result;
     }
 
     /** Run the callback as coroutine.
