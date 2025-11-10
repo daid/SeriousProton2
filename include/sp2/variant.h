@@ -15,6 +15,7 @@ public:
 
     inline bool isNone() const { return type == Type::None; }
     inline bool isInteger() const { return type == Type::Integer; }
+    inline bool isNumber() const { return type == Type::Integer || type == Type::Double; }
     inline bool isDouble() const { return type == Type::Double; }
     inline bool isString() const { return type == Type::String; }
 
