@@ -268,7 +268,14 @@ Result<Variant> Environment::_run(const string& code, const string& name)
     //set the environment table it as 1st upvalue
     lua_setupvalue(lua, -2, 1);
 
-    return callInternal(0);
+    if (callInternal(0)) {
+        auto return_value = convertFromLua(lua, typeIdentifier<Variant>{}, -1);
+        lua_pop(lua, 1);
+        return return_value;
+    }
+    auto error_result = Result<Variant>::makeError(lua_tostring(lua, -1));
+    lua_pop(lua, 1);
+    return error_result;
 }
 
 }//namespace script

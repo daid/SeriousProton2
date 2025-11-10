@@ -61,7 +61,7 @@ public:
     Result<void> compile(const string& code);
 
     //Call a script function. Return true if the call was made, false on an error.
-    template<typename... ARGS> Result<Variant> call(const string& global_function, ARGS... args)
+    template<typename RET=Variant, typename... ARGS> Result<RET> call(const string& global_function, ARGS... args)
     {
         //Get the environment table from the registry.
         lua_rawgetp(lua, LUA_REGISTRYINDEX, this);
@@ -72,11 +72,18 @@ public:
         if (lua_isfunction(lua, -1))
         {
             int arg_count = pushArgs(lua, args...);
-            return callInternal(arg_count);
+            if (callInternal(arg_count)) {
+                auto return_value = convertFromLua(lua, typeIdentifier<RET>{}, -1);
+                lua_pop(lua, 1);
+                return return_value;
+            }
+            auto result = Result<RET>::makeError(lua_tostring(lua, -1));
+            lua_pop(lua, 1);
+            return result;
         }
         sp::string err = global_function + " is not a function but: " + luaL_typename(lua, -1);
         lua_pop(lua, 1);
-        return Result<Variant>::makeError(std::move(err));
+        return Result<RET>::makeError(std::move(err));
     }
 
     /** Run a function as coroutine.

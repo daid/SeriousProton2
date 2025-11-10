@@ -27,7 +27,8 @@ protected:
     }
 
     //Execute a call, only thing on the stack should be the function and the arguments.
-    Result<Variant> callInternal(int arg_count);
+    bool callInternal(int arg_count);
+    
     //Execute a resume, only thing on the stack should be the function and the arguments.
     Result<bool> resumeInternal(int arg_count);
     Result<std::shared_ptr<Coroutine>> callCoroutineInternal(lua_State* L, int arg_count);

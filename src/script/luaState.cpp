@@ -6,7 +6,7 @@
 namespace sp {
 namespace script {
 
-Result<Variant> LuaState::callInternal(int arg_count)
+bool LuaState::callInternal(int arg_count)
 {
     Environment::AllocInfo* alloc_info;
     lua_getallocf(lua, reinterpret_cast<void**>(&alloc_info));
@@ -21,13 +21,9 @@ Result<Variant> LuaState::callInternal(int arg_count)
         alloc_info->in_protected_call = false;
     if (result)
     {
-        auto result = Result<Variant>::makeError(lua_tostring(lua, -1));
-        lua_pop(lua, 1);
-        return result;
+        return false;
     }
-    auto return_value = convertFromLua(lua, typeIdentifier<Variant>{}, -1);
-    lua_pop(lua, 1);
-    return return_value;
+    return true;
 }
 
 Result<bool> LuaState::resumeInternal(int arg_count)
