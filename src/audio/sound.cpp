@@ -7,6 +7,21 @@
 #include <unordered_map>
 #include <string.h>
 
+#define STB_VORBIS_NO_STDIO
+#define STB_VORBIS_NO_PUSHDATA_API
+#define STB_VORBIS_HEADER_ONLY
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wshadow-compatible-local"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif//__GNUC__
+#include "stb/stb_vorbis.h"
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif//__GNUC__
+
+
 namespace sp {
 namespace audio {
 
@@ -71,6 +86,75 @@ static int SDLCALL sdl_to_stream_close(struct SDL_RWops * context)
     return 0;
 }
 
+static void loadWavFile(io::ResourceStreamPtr stream, AudioBuffer* data)
+{
+    SDL_RWops ops = {
+        .size = sdl_to_stream_size,
+        .seek = sdl_to_stream_seek,
+        .read = sdl_to_stream_read,
+        .write = sdl_to_stream_write,
+        .close = sdl_to_stream_close,
+        .type = SDL_RWOPS_UNKNOWN,
+        .hidden = {.unknown = { .data1 = stream.get() } },
+    };
+    SDL_AudioSpec spec;
+    uint8_t* buffer = nullptr;
+    uint32_t buffer_size = 0;
+    if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
+    {
+        SDL_AudioCVT cvt;
+        SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 48000);
+        if (cvt.needed)
+        {
+            cvt.len = buffer_size;
+            data->resize(cvt.len * cvt.len_mult / sizeof(float));
+            cvt.buf = reinterpret_cast<uint8_t*>(data->data());
+            memcpy(cvt.buf, buffer, buffer_size);
+            SDL_ConvertAudio(&cvt);
+            data->resize(cvt.len_cvt / sizeof(float));
+            data->shrink_to_fit();
+        }
+        else
+        {
+            data->resize(buffer_size / sizeof(float));
+            memcpy(data->data(), buffer, buffer_size);
+        }
+        SDL_FreeWAV(buffer);
+    }
+}
+
+void loadVorbisFile(io::ResourceStreamPtr stream, AudioBuffer* data)
+{
+    std::vector<uint8_t> file_data;
+    file_data.resize(stream->getSize());
+    stream->read(file_data.data(), file_data.size());
+    stb_vorbis* vorbis = stb_vorbis_open_memory(file_data.data(), file_data.size(), nullptr, nullptr);
+    if (!vorbis) return;
+    auto info = stb_vorbis_get_info(vorbis);
+    size_t sample_count = 0;
+    while(true)
+    {
+        const size_t extra_buffer = 2048;
+        data->resize(sample_count + extra_buffer);
+        int vorbis_samples = stb_vorbis_get_samples_float_interleaved(vorbis, 2, &(*data)[sample_count], extra_buffer) * 2;
+        if (vorbis_samples == 0)
+            break;
+        sample_count += vorbis_samples;
+    }
+    if (info.sample_rate != 48000) {
+        SDL_AudioCVT cvt;
+        SDL_BuildAudioCVT(&cvt, AUDIO_F32, 2, info.sample_rate, AUDIO_F32, 2, 48000);
+        cvt.len = sample_count * sizeof(float);
+        data->resize(cvt.len * cvt.len_mult / sizeof(float));
+        cvt.buf = reinterpret_cast<uint8_t*>(data->data());
+        SDL_ConvertAudio(&cvt);
+        sample_count = cvt.len_cvt / sizeof(float);
+    }
+    data->resize(sample_count);
+    data->shrink_to_fit();
+    stb_vorbis_close(vorbis);
+}
+
 void Sound::play(const string& resource_name)
 {
     AudioBuffer* data = sound_cache[resource_name];
@@ -80,40 +164,10 @@ void Sound::play(const string& resource_name)
         io::ResourceStreamPtr stream = io::ResourceProvider::get(resource_name);
         if (stream)
         {
-            SDL_RWops ops = {
-                .size = sdl_to_stream_size,
-                .seek = sdl_to_stream_seek,
-                .read = sdl_to_stream_read,
-                .write = sdl_to_stream_write,
-                .close = sdl_to_stream_close,
-                .type = SDL_RWOPS_UNKNOWN,
-                .hidden = {.unknown = { .data1 = stream.get() } },
-            };
-            SDL_AudioSpec spec;
-            uint8_t* buffer = nullptr;
-            uint32_t buffer_size = 0;
-            if (SDL_LoadWAV_RW(&ops, false, &spec, &buffer, &buffer_size))
-            {
-                SDL_AudioCVT cvt;
-                SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_F32, 2, 48000);
-                if (cvt.needed)
-                {
-                    cvt.len = buffer_size;
-                    data->resize(cvt.len * cvt.len_mult / sizeof(float));
-                    cvt.buf = reinterpret_cast<uint8_t*>(data->data());
-                    memcpy(cvt.buf, buffer, buffer_size);
-                    SDL_ConvertAudio(&cvt);
-                    data->resize(cvt.len_cvt / sizeof(float));
-                    data->shrink_to_fit();
-                }
-                else
-                {
-                    data->resize(buffer_size / sizeof(float));
-                    memcpy(data->data(), buffer, buffer_size);
-                }
-                SDL_FreeWAV(buffer);
-            }
-
+            if (resource_name.endswith(".ogg"))
+                loadVorbisFile(stream, data);
+            else
+                loadWavFile(stream, data);
             LOG(Info, "Loaded", resource_name, "with", data->size(), "samples", float(data->size()) / 2 / 44100);
         }
         sound_cache[resource_name] = data;
