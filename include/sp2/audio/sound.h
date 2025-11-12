@@ -9,7 +9,7 @@ namespace audio {
 class Sound
 {
 public:
-    static void play(const string& resource_name);
+    static void play(const string& resource_name, float volume=1.0f);
     
     //Set the global volume for all sounds in the range of 0 to 100
     //This does not effect the music volume.

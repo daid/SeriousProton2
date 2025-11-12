@@ -35,7 +35,7 @@ public:
     virtual void onMixSamples(float* stream, int sample_count) override
     {
         sample_count = std::min(sample_count, int(buffer->size() - index));
-        mix(stream, &(buffer->data()[index]), sample_count, mix_volume);
+        mix(stream, &(buffer->data()[index]), sample_count, mix_volume * volume);
         index += sample_count;
         if (index == buffer->size())
         {
@@ -46,6 +46,7 @@ public:
 
     unsigned int index;
     const AudioBuffer* buffer;
+    float volume = 1.0;
 };
 
 static std::unordered_map<string, AudioBuffer*> sound_cache;
@@ -155,7 +156,7 @@ void loadVorbisFile(io::ResourceStreamPtr stream, AudioBuffer* data)
     stb_vorbis_close(vorbis);
 }
 
-void Sound::play(const string& resource_name)
+void Sound::play(const string& resource_name, float volume)
 {
     AudioBuffer* data = sound_cache[resource_name];
     if (data == nullptr)
@@ -179,6 +180,7 @@ void Sound::play(const string& resource_name)
         {
             slot[n].index = 0;
             slot[n].buffer = data;
+            slot[n].volume = volume;
             slot[n].start();
             return;
         }
