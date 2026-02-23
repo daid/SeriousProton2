@@ -15,7 +15,7 @@ Scene::Scene(const string& scene_name, int priority)
 : scene_name(scene_name), priority(priority)
 {
     root = new Node(this);
-    enabled = true;
+    enable_flags = FlagEnableUpdate | FlagEnableRender | FlagEnableInput;
 
     sp2assert(!get(scene_name), "Cannot create two scenes with the same name.");
     scene_mapping[scene_name] = this;
@@ -37,13 +37,20 @@ Scene::~Scene()
 
 void Scene::setEnabled(bool enabled)
 {
-    if (this->enabled != enabled)
+    setEnableFlags(enabled ? (FlagEnableUpdate | FlagEnableRender | FlagEnableInput) : 0);
+}
+
+void Scene::setEnableFlags(uint32_t flags)
+{
+    if (enable_flags != flags)
     {
-        this->enabled = enabled;
-        if (enabled)
-            onEnable();
-        else
-            onDisable();
+        auto new_flags = flags & ~enable_flags;
+        auto old_flags = enable_flags & ~flags;
+        enable_flags = flags;
+        if (new_flags)
+            onEnable(new_flags);
+        if (old_flags)
+            onDisable(old_flags);
     }
 }
 

@@ -26,6 +26,10 @@ class Camera;
 class Scene : public script::BindingObject
 {
 public:
+    static inline uint32_t FlagEnableUpdate = 0x01;
+    static inline uint32_t FlagEnableRender = 0x02;
+    static inline uint32_t FlagEnableInput = 0x04;
+
     Scene(const string& scene_name, int priority=0);
     virtual ~Scene();
 
@@ -36,7 +40,8 @@ public:
     void enable() { setEnabled(true); }
     void disable() { setEnabled(false); }
     void setEnabled(bool enabled);
-    bool isEnabled() { return enabled; }
+    void setEnableFlags(uint32_t flags);
+    bool isEnabled(uint32_t flags) { return enable_flags & flags; }
     void fixedUpdate();
     void postFixedUpdate(float delta);
     void update(float delta);
@@ -71,8 +76,8 @@ public:
 
     virtual void onUpdate(float delta) {}
     virtual void onFixedUpdate() {}
-    virtual void onEnable() {}
-    virtual void onDisable() {}
+    virtual void onEnable(uint32_t flags) {}
+    virtual void onDisable(uint32_t flags) {}
     
     string getName() const { return scene_name; }
     int getPriority() const { return priority; }
@@ -87,7 +92,7 @@ private:
     P<Node> root;
     P<Camera> camera;
     collision::Backend* collision_backend = nullptr;
-    bool enabled;
+    uint32_t enable_flags;
     int priority;
 
     void updateNode(float delta, P<Node> node);

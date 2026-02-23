@@ -65,7 +65,7 @@ void CollisionRenderPass::renderScene(RenderQueue& queue, P<Scene> scene)
     if (specific_camera)
         camera = specific_camera;
 
-    if (scene->isEnabled() && camera)
+    if (scene->isEnabled(Scene::FlagEnableRender) && camera)
     {
         if (scene->collision_backend)
         {
