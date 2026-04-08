@@ -24,8 +24,9 @@ std::unordered_map<string, std::shared_ptr<MeshData>> GLBLoader::meshCache;
 std::shared_ptr<MeshData> GLBLoader::GLBFile::flatMesh() const {
     sp::MeshData::Vertices vertices;
     sp::MeshData::Indices indices;
+    auto transform = Matrix4x4f::fromQuaternion(Quaternionf::fromAxisAngle({1, 0, 0}, 90) * Quaternionf::fromAxisAngle({0, 1, 0}, 180));
     for(auto& root : roots) {
-        addToFlat(vertices, indices, root, Matrix4x4f::identity());
+        addToFlat(vertices, indices, root, transform);
     }
     return MeshData::create(std::move(vertices), std::move(indices));
 }
@@ -124,13 +125,12 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
         node.translation.x = node_json["translation"][0];
         node.translation.y = node_json["translation"][1];
         node.translation.z = node_json["translation"][2];
-        node.translation = swap_axis(node.translation);
     }
     if (node_json.find("rotation") != node_json.end()) {
-        node.rotation.x = -static_cast<double>(node_json["rotation"][0]);
-        node.rotation.y = node_json["rotation"][2];
-        node.rotation.z = node_json["rotation"][1];
-        node.rotation.w = node_json["rotation"][3];
+        node.rotation.x = static_cast<double>(node_json["rotation"][0]);
+        node.rotation.y = static_cast<double>(node_json["rotation"][1]);
+        node.rotation.z = static_cast<double>(node_json["rotation"][2]);
+        node.rotation.w = static_cast<double>(node_json["rotation"][3]);
     }
     if (node_json.find("mesh") != node_json.end()) {
         auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
@@ -148,8 +148,8 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
             node.vertices.reserve(p_a.value("count", 0));
             for(int vertex_offset=0; vertex_offset<p_a.value("count", 0); vertex_offset++) {
                 node.vertices.emplace_back(
-                    swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + p_b.value("byteOffset", 0) + p_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
-                    swap_axis(*reinterpret_cast<sp::Vector3f*>(bindata.data() + n_b.value("byteOffset", 0) + n_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset)),
+                    *reinterpret_cast<sp::Vector3f*>(bindata.data() + p_b.value("byteOffset", 0) + p_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset),
+                    *reinterpret_cast<sp::Vector3f*>(bindata.data() + n_b.value("byteOffset", 0) + n_b.value("byteStride", sizeof(sp::Vector3f)) * vertex_offset),
                     *reinterpret_cast<sp::Vector2f*>(bindata.data() + t_b.value("byteOffset", 0) + t_b.value("byteStride", sizeof(sp::Vector2f)) * vertex_offset)
                 );
             }
