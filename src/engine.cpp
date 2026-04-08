@@ -280,7 +280,7 @@ void Engine::update(float time_delta)
         fixed_update_accumulator -= fixed_update_delta;
         for(P<Scene> scene : Scene::all())
         {
-            if (scene->isEnabled())
+            if (scene->isEnabled(Scene::FlagEnableUpdate))
             {
                 scene->fixedUpdate();
             }
@@ -290,13 +290,13 @@ void Engine::update(float time_delta)
     in_fixed_update = false;
     for(P<Scene> scene : Scene::all())
     {
-        if (scene->isEnabled())
+        if (scene->isEnabled(Scene::FlagEnableUpdate))
             scene->postFixedUpdate(fixed_update_accumulator);
     }
     timing.fixed_update = timing_clock.restart();
     for(P<Scene> scene : Scene::all())
     {
-        if (scene->isEnabled())
+        if (scene->isEnabled(Scene::FlagEnableUpdate))
             scene->update(time_delta);
     }
     for(P<Updatable> updatable : Updatable::updatables)

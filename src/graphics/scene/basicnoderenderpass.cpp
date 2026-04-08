@@ -95,7 +95,7 @@ bool BasicNodeRenderPass::privateOnPointerMove(P<Scene> scene, P<Camera> camera,
 {
     if (!camera)
         camera = scene->getCamera();
-    if (!camera || !scene->isEnabled())
+    if (!camera || !scene->isEnabled(Scene::FlagEnableInput))
         return false;
     if (scene->onPointerMove(camera->screenToWorldRay(Vector2f(position)), id))
     {
@@ -110,7 +110,7 @@ bool BasicNodeRenderPass::privateOnPointerDown(P<Scene> scene, P<Camera> camera,
 {
     if (!camera)
         camera = scene->getCamera();
-    if (!camera || !scene->isEnabled())
+    if (!camera || !scene->isEnabled(Scene::FlagEnableInput))
         return false;
     if (scene->onPointerDown(button, camera->screenToWorldRay(Vector2f(position)), id))
     {
@@ -166,7 +166,7 @@ bool BasicNodeRenderPass::privateOnWheelMove(P<Scene> scene, P<Camera> camera, V
 {
     if (!camera)
         camera = scene->getCamera();
-    if (!camera || !scene->isEnabled())
+    if (!camera || !scene->isEnabled(Scene::FlagEnableInput))
         return false;
     if (scene->onWheelMove(camera->screenToWorldRay(Vector2f(position)), direction))
         return true;
@@ -190,7 +190,7 @@ void BasicNodeRenderPass::renderScene(RenderQueue& queue, P<Scene> scene, P<Came
     if (!camera)
         camera = scene->getCamera();
 
-    if (scene->isEnabled() && camera)
+    if (scene->isEnabled(Scene::FlagEnableRender) && camera)
     {
         queue.setCamera(camera);
         recursiveNodeRender(queue, scene->getRoot());
