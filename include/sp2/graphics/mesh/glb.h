@@ -38,10 +38,6 @@ private:
     GLBLoader(const string& resource_name);
     void handleNode(int node_id, GLBFile::Node& node);
 
-    template<typename T> static sp::Vector3<T> swap_axis(sp::Vector3<T> v) {
-       return {-v.x, v.z, v.y};
-    }
-
     GLBFile result;
     nlohmann::json json;
     std::vector<uint8_t> bindata;
