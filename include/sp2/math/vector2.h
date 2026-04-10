@@ -11,6 +11,7 @@ namespace sp {
 template<typename T> class Vector2
 {
 public:
+    using ElementType = T;
     T x, y;
     
     inline constexpr Vector2()

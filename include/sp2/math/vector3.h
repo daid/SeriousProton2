@@ -9,6 +9,7 @@ namespace sp {
 template<typename T> class Vector3
 {
 public:
+    using ElementType = T;
     T x, y, z;
     
     inline Vector3()

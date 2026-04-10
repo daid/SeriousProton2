@@ -26,6 +26,20 @@ public:
         return start + ray_vector * distance_normalized;
     }
     
+    T closestOnRayTo(const T& point, typename T::ElementType& distance_normalized, bool clamp=true) const
+    {
+        T start_to_point = point - start;
+        T ray_vector = end - start;
+        
+        distance_normalized = start_to_point.dot(ray_vector) / ray_vector.dot(ray_vector);
+        if (clamp)
+        {
+            if (distance_normalized < 0) return start;
+            if (distance_normalized > 1) return end;
+        }
+        return start + ray_vector * distance_normalized;
+    }
+    
     Ray<T> shortestDistance(const Ray<T>& other, bool clamp=true) const
     {
         T v13 = start - other.start;
