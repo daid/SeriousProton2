@@ -13,6 +13,7 @@ public:
     ~FreetypeFont();
 
     virtual Texture* getTexture(int pixel_size) override;
+    virtual bool setGlyph(int char_code, int pixel_size, sp::Image&& image) override;
 protected:
     virtual CharacterInfo getCharacterInfo(const char* str) override;
     virtual bool getGlyphInfo(int char_code, int pixel_size, GlyphInfo& info) override;

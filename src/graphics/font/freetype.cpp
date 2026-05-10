@@ -109,6 +109,22 @@ Texture* FreetypeFont::getTexture(int pixel_size)
     return nullptr;
 }
 
+bool FreetypeFont::setGlyph(int char_code, int pixel_size, sp::Image&& image)
+{
+    if (texture_cache.find(pixel_size) == texture_cache.end())
+    {
+        texture_cache[pixel_size] = new AtlasTexture(name, Vector2i(pixel_size * 16, pixel_size * 16));
+    }
+    float aspect = image.getSize().x / image.getSize().y;
+
+    GlyphInfo info;
+    info.advance = float(pixel_size) * aspect;
+    info.bounds = {{0, float(pixel_size)}, {float(pixel_size) * aspect, float(pixel_size)}};
+    info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
+    loaded_glyphs[pixel_size][char_code] = info;
+    return true;
+}
+
 Font::CharacterInfo FreetypeFont::getCharacterInfo(const char* str)
 {
     Font::CharacterInfo info;
