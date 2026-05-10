@@ -8,12 +8,12 @@ std::shared_ptr<MeshData> Font::createString(const string& s, int pixel_size, fl
     return prepare(s, pixel_size, text_size, area_size, alignment, flags).create();
 }
 
-bool Font::setGlyph(int char_code, int pixel_size, const sp::string& resource_name)
+bool Font::setGlyph(int char_code, int pixel_size, const sp::string& resource_name, float y_offset)
 {
     sp::Image image;
     auto res = sp::io::ResourceProvider::get(resource_name);
     if (res && image.loadFromStream(res)) {
-        if (setGlyph(char_code, pixel_size, std::move(image))) {
+        if (setGlyph(char_code, pixel_size, std::move(image), y_offset)) {
             return true;
         }
         LOG(Warning, "Failed add: " + resource_name + " as font glyph");

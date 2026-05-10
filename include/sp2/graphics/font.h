@@ -23,8 +23,8 @@ public:
      */
     std::shared_ptr<MeshData> createString(const string& s, int pixel_size, float text_size, Vector2d area_size, Alignment alignment, int flags=0);
     virtual Texture* getTexture(int pixel_size) = 0;
-    bool setGlyph(int char_code, int pixel_size, const sp::string& resource_name);
-    virtual bool setGlyph(int char_code, int pixel_size, sp::Image&& image) { return false; }
+    bool setGlyph(int char_code, int pixel_size, const sp::string& resource_name, float y_offset=0.0f);
+    virtual bool setGlyph(int char_code, int pixel_size, sp::Image&& image, float y_offset=0.0f) { return false; }
 
     class PreparedFontString
     {

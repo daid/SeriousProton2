@@ -109,7 +109,7 @@ Texture* FreetypeFont::getTexture(int pixel_size)
     return nullptr;
 }
 
-bool FreetypeFont::setGlyph(int char_code, int pixel_size, sp::Image&& image)
+bool FreetypeFont::setGlyph(int char_code, int pixel_size, sp::Image&& image, float y_offset)
 {
     if (texture_cache.find(pixel_size) == texture_cache.end())
     {
@@ -119,7 +119,7 @@ bool FreetypeFont::setGlyph(int char_code, int pixel_size, sp::Image&& image)
 
     GlyphInfo info;
     info.advance = float(pixel_size) * aspect;
-    info.bounds = {{0, float(pixel_size)}, {float(pixel_size) * aspect, float(pixel_size)}};
+    info.bounds = {{0, float(pixel_size)-y_offset}, {float(pixel_size) * aspect, float(pixel_size)}};
     info.uv_rect = texture_cache[pixel_size]->add(std::move(image), 1);
     loaded_glyphs[pixel_size][char_code] = info;
     return true;
