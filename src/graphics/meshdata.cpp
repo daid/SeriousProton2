@@ -91,10 +91,10 @@ std::shared_ptr<MeshData> MeshData::createQuad(Vector2f size, Vector2f uv0, Vect
     Indices indices{0,1,2,2,1,3};
     vertices.reserve(4);
     
-    vertices.emplace_back(Vector3f(-size.x, -size.y, 0.0f), Vector2f(uv0.x, uv1.y));
-    vertices.emplace_back(Vector3f( size.x, -size.y, 0.0f), Vector2f(uv1.x, uv1.y));
-    vertices.emplace_back(Vector3f(-size.x,  size.y, 0.0f), Vector2f(uv0.x, uv0.y));
-    vertices.emplace_back(Vector3f( size.x,  size.y, 0.0f), Vector2f(uv1.x, uv0.y));
+    vertices.emplace_back(Vector3f(-size.x, -size.y, 0.0f), Vector3f(0.0f,0.0f,1.0f), Vector2f(uv0.x, uv1.y));
+    vertices.emplace_back(Vector3f( size.x, -size.y, 0.0f), Vector3f(0.0f,0.0f,1.0f), Vector2f(uv1.x, uv1.y));
+    vertices.emplace_back(Vector3f(-size.x,  size.y, 0.0f), Vector3f(0.0f,0.0f,1.0f), Vector2f(uv0.x, uv0.y));
+    vertices.emplace_back(Vector3f( size.x,  size.y, 0.0f), Vector3f(0.0f,0.0f,1.0f), Vector2f(uv1.x, uv0.y));
     
     return std::make_shared<MeshData>(std::move(vertices), std::move(indices));
 }

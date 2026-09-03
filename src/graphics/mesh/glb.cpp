@@ -2,6 +2,7 @@
 #include <sp2/io/resourceProvider.h>
 #include <sp2/graphics/image.h>
 #include <sp2/io/bufferResourceStream.h>
+#include <sp2/graphics/textureManager.h>
 
 
 namespace sp {
@@ -108,13 +109,24 @@ GLBLoader::GLBLoader(const string& resource_name)
         }
     }
     for(auto& json_image : json["images"]) {
-        auto& bufferview = json["bufferViews"][static_cast<int>(json_image["bufferView"])];
-        auto ptr = bindata.data() + bufferview.value("byteOffset", 0);
-        auto size = bufferview.value("byteLength", 0);
+        if (!json_image["bufferView"].is_null()) {
+            auto& bufferview = json["bufferViews"][static_cast<int>(json_image["bufferView"])];
+            auto ptr = bindata.data() + bufferview.value("byteOffset", 0);
+            auto size = bufferview.value("byteLength", 0);
 
-        Image image;
-        image.loadFromStream(std::make_shared<io::DataBufferResourceStream>(ptr, size));
-        result.textures.push_back(new GLBTexture(resource_name, std::move(image)));
+            Image image;
+            image.loadFromStream(std::make_shared<io::DataBufferResourceStream>(ptr, size));
+            result.textures.push_back(new GLBTexture(resource_name, std::move(image)));
+        } else if (!json_image["uri"].is_null()) {
+            std::string uri = json_image["uri"];
+            if (uri[0] != '/') {
+                auto sep_pos = resource_name.find_last_of('/');
+                if (sep_pos != std::string::npos) {
+                    uri = resource_name.substr(0, sep_pos + 1) + uri;
+                }
+            }
+            result.textures.push_back(texture_manager.get(uri));
+        }
     }
 }
 
@@ -135,7 +147,7 @@ void GLBLoader::handleNode(int node_id, GLBFile::Node& node)
     if (node_json.find("mesh") != node_json.end()) {
         auto& mesh = json["meshes"][static_cast<int>(node_json["mesh"])];
         for(auto& primitive : mesh["primitives"]) {
-            if (static_cast<int>(primitive["mode"]) != 4) continue; // Only import triangle primitives
+            if (!primitive["mode"].is_null() && static_cast<int>(primitive["mode"]) != 4) continue; // Only import triangle primitives
             auto& p_a = json["accessors"][static_cast<int>(primitive["attributes"]["POSITION"])];
             auto& p_b = json["bufferViews"][static_cast<int>(p_a["bufferView"])];
             auto& n_a = json["accessors"][static_cast<int>(primitive["attributes"]["NORMAL"])];
