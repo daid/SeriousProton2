@@ -10,6 +10,16 @@ namespace sp {
 class RenderTexture : public Texture
 {
 public:
+    struct TextureFormat {
+        uint8_t component_count = 4;
+        enum class Format {
+            U8,
+            U16,
+            U32,
+            F32
+        } format = Format::U8;
+    };
+
     /**
         Create a RenderTexture.
         This can be used as both a texture, as well as a target to render on.
@@ -21,6 +31,7 @@ public:
      */
     RenderTexture(const string& name, Vector2i size, bool double_buffered);
     RenderTexture(const string& name, Vector2i size, int texture_count, bool double_buffered);
+    RenderTexture(const string& name, Vector2i size, const std::vector<TextureFormat>& formats, bool double_buffered);
     virtual ~RenderTexture();
 
     //Get the texture for rendering to other targets.
@@ -48,7 +59,7 @@ private:
 
     bool double_buffered;
     Vector2i size;
-    int texture_count=1;
+    std::vector<TextureFormat> texture_formats;
 
     bool dirty[2];
     bool flipped;

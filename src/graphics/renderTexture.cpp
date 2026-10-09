@@ -10,9 +10,21 @@ RenderTexture::RenderTexture(const string& name, Vector2i size, bool double_buff
 {
 }
 
+static inline std::vector<RenderTexture::TextureFormat> defaultFormatList(int count) {
+    std::vector<RenderTexture::TextureFormat> formats;
+    formats.resize(count, {4, RenderTexture::TextureFormat::Format::U8});
+    return formats;
+}
+
 RenderTexture::RenderTexture(const string& name, Vector2i size, int texture_count, bool double_buffered)
-: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size), texture_count(texture_count)
+: RenderTexture(name, size, defaultFormatList(texture_count), double_buffered)
 {
+}
+
+RenderTexture::RenderTexture(const string& name, Vector2i size, const std::vector<TextureFormat>& formats, bool double_buffered)
+: Texture(Texture::Type::Dynamic, name), double_buffered(double_buffered), size(size)
+{
+    texture_formats = formats;
     flipped = false;
     auto_clear = !double_buffered;
     smooth = texture_manager.isDefaultSmoothFiltering();
@@ -22,8 +34,8 @@ RenderTexture::RenderTexture(const string& name, Vector2i size, int texture_coun
         dirty[n] = false;
 
         frame_buffer[n] = 0;
-        color_buffer[n].resize(texture_count, nullptr);
-        for(int idx=0; idx<texture_count; idx++)
+        color_buffer[n].resize(formats.size(), nullptr);
+        for(unsigned int idx=0; idx<formats.size(); idx++)
             color_buffer[n][idx] = new ColorTexture(name);
         depth_buffer[n] = 0;
     }
@@ -53,7 +65,7 @@ void RenderTexture::create()
     {
         glGenFramebuffers(count, frame_buffer);
         for(int n=0;n<count; n++)
-            for(int idx=0; idx<texture_count; idx++)
+            for(unsigned int idx=0; idx<texture_formats.size(); idx++)
                 glGenTextures(1, &color_buffer[n][idx]->handle);
         glGenRenderbuffers(count, depth_buffer);
     }
@@ -62,9 +74,23 @@ void RenderTexture::create()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer[n]);
 
-        for(int idx=0; idx<texture_count; idx++) {
+        for(unsigned int idx=0; idx<texture_formats.size(); idx++) {
             glBindTexture(GL_TEXTURE_2D, color_buffer[n][idx]->handle);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            GLenum type = GL_UNSIGNED_BYTE;
+            GLenum format = GL_RGBA;
+            switch(texture_formats[idx].component_count) {
+            case 1: format = GL_LUMINANCE; break;
+            //case 2: format = GL_RG; break;
+            case 3: format = GL_RGB; break;
+            case 4: format = GL_RGBA; break;
+            }
+            switch(texture_formats[idx].format) {
+            case TextureFormat::Format::U8: type = GL_UNSIGNED_BYTE; break;
+            case TextureFormat::Format::U16: type = GL_UNSIGNED_SHORT; break;
+            case TextureFormat::Format::U32: type = GL_UNSIGNED_BYTE; break;
+            case TextureFormat::Format::F32: type = GL_UNSIGNED_BYTE; break;
+            }
+            glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, format, type, nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -123,7 +149,7 @@ void RenderTexture::setSize(Vector2i new_size)
 
 Texture* RenderTexture::getTexture(int index)
 {
-    if (index < 0 || index >= texture_count)
+    if (index < 0 || index >= int(texture_formats.size()))
         return nullptr;
     return color_buffer[0][index];
 }
@@ -149,9 +175,9 @@ void RenderTexture::activateRenderTarget()
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer[index]);
     if (glDrawBuffers) {
         unsigned int buffers[8];
-        for(int n=0; n<texture_count; n++)
+        for(unsigned int n=0; n<texture_formats.size(); n++)
             buffers[n] = GL_COLOR_ATTACHMENT0 + n;
-        glDrawBuffers(texture_count, buffers);
+        glDrawBuffers(texture_formats.size(), buffers);
     }
     if (auto_clear)
     {
