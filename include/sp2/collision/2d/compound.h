@@ -16,7 +16,7 @@ public:
 
     void add(Shape2D* shape);
 private:
-    virtual void createFixture(b2Body* body) const override;
+    virtual void createShape(b2BodyId body) const override;
 
     std::vector<const Shape2D*> shapes;
 };

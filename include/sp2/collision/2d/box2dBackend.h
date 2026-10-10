@@ -2,9 +2,7 @@
 #define SP2_COLLISION_2D_BOX2D_BACKEND_H
 
 #include <sp2/collision/backend.h>
-
-class b2World;
-class b2Body;
+#include <private/collision/box2d_id.h>
 
 namespace sp {
 namespace collision {
@@ -40,8 +38,13 @@ public:
     virtual void query(Rect2d area, std::function<bool(P<Node> object)> callback_function) override;
     virtual void queryAny(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function) override;
     virtual void queryAll(Ray3d ray, std::function<bool(P<Node> object, Vector3d hit_location, Vector3d hit_normal)> callback_function) override;
+
+    void* addBodyId(b2BodyId body);
+    b2BodyId getBodyId(void* body);
 private:
-    b2World* world = nullptr;
+    b2WorldId world = b2_nullWorldId;
+    std::vector<b2BodyId> bodies;
+    size_t free_body_start = std::numeric_limits<uint32_t>::max();
 
     friend class collision::Shape2D;
     friend class collision::Joint2D;

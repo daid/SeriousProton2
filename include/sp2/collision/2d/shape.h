@@ -3,8 +3,9 @@
 
 #include <sp2/collision/shape.h>
 
-class b2Body;
-class b2Shape;
+class b2BodyId;
+class b2ShapeId;
+class b2ShapeDef;
 
 namespace sp {
 namespace collision {
@@ -13,11 +14,11 @@ class Shape2D : public Shape
 {
 private:
     virtual void create(Node* node) const override;
-    virtual void createFixture(b2Body* body) const = 0;
+    virtual void createShape(b2BodyId body) const = 0;
 
     friend class Compound2D;
 protected:
-    void createFixtureOnBody(b2Body* body, b2Shape* shape) const;
+    b2ShapeDef getShapeDef(b2BodyId body) const;
 };
 
 }//namespace collision

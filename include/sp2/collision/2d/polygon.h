@@ -25,7 +25,7 @@ private:
 
     std::vector<Vector2f> buildConvex() const;
     
-    virtual void createFixture(b2Body* body) const override;
+    virtual void createShape(b2BodyId body) const override;
 };
 
 }//namespace collision

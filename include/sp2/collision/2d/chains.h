@@ -26,7 +26,7 @@ public:
     std::vector<Path> loops;
 
 private:
-    virtual void createFixture(b2Body* body) const override;
+    virtual void createShape(b2BodyId body) const override;
 };
 
 }//namespace collision

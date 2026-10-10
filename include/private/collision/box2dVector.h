@@ -6,7 +6,7 @@
 
 template<typename T> static inline b2Vec2 toVector(const sp::Vector2<T>& v)
 {
-    return b2Vec2(v.x, v.y);
+    return b2Vec2{float(v.x), float(v.y)};
 }
 
 template<typename T> static inline sp::Vector2<T> toVector(const b2Vec2& v)
@@ -16,7 +16,7 @@ template<typename T> static inline sp::Vector2<T> toVector(const b2Vec2& v)
 
 template<typename T> static inline b2Vec2 toVector(const sp::Vector3<T>& v)
 {
-    return b2Vec2(v.x, v.y);
+    return b2Vec2{float(v.x), float(v.y)};
 }
 
 template<typename T> static inline sp::Vector3<T> toVector3(const b2Vec2& v)

@@ -13,30 +13,40 @@ Chains2D::Chains2D()
     type = Type::Static;
 }
 
-void Chains2D::createFixture(b2Body* body) const
+void Chains2D::createShape(b2BodyId body) const
 {
+    auto shapedef = getShapeDef(body);
     for(auto chain : chains)
     {
-        b2ChainShape shape;
+        b2ChainDef shape = b2DefaultChainDef();
         std::vector<b2Vec2> verts;
         verts.reserve(chain.size());
         for(unsigned int n=0; n<chain.size(); n++)
-            verts.push_back(toVector(chain[n]));
-        shape.CreateChain(verts.data(), chain.size());
+            verts.push_back(toVector(chain[chain.size()-1-n]));
+        shape.points = verts.data();
+        shape.count = verts.size();
+        shape.materials = &shapedef.material;
+        shape.filter = shapedef.filter;
+        shape.userData = shapedef.userData;
 
-        createFixtureOnBody(body, &shape);
+        b2CreateChain(body, &shape);
     }
 
     for(auto loop : loops)
     {
-        b2ChainShape shape;
+        b2ChainDef shape = b2DefaultChainDef();
         std::vector<b2Vec2> verts;
         verts.reserve(loop.size());
         for(unsigned int n=0; n<loop.size(); n++)
-            verts.push_back(toVector(loop[n]));
-        shape.CreateLoop(verts.data(), loop.size());
+            verts.push_back(toVector(loop[loop.size()-1-n]));
+        shape.isLoop = true;
+        shape.points = verts.data();
+        shape.count = verts.size();
+        shape.materials = &shapedef.material;
+        shape.filter = shapedef.filter;
+        shape.userData = shapedef.userData;
 
-        createFixtureOnBody(body, &shape);
+        b2CreateChain(body, &shape);
     }
 }
 

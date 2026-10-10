@@ -16,15 +16,15 @@ void Shape2D::create(Node* node) const
     if (!getCollisionBackend(node))
         setCollisionBackend(node, new collision::Box2DBackend());
     sp2assert(dynamic_cast<collision::Box2DBackend*>(getCollisionBackend(node)), "Not having a Box2D collision backend, while already having a collision backend. Trying to mix different types of collision?");
-    b2World* world = static_cast<collision::Box2DBackend*>(getCollisionBackend(node))->world;
+    auto backend = static_cast<collision::Box2DBackend*>(getCollisionBackend(node));
 
     sp2assert(node->getParent() == node->getScene()->getRoot(), "2D collision shapes can only be added to top level nodes.");
 
     if (!getCollisionBody(node))
     {
-        b2BodyDef body_def;
+        b2BodyDef body_def = b2DefaultBodyDef();
         body_def.position = toVector(node->getGlobalPosition2D());
-        body_def.angle = node->getGlobalRotation2D() / 180.0 * pi;
+        body_def.rotation = b2MakeRot(node->getGlobalRotation2D() / 180.0 * pi);
         body_def.linearDamping = linear_damping;
         body_def.angularDamping = angular_damping;
         switch(type)
@@ -44,50 +44,56 @@ void Shape2D::create(Node* node) const
         }
         body_def.fixedRotation = fixed_rotation;
         body_def.userData = node;
-        setCollisionBody(node, world->CreateBody(&body_def));
+        auto bodyId = b2CreateBody(backend->world, &body_def);
+        setCollisionBody(node, backend->addBodyId(bodyId));
     }
     else
     {
-        b2Body* body = static_cast<b2Body*>(getCollisionBody(node));
+        b2BodyId body = backend->getBodyId(getCollisionBody(node));
         
-        body->SetLinearDamping(linear_damping);
-        body->SetAngularDamping(angular_damping);
+        b2Body_SetLinearDamping(body, linear_damping);
+        b2Body_SetAngularDamping(body, angular_damping);
         switch(type)
         {
         case Type::Sensor:
-            body->SetType(b2_dynamicBody);
+            b2Body_SetType(body, b2_dynamicBody);
             break;
         case Type::Static:
-            body->SetType(b2_staticBody);
+            b2Body_SetType(body, b2_staticBody);
             break;
         case Type::Kinematic:
-            body->SetType(b2_kinematicBody);
+            b2Body_SetType(body, b2_kinematicBody);
             break;
         case Type::Dynamic:
-            body->SetType(b2_dynamicBody);
+            b2Body_SetType(body, b2_dynamicBody);
             break;
         }
-        body->SetFixedRotation(fixed_rotation);
+        b2Body_SetFixedRotation(body, fixed_rotation);
     }
     
-    b2Body* body = static_cast<b2Body*>(getCollisionBody(node));
-    while(body->GetFixtureList())
-        body->DestroyFixture(body->GetFixtureList());
-    createFixture(body);
+    b2BodyId body = backend->getBodyId(getCollisionBody(node));
+    while(b2Body_GetShapeCount(body) > 0)
+    {
+        b2ShapeId shapes[1];
+        b2Body_GetShapes(body, shapes, 1);
+        b2DestroyShape(shapes[0], false);
+    }
+    createShape(body);
 }
 
-void Shape2D::createFixtureOnBody(b2Body* body, b2Shape* shape) const
+b2ShapeDef Shape2D::getShapeDef(b2BodyId body) const
 {
-    b2FixtureDef shapeDef;
-    shapeDef.shape = shape;
+    b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = density;
-    shapeDef.friction = friction;
-    shapeDef.restitution = restitution;
+    shapeDef.material.friction = friction;
+    shapeDef.material.restitution = restitution;
     shapeDef.isSensor = (type == Type::Sensor);
-    shapeDef.userData = body->GetUserData();
+    shapeDef.userData = b2Body_GetUserData(body);
     shapeDef.filter.categoryBits = filter_category;
     shapeDef.filter.maskBits = filter_mask;
-    body->CreateFixture(&shapeDef);
+    // shapeDef.enableContactEvents = true;
+    // shapeDef.enableSensorEvents = true;
+    return shapeDef;
 }
 
 }//namespace collision

@@ -27,10 +27,10 @@ void Compound2D::add(Shape2D* shape)
     shapes.push_back(shape);
 }
 
-void Compound2D::createFixture(b2Body* body) const
+void Compound2D::createShape(b2BodyId body) const
 {
     for(const auto shape : shapes)
-        shape->createFixture(body);
+        shape->createShape(body);
 }
 
 }//namespace collision

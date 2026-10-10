@@ -25,27 +25,27 @@ void Joint2D::create(b2JointDef* joint_def, sp::P<sp::Node> node_a, sp::P<sp::No
     
     collision::Box2DBackend* backend = dynamic_cast<collision::Box2DBackend*>(scene->collision_backend);
     sp2assert(backend, "No 2d collision backend when creating a 2d joint.");
-    if (joint)
-    {
-        joint->SetUserData(nullptr);
-        backend->world->DestroyJoint(joint);
-    }
+    // if (joint)
+    // {
+    //     joint->SetUserData(nullptr);
+    //     backend->world->DestroyJoint(joint);
+    // }
     
-    joint_def->bodyA = static_cast<b2Body*>(node_a->collision_body);
-    joint_def->bodyB = static_cast<b2Body*>(node_b->collision_body);
-    joint_def->userData = this;
+    // joint_def->bodyA = static_cast<b2Body*>(node_a->collision_body);
+    // joint_def->bodyB = static_cast<b2Body*>(node_b->collision_body);
+    // joint_def->userData = this;
 
-    joint = backend->world->CreateJoint(joint_def);
+    // joint = backend->world->CreateJoint(joint_def);
 }
 
 Joint2D::~Joint2D()
 {
-    if (joint && scene)
-    {
-        joint->SetUserData(nullptr);
-        collision::Box2DBackend* backend = static_cast<collision::Box2DBackend*>(scene->collision_backend);
-        backend->world->DestroyJoint(joint);
-    }
+    // if (joint && scene)
+    // {
+    //     joint->SetUserData(nullptr);
+    //     collision::Box2DBackend* backend = static_cast<collision::Box2DBackend*>(scene->collision_backend);
+    //     backend->world->DestroyJoint(joint);
+    // }
 }
 
 }//namespace collision

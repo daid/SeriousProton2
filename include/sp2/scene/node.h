@@ -9,7 +9,7 @@
 #include <sp2/graphics/animation.h>
 #include <sp2/multiplayer/replication.h>
 
-class b2Body;
+class b2BodyId;
 class btRigidBody;
 
 namespace sp {

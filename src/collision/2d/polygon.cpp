@@ -4,6 +4,8 @@
 #include <private/collision/box2dVector.h>
 #include <private/collision/box2d.h>
 
+#include <algorithm>
+
 
 namespace sp {
 namespace collision {
@@ -71,7 +73,7 @@ std::vector<Vector2f> Polygon2D::buildConvex() const
     return result;
 }
 
-void Polygon2D::createFixture(b2Body* body) const
+void Polygon2D::createShape(b2BodyId body) const
 {
     std::vector<Vector2f> points = buildConvex();
     if (points.size() < 3)
@@ -80,7 +82,7 @@ void Polygon2D::createFixture(b2Body* body) const
         return;
     }
 
-    while(points.size() > b2_maxPolygonVertices)
+    while(points.size() > B2_MAX_POLYGON_VERTICES)
     {
         //To many points, delete a point to create a simpler polygon.
         int best = -1;
@@ -100,14 +102,15 @@ void Polygon2D::createFixture(b2Body* body) const
         points.erase(points.begin() + best);
     }
     
-    b2PolygonShape shape;
-    b2Vec2 b2points[b2_maxPolygonVertices];
+    b2Vec2 b2points[B2_MAX_POLYGON_VERTICES];
     for(unsigned int n=0; n<points.size(); n++)
         b2points[n] = toVector<float>(points[n]);
-    
-    shape.Set(b2points, points.size());
 
-    createFixtureOnBody(body, &shape);
+    b2Hull hull = b2ComputeHull(b2points, points.size());
+    b2Polygon shape = b2MakePolygon(&hull, 0.0f);
+
+    auto shapedef = getShapeDef(body);
+    b2CreatePolygonShape(body, &shapedef, &shape);
 }
 
 }//namespace collision

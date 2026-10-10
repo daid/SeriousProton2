@@ -17,13 +17,14 @@ Circle2D::Circle2D(Vector2d center, double radius)
 {
 }
 
-void Circle2D::createFixture(b2Body* body) const
+void Circle2D::createShape(b2BodyId body) const
 {
-    b2CircleShape shape;
-    shape.m_radius = radius;
-    shape.m_p = toVector(center);
+    b2Circle shape;
+    shape.radius = radius;
+    shape.center = toVector(center);
 
-    createFixtureOnBody(body, &shape);
+    auto shapedef = getShapeDef(body);
+    b2CreateCircleShape(body, &shapedef, &shape);
 }
 
 }//namespace collision

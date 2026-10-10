@@ -16,7 +16,7 @@ private:
     double radius;
     Vector2d center;
 
-    virtual void createFixture(b2Body* body) const override;
+    virtual void createShape(b2BodyId body) const override;
 };
 
 }//namespace collision
