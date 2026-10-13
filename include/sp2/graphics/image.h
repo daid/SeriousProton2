@@ -68,6 +68,7 @@ public:
     //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
     //Returns true on success.
     bool saveToFile(const string& filename) { return false; }
+    std::vector<uint8_t> saveToBuffer() { return {}; }
 protected:
     Vector2i size;
     std::vector<T> pixels;
@@ -82,6 +83,7 @@ template<> bool Image::loadFromFile(const string& filename);
 //Write the image to a file. Supported extensions: png, bmp, tga, jpg, jpeg
 //Returns true on success.
 template<> bool Image::saveToFile(const string& filename);
+template<> std::vector<uint8_t> Image::saveToBuffer();
 
 }//namespace sp
 

@@ -145,4 +145,14 @@ template<> bool Image::saveToFile(const string& filename)
     return false;
 }
 
+template<> std::vector<uint8_t> Image::saveToBuffer()
+{
+    std::vector<uint8_t> output;
+    stbi_write_png_to_func([](void *context, void *data, int size) {
+        auto v = reinterpret_cast<std::vector<uint8_t>*>(context);
+        v->insert(v->end(), static_cast<uint8_t*>(data), static_cast<uint8_t*>(data) + size);
+    }, &output, size.x, size.y, 4, pixels.data(), size.x * 4);
+    return output;
+}
+
 }//namespace sp
