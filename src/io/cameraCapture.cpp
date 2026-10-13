@@ -335,6 +335,12 @@ CameraCapture::State CameraCapture::init(int index, sp::Vector2i prefered_size)
     
     data->capture_graph_builder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, data->base_filter_cam, IID_IAMStreamConfig, reinterpret_cast<LPVOID*>(&data->AM_stream_config));
     AM_MEDIA_TYPE* pAmMediaType = nullptr;
+    if (prefered_size.x > 0 && prefered_size.y > 0) {
+        data->AM_stream_config->GetFormat(&pAmMediaType);
+        reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biWidth = prefered_size.x;
+        reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biHeight = prefered_size.y;
+        data->AM_stream_config->SetFormat(pAmMediaType);
+    }
     data->AM_stream_config->GetFormat(&pAmMediaType);
     size.x = reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biWidth;
     size.y = reinterpret_cast<VIDEOINFOHEADER*>(pAmMediaType->pbFormat)->bmiHeader.biHeight;
