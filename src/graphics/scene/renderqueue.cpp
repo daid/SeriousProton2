@@ -139,16 +139,13 @@ void RenderQueue::render(std::vector<Item>& list)
                 break;
             case RenderData::Type::Normal:
             case RenderData::Type::Transparent:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
             case RenderData::Type::Additive:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            case RenderData::Type::Subtractive:
                 break;
             }
             if (item.data.mesh)
             {
-                if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
-                    glDepthMask(false);
+                updateRenderState(item.data.type);
                 if (item.data.shader->bind() || force_camera_matrix_update)
                 {
                     item.data.shader->setUniform("projection_matrix", camera_projection);
@@ -160,13 +157,51 @@ void RenderQueue::render(std::vector<Item>& list)
                 item.data.shader->setUniform("color", item.data.color);
                 item.data.shader->setUniform("texture_map", item.data.texture);
                 item.data.mesh->render();
-                if (item.data.type == RenderData::Type::Transparent || item.data.type == RenderData::Type::Additive)
-                    glDepthMask(true);
             }
             break;
         }
     }
     list.clear();
+}
+
+void RenderQueue::updateRenderState(RenderData::Type type)
+{
+    switch(type)
+    {
+        case RenderData::Type::None:
+        case RenderData::Type::Custom1:
+        case RenderData::Type::Custom2:
+        case RenderData::Type::Custom3:
+        case RenderData::Type::Custom4:
+        case RenderData::Type::Custom5:
+        case RenderData::Type::Custom6:
+        case RenderData::Type::Custom7:
+        case RenderData::Type::Custom8:
+            current_depth_mask_enable = std::numeric_limits<unsigned int>::max();
+            current_blend_equation = std::numeric_limits<unsigned int>::max();
+            current_blend_func = std::numeric_limits<unsigned int>::max();
+            break;
+        case RenderData::Type::Normal:
+            if (current_depth_mask_enable != true) { glDepthMask(true); current_depth_mask_enable = true; }
+            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
+            if (current_blend_func != GL_ONE_MINUS_SRC_ALPHA) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); current_blend_func = GL_ONE_MINUS_SRC_ALPHA; }
+            break;
+        case RenderData::Type::Transparent:
+            if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
+            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
+            if (current_blend_func != GL_ONE_MINUS_SRC_ALPHA) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); current_blend_func = GL_ONE_MINUS_SRC_ALPHA; }
+            break;
+        case RenderData::Type::Additive:
+            if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
+            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
+            if (current_blend_func != GL_ONE) { glBlendFunc(GL_SRC_ALPHA, GL_ONE); current_blend_func = GL_ONE; }
+            break;
+        case RenderData::Type::Subtractive:
+            if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
+            if (current_blend_equation != GL_FUNC_SUBTRACT) { glBlendEquation(GL_FUNC_SUBTRACT); current_blend_equation = GL_FUNC_SUBTRACT; }
+            if (current_blend_func != GL_ONE) { glBlendFunc(GL_SRC_ALPHA, GL_ONE); current_blend_func = GL_ONE; }
+            break;
+    }
 }
 
 }//namespace sp

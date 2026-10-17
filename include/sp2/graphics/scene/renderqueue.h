@@ -71,6 +71,7 @@ private:
     };
 
     void render(std::vector<Item>& list);
+    void updateRenderState(RenderData::Type type);
 
     Matrix4x4f camera_projection;
     Matrix4x4f camera_transform;
@@ -79,6 +80,10 @@ private:
     
     float target_aspect_ratio;
     float aspect_ratio;
+
+    unsigned int current_depth_mask_enable = std::numeric_limits<unsigned int>::max();
+    unsigned int current_blend_equation = std::numeric_limits<unsigned int>::max();
+    unsigned int current_blend_func = std::numeric_limits<unsigned int>::max();
 
 #ifdef SP2_USE_RENDER_THREAD
     void renderThread();
