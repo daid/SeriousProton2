@@ -183,23 +183,19 @@ void RenderQueue::updateRenderState(RenderData::Type type)
             break;
         case RenderData::Type::Normal:
             if (current_depth_mask_enable != true) { glDepthMask(true); current_depth_mask_enable = true; }
-            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
             if (current_blend_func != GL_ONE_MINUS_SRC_ALPHA) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); current_blend_func = GL_ONE_MINUS_SRC_ALPHA; }
             break;
         case RenderData::Type::Transparent:
             if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
-            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
             if (current_blend_func != GL_ONE_MINUS_SRC_ALPHA) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); current_blend_func = GL_ONE_MINUS_SRC_ALPHA; }
             break;
         case RenderData::Type::Additive:
             if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
-            if (current_blend_equation != GL_FUNC_ADD) { glBlendEquation(GL_FUNC_ADD); current_blend_equation = GL_FUNC_ADD; }
             if (current_blend_func != GL_ONE) { glBlendFunc(GL_SRC_ALPHA, GL_ONE); current_blend_func = GL_ONE; }
             break;
         case RenderData::Type::Subtractive:
             if (current_depth_mask_enable != false) { glDepthMask(false); current_depth_mask_enable = false; }
-            if (current_blend_equation != GL_FUNC_SUBTRACT) { glBlendEquation(GL_FUNC_SUBTRACT); current_blend_equation = GL_FUNC_SUBTRACT; }
-            if (current_blend_func != GL_ONE) { glBlendFunc(GL_SRC_ALPHA, GL_ONE); current_blend_func = GL_ONE; }
+            if (current_blend_func != GL_ZERO) { glBlendFunc(GL_DST_COLOR, GL_ZERO); current_blend_func = GL_ZERO; }
             break;
     }
 }
