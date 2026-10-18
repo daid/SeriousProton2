@@ -2,6 +2,7 @@
 #define SP2_GRAPHICS_IMAGE_THRESHOLD_H
 
 #include <sp2/graphics/image.h>
+#include <sp2/graphics/image/blur.h>
 
 
 namespace sp::image {

@@ -106,6 +106,10 @@ void RenderQueue::renderThread()
 
 void RenderQueue::render(std::vector<Item>& list)
 {
+    current_depth_mask_enable = std::numeric_limits<unsigned int>::max();
+    current_blend_equation = std::numeric_limits<unsigned int>::max();
+    current_blend_func = std::numeric_limits<unsigned int>::max();
+
     bool force_camera_matrix_update = false;
     for(Item& item : list)
     {
