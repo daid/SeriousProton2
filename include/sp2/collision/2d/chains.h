@@ -20,12 +20,17 @@ class Chains2D : public Shape2D
 public:
     Chains2D();
 
+    void addLine(sp::Vector2f start, sp::Vector2f end);
+
     typedef std::vector<sp::Vector2f> Path;
     
     std::vector<Path> chains;
     std::vector<Path> loops;
 
 private:
+    void addToChainEnd(size_t idx, sp::Vector2f point);
+    void addToChainStart(size_t idx, sp::Vector2f point);
+
     virtual void createFixture(b2Body* body) const override;
 };
 
