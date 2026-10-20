@@ -67,8 +67,8 @@ public:
         int index = vertices.size();
         vertices.emplace_back(Vector3f(v0.x, v0.y, 0.0f), c, Vector2f());
         vertices.emplace_back(Vector3f(v1.x, v1.y, 0.0f), c, Vector2f());
-        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f), c, Vector2f());
-        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 - diff.y, (v0.y + v1.y) / 2 + diff.x, 0.0f), c, Vector2f());
+        vertices.emplace_back(Vector3f((v0.x + v1.x) / 2 + diff.y, (v0.y + v1.y) / 2 - diff.x, 0.0f), c, Vector2f());
 
         indices.emplace_back(index);
         indices.emplace_back(index + 1);
