@@ -2,6 +2,11 @@
 
 namespace sp {
 
+void MeshBuilder::addQuad(Vector2f p0, Vector2f p1, Vector2f p2, Vector2f p3)
+{
+    addQuad(Vector3f(p0.x, p0.y, 0.0f), Vector3f(p1.x, p1.y, 0.0f), Vector3f(p2.x, p2.y, 0.0f), Vector3f(p3.x, p3.y, 0.0f));
+}
+
 void MeshBuilder::addQuad(Vector3f p0, Vector3f p1, Vector3f p2, Vector3f p3)
 {
     int i = vertices.size();
