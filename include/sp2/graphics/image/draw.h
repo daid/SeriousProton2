@@ -65,7 +65,7 @@ template<typename T> void draw(ImageBase<T>& img, Rect2i rect, T color)
 template<typename T> void draw(ImageBase<T>& target, Vector2i position, const ImageBase<T>& source)
 {
     auto target_size = target.getSize();
-    auto source_size = target.getSize();
+    auto source_size = source.getSize();
 
     if (position.x + source_size.x <= 0 || position.x > target_size.x)
         return;
