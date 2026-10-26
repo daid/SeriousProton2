@@ -64,6 +64,8 @@
             FS.mkdir('/preferences')
             FS.mount(IDBFS, {}, '/preferences');
             FS.syncfs(true, function (err) { removeRunDependency('syncfs'); })
+            // Workaround for SDL2 not enabling EGL stencil buffer even if I ask for it...
+            EGL.contextAttributes.stencil = true;
         }],
         postRun: [],
         print: console.log,
