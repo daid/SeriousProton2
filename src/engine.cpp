@@ -78,7 +78,16 @@ Engine::Engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 #endif
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-    SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_SENSOR);
+
+    SDL_Init(SDL_INIT_TIMER);
+    SDL_Init(SDL_INIT_AUDIO);
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_EVENTS);
+    SDL_Init(SDL_INIT_JOYSTICK);
+    SDL_Init(SDL_INIT_HAPTIC);
+    SDL_Init(SDL_INIT_GAMECONTROLLER);
+    SDL_Init(SDL_INIT_SENSOR);
+
     signal(SIGTERM, requestShutdownSignal);
     atexit(SDL_Quit);
 
