@@ -57,7 +57,7 @@ void Keybinding::setKeys(const std::initializer_list<const string>& keys)
 
 void Keybinding::addKey(const string& key, bool inverted)
 {
-    if (key.startswith("-"))
+    if (key.startswith("-") && key.length() > 1)
     {
         return addKey(key.substr(1), !inverted);
     }
