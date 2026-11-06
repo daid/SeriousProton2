@@ -248,22 +248,24 @@ static inline bool convertFromLua(lua_State* L, typeIdentifier<bool>, int index)
 
 static inline int convertFromLua(lua_State* L, typeIdentifier<int>, int index)
 {
-    return luaL_checkinteger(L, index);
+    return lua_tointeger(L, index);
 }
 
 static inline float convertFromLua(lua_State* L, typeIdentifier<float>, int index)
 {
-    return luaL_checknumber(L, index);
+    return lua_tonumber(L, index);
 }
 
 static inline double convertFromLua(lua_State* L, typeIdentifier<double>, int index)
 {
-    return luaL_checknumber(L, index);
+    return lua_tonumber(L, index);
 }
 
 static inline string convertFromLua(lua_State* L, typeIdentifier<string>, int index)
 {
-    return luaL_checkstring(L, index);
+    auto res = lua_tolstring(L, index, nullptr);
+    if (!res) return "";
+    return res;
 }
 
 template<typename T> Vector2<T> convertFromLua(lua_State* L, typeIdentifier<Vector2<T>>, int index)
